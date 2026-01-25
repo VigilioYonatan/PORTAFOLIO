@@ -1,0 +1,87 @@
+import { DrizzleExceptionFilter } from "@infrastructure/filters/drizzle-exception.filter";
+import { HttpExceptionFilter } from "@infrastructure/filters/http-exception.filter";
+import { InitialCacheMiddleware } from "@infrastructure/middlewares/initial.middleware";
+import { AppConfigModule } from "@infrastructure/modules/config.module";
+import { AppCacheModule } from "@infrastructure/providers/cache";
+import { DatabaseModule } from "@infrastructure/providers/database";
+import { AppLoggerModule } from "@infrastructure/providers/logger";
+import { AiModule } from "@modules/ai/modules/ai.module";
+import { AnalyticsModule } from "@modules/analytics/modules/analytics.module";
+import { SessionConfigService } from "@modules/auth/config/session.config";
+import { HybridAuthGuard } from "@modules/auth/guards/hybrid.guard";
+import { RolesGuard } from "@modules/auth/guards/roles.guard";
+import { AuthModule } from "@modules/auth/modules/auth.module";
+import { ContactModule } from "@modules/contact/modules/contact.module";
+// import { DemoModule } from "@modules/demo/demo.module";
+import { DocumentModule } from "@modules/documents/document.module";
+import { MusicTrackModule } from "@modules/music/music.module";
+import { NotificationModule } from "@modules/notification/notification.module";
+import { PortfolioConfigModule } from "@modules/portfolio-config/portfolio-config.module";
+// import { TestimonialModule } from "@modules/testimonial/modules/testimonial.module";
+import { ProjectModule } from "@modules/project/project.module";
+import { TecheableModule } from "@modules/techeable/techeable.module";
+// import { WorkExperienceModule } from "@modules/work-experience/work-experience.module";
+// import { BlogCategoryModule } from "@modules/blog-category/blog-category.module";
+// import { BlogPostModule } from "@modules/blog-post/blog-post.module";
+import { TechnologyModule } from "@modules/technology/technology.module";
+// import { RecruitmentModule } from "@modules/recruitment/modules/recruitment.module";
+// import { RoleModule } from "@modules/role/modules/role.module";
+import { TenantModule } from "@modules/tenant/modules/tenant.module";
+import { UploadModule } from "@modules/uploads/modules/upload.module";
+// import { UsageModule } from "@modules/usage/modules/usage.module";
+import { UserModule } from "@modules/user/user.module";
+import { WebModule } from "@modules/web/modules/web.module";
+import { WorkMilestoneModule } from "@modules/work-milestone/work-milestone.module";
+import type { MiddlewareConsumer, NestModule } from "@nestjs/common";
+import { Module } from "@nestjs/common";
+import { APP_FILTER, APP_GUARD } from "@nestjs/core";
+import { EventEmitterModule } from "@nestjs/event-emitter";
+import { ThrottlerModule } from "@nestjs/throttler";
+import { ChatModule } from "./modules/chat/chat.module";
+import { SocialModule } from "./modules/social/social.module";
+
+@Module({
+	imports: [
+		EventEmitterModule.forRoot(),
+		AppConfigModule,
+		AppCacheModule,
+		AppLoggerModule,
+		DatabaseModule,
+		ThrottlerModule.forRoot([
+			{
+				ttl: 60000, // 1 minute
+				limit: 100, // 100 requests per minute
+			},
+		]),
+		UploadModule,
+		AiModule,
+		AuthModule,
+		TenantModule,
+		UserModule,
+		ContactModule,
+		DocumentModule,
+		ChatModule,
+		SocialModule,
+		PortfolioConfigModule,
+		ProjectModule,
+		TecheableModule,
+		TechnologyModule,
+		MusicTrackModule,
+		NotificationModule,
+		AnalyticsModule,
+		WorkMilestoneModule,
+		WebModule,
+	],
+	providers: [
+		SessionConfigService,
+		{ provide: APP_FILTER, useClass: HttpExceptionFilter },
+		{ provide: APP_FILTER, useClass: DrizzleExceptionFilter },
+		{ provide: APP_GUARD, useClass: HybridAuthGuard },
+		{ provide: APP_GUARD, useClass: RolesGuard },
+	],
+})
+export class AppModule implements NestModule {
+	configure(consumer: MiddlewareConsumer) {
+		consumer.apply(InitialCacheMiddleware).forRoutes("*");
+	}
+}

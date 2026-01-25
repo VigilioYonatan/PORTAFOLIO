@@ -1,0 +1,46 @@
+---
+import WebLayout from "../_components/layouts/web-layout/index.astro";
+---
+
+<WebLayout title="Blog">
+  <div class="container mx-auto py-20 px-4">
+    <h1 class="text-4xl font-black font-mono mb-8 text-primary">
+      NEURAL_ARCHIVES (BLOG)
+    </h1>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {/* Mock Posts */}
+      <a
+        href="/en/blog/cyberpunk-design"
+        class="group block border border-border bg-card p-6 rounded-xl hover:border-primary/50 transition-colors"
+      >
+        <div
+          class="aspect-video bg-muted mb-4 rounded-lg overflow-hidden relative"
+        >
+          <div
+            class="absolute inset-0 bg-primary/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
+          >
+            <span
+              class="font-mono font-bold text-black bg-primary px-2 py-1 rounded"
+              >READ_FILE</span
+            >
+          </div>
+        </div>
+        <h2
+          class="text-xl font-bold mb-2 group-hover:text-primary transition-colors"
+        >
+          Designing Cyberpunk UI
+        </h2>
+        <p class="text-muted-foreground text-sm line-clamp-2">
+          How to create glitch effects and neon glows using Tailwind and CSS
+          animations.
+        </p>
+        <div
+          class="mt-4 flex items-center justify-between text-xs text-muted-foreground font-mono"
+        >
+          <span>2024-03-15</span>
+          <span>DEV_LOG</span>
+        </div>
+      </a>
+    </div>
+  </div>
+</WebLayout>

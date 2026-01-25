@@ -1,0 +1,26 @@
+---
+import WebLayout from "./_components/layouts/web-layout/index.astro";
+import LegalDoc from "./_components/legal/LegalDoc";
+---
+
+<WebLayout title="Terms of Service">
+  <LegalDoc client:load title="TERMS_OF_SERVICE" lastUpdated="2025-01-01">
+    <p>By accessing this portfolio, you agree to these terms.</p>
+
+    <h3>1. Usage</h3>
+    <p>
+      You may view the content for personal or recruitment purposes. Do not
+      scrape or copy the design without permission, as per standard copyright
+      laws.
+    </p>
+
+    <h3>2. Source Code</h3>
+    <p>
+      The project architecture is shown for demonstration. If the source is
+      public on GitHub, standard license (MIT) applies.
+    </p>
+
+    <h3>3. Disclaimer</h3>
+    <p>Content is provided "as is".</p>
+  </LegalDoc>
+</WebLayout>

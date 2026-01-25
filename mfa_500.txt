@@ -1,0 +1,223 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/config/Desktop/gat/portfolio[39m
+
+[90mstdout[2m | src/modules/auth/__tests__/mfa-disable.e2e.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (37) from .env.test -- tip: ⚙️  write to custom object with { processEnv: myObject }
+
+[90mstdout[2m | src/modules/auth/__tests__/mfa-disable.e2e.test.ts[2m > [22m[2mAuth MFA Disable (E2E)
+[22m[39m[dotenv@17.2.3] injecting env (37) from .env.test -- tip: ✅ audit secrets and track compliance: https://dotenvx.com/ops
+🐘 Connecting to real PostgreSQL for tests...
+🔌 Ensuring vector extension...
+
+[90mstdout[2m | src/modules/auth/__tests__/mfa-disable.e2e.test.ts[2m > [22m[2mAuth MFA Disable (E2E)
+[22m[39m✅ Vector extension ready.
+📜 Running migrations on PostgreSQL...
+Query: CREATE SCHEMA IF NOT EXISTS "drizzle"
+
+[90mstdout[2m | src/modules/auth/__tests__/mfa-disable.e2e.test.ts[2m > [22m[2mAuth MFA Disable (E2E)
+[22m[39mQuery: 
+			CREATE TABLE IF NOT EXISTS "drizzle"."__drizzle_migrations" (
+				id SERIAL PRIMARY KEY,
+				hash text NOT NULL,
+				created_at bigint
+			)
+		
+
+[90mstdout[2m | src/modules/auth/__tests__/mfa-disable.e2e.test.ts[2m > [22m[2mAuth MFA Disable (E2E)
+[22m[39mQuery: select id, hash, created_at from "drizzle"."__drizzle_migrations" order by created_at desc limit 1
+
+[90mstdout[2m | src/modules/auth/__tests__/mfa-disable.e2e.test.ts[2m > [22m[2mAuth MFA Disable (E2E)
+[22m[39mQuery: begin
+
+[90mstdout[2m | src/modules/auth/__tests__/mfa-disable.e2e.test.ts[2m > [22m[2mAuth MFA Disable (E2E)
+[22m[39mQuery: commit
+
+[90mstdout[2m | src/modules/auth/__tests__/mfa-disable.e2e.test.ts[2m > [22m[2mAuth MFA Disable (E2E)
+[22m[39m✅ Migrations completed.
+
+[90mstdout[2m | src/modules/auth/__tests__/mfa-disable.e2e.test.ts[2m > [22m[2mAuth MFA Disable (E2E)
+[22m[39mQuery: DO $$
+        BEGIN
+          IF EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'users') THEN
+            TRUNCATE users, tenant_setting, tenants RESTART IDENTITY CASCADE;
+          END IF;
+        END $$;
+
+[90mstdout[2m | src/modules/auth/__tests__/mfa-disable.e2e.test.ts[2m > [22m[2mAuth MFA Disable (E2E)
+[22m[39mQuery: SELECT id FROM tenants WHERE slug = 'localhost' LIMIT 1
+
+[90mstdout[2m | src/modules/auth/__tests__/mfa-disable.e2e.test.ts[2m > [22m[2mAuth MFA Disable (E2E)
+[22m[39mQuery: 
+    INSERT INTO tenants (name, slug, domain, email, plan, is_active, created_at, updated_at)
+    VALUES ('Localhost Tenant', 'localhost', 'localhost', 'test@localhost.com', 'ENTERPRISE', true, NOW(), NOW())
+    RETURNING id
+  
+
+[90mstdout[2m | src/modules/auth/__tests__/mfa-disable.e2e.test.ts[2m > [22m[2mAuth MFA Disable (E2E)
+[22m[39mQuery: 
+      INSERT INTO tenant_setting (tenant_id, is_verified, color_primary, color_secondary, default_language, time_zone, created_at, updated_at)
+      VALUES ($1, true, '#000000', '#ffffff', 'EN', 'UTC', NOW(), NOW())
+     -- params: [1]
+
+[90mstdout[2m | src/modules/auth/__tests__/mfa-disable.e2e.test.ts[2m > [22m[2mAuth MFA Disable (E2E)
+[22m[39mQuery: 
+      INSERT INTO users (username, email, password, role_id, tenant_id, is_superuser, security_stamp, created_at, updated_at)
+      VALUES ('admin', 'admin@localhost.com', $1, 1, $2, true, '550e8400-e29b-41d4-a716-446655440000', NOW(), NOW())
+     -- params: ["$2b$10$HF72JzGdqF4EFNaPuPQl8uqivWH238NojWSxZ4Mdip309RqKOKI86", 1]
+
+[90mstdout[2m | src/modules/auth/__tests__/mfa-disable.e2e.test.ts[2m > [22m[2mAuth MFA Disable (E2E)
+[22m[39mQuery: 
+      INSERT INTO users (username, email, password, role_id, tenant_id, is_superuser, security_stamp, created_at, updated_at)
+      VALUES ('user', 'user@localhost.com', $1, 2, $2, false, '550e8400-e29b-41d4-a716-446655440005', NOW(), NOW())
+     -- params: ["$2b$10$HF72JzGdqF4EFNaPuPQl8uqivWH238NojWSxZ4Mdip309RqKOKI86", 1]
+
+[90mstdout[2m | src/modules/auth/__tests__/mfa-disable.e2e.test.ts[2m > [22m[2mAuth MFA Disable (E2E)
+[22m[39mQuery: SELECT id FROM tenants WHERE slug = 'localhost' LIMIT 1
+
+[90mstdout[2m | src/modules/auth/__tests__/mfa-disable.e2e.test.ts[2m > [22m[2mAuth MFA Disable (E2E)[2m > [22m[2mshould disable MFA successfully
+[22m[39m➡️  Proceeding to next middleware/guard for POST /api/v1/auth/login
+
+[90mstdout[2m | src/modules/auth/__tests__/mfa-disable.e2e.test.ts[2m > [22m[2mAuth MFA Disable (E2E)[2m > [22m[2mshould disable MFA successfully
+[22m[39m➡️  Proceeding to next middleware/guard for POST /api/v1/auth/mfa/setup
+
+[90mstdout[2m | src/modules/auth/__tests__/mfa-disable.e2e.test.ts[2m > [22m[2mAuth MFA Disable (E2E)[2m > [22m[2mshould disable MFA successfully
+[22m[39m🔑 JWT Payload: {
+  sub: [33m3[39m,
+  email: [32m'testuser_1769328457158-1-bgpjzr@example.com'[39m,
+  role_id: [33m1[39m,
+  tenant_id: [33m1[39m,
+  security_stamp: [32m'b81706a4-9ee6-4686-b12c-89d1883c618a'[39m,
+  iat: [33m1769328457[39m,
+  exp: [33m1769329357[39m
+}
+
+[90mstdout[2m | src/modules/auth/__tests__/mfa-disable.e2e.test.ts[2m > [22m[2mAuth MFA Disable (E2E)[2m > [22m[2mshould disable MFA successfully
+[22m[39m👤 User found in Auth Guard: testuser_1769328457158-1-bgpjzr@example.com
+🛡️ Comparing stamps: {
+  db: [32m'b81706a4-9ee6-4686-b12c-89d1883c618a'[39m,
+  payload: [32m'b81706a4-9ee6-4686-b12c-89d1883c618a'[39m
+}
+
+[90mstdout[2m | src/modules/auth/__tests__/mfa-disable.e2e.test.ts[2m > [22m[2mAuth MFA Disable (E2E)[2m > [22m[2mshould disable MFA successfully
+[22m[39m🔑 JWT Payload: {
+  sub: [33m3[39m,
+  email: [32m'testuser_1769328457158-1-bgpjzr@example.com'[39m,
+  role_id: [33m1[39m,
+  tenant_id: [33m1[39m,
+  security_stamp: [32m'b81706a4-9ee6-4686-b12c-89d1883c618a'[39m,
+  iat: [33m1769328457[39m,
+  exp: [33m1769329357[39m
+}
+
+[90mstdout[2m | src/modules/auth/__tests__/mfa-disable.e2e.test.ts[2m > [22m[2mAuth MFA Disable (E2E)[2m > [22m[2mshould disable MFA successfully
+[22m[39m👤 User found in Auth Guard: testuser_1769328457158-1-bgpjzr@example.com
+🛡️ Comparing stamps: {
+  db: [32m'b81706a4-9ee6-4686-b12c-89d1883c618a'[39m,
+  payload: [32m'b81706a4-9ee6-4686-b12c-89d1883c618a'[39m
+}
+
+[31m[Nest] 1500450  - [39m01/25/2026, 3:07:37 AM [31m  ERROR[39m [38;5;3m[HttpExceptionFilter] [39mTypeError: Cannot read properties of undefined (reading 'id')
+    at AuthController.setupMfa [90m(/config/Desktop/gat/portfolio/[39msrc/modules/auth/controllers/auth.controller.ts:146:75[90m)[39m
+    at [90m/config/Desktop/gat/portfolio/[39mnode_modules/[4m.pnpm[24m/@nestjs+core@11.1.11_@nestjs+common@11.1.10_reflect-metadata@0.2.2_rxjs@7.8.2__@nestjs+_8ca719937ba9644702b0d6fbf7ffeeb4/node_modules/[4m@nestjs/core[24m/router/router-execution-context.js:38:29
+[90m    at processTicksAndRejections (node:internal/process/task_queues:103:5)[39m
+[90mstderr[2m | src/modules/auth/__tests__/mfa-disable.e2e.test.ts[2m > [22m[2mAuth MFA Disable (E2E)[2m > [22m[2mshould disable MFA successfully
+[22m[39mDEBUG DRIZZLE ERROR: {}
+
+[90mstdout[2m | src/modules/auth/__tests__/mfa-disable.e2e.test.ts[2m > [22m[2mAuth MFA Disable (E2E)[2m > [22m[2mshould fail to disable MFA with wrong password
+[22m[39m➡️  Proceeding to next middleware/guard for POST /api/v1/auth/login
+
+ [31m×[39m src/modules/auth/__tests__/mfa-disable.e2e.test.ts[2m > [22mAuth MFA Disable (E2E)[2m > [22mshould disable MFA successfully[32m 144[2mms[22m[39m
+[31m   → expected 200 "OK", got 500 "Internal Server Error"[39m
+[90mstdout[2m | src/modules/auth/__tests__/mfa-disable.e2e.test.ts[2m > [22m[2mAuth MFA Disable (E2E)[2m > [22m[2mshould fail to disable MFA with wrong password
+[22m[39m➡️  Proceeding to next middleware/guard for POST /api/v1/auth/mfa/disable
+
+[90mstdout[2m | src/modules/auth/__tests__/mfa-disable.e2e.test.ts[2m > [22m[2mAuth MFA Disable (E2E)[2m > [22m[2mshould fail to disable MFA with wrong password
+[22m[39m🔑 JWT Payload: {
+  sub: [33m4[39m,
+  email: [32m'testuser_1769328457301-2-248xnc@example.com'[39m,
+  role_id: [33m1[39m,
+  tenant_id: [33m1[39m,
+  security_stamp: [32m'18de82ae-e0ee-4858-a9ed-0f44c53808b8'[39m,
+  iat: [33m1769328457[39m,
+  exp: [33m1769329357[39m
+}
+
+[90mstdout[2m | src/modules/auth/__tests__/mfa-disable.e2e.test.ts[2m > [22m[2mAuth MFA Disable (E2E)[2m > [22m[2mshould fail to disable MFA with wrong password
+[22m[39m👤 User found in Auth Guard: testuser_1769328457301-2-248xnc@example.com
+🛡️ Comparing stamps: {
+  db: [32m'18de82ae-e0ee-4858-a9ed-0f44c53808b8'[39m,
+  payload: [32m'18de82ae-e0ee-4858-a9ed-0f44c53808b8'[39m
+}
+
+[90mstdout[2m | src/modules/auth/__tests__/mfa-disable.e2e.test.ts[2m > [22m[2mAuth MFA Disable (E2E)[2m > [22m[2mshould fail to disable MFA with wrong password
+[22m[39m🔑 JWT Payload: {
+  sub: [33m4[39m,
+  email: [32m'testuser_1769328457301-2-248xnc@example.com'[39m,
+  role_id: [33m1[39m,
+  tenant_id: [33m1[39m,
+  security_stamp: [32m'18de82ae-e0ee-4858-a9ed-0f44c53808b8'[39m,
+  iat: [33m1769328457[39m,
+  exp: [33m1769329357[39m
+}
+
+[90mstdout[2m | src/modules/auth/__tests__/mfa-disable.e2e.test.ts[2m > [22m[2mAuth MFA Disable (E2E)[2m > [22m[2mshould fail to disable MFA with wrong password
+[22m[39m👤 User found in Auth Guard: testuser_1769328457301-2-248xnc@example.com
+🛡️ Comparing stamps: {
+  db: [32m'18de82ae-e0ee-4858-a9ed-0f44c53808b8'[39m,
+  payload: [32m'18de82ae-e0ee-4858-a9ed-0f44c53808b8'[39m
+}
+
+[31m[Nest] 1500450  - [39m01/25/2026, 3:07:37 AM [31m  ERROR[39m [38;5;3m[HttpExceptionFilter] [39mTypeError: Cannot read properties of undefined (reading 'id')
+    at AuthController.disableMfa [90m(/config/Desktop/gat/portfolio/[39msrc/modules/auth/controllers/auth.controller.ts:175:35[90m)[39m
+    at [90m/config/Desktop/gat/portfolio/[39mnode_modules/[4m.pnpm[24m/@nestjs+core@11.1.11_@nestjs+common@11.1.10_reflect-metadata@0.2.2_rxjs@7.8.2__@nestjs+_8ca719937ba9644702b0d6fbf7ffeeb4/node_modules/[4m@nestjs/core[24m/router/router-execution-context.js:38:29
+[90m    at processTicksAndRejections (node:internal/process/task_queues:103:5)[39m
+[90mstderr[2m | src/modules/auth/__tests__/mfa-disable.e2e.test.ts[2m > [22m[2mAuth MFA Disable (E2E)[2m > [22m[2mshould fail to disable MFA with wrong password
+[22m[39mDEBUG DRIZZLE ERROR: {}
+
+ [31m×[39m src/modules/auth/__tests__/mfa-disable.e2e.test.ts[2m > [22mAuth MFA Disable (E2E)[2m > [22mshould fail to disable MFA with wrong password[32m 116[2mms[22m[39m
+[31m   → expected 400 "Bad Request", got 500 "Internal Server Error"[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 2 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m src/modules/auth/__tests__/mfa-disable.e2e.test.ts[2m > [22mAuth MFA Disable (E2E)[2m > [22mshould disable MFA successfully
+[31m[1mError[22m: expected 200 "OK", got 500 "Internal Server Error"[39m
+[36m [2m❯[22m src/modules/auth/__tests__/mfa-disable.e2e.test.ts:[2m79:5[22m[39m
+    [90m 77| [39m   [33m.[39m[35mset[39m([32m"Host"[39m[33m,[39m [32m"localhost"[39m)
+    [90m 78| [39m   [33m.[39m[35mset[39m([32m"Authorization"[39m[33m,[39m [32m`Bearer [39m[36m${[39maccessToken[36m}[39m[32m`[39m)
+    [90m 79| [39m   [33m.[39m[34mexpect[39m([34m200[39m)[33m;[39m
+    [90m   | [39m    [31m^[39m
+    [90m 80| [39m
+    [90m 81| [39m  [35mconst[39m secret [33m=[39m setupRes[33m.[39mbody[33m.[39msecret[33m;[39m
+[90m [2m❯[22m Test._assertStatus node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:[2m309:14[22m[39m
+[90m [2m❯[22m node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:[2m365:13[22m[39m
+[90m [2m❯[22m Test._assertFunction node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:[2m342:13[22m[39m
+[90m [2m❯[22m Test.assert node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:[2m195:23[22m[39m
+[90m [2m❯[22m localAssert node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:[2m138:14[22m[39m
+[90m [2m❯[22m Server.<anonymous> node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:[2m152:11[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/modules/auth/__tests__/mfa-disable.e2e.test.ts[2m > [22mAuth MFA Disable (E2E)[2m > [22mshould fail to disable MFA with wrong password
+[31m[1mError[22m: expected 400 "Bad Request", got 500 "Internal Server Error"[39m
+[36m [2m❯[22m src/modules/auth/__tests__/mfa-disable.e2e.test.ts:[2m163:5[22m[39m
+    [90m161| [39m    token[33m:[39m [32m"000000"[39m[33m,[39m
+    [90m162| [39m   })
+    [90m163| [39m   [33m.[39m[34mexpect[39m([34m400[39m)[33m;[39m
+    [90m   | [39m    [31m^[39m
+    [90m164| [39m })[33m;[39m
+    [90m165| [39m})[33m;[39m
+[90m [2m❯[22m Test._assertStatus node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:[2m309:14[22m[39m
+[90m [2m❯[22m node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:[2m365:13[22m[39m
+[90m [2m❯[22m Test._assertFunction node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:[2m342:13[22m[39m
+[90m [2m❯[22m Test.assert node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:[2m195:23[22m[39m
+[90m [2m❯[22m localAssert node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:[2m138:14[22m[39m
+[90m [2m❯[22m Server.<anonymous> node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:[2m152:11[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m2 failed[39m[22m[90m (2)[39m
+[2m   Start at [22m 03:07:33
+[2m   Duration [22m 3.43s[2m (transform 1.32s, setup 62ms, import 2.76s, tests 484ms, environment 0ms)[22m
+

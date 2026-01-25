@@ -1,0 +1,55 @@
+
+> astro-test@0.0.1 build:client /config/Desktop/gat/portfolio
+> astro build
+
+23:56:49 [@astrojs/node] Enabling sessions with filesystem storage
+23:56:50 [content] Syncing content
+23:56:50 [content] Synced content
+23:56:50 [types] Generated 54ms
+23:56:50 [build] output: "server"
+23:56:50 [build] mode: "server"
+23:56:50 [build] directory: /config/Desktop/gat/portfolio/dist/
+23:56:50 [build] adapter: @astrojs/node
+23:56:50 [build] Collecting build info...
+23:56:50 [build] ✓ Completed in 127ms.
+23:56:50 [build] Building server entrypoints...
+23:56:51 [WARN] [vite] 
+/grid.svg referenced in /grid.svg didn't resolve at build time, it will remain unchanged to be resolved at runtime
+23:56:52 [WARN] [vite] "Circle" and "Share2" are imported from external module "lucide-preact" but never used in "src/components/form/form-document-array/components/form-document-array.component.tsx" and "src/modules/blog/components/BlogReader.tsx".
+23:56:52 [vite] ✓ built in 2.13s
+23:56:52 [build] ✓ Completed in 2.16s.
+
+ building client (vite) 
+23:56:52 [vite] transforming...
+23:56:53 [vite] ✓ 1761 modules transformed.
+23:56:53 [ERROR] [vite] ✗ Build failed in 1.13s
+[vite:preact-jsx] /config/Desktop/gat/portfolio/src/modules/music/components/AudioList.tsx: 'return' outside of function. (319:1)
+
+  317 |
+  318 |
+> 319 | 	return (
+      | 	^
+  320 | 		<svg
+  321 | 			xmlns="http://www.w3.org/2000/svg"
+  322 | 			width={size}
+file: /config/Desktop/gat/portfolio/src/modules/music/components/AudioList.tsx:319:1
+  Location:
+    undefined:319:1
+  Stack trace:
+    at constructor (/config/Desktop/gat/portfolio/node_modules/.pnpm/@babel+parser@7.28.5/node_modules/@babel/parser/lib/index.js:367:19)
+    at TypeScriptParserMixin.parseReturnStatement (/config/Desktop/gat/portfolio/node_modules/.pnpm/@babel+parser@7.28.5/node_modules/@babel/parser/lib/index.js:13212:12)
+    at TypeScriptParserMixin.parseStatementContent (/config/Desktop/gat/portfolio/node_modules/.pnpm/@babel+parser@7.28.5/node_modules/@babel/parser/lib/index.js:9569:18)
+    at TypeScriptParserMixin.parseModuleItem (/config/Desktop/gat/portfolio/node_modules/.pnpm/@babel+parser@7.28.5/node_modules/@babel/parser/lib/index.js:12820:17)
+    at TypeScriptParserMixin.parseBlockBody (/config/Desktop/gat/portfolio/node_modules/.pnpm/@babel+parser@7.28.5/node_modules/@babel/parser/lib/index.js:13385:10)
+    at TypeScriptParserMixin.parseTopLevel (/config/Desktop/gat/portfolio/node_modules/.pnpm/@babel+parser@7.28.5/node_modules/@babel/parser/lib/index.js:12688:25)
+    at TypeScriptParserMixin.parse (/config/Desktop/gat/portfolio/node_modules/.pnpm/@babel+parser@7.28.5/node_modules/@babel/parser/lib/index.js:10183:18)
+    at parser (/config/Desktop/gat/portfolio/node_modules/.pnpm/@babel+core@7.28.5/node_modules/@babel/core/lib/parser/index.js:41:34)
+    at normalizeFile (/config/Desktop/gat/portfolio/node_modules/.pnpm/@babel+core@7.28.5/node_modules/@babel/core/lib/transformation/normalize-file.js:64:37)
+    at run (/config/Desktop/gat/portfolio/node_modules/.pnpm/@babel+core@7.28.5/node_modules/@babel/core/lib/transformation/index.js:22:50)
+    at transform (/config/Desktop/gat/portfolio/node_modules/.pnpm/@babel+core@7.28.5/node_modules/@babel/core/lib/transform.js:22:33)
+    at step (/config/Desktop/gat/portfolio/node_modules/.pnpm/gensync@1.0.0-beta.2/node_modules/gensync/index.js:261:32)
+    at async.call.result.err.err (/config/Desktop/gat/portfolio/node_modules/.pnpm/gensync@1.0.0-beta.2/node_modules/gensync/index.js:223:11)
+    at /config/Desktop/gat/portfolio/node_modules/.pnpm/@babel+core@7.28.5/node_modules/@babel/core/lib/gensync-utils/async.js:67:7
+    at step (/config/Desktop/gat/portfolio/node_modules/.pnpm/gensync@1.0.0-beta.2/node_modules/gensync/index.js:287:14)
+    at async.call.result.err.err (/config/Desktop/gat/portfolio/node_modules/.pnpm/gensync@1.0.0-beta.2/node_modules/gensync/index.js:223:11)
+ ELIFECYCLE  Command failed with exit code 1.

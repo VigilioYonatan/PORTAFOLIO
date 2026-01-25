@@ -1,0 +1,64 @@
+import { ZodPipe } from "@infrastructure/pipes/zod.pipe";
+import { Public } from "@modules/auth/decorators/public.decorator";
+import {
+	Body,
+	Controller,
+	Get,
+	HttpCode,
+	Post,
+	Query,
+	Req,
+} from "@nestjs/common";
+import { ApiBody, ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
+import type { Request } from "express";
+import {
+	SocialReactionCountResponseClassDto,
+	SocialReactionToggleResponseClassDto,
+} from "./dtos/social.response.class.dto";
+import type { SocialReactionToggleResponseDto } from "./dtos/social.response.dto";
+import { SocialReactionStoreClassDto } from "./dtos/social-reaction.class.dto";
+import { SocialReactionQueryClassDto } from "./dtos/social-reaction.query.class.dto";
+import {
+	type SocialReactionStoreDto,
+	socialReactionStoreSchema,
+} from "./dtos/social-reaction.store.dto";
+import { SocialService } from "./services/social.service";
+
+@ApiTags("Social & Interactions")
+@Controller("social")
+export class SocialController {
+	constructor(private readonly socialService: SocialService) {}
+
+	@Public()
+	@HttpCode(200)
+	@Post("/reactions")
+	@ApiOperation({ summary: "Crear o eliminar reacción (Toggle)" })
+	@ApiBody({ type: SocialReactionStoreClassDto })
+	@ApiResponse({
+		status: 200,
+		type: SocialReactionToggleResponseClassDto,
+	})
+	toggleReaction(
+		@Req() req: Request,
+		@Body(new ZodPipe(socialReactionStoreSchema)) body: SocialReactionStoreDto,
+	): Promise<SocialReactionToggleResponseDto> {
+		const tenant_id = req.locals.tenant.id;
+		// Use user ID if authenticated, otherwise IP address as a fallback visitor ID
+		const visitor_id = (req.user as any)?.id
+			? String((req.user as any).id)
+			: req.ip || "unknown-visitor";
+		return this.socialService.toggleReaction(tenant_id, visitor_id, body);
+	}
+
+	@Public()
+	@Get("/reactions")
+	@ApiOperation({ summary: "Obtener conteo de reacciones" })
+	getReactionCounts(
+		@Query() query: SocialReactionQueryClassDto,
+	): Promise<SocialReactionCountResponseClassDto> {
+		return this.socialService.getReactionCounts(
+			query.target_id,
+			query.target_type as any,
+		);
+	}
+}

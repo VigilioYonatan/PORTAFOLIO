@@ -1,0 +1,51 @@
+{
+	"$schema": "https://docs.renovatebot.com/renovate-schema.json",
+	"extends": ["config:recommended", "helpers:pinGitHubActionDigests"],
+	"timezone": "America/Lima",
+	"schedule": ["before 9am on monday"],
+	"labels": ["dependencies"],
+	"prHourlyLimit": 5,
+	"prConcurrentLimit": 10,
+	"packageRules": [
+		{
+			"description": "Agrupar updates menores y patch",
+			"matchUpdateTypes": ["minor", "patch"],
+			"groupName": "minor-and-patch",
+			"automerge": true
+		},
+		{
+			"description": "Updates mayores requieren review manual",
+			"matchUpdateTypes": ["major"],
+			"automerge": false,
+			"labels": ["dependencies", "major-update"]
+		},
+		{
+			"description": "Agrupar updates de Docker",
+			"matchManagers": ["dockerfile", "docker-compose"],
+			"groupName": "docker",
+			"labels": ["dependencies", "docker"]
+		},
+		{
+			"description": "Agrupar updates de Gitea Actions",
+			"matchManagers": ["gitea-actions"],
+			"groupName": "gitea-actions",
+			"labels": ["dependencies", "ci"]
+		},
+		{
+			"description": "Updates de testing",
+			"matchPackagePatterns": ["vitest", "jest", "testing-library"],
+			"groupName": "testing",
+			"automerge": true
+		},
+		{
+			"description": "Updates de linting",
+			"matchPackagePatterns": ["biome", "eslint", "prettier"],
+			"groupName": "linting",
+			"automerge": true
+		}
+	],
+	"vulnerabilityAlerts": {
+		"enabled": true,
+		"labels": ["security"]
+	}
+}

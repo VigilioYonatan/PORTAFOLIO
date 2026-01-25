@@ -1,0 +1,48 @@
+# Build output
+dist/
+.output/
+build/
+
+# Generated
+.astro/
+*.tsbuildinfo
+
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Environment
+.env
+.env.local
+.env.production
+.env.*.local
+.env.test
+
+# Testing
+coverage/
+tests/test-results/
+tests/playwright-report/
+playwright/.cache/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDEs
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Temp
+.temp/
+tmp/
+
+.sessions/

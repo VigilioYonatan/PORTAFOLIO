@@ -1,0 +1,13 @@
+---
+import AuthLayout from "../_components/layouts/auth-layout.astro";
+import LoginForm from "@modules/auth/components/LoginForm";
+import { getLangFromUrl } from "@src/i18n";
+
+const lang = getLangFromUrl(Astro.url);
+---
+
+<AuthLayout title="Login | System Access">
+  <div class="flex min-h-screen items-center justify-center p-4">
+    <LoginForm client:only="preact" />
+  </div>
+</AuthLayout>

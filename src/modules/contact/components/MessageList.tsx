@@ -1,0 +1,172 @@
+import VigilioTable from "@components/tables";
+import {
+	contactIndexApi,
+	type ContactIndexMethods,
+	type ContactIndexSecondaryPaginator,
+} from "@modules/contact/apis/contact.index.api";
+// import { contactMarkReadApi } from "@modules/contact/apis/contact.update.api"; // Removed unused import
+import type { ContactMessageSchema } from "@modules/contact/schemas/contact-message.schema";
+import { useSignal } from "@preact/signals";
+import { useTable, type Columns } from "@vigilio/preact-table";
+import { sweetModal } from "@vigilio/sweet";
+import { Eye, Mail, MailOpen, MessageSquare, Search } from "lucide-preact";
+import Modal from "@components/extras/Modal";
+import MessageDetail from "@modules/contact/components/MessageDetail";
+import { formatDateTz } from "@infrastructure/utils/hybrid/date.utils";
+import { useEffect } from "preact/hooks";
+
+export default function MessageList() {
+	const selectedMessage = useSignal<ContactMessageSchema | null>(null);
+
+	const columns: Columns<
+		ContactMessageSchema,
+		ContactIndexSecondaryPaginator,
+		ContactIndexMethods
+	> = [
+		{
+			key: "is_read",
+			header: "Status",
+			cell: (item) => (
+				<div class="flex items-center justify-center">
+					{item.is_read ? (
+						<MailOpen size={14} class="text-muted-foreground/40" />
+					) : (
+						<div class="relative">
+							<Mail size={14} class="text-primary" />
+							<span class="absolute -top-1 -right-1 w-2 h-2 bg-primary rounded-full animate-ping" />
+						</div>
+					)}
+				</div>
+			),
+		},
+		{
+			key: "name",
+			header: "Sender",
+			cell: (item) => (
+				<div class="flex flex-col">
+					<span class="text-xs font-bold text-foreground">{item.name}</span>
+					<span class="text-[10px] text-muted-foreground font-mono">
+						{item.email}
+					</span>
+				</div>
+			),
+		},
+		{
+			key: "subject",
+			header: "Subject",
+			cell: (item) => (
+				<span class="text-xs text-muted-foreground line-clamp-1 max-w-[200px]">
+					{item.subject || "(No Subject)"}
+				</span>
+			),
+		},
+		{
+			key: "created_at",
+			header: "Received",
+			cell: (item) => (
+				<span class="text-[10px] text-muted-foreground/60 font-mono">
+					{formatDateTz(item.created_at)}
+				</span>
+			),
+		},
+		{
+			key: "action",
+			header: "Action",
+			cell: (item) => (
+				<div class="flex items-center gap-2">
+					<button
+						onClick={() => (selectedMessage.value = item)}
+						class="p-2 hover:bg-white/5 rounded-lg text-primary transition-colors"
+					>
+						<Eye size={14} />
+					</button>
+				</div>
+			),
+		},
+	];
+
+	const table = useTable<
+		ContactMessageSchema,
+		ContactIndexSecondaryPaginator,
+		ContactIndexMethods
+	>({
+		columns,
+		pagination: { limit: 10 },
+	});
+
+	const query = contactIndexApi(table);
+
+	useEffect(() => {
+		query.refetch(false);
+	}, [
+		table.pagination.value.limit,
+		table.pagination.value.offset,
+		table.search.debounceTerm,
+		table.sort.value,
+		table.filters.value,
+	]);
+
+	return (
+		<VigilioTable table={table} query={query}>
+			<div class="flex flex-col gap-4 mb-6">
+				<div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+					<div class="flex flex-col">
+						<span class="text-[9px] font-black font-mono tracking-[0.3em] text-primary/40 uppercase">
+							Communication_Logs
+						</span>
+						<h3 class="text-xl font-black tracking-tight uppercase flex items-center gap-3">
+							<MessageSquare size={20} class="text-primary" />
+							Incoming Messages
+						</h3>
+					</div>
+					<div class="relative group w-full lg:w-96">
+						<Search
+							size={16}
+							class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/40 group-focus-within:text-primary transition-colors"
+						/>
+						<input
+							type="text"
+							placeholder="FILTER_NEURAL_RECORDS..."
+							class="bg-black/60 border border-white/10 text-[10px] font-mono tracking-widest rounded-xl pl-10 pr-4 py-3 w-full focus:outline-none focus:ring-1 focus:ring-primary/40 focus:border-primary/30 transition-all placeholder:text-muted-foreground/20"
+							value={table.search.value}
+							onInput={(e) =>
+								table.search.onSearchByName(e.currentTarget.value)
+							}
+						/>
+					</div>
+				</div>
+			</div>
+
+			<VigilioTable.table>
+				<VigilioTable.thead>
+					<VigilioTable.thead.row>
+						<VigilioTable.thead.th />
+					</VigilioTable.thead.row>
+				</VigilioTable.thead>
+				<VigilioTable.tbody>
+					<VigilioTable.tbody.row title="No records in buffer">
+						{(data) => <VigilioTable.tbody.td data={data} />}
+					</VigilioTable.tbody.row>
+				</VigilioTable.tbody>
+			</VigilioTable.table>
+
+			<VigilioTable.footer>
+				<div class="flex flex-col sm:flex-row justify-between gap-4 w-full items-center p-6 bg-zinc-900/20 border-t border-white/5 rounded-b-2xl">
+					<VigilioTable.footer.show />
+					<VigilioTable.footer.paginator />
+				</div>
+			</VigilioTable.footer>
+
+			<Modal
+				isOpen={!!selectedMessage.value}
+				onClose={() => (selectedMessage.value = null)}
+				contentClassName="max-w-2xl w-full"
+			>
+				<MessageDetail
+					message={selectedMessage.value!}
+					onUpdate={() => query.refetch(false)}
+				/>
+			</Modal>
+		</VigilioTable>
+	);
+}

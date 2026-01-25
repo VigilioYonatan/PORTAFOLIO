@@ -1,0 +1,30 @@
+services:
+  rustfs-server:
+    security_opt:
+      - no-new-privileges:true
+    image: rustfs/rustfs:1.0.0-alpha.48
+    container_name: rustfs-server
+    restart: unless-stopped
+    ports:
+      - "9000:9000"
+    volumes:
+      - data:/data
+      - logs:/var/logs/rustfs/
+
+    environment: #
+      RUSTFS_VOLUMES: ./data
+      RUSTFS_ADDRESS: 0.0.0.0:9000
+      RUSTFS_CONSOLE_ENABLE: true
+      RUSTFS_ACCESS_KEY: admin
+      RUSTFS_SECRET_KEY: admin123
+      RUSTFS_LOG_LEVEL: info
+      RUSTFS_OBS_LOG_DIRECTORY: /var/logs/rustfs/
+    networks:
+      - dokploy-network
+# pd network create dokploy-network
+volumes:
+  data:
+  logs:
+networks:
+  dokploy-network:
+    driver: bridge

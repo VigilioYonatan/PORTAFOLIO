@@ -1,0 +1,20 @@
+services:
+  postgres_db:
+    image: postgres:18.1-alpine
+    restart: always
+    container_name: database_db
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASS}
+      POSTGRES_DB: ${DB_NAME}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "${DB_PORT}:5432"
+    networks:
+      - dokploy-network
+volumes:
+  postgres_data:
+networks:
+  dokploy-network:
+    external: true

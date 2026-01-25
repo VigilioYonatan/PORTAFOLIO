@@ -1,0 +1,53 @@
+---
+import WebLayout from "../_components/layouts/web-layout/index.astro";
+---
+
+<WebLayout title="Projects">
+  <div class="container mx-auto py-20 px-4">
+    <h1 class="text-4xl font-black font-mono mb-8 text-primary">
+      PROJECT_DATABASE
+    </h1>
+    <div class="grid grid-cols-1 gap-8">
+      {/* Mock Project */}
+      <a
+        href="/en/projects/portfolio-v4"
+        class="group relative block border border-border bg-card rounded-xl overflow-hidden hover:border-primary/50 transition-colors"
+      >
+        <div class="grid grid-cols-1 md:grid-cols-2">
+          <div
+            class="aspect-video bg-muted relative group-hover:scale-105 transition-transform duration-500"
+          >
+            {/* Image placeholder */}
+          </div>
+          <div class="p-8 flex flex-col justify-center">
+            <h2
+              class="text-2xl font-bold mb-2 group-hover:text-primary transition-colors"
+            >
+              Portfolio V4
+            </h2>
+            <p class="text-muted-foreground mb-4">
+              A high-performance personal portfolio built with Astro, Preact,
+              and NestJS. Features RAG AI Chat.
+            </p>
+            <div class="flex flex-wrap gap-2 mb-6">
+              <span class="px-2 py-1 rounded bg-secondary text-xs font-mono"
+                >Astro</span
+              >
+              <span class="px-2 py-1 rounded bg-secondary text-xs font-mono"
+                >NestJS</span
+              >
+              <span class="px-2 py-1 rounded bg-secondary text-xs font-mono"
+                >PostgreSQL</span
+              >
+            </div>
+            <span
+              class="font-mono text-primary text-sm flex items-center gap-2"
+            >
+              ACCESS_DETAILS &gt;
+            </span>
+          </div>
+        </div>
+      </a>
+    </div>
+  </div>
+</WebLayout>

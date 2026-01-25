@@ -1,0 +1,79 @@
+services:
+  app:
+    container_name: template_app
+    ports:
+      - "${PORT}:${PORT}"
+    environment:
+      # App
+      PUBLIC_NAME_APP: ${PUBLIC_NAME_APP}
+      NODE_ENV: ${NODE_ENV}
+      PUBLIC_ENV: ${PUBLIC_ENV}
+      PORT: ${PORT}
+      PUBLIC_URL: ${PUBLIC_URL}
+      PUBLIC_PORT: ${PUBLIC_PORT}
+
+      # Database
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_USER: ${DB_USER}
+      DB_PASS: ${DB_PASS}
+      DB_NAME: ${DB_NAME}
+      DATABASE_URL: ${DATABASE_URL}
+
+      # Cache (Redis/Dragonfly)
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PORT: ${REDIS_PORT}
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+
+      # JWT
+      JWT_KEY: ${JWT_KEY}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN}
+      JWT_REFRESH_KEY: ${JWT_REFRESH_KEY}
+      JWT_REFRESH_EXPIRES_IN: ${JWT_REFRESH_EXPIRES_IN}
+
+      # HMAC
+      PUBLIC_HMAC_KEY: ${PUBLIC_HMAC_KEY}
+
+      # Storage (RustFS/MinIO)
+      RUSTFS_ENDPOINT: ${RUSTFS_ENDPOINT}
+      RUSTFS_PORT: ${RUSTFS_PORT}
+      RUSTFS_ROOT_USER: ${RUSTFS_ROOT_USER}
+      RUSTFS_ROOT_PASSWORD: ${RUSTFS_ROOT_PASSWORD}
+      RUSTFS_BUCKET_NAME: ${RUSTFS_BUCKET_NAME}
+      RUSTFS_REGION: ${RUSTFS_REGION}
+      RUSTFS_INTERNAL_ENDPOINT: ${RUSTFS_INTERNAL_ENDPOINT}
+      RUSTFS_PUBLIC_ENDPOINT: ${RUSTFS_PUBLIC_ENDPOINT}
+
+      # Mail
+      MAIL_HOST: ${MAIL_HOST}
+      MAIL_PORT: ${MAIL_PORT}
+      MAIL_USER: ${MAIL_USER}
+      MAIL_PASS: ${MAIL_PASS}
+      MAIL_FROM: ${MAIL_FROM}
+      MAIL_FROM_NAME: ${MAIL_FROM_NAME}
+
+      # Security
+      CORS_ORIGINS: ${CORS_ORIGINS}
+      THROTTLE_TTL: ${THROTTLE_TTL}
+      THROTTLE_LIMIT: ${THROTTLE_LIMIT}
+      LOG_LEVEL: ${LOG_LEVEL}
+
+      # VAPID (Push Notifications)
+      PUBLIC_VAPID_KEY: ${PUBLIC_VAPID_KEY}
+      PRIVATE_VAPID_KEY: ${PRIVATE_VAPID_KEY}
+
+      # Dev tools
+      CHOKIDAR_USEPOLLING: true
+      CHOKIDAR_INTERVAL: 250
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.${PUBLIC_NAME_APP}.rule=Host(`${PUBLIC_URL}`)
+      - traefik.http.routers.${PUBLIC_NAME_APP}.entrypoints=websecure
+      - traefik.http.routers.${PUBLIC_NAME_APP}.tls.certResolver=letsencrypt
+      - traefik.http.services.${PUBLIC_NAME_APP}.loadbalancer.server.port=${PORT}
+    networks:
+      - dokploy-network
+
+networks:
+  dokploy-network:
+    external: true

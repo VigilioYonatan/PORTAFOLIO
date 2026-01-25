@@ -1,0 +1,79 @@
+---
+import WebLayout from "../_components/layouts/web-layout/index.astro";
+import FuturisticMDX from "@modules/blog/components/FuturisticMDX";
+import SocialHub from "@modules/blog/components/SocialHub";
+import { GithubIcon, GlobeIcon } from "lucide-preact";
+
+const { slug } = Astro.params;
+const content = `
+<h2>Project Overview</h2>
+<p>This project proves that high performance and high aesthetics can coexist...</p>
+<h3>Technical Challenges</h3>
+<p>Implementing a custom RAG solution on a VPS...</p>
+`;
+---
+
+<WebLayout title={`Project: ${slug}`}>
+  <div class="min-h-screen">
+    {/* Hero Header */}
+    <div class="h-[40vh] bg-muted relative overflow-hidden flex items-end">
+      <div
+        class="absolute inset-0 bg-gradient-to-t from-background to-transparent z-10"
+      >
+      </div>
+      <div class="container mx-auto px-4 relative z-20 pb-12">
+        <h1 class="text-4xl md:text-6xl font-black font-mono mb-4 text-white">
+          PORTFOLIO_V4
+        </h1>
+        <div class="flex gap-4">
+          <a
+            href="#"
+            class="flex items-center gap-2 px-4 py-2 bg-white text-black font-bold text-sm hover:bg-white/90"
+          >
+            <GlobeIcon size={16} /> LIVE_DEMO
+          </a>
+          <a
+            href="#"
+            class="flex items-center gap-2 px-4 py-2 border border-white text-white font-bold text-sm hover:bg-white/10"
+          >
+            <GithubIcon size={16} /> SOURCE_CODE
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div
+      class="container mx-auto py-12 px-4 max-w-4xl grid grid-cols-1 md:grid-cols-3 gap-12"
+    >
+      <div class="md:col-span-2">
+        <div class="mb-8">
+          <h3 class="font-mono font-bold text-primary mb-2">IMPACT_SUMMARY</h3>
+          <p class="text-xl">
+            Increased user engagement by 40% through sound-reactive UI
+            components.
+          </p>
+        </div>
+
+        <FuturisticMDX client:load content={content} />
+        <SocialHub client:load likes={128} comments={12} />
+      </div>
+
+      <div class="md:col-span-1 space-y-8">
+        <div class="p-6 border border-border rounded-xl bg-card">
+          <h4 class="font-bold mb-4 font-mono">TECH_STACK</h4>
+          <ul class="space-y-2 text-sm text-muted-foreground">
+            <li class="flex items-center gap-2">
+              <span class="w-1 h-1 bg-primary rounded-full"></span> Astro 4.0
+            </li>
+            <li class="flex items-center gap-2">
+              <span class="w-1 h-1 bg-primary rounded-full"></span> React / Preact
+            </li>
+            <li class="flex items-center gap-2">
+              <span class="w-1 h-1 bg-primary rounded-full"></span> Tailwind CSS
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</WebLayout>

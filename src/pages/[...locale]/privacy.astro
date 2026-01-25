@@ -1,0 +1,32 @@
+---
+import WebLayout from "./_components/layouts/web-layout/index.astro";
+import LegalDoc from "./_components/legal/LegalDoc";
+---
+
+<WebLayout title="Privacy Policy">
+  <LegalDoc client:load title="PRIVACY_POLICY" lastUpdated="2025-01-01">
+    <p>
+      This privacy policy explains how we collect and use your data on this
+      personal portfolio. Since this is a demo/portfolio site, no real personal
+      data is sold.
+    </p>
+
+    <h3>1. Information Collection</h3>
+    <p>
+      We collect standard server logs (IP address, browser type) for security
+      and analytics purposes. The AI chat feature may process your inputs to
+      generate responses.
+    </p>
+
+    <h3>2. Cookies</h3>
+    <p>
+      We use local storage for preferences (theme, volume) and session cookies
+      for authentication if you are an admin.
+    </p>
+
+    <h3>3. Contact</h3>
+    <p>
+      If you have questions, please use the contact form or email me directly.
+    </p>
+  </LegalDoc>
+</WebLayout>

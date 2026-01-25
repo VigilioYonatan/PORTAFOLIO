@@ -1,0 +1,151 @@
+import { Palette, X } from "lucide-preact";
+import { useEffect, useState, useRef } from "preact/hooks";
+import { cn } from "@infrastructure/utils/client/cn";
+import { 
+    siPython, 
+    siPhp, 
+    siTypescript, 
+    siJavascript, 
+    siDocker, 
+    siNestjs, 
+    siReact, 
+} from "simple-icons/icons";
+
+// Helper to render SimpleIcon
+const SimpleIcon = ({ icon, className, size = 24 }: { icon: any, className?: string, size?: number }) => (
+    <svg 
+        role="img" 
+        viewBox="0 0 24 24" 
+        xmlns="http://www.w3.org/2000/svg"
+        className={cn("fill-current", className)}
+        width={size}
+        height={size}
+    >
+        <path d={icon.path} />
+    </svg>
+);
+
+export default function TechThemeSwitcher({ className }: { className?: string }) {
+	const themes = [
+		{ name: "Python", color: "#306998", icon: siPython },
+		{ name: "PHP", color: "#777BB4", icon: siPhp },
+		{ name: "TypeScript", color: "#3178C6", icon: siTypescript },
+		{ name: "JavaScript", color: "#F7DF1E", icon: siJavascript },
+		{ name: "Docker", color: "#2496ED", icon: siDocker },
+		{ name: "NestJS", color: "#E0234E", icon: siNestjs },
+		{ name: "React", color: "#61DAFB", icon: siReact },
+	];
+
+    const [isOpen, setIsOpen] = useState(false);
+    const containerRef = useRef<HTMLDivElement>(null);
+    const [activeTheme, setActiveTheme] = useState(themes[0]);
+
+	const changeTheme = (theme: typeof themes[0]) => {
+		document.documentElement.style.setProperty("--primary", theme.color);
+		localStorage.setItem("theme-color", theme.color);
+        localStorage.setItem("theme-name", theme.name);
+        setActiveTheme(theme);
+        setIsOpen(false);
+	};
+
+	useEffect(() => {
+		const savedColor = localStorage.getItem("theme-color");
+        const savedName = localStorage.getItem("theme-name");
+		if (savedColor) {
+			document.documentElement.style.setProperty("--primary", savedColor);
+            const found = themes.find(t => t.name === savedName) || themes.find(t => t.color === savedColor);
+            if (found) setActiveTheme(found);
+		}
+        
+        // Click outside listener
+        const handleClickOutside = (event: MouseEvent) => {
+            if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+                setIsOpen(false);
+            }
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+	}, []);
+
+	return (
+		<div ref={containerRef} class={cn("relative", className)}>
+             <div class="flex items-center gap-2 mb-1 opacity-50">
+                <Palette size={12} />
+                <span class="text-[9px] font-mono tracking-widest uppercase">Tech Theme</span>
+             </div>
+            
+            {/* Trigger Button - Enhanced Design */}
+            <button 
+                onClick={() => setIsOpen(!isOpen)}
+                class={cn(
+                    "w-full flex items-center justify-between gap-3 px-3 py-2.5 bg-zinc-900/50 border border-white/5 rounded-xl hover:border-primary/50 hover:bg-zinc-900 transition-all group shadow-sm",
+                    isOpen && "border-primary/50 ring-1 ring-primary/20"
+                )}
+            >
+                <div class="flex items-center gap-2.5">
+                    <div class="p-1.5 bg-white/5 rounded-md text-muted-foreground group-hover:text-primary transition-colors">
+                        <SimpleIcon icon={activeTheme.icon} size={12} />
+                    </div>
+                    <span class="text-[10px] font-black uppercase tracking-widest text-muted-foreground group-hover:text-foreground transition-colors">
+                        {activeTheme.name}
+                    </span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <div 
+                        class="w-1.5 h-1.5 rounded-full shadow-[0_0_8px] animate-pulse" 
+                        style={{ backgroundColor: activeTheme.color, boxShadow: `0 0 8px ${activeTheme.color}` }}
+                    />
+                </div>
+            </button>
+
+            {/* Popover Grid - Fixed Positioning & Width */}
+            {isOpen && (
+                <div class="absolute bottom-[calc(100%+12px)] left-1/2 -translate-x-1/2 w-[240px] p-4 bg-zinc-950/95 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-2xl z-50 animate-in fade-in slide-in-from-bottom-2 zoom-in-95">
+                    {/* Arrow Pointer */}
+                    <div class="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-zinc-950 border-r border-b border-white/10 rotate-45 transform" />
+
+                    <div class="flex items-center justify-between mb-4 pb-3 border-b border-white/5">
+                        <div class="flex flex-col gap-0.5">
+                            <span class="text-[9px] font-black tracking-[0.2em] text-white uppercase">Stack_Protocol</span>
+                            <span class="text-[8px] font-mono text-muted-foreground">SELECT_PRIMARY_NODE</span>
+                        </div>
+                        <button onClick={() => setIsOpen(false)} class="p-1 hover:bg-white/10 rounded-md text-muted-foreground hover:text-white transition-colors">
+                            <X size={12} />
+                        </button>
+                    </div>
+                    
+                    <div class="grid grid-cols-4 gap-3">
+                        {themes.map((theme) => {
+                            const isActive = activeTheme.name === theme.name;
+                            return (
+                                <button
+                                    key={theme.name}
+                                    onClick={() => changeTheme(theme)}
+                                    title={theme.name}
+                                    class={cn(
+                                        "aspect-square rounded-xl border flex flex-col items-center justify-center gap-1 transition-all relative group",
+                                        isActive 
+                                            ? "bg-primary/10 border-primary/50 shadow-[0_0_15px_rgba(var(--primary-rgb),0.2)]" 
+                                            : "bg-black/40 border-white/5 hover:border-primary/40 hover:bg-white/5 hover:scale-105"
+                                    )}
+                                >
+                                    <SimpleIcon 
+                                        icon={theme.icon} 
+                                        size={18} 
+                                        className={cn(
+                                            "transition-all duration-300",
+                                            isActive ? "text-primary filter drop-shadow-[0_0_5px_rgba(var(--primary-rgb),0.5)]" : "text-muted-foreground group-hover:text-primary"
+                                        )} 
+                                    />
+                                    {isActive && (
+                                        <div class="absolute inset-0 rounded-xl ring-1 ring-inset ring-primary/20 pointer-events-none" />
+                                    )}
+                                </button>
+                            );
+                        })}
+                    </div>
+                </div>
+            )}
+		</div>
+	);
+}

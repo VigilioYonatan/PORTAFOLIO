@@ -1,0 +1,22 @@
+include:
+    - path:
+          - .docker/docker-compose-postgres.yml
+      project_directory: .
+
+services:
+    app:
+        # ⚠️ CAMBIAR: Usa tu dominio de Gitea y nombre del repositorio
+        image: gitea.tudominio.com/usuario/NEST-ASTROJS-BASE:${IMAGE_TAG:-production}
+        extends:
+            file: .docker/docker-compose-base.yml
+            service: app
+        restart: always
+        # NOTA: Ya no construimos aquí, solo hacemos pull de la imagen pre-construida
+        # build:
+        #     context: .
+        #     dockerfile: Dockerfile
+        #     target: production
+
+networks:
+    dokploy-network:
+        external: true

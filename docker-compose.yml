@@ -1,0 +1,9 @@
+include:
+    - path:
+          - .docker/docker-compose-rustfs.yml
+          - .docker/docker-compose-dragonfly.yml
+          - .docker/docker-compose-postgres.yml
+      project_directory: .
+networks:
+    dokploy-network:
+        external: true

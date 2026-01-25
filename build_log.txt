@@ -1,0 +1,62 @@
+
+> astro-test@0.0.1 build:client /config/Desktop/gat/portfolio
+> astro build
+
+23:55:52 [@astrojs/node] Enabling sessions with filesystem storage
+23:55:52 [content] Syncing content
+23:55:52 [content] Synced content
+23:55:52 [types] Generated 54ms
+23:55:52 [build] output: "server"
+23:55:52 [build] mode: "server"
+23:55:52 [build] directory: /config/Desktop/gat/portfolio/dist/
+23:55:52 [build] adapter: @astrojs/node
+23:55:52 [build] Collecting build info...
+23:55:52 [build] ✓ Completed in 112ms.
+23:55:52 [build] Building server entrypoints...
+23:55:53 [WARN] [vite] 
+/grid.svg referenced in /grid.svg didn't resolve at build time, it will remain unchanged to be resolved at runtime
+23:55:54 [WARN] [vite] "Circle" and "Share2" are imported from external module "lucide-preact" but never used in "src/components/form/form-document-array/components/form-document-array.component.tsx" and "src/modules/blog/components/BlogReader.tsx".
+23:55:54 [vite] ✓ built in 2.23s
+23:55:54 [build] ✓ Completed in 2.28s.
+
+ building client (vite) 
+23:55:54 [vite] transforming...
+23:55:55 [vite] ✓ 1764 modules transformed.
+23:55:55 [ERROR] [vite] ✗ Build failed in 1.20s
+[vite:preact-jsx] /config/Desktop/gat/portfolio/src/modules/technology/components/TechnologyTable.tsx: Unterminated template. (208:3)
+
+  206 | 	);
+  207 | }
+> 208 | ```
+      |    ^
+  209 |
+file: /config/Desktop/gat/portfolio/src/modules/technology/components/TechnologyTable.tsx:208:3
+  Location:
+    undefined:208:3
+  Stack trace:
+    at constructor (/config/Desktop/gat/portfolio/node_modules/.pnpm/@babel+parser@7.28.5/node_modules/@babel/parser/lib/index.js:367:19)
+    at Object.unterminated (/config/Desktop/gat/portfolio/node_modules/.pnpm/@babel+parser@7.28.5/node_modules/@babel/parser/lib/index.js:5695:20)
+    at TypeScriptParserMixin.readTemplateToken (/config/Desktop/gat/portfolio/node_modules/.pnpm/@babel+parser@7.28.5/node_modules/@babel/parser/lib/index.js:6544:9)
+    at TypeScriptParserMixin.getTokenFromCode (/config/Desktop/gat/portfolio/node_modules/.pnpm/@babel+parser@7.28.5/node_modules/@babel/parser/lib/index.js:4826:11)
+    at TypeScriptParserMixin.nextToken (/config/Desktop/gat/portfolio/node_modules/.pnpm/@babel+parser@7.28.5/node_modules/@babel/parser/lib/index.js:5807:10)
+    at TypeScriptParserMixin.parseTemplateElement (/config/Desktop/gat/portfolio/node_modules/.pnpm/@babel+parser@7.28.5/node_modules/@babel/parser/lib/index.js:11857:10)
+    at TypeScriptParserMixin.parseExprAtom (/config/Desktop/gat/portfolio/node_modules/.pnpm/@babel+parser@7.28.5/node_modules/@babel/parser/lib/index.js:11415:21)
+    at TypeScriptParserMixin.parseExprSubscripts (/config/Desktop/gat/portfolio/node_modules/.pnpm/@babel+parser@7.28.5/node_modules/@babel/parser/lib/index.js:11145:23)
+    at TypeScriptParserMixin.parseMaybeUnary (/config/Desktop/gat/portfolio/node_modules/.pnpm/@babel+parser@7.28.5/node_modules/@babel/parser/lib/index.js:11110:23)
+    at TypeScriptParserMixin.parseMaybeUnaryOrPrivate (/config/Desktop/gat/portfolio/node_modules/.pnpm/@babel+parser@7.28.5/node_modules/@babel/parser/lib/index.js:10963:61)
+    at TypeScriptParserMixin.parseMaybeConditional (/config/Desktop/gat/portfolio/node_modules/.pnpm/@babel+parser@7.28.5/node_modules/@babel/parser/lib/index.js:10945:23)
+    at TypeScriptParserMixin.parseMaybeAssign (/config/Desktop/gat/portfolio/node_modules/.pnpm/@babel+parser@7.28.5/node_modules/@babel/parser/lib/index.js:9839:20)
+    at /config/Desktop/gat/portfolio/node_modules/.pnpm/@babel+parser@7.28.5/node_modules/@babel/parser/lib/index.js:10844:39
+    at TypeScriptParserMixin.parseExpression (/config/Desktop/gat/portfolio/node_modules/.pnpm/@babel+parser@7.28.5/node_modules/@babel/parser/lib/index.js:10844:17)
+    at TypeScriptParserMixin.parseStatementContent (/config/Desktop/gat/portfolio/node_modules/.pnpm/@babel+parser@7.28.5/node_modules/@babel/parser/lib/index.js:9569:18)
+    at TypeScriptParserMixin.parseModuleItem (/config/Desktop/gat/portfolio/node_modules/.pnpm/@babel+parser@7.28.5/node_modules/@babel/parser/lib/index.js:12820:17)
+    at TypeScriptParserMixin.parseBlockBody (/config/Desktop/gat/portfolio/node_modules/.pnpm/@babel+parser@7.28.5/node_modules/@babel/parser/lib/index.js:13385:10)
+    at TypeScriptParserMixin.parseTopLevel (/config/Desktop/gat/portfolio/node_modules/.pnpm/@babel+parser@7.28.5/node_modules/@babel/parser/lib/index.js:12688:25)
+    at TypeScriptParserMixin.parse (/config/Desktop/gat/portfolio/node_modules/.pnpm/@babel+parser@7.28.5/node_modules/@babel/parser/lib/index.js:10183:18)
+    at parser (/config/Desktop/gat/portfolio/node_modules/.pnpm/@babel+core@7.28.5/node_modules/@babel/core/lib/parser/index.js:41:34)
+    at normalizeFile (/config/Desktop/gat/portfolio/node_modules/.pnpm/@babel+core@7.28.5/node_modules/@babel/core/lib/transformation/normalize-file.js:64:37)
+    at run (/config/Desktop/gat/portfolio/node_modules/.pnpm/@babel+core@7.28.5/node_modules/@babel/core/lib/transformation/index.js:22:50)
+    at transform (/config/Desktop/gat/portfolio/node_modules/.pnpm/@babel+core@7.28.5/node_modules/@babel/core/lib/transform.js:22:33)
+    at step (/config/Desktop/gat/portfolio/node_modules/.pnpm/gensync@1.0.0-beta.2/node_modules/gensync/index.js:261:32)
+    at async.call.result.err.err (/config/Desktop/gat/portfolio/node_modules/.pnpm/gensync@1.0.0-beta.2/node_modules/gensync/index.js:223:11)
+ ELIFECYCLE  Command failed with exit code 1.

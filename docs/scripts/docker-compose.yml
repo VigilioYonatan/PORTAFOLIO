@@ -1,0 +1,23 @@
+services:
+  webtop:
+    image: lscr.io/linuxserver/webtop:ubuntu-xfce
+    container_name: bot-ableton-safe
+    # Remove 'privileged' and 'cap_add' unless you specifically need them 
+    # for an app you are installing INSIDE the desktop.
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Lima
+    volumes:
+      - webtop_config:/config
+      - .:/config/workspace
+    ports:
+      - 3001:3000
+    shm_size: "8gb"
+    restart: unless-stopped
+    # If you are on a modern kernel, this helps with seccomp issues without being "privileged"
+    security_opt:
+      - seccomp:unconfined
+
+volumes:
+  webtop_config:

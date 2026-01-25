@@ -1,0 +1,87 @@
+---
+import { ClientRouter } from "astro:transitions";
+import "@pages/_main.ts";
+import { getLangFromUrl } from "@src/i18n";
+import "@assets/css/global.css";
+
+const lang = getLangFromUrl(Astro.url);
+const { title } = Astro.props;
+---
+
+<!doctype html>
+<html lang={lang} class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{title || "Authentication | IntelliDoc AI"}</title>
+    <ClientRouter />
+  </head>
+  <body
+    class="bg-[#0d1117] text-foreground antialiased selection:bg-primary/30"
+  >
+    <div class="min-h-screen w-full flex">
+      <!-- Left Column: Branding Panel (Desktop Only) -->
+      <div class="hidden lg:flex lg:w-1/2 h-screen sticky top-0">
+        <!-- <BrandSection client:load lang={lang} /> -->
+        <div
+          class="w-full h-full bg-zinc-900 border-r border-zinc-800 flex items-center justify-center"
+        >
+          <h1 class="text-4xl font-black text-zinc-800 tracking-tighter">
+            BRAND_SECTION_PLACEHOLDER
+          </h1>
+        </div>
+      </div>
+
+      <!-- Right Column: Auth Form -->
+      <div
+        class="w-full lg:w-1/2 min-h-screen flex flex-col items-center justify-center p-6 md:p-12 bg-[#0d1117] relative"
+      >
+        <!-- Mobile Header (Visible on < lg) -->
+        <div
+          class="lg:hidden flex flex-col items-center gap-3 mb-8 animate-in fade-in slide-in-from-top-4 duration-700"
+        >
+          <div
+            class="w-10 h-10 bg-primary/20 rounded-lg flex items-center justify-center border border-primary/30"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="text-primary"
+            >
+              <path
+                d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"
+              ></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+            </svg>
+          </div>
+          <h1 class="text-xl font-bold tracking-tight text-white">
+            IntelliDoc AI
+          </h1>
+        </div>
+
+        <!-- Form Container -->
+        <div class="w-full max-w-md animate-in fade-in zoom-in-95 duration-500">
+          <slot />
+        </div>
+
+        <!-- Footer -->
+        <div class="mt-12 text-center">
+          <p
+            class="text-[10px] font-medium text-zinc-600 uppercase tracking-widest"
+          >
+            &copy; 2026 IntelliDoc AI • Enterprise Document Intelligence
+          </p>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
