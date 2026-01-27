@@ -1,8 +1,6 @@
 import { E2EApp } from "@infrastructure/config/server/e2e-app";
 import { UserFactory } from "@modules/user/__tests__/user.factory";
-import { userEntity } from "@modules/user/entities/user.entity";
 import { UserService } from "@modules/user/services/user.service";
-import { eq } from "drizzle-orm";
 import request from "supertest";
 
 describe("AuthController (E2E Real DB)", () => {

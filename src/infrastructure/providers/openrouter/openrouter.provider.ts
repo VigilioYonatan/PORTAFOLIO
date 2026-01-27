@@ -224,6 +224,7 @@ export class OpenRouterProvider {
 	 */
 	sanitizeUserInput(input: string): string {
 		// 1. Remove control characters
+		// biome-ignore lint/suspicious/noControlCharactersInRegex: <explanation>
 		let sanitized = input.replace(/[\x00-\x1F\x7F]/g, "");
 
 		// 2. Remove code blocks that could contain instructions

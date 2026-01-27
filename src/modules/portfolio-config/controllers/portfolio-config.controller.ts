@@ -17,8 +17,6 @@ import {
 	Controller,
 	Get,
 	HttpCode,
-	Injectable,
-	Post,
 	Put,
 	Req,
 	Res,

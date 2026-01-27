@@ -1,5 +1,5 @@
 import { useContext } from "preact/hooks";
-import { VigilioTableContext } from "./VigilioTable";
+import { VigilioTableContext } from "./vigilio-table";
 
 interface TdProps<T extends object> {
 	data: T;

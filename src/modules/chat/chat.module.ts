@@ -7,6 +7,7 @@ import { ConversationRepository } from "./repositories/conversation.repository";
 import { ConversationSeeder } from "./seeders/conversation.seeder";
 import { ChatService } from "./services/chat.service";
 import { ConversationService } from "./services/conversation.service";
+import { ChatCache } from "./caches/chat.cache";
 
 @Module({
 	imports: [AiModule],
@@ -17,7 +18,8 @@ import { ConversationService } from "./services/conversation.service";
 		ConversationService,
 		ConversationRepository,
 		ConversationSeeder,
+		ChatCache,
 	],
-	exports: [ChatService, ConversationService, ConversationSeeder],
+	exports: [ChatService, ConversationService, ConversationSeeder, ChatCache],
 })
 export class ChatModule {}

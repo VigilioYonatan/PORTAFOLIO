@@ -1,4 +1,3 @@
-// @vitest-environment happy-dom
 import {
 	cleanup,
 	fireEvent,
@@ -6,7 +5,6 @@ import {
 	screen,
 	waitFor,
 } from "@testing-library/preact";
-import { sweetModal } from "@vigilio/sweet";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { authRegisterApi } from "../../apis/auth.register.api";
 import { RegisterForm } from "../register.form";

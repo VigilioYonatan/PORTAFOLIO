@@ -1,10 +1,6 @@
-import dayjs, { slugify } from "@infrastructure/utils/hybrid";
+import { slugify } from "@infrastructure/utils/hybrid";
+import { paginator } from "@infrastructure/utils/server/helpers";
 import {
-	type PaginatorResult,
-	paginator,
-} from "@infrastructure/utils/server/helpers";
-import {
-	BadRequestException,
 	Injectable,
 	Logger,
 	NotFoundException,
@@ -12,13 +8,13 @@ import {
 import { TenantCache } from "../caches/tenant.cache";
 import type { TenantQueryDto } from "../dtos/tenant.query.dto";
 import type {
-	TenantDestroyResponseDto,
 	TenantIndexResponseDto,
 	TenantSettingResponseDto,
 	TenantShowResponseDto,
 	TenantStoreResponseDto,
 	TenantUpdateMeResponseDto,
 	TenantUpdateResponseDto,
+	TenantDestroyResponseDto,
 } from "../dtos/tenant.response.dto";
 import type { TenantStoreDto } from "../dtos/tenant.store.dto";
 import type { TenantUpdateDto } from "../dtos/tenant.update.dto";
@@ -27,7 +23,6 @@ import type { TenantSettingUpdateDto } from "../dtos/tenant-setting.update.dto";
 import type { TenantSettingUpdateMeDto } from "../dtos/tenant-setting.update-me.dto";
 import { TenantRepository } from "../repositories/tenant.repository";
 import type { TenantSchema, TenantShowSchema } from "../schemas/tenant.schema";
-import type { TenantSettingSchema } from "../schemas/tenant-setting.schema";
 
 @Injectable()
 export class TenantService {
@@ -108,17 +103,10 @@ export class TenantService {
 			slug: slugify(body.name),
 		});
 
-		// Cache Write-Through
-		const fullTenant = await this.tenantRepository.showById(tenant.id);
-		if (fullTenant) {
-			await this.tenantCache.set(fullTenant);
-		}
 		// Invalidate lists
 		await this.tenantCache.invalidateLists();
 
-		if (!fullTenant) throw new BadRequestException("Error creating tenant");
-
-		return { success: true, tenant: fullTenant };
+		return { success: true, tenant };
 	}
 
 	async update(
@@ -132,11 +120,7 @@ export class TenantService {
 		await this.tenantCache.invalidate(id);
 		await this.tenantCache.invalidateLists();
 
-		const fullTenant = await this.tenantRepository.showById(id);
-		if (!fullTenant)
-			throw new NotFoundException("Tenant not found after update");
-
-		return { success: true, tenant: fullTenant };
+		return { success: true, tenant };
 	}
 
 	async updateMe(
@@ -150,14 +134,10 @@ export class TenantService {
 		await this.tenantCache.invalidate(tenant_id);
 		await this.tenantCache.invalidateLists();
 
-		const fullTenant = await this.tenantRepository.showById(tenant_id);
-		if (!fullTenant)
-			throw new NotFoundException("Tenant not found after update");
-
-		return { success: true, tenant: fullTenant };
+		return { success: true, tenant };
 	}
 
-	async destroy(id: number): Promise<{ success: true; message: string }> {
+	async destroy(id: number): Promise<TenantDestroyResponseDto> {
 		this.logger.log({ id }, "Deleting tenant");
 
 		// 2. Perform deletion

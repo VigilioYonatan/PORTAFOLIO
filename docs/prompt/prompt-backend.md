@@ -17,6 +17,11 @@
 > Por que tu ayudas para cosas repetidas , pero para lógica que es privado o temas personales ahi te pierdes. IMPORTANTE.
 > Nunca en los parametros o retorna codigo duro.
 > Eliminar imports que no estes usando el archivo.
+> Importante al poner los nombres de las clases de servicios, controller,repositories.
+Si el archivo se llama example.service.ts , el nombre de la clase de ese servicio se debe llamar class ExampleService{},
+Si el archivo se llama example.controller.ts , el nombre de la clase de ese controlador se debe llamar class ExampleController{} y el @controller("examples") debes ponerlo, como dicen en rules-endpoints.md,
+Si el archivo se llama example.repository.ts , el nombre de la clase de ese repositorio se debe llamar class ExampleRepository{},
+Si el archivo se llama pepito-capo.repository.ts , el nombre de la clase de ese repositorio se debe llamar class PepitoCapoRepository{} u el @Controller("pepito-capo") debes ponerlo NO "pepito/capo" , como dicen en rules-endpoints.md,
 > Usar el schema siempre no hardcoear los tipos ,enums ,etc. EJEMPLO
 
 ```typescript
@@ -388,8 +393,7 @@ private readonly logger = new Logger(ExampleService.name);
 		this.logger.log({ tenant_id }, "Creating example");
 		const example = await this.exampleRepository.store(tenant_id, body);
 
-		// Cache Write-Through + Invalidate lists
-		await this.exampleCache.set(tenant_id, example);
+    // DONT USE .set()
 		await this.exampleCache.invalidateLists(tenant_id);
 
 		return { success: true, example };
@@ -404,6 +408,7 @@ private readonly logger = new Logger(ExampleService.name);
 		const example = await this.exampleRepository.update(tenant_id, id, body);
 
 		// Invalidate single + lists
+    // DONT USE .set()
 		await this.exampleCache.invalidate(tenant_id, id);
 		await this.exampleCache.invalidateLists(tenant_id);
 
@@ -516,8 +521,6 @@ class ExampleService {
     body: ExampleStoreDto,
   ): Promise<{ success: true; example: ExampleSchema }> {
     const example = await this.exampleRepository.store(tenant_id, body);
-    // Cache Write-Through + Invalidate lists
-    await this.exampleCache.set(tenant_id, example);
     await this.exampleCache.invalidateLists(tenant_id);
 
     return { success: true, example };
@@ -536,8 +539,7 @@ class OtherService {
     body: ExampleStoreDto,
   ): Promise<{ success: true; example: ExampleSchema }> {
     const example = await this.exampleRepository.store(tenant_id, body); // esto debe estar en exampleService, register por ejemplo
-    // Cache Write-Through + Invalidate lists
-    await this.exampleCache.set(tenant_id, example); // esto debe estar en exampleService, register por ejemplo
+   
     await this.exampleCache.invalidateLists(tenant_id);
 
     return { success: true, example };
@@ -972,7 +974,9 @@ show(
 3.  **Retornos Estandarizados:** TODOS los métodos de escritura (`store`, `update`, `destroy`) deben retornar el objeto creado/actualizado directamente (`result`), NO un array.
 4.  **Orden de Parámetros MANDATORIO:** En TODOS los métodos (repositories, services, controllers), el orden SIEMPRE debe ser: `tenant_id` → `user_id` (si existe) → `entity_id` → `body`.
 5.  **IMPORTANTE SEGUIR CONVENCIÓN** No usar find,get,set,create,delete en los nombres de los metodos
-
+6. No meter logica en los repositories, ejemplo convertir en slugify(), etc, solo consultas de db
+7. En store repository body: Omit<ExampleSchema, "id" | "tenant_id"|"created_at" | "updated_at">,
+    // Solo en el repositorio store puede ir Omit<ExampleSchema, "id" |"tenant_id"| "created_at" | "updated_at"> en el body ,ojo esto es solo exclusivo de store en repository, SOLO ESOS CAMPOS NO OTROS CAMPOS, SERVICES SE ENCARGARÁ
 ```typescript
 // ✅ CORRECTO
 index() // Mostrar todos, claro puedes usasr paginacion o normal, claro hay entidades con millones de datos, ahi si usar paginacion
@@ -1366,8 +1370,8 @@ export class ExampleRepository {
   }
 
   store(
-    body: Omit<ExampleSchema, "id" | "created_at" | "updated_at">,
-    // Solo en el repositorio store puede ir Omit<ExampleSchema, "id" | "created_at" | "updated_at"> en el body ,ojo esto es solo exclusivo de store en repository
+    body: Omit<ExampleSchema, "id" | "tenant_id"|"created_at" | "updated_at">,
+    // Solo en el repositorio store puede ir Omit<ExampleSchema, "id" |"tenant_id"| "created_at" | "updated_at"> en el body ,ojo esto es solo exclusivo de store en repository, SOLO ESOS CAMPOS NO OTROS CAMPOS, SERVICES SE ENCARGARÁ
   ): Promise<ExampleSchema> {
     const slug = slugify(body.name);
     return this.db.transaction(async (tx) => {
@@ -1813,7 +1817,7 @@ export const metadata = pgTable("metadata", {
   id: serial().primaryKey(),
   extra_info: text(),
   parent_id: integer().notNull(),
-  target_type: targetTypeEnum().notNull(),
+  target_type: targetTypeEnum().notNull(), // target_type, examplet_type es segun la entidad
 }, (table) => [
   // Esto obliga a que la combinación (tipo + id) sea ÚNICA en toda la tabla.
   uniqueIndex("metadata_target_unique_idx").on(table.target_type, table.parent_id),
@@ -2430,8 +2434,7 @@ export class UserService {
       tenant_id,
     );
 
-    // Cache Write-Through
-    await this.userCache.set(tenant_id, user);
+    await this.userCache.invalidateLists(tenant_id);
 
     return { success: true, user };
   }

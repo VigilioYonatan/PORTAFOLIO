@@ -36,7 +36,7 @@ describe("User Module (E2E)", () => {
 	describe("Admin User Management", () => {
 		it("should list users (GET /users)", async () => {
 			const response = await request(e2e.app.getHttpServer())
-				.get("/api/v1/users")
+				.get("/api/v1/user")
 				.set("Host", "localhost")
 				.set("Authorization", `Bearer ${adminAccessToken}`)
 				.set("x-mock-role", "admin");
@@ -56,7 +56,7 @@ describe("User Module (E2E)", () => {
 			};
 
 			const response = await request(e2e.app.getHttpServer())
-				.post("/api/v1/users")
+				.post("/api/v1/user")
 				.set("Host", "localhost")
 				.set("Authorization", `Bearer ${adminAccessToken}`)
 				.set("x-mock-role", "admin")
@@ -70,7 +70,7 @@ describe("User Module (E2E)", () => {
 	describe("User Profile (/me)", () => {
 		it("should return own profile (GET /users/me)", async () => {
 			const response = await request(e2e.app.getHttpServer())
-				.get("/api/v1/users/me")
+				.get("/api/v1/user/me")
 				.set("Host", "localhost")
 				.set("Authorization", `Bearer ${adminAccessToken}`)
 				.set("x-mock-role", "admin");
@@ -87,7 +87,7 @@ describe("User Module (E2E)", () => {
 			};
 
 			const response = await request(e2e.app.getHttpServer())
-				.patch("/api/v1/users/me")
+				.patch("/api/v1/user/me")
 				.set("Host", "localhost")
 				.set("Authorization", `Bearer ${adminAccessToken}`)
 				.set("x-mock-role", "admin")

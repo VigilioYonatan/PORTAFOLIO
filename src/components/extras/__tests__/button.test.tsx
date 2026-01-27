@@ -1,7 +1,7 @@
 // @vitest-environment happy-dom
 import { fireEvent, render, screen } from "@testing-library/preact";
 import { describe, expect, it, vi } from "vitest";
-import Button from "../Button";
+import Button from "../button";
 
 describe("Button Component", () => {
 	it("renders children correctly", () => {
@@ -29,7 +29,7 @@ describe("Button Component", () => {
 
 	it("shows loading state", () => {
 		render(
-			<Button loading loading_title="Processing...">
+			<Button isLoading loading_title="Processing...">
 				Submit
 			</Button>,
 		);

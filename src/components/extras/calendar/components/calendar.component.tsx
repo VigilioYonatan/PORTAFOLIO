@@ -1,4 +1,4 @@
-import Loader from "@components/extras/Loader";
+import Loader from "@components/extras/loader";
 import { sizeIcon } from "@infrastructure/utils/client";
 import { ChevronLeft, ChevronRight } from "lucide-preact";
 import { Fragment } from "preact/jsx-runtime";
@@ -32,6 +32,9 @@ function Calendar(props: CalendarProps) {
 					class="w-full h-[150px] object-cover rounded-t-lg mb-4"
 					src={image}
 					alt="Calendar header"
+					title="Calendar header"
+					width={448}
+					height={150}
 					loading="lazy"
 				/>
 			)}

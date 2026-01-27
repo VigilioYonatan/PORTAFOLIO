@@ -6,7 +6,6 @@ import { slugify } from "@infrastructure/utils/hybrid/slug.utils";
 import { Inject, Injectable } from "@nestjs/common";
 import { type NodePgDatabase } from "drizzle-orm/node-postgres";
 import { blogPostEntity } from "../entities/blog-post.entity";
-import { type BlogPostSchema } from "../schemas/blog-post.schema";
 
 @Injectable()
 export class BlogPostSeeder {

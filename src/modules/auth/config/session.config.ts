@@ -1,4 +1,3 @@
-import path from "node:path";
 import type { Environments } from "@infrastructure/config/server";
 import { getRedisClient } from "@infrastructure/providers/cache/cache.connection";
 import { PG_POOL } from "@infrastructure/providers/database/database.const";

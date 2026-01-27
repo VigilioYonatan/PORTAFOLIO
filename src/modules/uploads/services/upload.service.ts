@@ -2,9 +2,9 @@ import crypto from "node:crypto";
 import { createReadStream } from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
-import type { MultipartInitResult } from "@infrastructure/providers/storage/rustfs.service";
 import { MediaProcessorService } from "@infrastructure/providers/storage/services/media-processor.service";
 import { StorageFactory } from "@infrastructure/providers/storage/storage.factory";
+import { getExtensionFromMime, now } from "@infrastructure/utils/hybrid";
 import {
 	BadRequestException,
 	Injectable,
@@ -23,10 +23,12 @@ import {
 import type {
 	UploadMultipartCompleteResponseDto,
 	UploadSignedPartResponseDto,
+	UploadDeleteResponseDto,
+	UploadFormidableResponseDto,
+	UploadMultipartInitResponseDto,
+	UploadPresignedUrlResponseDto,
 } from "../dtos/upload.response.dto";
 import type { FilesSchema } from "../schemas/upload.schema";
-import { getExtensionFromMime } from "@infrastructure/utils/hybrid";
-import { now } from "@infrastructure/utils/hybrid";
 
 /** Error code when file size exceeds formidable limit */
 const FORMIDABLE_MAX_SIZE_ERROR = 1009;
@@ -106,11 +108,7 @@ export class UploadService {
 		entity: EntityFile,
 		property: EntityFileProperty,
 		_sessionId?: string, // SessionID is no longer used for temp folders
-	): Promise<{
-		success: boolean;
-		data: FilesSchema[];
-		fields: Fields;
-	}> {
+	): Promise<UploadFormidableResponseDto> {
 		const rule = this.getUploadConfig(entity, property);
 
 		const form = formidable({
@@ -140,8 +138,9 @@ export class UploadService {
 				let tempFilePathToDelete: string | null = null;
 				try {
 					const finalFilename = filename || crypto.randomUUID();
-					let originalExt =
-						path.extname(file.originalFilename || "").replace(".", "");
+					let originalExt = path
+						.extname(file.originalFilename || "")
+						.replace(".", "");
 
 					if (!originalExt && file.mimetype) {
 						originalExt = getExtensionFromMime(file.mimetype) || "bin";
@@ -168,7 +167,7 @@ export class UploadService {
 								name: finalFilename,
 								original_name: file.originalFilename || finalFilename,
 								dimension: item.dimension,
-								 created_at: now().toDate(),
+								created_at: now().toDate(),
 							});
 						}
 						return;
@@ -196,7 +195,7 @@ export class UploadService {
 							size: stats.size,
 							name: finalFilename,
 							original_name: file.originalFilename || finalFilename,
-							 created_at: now().toDate(),
+							created_at: now().toDate(),
 						});
 						return;
 					}
@@ -215,7 +214,7 @@ export class UploadService {
 						size: file.size,
 						name: finalFilename,
 						original_name: file.originalFilename || finalFilename,
-						 created_at: now().toDate(),
+						created_at: now().toDate(),
 					});
 				} catch (error) {
 					this.logger.error(
@@ -277,7 +276,7 @@ export class UploadService {
 		property: EntityFileProperty,
 		fileName: string,
 		fileType?: string,
-	): Promise<{ success: true; data: { uploadUrl: string; key: string } }> {
+	): Promise<UploadPresignedUrlResponseDto> {
 		const rule = this.getUploadConfig(entity, property);
 
 		if (fileType) {
@@ -307,10 +306,7 @@ export class UploadService {
 		await Promise.all(files.map((file) => this.storage.removeFile(file.key)));
 	}
 
-	async deleteByKey(key: string | string[]): Promise<{
-		success: true;
-		data: { message: string; key: string | string[] };
-	}> {
+	async deleteByKey(key: string | string[]): Promise<UploadDeleteResponseDto> {
 		if (!key) {
 			throw new InternalServerErrorException("Missing file key(s).");
 		}
@@ -334,7 +330,7 @@ export class UploadService {
 		property: EntityFileProperty,
 		fileName: string,
 		fileType: string,
-	): Promise<{ success: true; data: MultipartInitResult }> {
+	): Promise<UploadMultipartInitResponseDto> {
 		const rule = this.getUploadConfig(entity, property);
 		this.validateMimeType(fileType, rule);
 

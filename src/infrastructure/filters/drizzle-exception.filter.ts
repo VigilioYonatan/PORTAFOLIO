@@ -13,11 +13,6 @@ export class DrizzleExceptionFilter extends HttpExceptionFilter {
 		const response = ctx.getResponse<Response>();
 		// biome-ignore lint/suspicious/noExplicitAny: Exception handling
 		const exceptionAny = exception as any;
-		console.error(
-			"DEBUG DRIZZLE ERROR:",
-			JSON.stringify(exceptionAny, null, 2),
-		);
-
 		// A veces Drizzle anida el error en .cause, y a veces ese .cause tiene otro .cause
 		let dbError = exceptionAny.cause || exceptionAny;
 		if (dbError.cause) {

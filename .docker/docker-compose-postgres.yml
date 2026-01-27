@@ -1,6 +1,7 @@
 services:
   postgres_db:
-    image: postgres:18.1-alpine
+    image: pgvector/pgvector:pg17-trixie
+    #image: postgres:18.1-alpine
     restart: always
     container_name: database_db
     environment:

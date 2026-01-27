@@ -21,8 +21,8 @@ export const aiConfigSchema = z
 
 		// Technical Parameters
 		system_prompt: z.string().nullable(),
-		temperature: z.number().min(0).max(2).default(0.7),
-		max_tokens: z.number().int().positive().default(2000), // Máximo de tokens
+		temperature: z.number().min(0).max(2),
+		max_tokens: z.number().int().positive(), // Máximo de tokens
 
 		// Status
 		is_active: z.boolean(), // Estado: true = configuración activa

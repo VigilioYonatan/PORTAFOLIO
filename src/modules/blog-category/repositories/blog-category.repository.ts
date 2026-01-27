@@ -1,6 +1,5 @@
 import { schema } from "@infrastructure/providers/database/database.schema";
 import { DRIZZLE } from "@infrastructure/providers/database/database.service";
-import { slugify } from "@infrastructure/utils/hybrid/slug.utils";
 import { toNull } from "@infrastructure/utils/server";
 import { blogPostEntity } from "@modules/blog-post/entities/blog-post.entity";
 import { Inject, Injectable } from "@nestjs/common";
@@ -28,18 +27,13 @@ export class BlogCategoryRepository {
 
 	async store(
 		tenant_id: number,
-		body: Omit<
-			BlogCategorySchema,
-			"id" | "created_at" | "updated_at" | "tenant_id"
-		>,
+		body: Omit<BlogCategorySchema, "id" | "tenant_id" | "created_at" | "updated_at">,
 	): Promise<BlogCategorySchema> {
-		const slug = slugify(body.name);
 		const [result] = await this.db
 			.insert(blogCategoryEntity)
 			.values({
 				...body,
 				tenant_id,
-				slug,
 			})
 			.returning();
 		return result;
@@ -50,14 +44,9 @@ export class BlogCategoryRepository {
 		id: number,
 		body: Partial<BlogCategorySchema>,
 	): Promise<BlogCategorySchema> {
-		const updates: Partial<BlogCategorySchema> = { ...body };
-		if (body.name) {
-			updates.slug = slugify(body.name);
-		}
-
 		const [result] = await this.db
 			.update(blogCategoryEntity)
-			.set(updates)
+			.set(body)
 			.where(
 				and(
 					eq(blogCategoryEntity.id, id),
@@ -121,6 +110,14 @@ export class BlogCategoryRepository {
 				offset: useCursor ? undefined : query.offset,
 				where: useCursor ? cursorWhereClause : baseWhereClause,
 				orderBy: orderBy,
+				columns: {
+					description: false,
+				},
+				extras: {
+					description: sql<string>`substring(${blogCategoryEntity.description} from 1 for 3000)`.as(
+						"description",
+					),
+				},
 			}),
 			this.db
 				.select({ count: sql<number>`count(*)` })

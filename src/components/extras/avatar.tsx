@@ -1,5 +1,6 @@
 import { cn } from "@infrastructure/utils/client";
 import { printFileWithDimension } from "@infrastructure/utils/hybrid";
+import { DIMENSION_IMAGE } from "@modules/uploads/const/upload.const";
 import type { UserSchema } from "@modules/user/schemas/user.schema";
 
 type AvatarSize = "xs" | "sm" | "md" | "lg" | "xl";
@@ -46,8 +47,11 @@ function Avatar({ user, size = "md", status, className }: AvatarProps) {
 			>
 				{user?.avatar ? (
 					<img
-						src={printFileWithDimension(user.avatar, 100)[0]}
+						src={printFileWithDimension(user.avatar, DIMENSION_IMAGE.xs)[0]}
 						alt={user.username || ""}
+						title={user.username || ""}
+						width={DIMENSION_IMAGE.xs}
+						height={DIMENSION_IMAGE.xs}
 						class="w-full h-full object-cover"
 					/>
 				) : (

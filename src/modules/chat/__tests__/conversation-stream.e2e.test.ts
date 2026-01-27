@@ -11,7 +11,7 @@ import { of } from "rxjs";
 import request from "supertest";
 import { AppModule } from "../../../app.module";
 
-describe("Conversation Stream - GET /conversations/:id/stream (E2E)", () => {
+describe("Conversation Stream - GET /conversation/:id/stream (E2E)", () => {
 	let app: INestApplication;
 	let tenantId: number;
 
@@ -66,7 +66,7 @@ describe("Conversation Stream - GET /conversations/:id/stream (E2E)", () => {
 	it("should stream AI response for a conversation", async () => {
 		// 1. Create Conversation
 		const convRes = await request(app.getHttpServer())
-			.post("/api/v1/conversations")
+			.post("/api/v1/conversation")
 			.set("Host", "localhost")
 			.send({
 				title: "Stream Test",
@@ -77,13 +77,13 @@ describe("Conversation Stream - GET /conversations/:id/stream (E2E)", () => {
 
 		// 2. Add Message
 		await request(app.getHttpServer())
-			.post(`/api/v1/conversations/${conversationId}/messages`)
+			.post(`/api/v1/conversation/${conversationId}/contact`)
 			.set("Host", "localhost")
 			.send({ content: "Hello AI" });
 
 		// 3. Request Stream
 		const response = await request(app.getHttpServer())
-			.get(`/api/v1/conversations/${conversationId}/stream`)
+			.get(`/api/v1/conversation/${conversationId}/stream`)
 			.set("Host", "localhost")
 			.expect(200);
 

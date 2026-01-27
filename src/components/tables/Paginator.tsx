@@ -1,6 +1,6 @@
-import Loader from "@components/extras/Loader";
+import Loader from "@components/extras/loader";
 import { useContext } from "preact/hooks";
-import { VigilioTableContext } from "./VigilioTable";
+import { VigilioTableContext } from "./vigilio-table";
 
 function Paginator() {
 	const table = useContext(VigilioTableContext);

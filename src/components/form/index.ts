@@ -1,18 +1,19 @@
-import { Form as VigilioForm } from "./Form";
-import { FormArea as FormControlArea } from "./FormArea";
-import { FormButton } from "./FormButton";
-import { FormButtonSubmit } from "./FormButtonSubmit";
-import { FormCheck } from "./FormCheck";
-import { FormControl } from "./FormControl";
-import { FormMultiSelect } from "./FormMultiSelect";
-import { FormSelect } from "./FormSelect";
-import { FormToggle } from "./FormToggle";
+import { Form as VigilioForm } from "./form";
+import { FormArea as FormControlArea } from "./form.area";
+import { FormButton } from "./form.button";
+import { FormButtonSubmit } from "./form.button-submit";
+import { FormCheck } from "./form.check";
+import { FormControl } from "./form.control";
+import { FormMultiSelect } from "./form.multi-select";
+import { FormSelect } from "./form.select";
+import { FormToggle } from "./form.toggle";
 import { FormArray } from "./form-array";
 import { FormColor } from "./form-color";
 import { FormDocumentArray } from "./form-document-array";
 import { FormFile } from "./form-file";
 import { FormSelectInput } from "./form-select-input";
-export { formSelectNumber } from "./FormSelect";
+
+export { formSelectNumber } from "./form.select";
 
 export * from "./libs";
 

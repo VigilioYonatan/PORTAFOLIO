@@ -3,8 +3,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useSignal } from "@preact/signals";
 import { type Lang, useTranslations } from "@src/i18n";
 import { ArrowRight, Lock, Mail, Terminal } from "lucide-preact";
-import { useForm } from "react-hook-form";
-import { authLoginApi, type LoginApiError } from "../apis/auth.login.api";
+import { useForm, type Resolver } from "react-hook-form";
+import { type AuthLoginApiError, authLoginApi } from "../apis/auth.login.api";
 import { type AuthLoginDto, authLoginDto } from "../dtos/login.dto";
 
 // ============================================
@@ -51,7 +51,7 @@ export function LoginForm({ lang = "es" }: LoginFormProps) {
 					window.location.href = "/dashboard";
 				}
 			},
-			onError(error: LoginApiError) {
+			onError(error: AuthLoginApiError) {
 				if (error.is_locked && error.lockout_end_at) {
 					lockoutInfo.value = {
 						isLocked: true,
@@ -122,8 +122,7 @@ export function LoginForm({ lang = "es" }: LoginFormProps) {
 						{authLoginMutation.error && !lockoutInfo.value.isLocked ? (
 							<div className="bg-red-500/10 border border-red-500/30 p-3 text-red-500 text-xs font-mono flex items-center gap-2">
 								<span className="font-bold">[ERROR]</span>
-								{authLoginMutation.error.message ||
-									t("auth.error.credentials")}
+								{authLoginMutation.error.message || t("auth.error.credentials")}
 							</div>
 						) : null}
 

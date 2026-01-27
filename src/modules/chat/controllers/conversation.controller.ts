@@ -12,7 +12,7 @@ import {
 } from "@nestjs/common";
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
 import type { Request } from "express";
-import type { Observable } from "rxjs";
+import { type Observable } from "rxjs";
 import {
 	ChatMessagePublicStoreResponseClassDto,
 	ConversationStoreResponseClassDto,
@@ -27,13 +27,11 @@ import {
 	type ConversationStoreDto,
 	conversationStoreDto,
 } from "../dtos/conversation.store.dto";
-import { type ChatMessageSchema } from "../schemas/chat-message.schema";
-import { type ConversationSchema } from "../schemas/conversation.schema";
 import { ChatService } from "../services/chat.service";
 import { ConversationService } from "../services/conversation.service";
 
 @ApiTags("Conversations")
-@Controller("conversations")
+@Controller("conversation")
 export class ConversationController {
 	constructor(
 		private readonly conversationService: ConversationService,

@@ -1,4 +1,3 @@
-import { getEnvironments } from "@infrastructure/config/server";
 import { Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 
@@ -21,11 +20,9 @@ import { ConfigModule } from "@nestjs/config";
 	imports: [
 		ConfigModule.forRoot({
 			isGlobal: true,
-			envFilePath:
-				process.env.NODE_ENV === "TEST" || process.env.NODE_ENV === "test"
-					? [".env.test"]
-					: [".env"],
+			envFilePath: process.env.NODE_ENV === "TEST" ? [".env.test"] : [".env"],
 			expandVariables: true,
+			cache: true,
 		}),
 	],
 	exports: [ConfigModule],

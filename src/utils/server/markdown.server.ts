@@ -69,7 +69,7 @@ export async function processMarkdown(content: string): Promise<string> {
 		const text =
 			typeof quote === "string"
 				? quote
-				: (quote as any).text ||
+				: quote.text ||
 					(quote as any).tokens?.map((t: any) => t.text).join("") ||
 					"";
 		return `<blockquote class="border-l-4 border-primary/50 bg-primary/5 pl-4 py-2 my-4 italic text-muted-foreground rounded-r-lg backdrop-blur-sm">
@@ -93,6 +93,6 @@ export async function processMarkdown(content: string): Promise<string> {
 		async: true,
 		gfm: true,
 		breaks: true,
-		renderer: renderer as any, // Force cast to avoid strict type mismatch
+		renderer,
 	});
 }

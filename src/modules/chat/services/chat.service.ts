@@ -17,8 +17,8 @@ import type {
 	ConversationStoreResponseDto,
 } from "../dtos/chat.response.dto";
 import { ChatRepository } from "../repositories/chat.repository";
-import { type ChatMessageSchema } from "../schemas/chat-message.schema";
 import { type ConversationSchema } from "../schemas/conversation.schema";
+import { ChatCache } from "../caches/chat.cache";
 
 @Injectable()
 export class ChatService {
@@ -28,9 +28,10 @@ export class ChatService {
 		private readonly repository: ChatRepository,
 		private readonly aiService: AiService,
 		private readonly aiConfigService: AiConfigService,
+		private readonly cache: ChatCache,
 	) {}
 
-	async indexConversations(
+	async index(
 		tenant_id: number,
 		query: ConversationQueryDto,
 	): Promise<ConversationIndexResponseDto> {
@@ -40,14 +41,26 @@ export class ChatService {
 			"/chat/conversations",
 			{
 				filters: query,
-				cb: async (filters, _isClean) => {
-					return await this.repository.indexConversations(tenant_id, filters);
+				cb: async (filters, isClean) => {
+					// If clean query, try cache first
+					if (isClean) {
+						const cached = await this.cache.getList(tenant_id, filters);
+						if (cached) return cached;
+					}
+
+					const result = await this.repository.indexConversations(tenant_id, filters);
+
+					if (isClean) {
+						await this.cache.setList(tenant_id, filters, result);
+					}
+
+					return result;
 				},
 			},
 		);
 	}
 
-	async storeConversation(
+	async store(
 		tenant_id: number,
 		body: ConversationStoreDto,
 	): Promise<ConversationStoreResponseDto> {
@@ -56,6 +69,7 @@ export class ChatService {
 			tenant_id,
 			body,
 		);
+		await this.cache.invalidateLists(tenant_id);
 		return { success: true, conversation };
 	}
 
@@ -67,7 +81,7 @@ export class ChatService {
 		this.logger.log({ tenant_id, conversation_id }, "Creating chat message");
 
 		// 1. Verify conversation exists and belongs to tenant
-		await this.showConversation(tenant_id, conversation_id);
+		await this.show(tenant_id, conversation_id);
 
 		// 2. Create message object with sanitized content
 		const sanitizedContent = sanitizeInput(body.content);
@@ -85,6 +99,7 @@ export class ChatService {
 			tenant_id,
 			messagePayload,
 		);
+		await this.cache.invalidateLists(tenant_id);
 		return { success: true, message };
 	}
 
@@ -117,10 +132,7 @@ export class ChatService {
 		this.logger.log({ tenant_id, conversation_id }, "Starting AI stream");
 
 		// 1. Context: Conversation & Messages
-		const conversation = await this.showConversation(
-			tenant_id,
-			conversation_id,
-		);
+		await this.show(tenant_id, conversation_id);
 		const messages = await this.repository.getMessages(conversation_id);
 
 		// 2. AI Config
@@ -142,7 +154,7 @@ export class ChatService {
 		});
 	}
 
-	async showConversation(
+	async show(
 		tenant_id: number,
 		id: number,
 	): Promise<ConversationSchema> {

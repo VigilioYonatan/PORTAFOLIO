@@ -4,7 +4,7 @@ import { DRIZZLE } from "@infrastructure/providers/database/database.service";
 import { now } from "@infrastructure/utils/hybrid/date.utils";
 import { workExperienceEntity } from "@modules/work-experience/entities/work-experience.entity";
 import { Inject, Injectable } from "@nestjs/common";
-import { type InferInsertModel, eq } from "drizzle-orm";
+import { eq, type InferInsertModel } from "drizzle-orm";
 import type { NodePgDatabase } from "drizzle-orm/node-postgres";
 import { workMilestoneEntity } from "../entities/work-milestone.entity";
 

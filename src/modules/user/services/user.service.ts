@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import { paginator } from "@infrastructure/utils/server/helpers";
 import { Injectable, Logger, NotFoundException } from "@nestjs/common";
 import * as bcrypt from "bcrypt";
@@ -131,13 +132,12 @@ export class UserService {
 			...rest,
 			password: password_hash,
 			qr_code_token: null,
-			security_stamp: crypto.randomUUID(),
+			security_stamp: randomUUID(),
 			failed_login_attempts: 0,
 			is_mfa_enabled: false,
 			is_superuser: false,
 			email_verified_at: null,
 			lockout_end_at: null,
-			tenant_id,
 			google_id: null,
 			phone_number: null,
 			mfa_secret: null,
@@ -148,7 +148,6 @@ export class UserService {
 		});
 
 		// Cache Write-Through + Invalidate lists
-		await this.userCache.set(tenant_id, user);
 		await this.userCache.invalidateLists(tenant_id);
 
 		return { success: true, user };
@@ -274,7 +273,7 @@ export class UserService {
 	 * Invalidate user cache by ID and email
 	 * Used by AuthService when user data changes
 	 */
-	async invalidateUserCache(
+	async invalidateCache(
 		tenant_id: number,
 		user_id: number,
 		email?: string,
@@ -328,7 +327,7 @@ export class UserService {
 	 */
 	async storeForAuth(
 		tenant_id: number,
-		data: Omit<UserSchema, "id" | "created_at" | "updated_at">,
+		data: Omit<UserSchema, "id" | "tenant_id" | "created_at" | "updated_at">,
 	): Promise<UserShowSchema> {
 		this.logger.log(
 			{ tenant_id, email: data.email },
@@ -337,7 +336,6 @@ export class UserService {
 		const user = await this.userRepository.store(tenant_id, data);
 
 		// Cache Write-Through + Invalidate lists
-		await this.userCache.set(tenant_id, user);
 		await this.userCache.invalidateLists(tenant_id);
 
 		return user;

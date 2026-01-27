@@ -126,16 +126,16 @@ describe("TechnologyService", () => {
 			const result = await service.store(TENANT_ID, body);
 
 			expect(repository.store).toHaveBeenCalledWith(TENANT_ID, body);
-			expect(cache.set).toHaveBeenCalledWith(TENANT_ID, tech);
 			expect(cache.invalidateLists).toHaveBeenCalledWith(TENANT_ID);
 			expect(result.technology).toEqual(tech);
+
 		});
 	});
 
 	describe("update", () => {
 		it("should update technology and invalidate caches", async () => {
 			const id = 1;
-			const body = { name: "Updated Name" };
+			const body = { name: "Updated Name", category: "AI" as const };
 			const existingTech = TechnologyFactory.createSchema({ id, name: "Old" });
 			const updatedTech = TechnologyFactory.createSchema({
 				id,
@@ -161,7 +161,7 @@ describe("TechnologyService", () => {
 			vi.mocked(repository.showById).mockResolvedValue(null);
 
 			await expect(
-				service.update(TENANT_ID, 999, { name: "New" }),
+				service.update(TENANT_ID, 999, { name: "New", category: "AI" }),
 			).rejects.toThrow(NotFoundException);
 
 			expect(repository.update).not.toHaveBeenCalled();

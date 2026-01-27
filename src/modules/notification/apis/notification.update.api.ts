@@ -9,7 +9,7 @@ export interface NotificationUpdateApiError {
 }
 
 /**
- * notificationUpdate - /api/v1/notifications/:id
+ * notificationUpdate - /api/v1/notification/:id
  * @method PATCH
  */
 export function notificationUpdateApi() {
@@ -17,7 +17,7 @@ export function notificationUpdateApi() {
 		NotificationUpdateResponseDto,
 		{ id: number; body: NotificationUpdateDto },
 		NotificationUpdateApiError
-	>("/notifications", async (url, { id, body }) => {
+	>("/notification", async (url, { id, body }) => {
 		const response = await fetch(`/api/v1${url}/${id}`, {
 			method: "PATCH",
 			body: JSON.stringify(body),

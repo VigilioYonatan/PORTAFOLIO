@@ -1,6 +1,6 @@
 import { useContext } from "preact/hooks";
 import type { JSX } from "preact/jsx-runtime";
-import { VigilioTableContext } from "./VigilioTable";
+import { VigilioTableContext } from "./vigilio-table";
 
 interface FooterProps {
 	className?: string;

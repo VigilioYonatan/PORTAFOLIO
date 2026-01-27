@@ -1,4 +1,4 @@
-import { useEntranceAnimation } from "@hooks/useMotion";
+import { useEntranceAnimation } from "@hooks/use-motion";
 import { cn } from "@infrastructure/utils/client";
 import { useSignal } from "@preact/signals";
 import { CheckIcon, PaletteIcon, PenLineIcon, TrashIcon } from "lucide-preact";

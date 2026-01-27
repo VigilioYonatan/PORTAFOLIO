@@ -10,7 +10,7 @@ export const notificationSchema = z
 		title: z.string().min(1).max(100), // Título de la notificación
 		content: z.string().min(1).max(500), // Breve resumen o contenido
 		link: z.string().max(500).nullable(), // Enlace directo a la acción relacionada (opcional)
-		is_read: z.boolean().default(false), // Estado de lectura
+		is_read: z.boolean(), // Estado de lectura
 		...timeStampSchema.shape, // created_at, updated_at
 	})
 	.strict();

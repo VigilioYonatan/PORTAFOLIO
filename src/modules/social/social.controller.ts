@@ -1,4 +1,6 @@
+import { ZodQueryPipe } from "@infrastructure/pipes/zod-query.pipe";
 import { ZodPipe } from "@infrastructure/pipes/zod.pipe";
+import { socialReactionQueryDto } from "./dtos/social-reaction.query.dto";
 import { Public } from "@modules/auth/decorators/public.decorator";
 import {
 	Body,
@@ -20,7 +22,7 @@ import { SocialReactionStoreClassDto } from "./dtos/social-reaction.class.dto";
 import { SocialReactionQueryClassDto } from "./dtos/social-reaction.query.class.dto";
 import {
 	type SocialReactionStoreDto,
-	socialReactionStoreSchema,
+	socialReactionStoreDto,
 } from "./dtos/social-reaction.store.dto";
 import { SocialService } from "./services/social.service";
 
@@ -40,12 +42,12 @@ export class SocialController {
 	})
 	toggleReaction(
 		@Req() req: Request,
-		@Body(new ZodPipe(socialReactionStoreSchema)) body: SocialReactionStoreDto,
+		@Body(new ZodPipe(socialReactionStoreDto)) body: SocialReactionStoreDto,
 	): Promise<SocialReactionToggleResponseDto> {
 		const tenant_id = req.locals.tenant.id;
 		// Use user ID if authenticated, otherwise IP address as a fallback visitor ID
-		const visitor_id = (req.user as any)?.id
-			? String((req.user as any).id)
+		const visitor_id = req.locals.user?.id
+			? String(req.locals.user.id)
 			: req.ip || "unknown-visitor";
 		return this.socialService.toggleReaction(tenant_id, visitor_id, body);
 	}
@@ -54,11 +56,12 @@ export class SocialController {
 	@Get("/reactions")
 	@ApiOperation({ summary: "Obtener conteo de reacciones" })
 	getReactionCounts(
-		@Query() query: SocialReactionQueryClassDto,
+		@Query(new ZodQueryPipe(socialReactionQueryDto))
+		query: SocialReactionQueryClassDto,
 	): Promise<SocialReactionCountResponseClassDto> {
 		return this.socialService.getReactionCounts(
-			query.target_id,
-			query.target_type as any,
+			query.reactable_id,
+			query.reactable_type,
 		);
 	}
 }

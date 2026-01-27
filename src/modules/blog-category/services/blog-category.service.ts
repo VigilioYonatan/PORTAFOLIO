@@ -1,3 +1,4 @@
+import { slugify } from "@infrastructure/utils/hybrid/slug.utils";
 import { paginator } from "@infrastructure/utils/server";
 import {
 	BadRequestException,
@@ -35,7 +36,7 @@ export class BlogCategoryService {
 		this.logger.log({ tenant_id }, "Listing blog categories");
 
 		return await paginator<BlogCategoryQueryDto, BlogCategorySchema>(
-			"/blog/categories",
+			"/blog-category",
 			{
 				filters: query,
 				cb: async (filters: BlogCategoryQueryDto, isClean: boolean) => {
@@ -86,10 +87,10 @@ export class BlogCategoryService {
 		body: BlogCategoryStoreDto,
 	): Promise<BlogCategoryStoreResponseDto> {
 		this.logger.log({ tenant_id }, "Creating blog category");
-		const category = await this.repository.store(tenant_id, body);
+		const slug = slugify(body.name);
+		const category = await this.repository.store(tenant_id, { ...body, slug });
 
 		// Cache Write-Through + Invalidate lists
-		await this.blogCategoryCache.set(tenant_id, category);
 		await this.blogCategoryCache.invalidateLists(tenant_id);
 
 		return { success: true, category };
@@ -101,7 +102,13 @@ export class BlogCategoryService {
 		body: BlogCategoryUpdateDto,
 	): Promise<BlogCategoryUpdateResponseDto> {
 		this.logger.log({ tenant_id, id }, "Updating blog category");
-		const category = await this.repository.update(tenant_id, id, body);
+
+		const updates: Partial<BlogCategorySchema> = { ...body };
+		if (body.name) {
+			updates.slug = slugify(body.name);
+		}
+
+		const category = await this.repository.update(tenant_id, id, updates);
 
 		// Invalidate single + lists
 		await this.blogCategoryCache.invalidate(tenant_id, id);

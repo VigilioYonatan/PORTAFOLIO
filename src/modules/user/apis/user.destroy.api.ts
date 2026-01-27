@@ -7,12 +7,12 @@ export interface UserDestroyApiError {
 }
 
 /**
- * userDestroy - /api/v1/users/:id
+ * userDestroy - /api/v1/user/:id
  * @method DELETE
  */
 export function userDestroyApi() {
 	return useMutation<UserDestroyResponseDto, number, UserDestroyApiError>(
-		"/users",
+		"/user",
 		async (url, id) => {
 			const response = await fetch(`/api/v1${url}/${id}`, {
 				method: "DELETE",

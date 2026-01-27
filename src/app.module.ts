@@ -14,7 +14,7 @@ import { AuthModule } from "@modules/auth/modules/auth.module";
 import { ContactModule } from "@modules/contact/modules/contact.module";
 // import { DemoModule } from "@modules/demo/demo.module";
 import { DocumentModule } from "@modules/documents/document.module";
-import { MusicTrackModule } from "@modules/music/music.module";
+import { MusicModule } from "@modules/music/music.module";
 import { NotificationModule } from "@modules/notification/notification.module";
 import { PortfolioConfigModule } from "@modules/portfolio-config/portfolio-config.module";
 // import { TestimonialModule } from "@modules/testimonial/modules/testimonial.module";
@@ -66,7 +66,7 @@ import { SocialModule } from "./modules/social/social.module";
 		ProjectModule,
 		TecheableModule,
 		TechnologyModule,
-		MusicTrackModule,
+		MusicModule,
 		NotificationModule,
 		AnalyticsModule,
 		WorkMilestoneModule,

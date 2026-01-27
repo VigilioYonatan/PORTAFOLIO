@@ -12,7 +12,6 @@ import {
 	RequestMethod,
 	VersioningType,
 } from "@nestjs/common";
-import { AuthGuard } from "@nestjs/passport";
 import { Test, type TestingModule } from "@nestjs/testing";
 import { AppModule } from "@src/app.module";
 import type { Profile } from "passport-google-oauth20";
@@ -106,7 +105,13 @@ describe("Google OAuth (E2E)", () => {
 			provider: "google",
 			profileUrl: "http://profile.com",
 			_raw: "",
-			_json: {},
+			_json: {
+				iss: "https://accounts.google.com",
+				aud: "client_id",
+				sub: "google_new_id",
+				iat: 1234567890,
+				exp: 1234567890,
+			},
 		};
 
 		const response = await request(app.getHttpServer())
@@ -161,7 +166,13 @@ describe("Google OAuth (E2E)", () => {
 			provider: "google",
 			profileUrl: "http://profile.com",
 			_raw: "",
-			_json: {},
+			_json: {
+				iss: "https://accounts.google.com",
+				aud: "client_id",
+				sub: "google_linked_id",
+				iat: 1234567890,
+				exp: 1234567890,
+			},
 		};
 
 		await request(app.getHttpServer())

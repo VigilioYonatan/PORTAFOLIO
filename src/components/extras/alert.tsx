@@ -57,7 +57,7 @@ function Alert({ type, title, message, onClose, className }: AlertProps) {
 	return (
 		<div
 			class={cn(
-				"p-4 rounded-[var(--radius-lg)] border backdrop-blur-sm shadow-sm",
+				"p-4 rounded-(--radius-lg) border backdrop-blur-sm shadow-sm",
 				style.container,
 				className,
 			)}
@@ -78,7 +78,7 @@ function Alert({ type, title, message, onClose, className }: AlertProps) {
 					<button
 						type="button"
 						onClick={onClose}
-						class="shrink-0 p-1 hover:bg-hover rounded-[var(--radius-lg)] transition-colors"
+						class="shrink-0 p-1 hover:bg-hover rounded-(--radius-lg) transition-colors"
 					>
 						<XIcon
 							width={20}

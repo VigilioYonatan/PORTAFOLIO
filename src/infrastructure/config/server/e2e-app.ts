@@ -1,6 +1,5 @@
 import { configureApp } from "@infrastructure/config/server/app.config";
 import {
-	seedLocalhostTenant,
 	setupTestDb,
 	type TestDb,
 	teardownTestDb,
@@ -8,7 +7,7 @@ import {
 import { CacheService } from "@infrastructure/providers/cache/cache.service";
 import { DRIZZLE } from "@infrastructure/providers/database/database.service";
 import { SessionConfigService } from "@modules/auth/config/session.config";
-import type { INestApplication, Type } from "@nestjs/common";
+import type { INestApplication } from "@nestjs/common";
 import {
 	Test,
 	type TestingModule,

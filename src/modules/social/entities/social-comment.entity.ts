@@ -7,6 +7,7 @@ import {
 	boolean,
 	index,
 	integer,
+	pgEnum,
 	pgTable,
 	serial,
 	text,
@@ -14,6 +15,11 @@ import {
 	varchar,
 } from "drizzle-orm/pg-core";
 import { type SocialCommentSchema } from "../schemas/social-comment.schema";
+
+export const commentableTypeEnum = pgEnum("commentable_type_enum", [
+	"PORTFOLIO_PROJECT",
+	"BLOG_POST",
+]);
 
 export const socialCommentEntity = pgTable(
 	"social_comments",
@@ -26,9 +32,7 @@ export const socialCommentEntity = pgTable(
 		surname: varchar({ length: 100 }).notNull(),
 		content: text().notNull(),
 		commentable_id: integer().notNull(),
-		commentable_type: varchar({ length: 50 })
-			.$type<SocialCommentSchema["commentable_type"]>()
-			.notNull(),
+		commentable_type: commentableTypeEnum().notNull(),
 		visitor_id: varchar({ length: 50 }).$type<string>(), // UUID string
 		ip_address: varchar({ length: 45 }),
 		is_visible: boolean().notNull().default(true),

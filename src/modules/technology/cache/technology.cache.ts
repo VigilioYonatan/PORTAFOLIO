@@ -1,8 +1,8 @@
 import { CacheService } from "@infrastructure/providers/cache/cache.service";
-import { PaginatorResult, toNull } from "@infrastructure/utils/server";
+import { toNull } from "@infrastructure/utils/server";
 import { Injectable } from "@nestjs/common";
-import { TechnologyQueryDto } from "../dtos/technology.query.dto";
-import { TechnologySchema } from "../schemas/technology.schema";
+import type { TechnologyQueryDto } from "../dtos/technology.query.dto";
+import type { TechnologySchema } from "../schemas/technology.schema";
 
 @Injectable()
 export class TechnologyCache {

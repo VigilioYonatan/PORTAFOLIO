@@ -2,12 +2,12 @@ import { useQuery } from "@vigilio/preact-fetching";
 import type { TenantSettingSchema } from "../schemas/tenant-setting.schema";
 
 /**
- * tenantSettingShowMe - /api/v1/tenants/settings/me
+ * tenantSettingShowMe - /api/v1/tenant-setting/me
  * @method GET
  */
 export function tenantSettingShowMeApi() {
 	return useQuery<TenantSettingShowMeApiResult, TenantSettingShowMeApiError>(
-		"/tenants/settings/me",
+		"/tenant-setting/me",
 		async (url) => {
 			const response = await fetch(`/api/v1${url}`);
 			const result = await response.json();

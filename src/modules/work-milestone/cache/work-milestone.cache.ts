@@ -41,8 +41,8 @@ export class WorkMilestoneCache {
 	async getList(
 		tenant_id: number,
 		query: WorkMilestoneQueryDto,
-	): Promise<WorkMilestoneSchema[] | null> {
-		const cache = await this.cacheService.get<WorkMilestoneSchema[]>(
+	): Promise<[WorkMilestoneSchema[], number] | null> {
+		const cache = await this.cacheService.get<[WorkMilestoneSchema[], number]>(
 			this.getListKey(tenant_id, query),
 		);
 		return cache || null;
@@ -51,7 +51,7 @@ export class WorkMilestoneCache {
 	async setList(
 		tenant_id: number,
 		query: WorkMilestoneQueryDto,
-		milestones: WorkMilestoneSchema[],
+		milestones: [WorkMilestoneSchema[], number],
 	): Promise<void> {
 		await this.cacheService.set(
 			this.getListKey(tenant_id, query),

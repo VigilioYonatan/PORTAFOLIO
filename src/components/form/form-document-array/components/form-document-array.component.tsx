@@ -1,5 +1,5 @@
-import Badge from "@components/extras/Badge";
-import Loader from "@components/extras/Loader";
+import Badge from "@components/extras/badge";
+import Loader from "@components/extras/loader";
 import {
 	type PaginatorResult,
 	type PaginatorResultError,
@@ -7,7 +7,7 @@ import {
 import { cn } from "@infrastructure/utils/client";
 import type { UseQuery } from "@vigilio/preact-fetching";
 import type { UsePaginator } from "@vigilio/preact-paginator";
-import { CheckCircle2, Circle, FileText, Search, X } from "lucide-preact";
+import { CheckCircle2, FileText, Search, X } from "lucide-preact";
 import type { Path } from "react-hook-form";
 import {
 	type SavedSearchItem,
@@ -52,7 +52,6 @@ export function FormDocumentArray<X extends object, T extends object>({
 		handleSearchChange,
 		handleSelectSuggestion,
 		handleRemoveItem,
-		data,
 		err,
 		valueFormated,
 	} = useFormArray({
@@ -141,7 +140,7 @@ export function FormDocumentArray<X extends object, T extends object>({
 										item.status === "READY"
 											? "success"
 											: item.status === "FAILED"
-												? "danger"
+												? "destructive"
 												: "secondary"
 									}
 									className="px-1.5 py-0.5 text-[10px] ml-2"
@@ -187,7 +186,7 @@ export function FormDocumentArray<X extends object, T extends object>({
 														meta.status === "READY"
 															? "success"
 															: meta.status === "FAILED"
-																? "danger"
+																? "destructive"
 																: "secondary"
 													}
 													className="px-1.5 py-0.5 text-[10px]"

@@ -241,7 +241,7 @@ direction TB
     class techeable {
         +id: int [PK]
         +techeable_id: int -- Morph ID (Project or Blog) (UQC)
-        +techeable_type: text[50] -- 'PORTFOLIO_PROJECT' | 'BLOG_POST' (UQC)
+        +techeable_type: enum -- 'PORTFOLIO_PROJECT' | 'BLOG_POST' (UQC)
         +technology_id: int [FK] (UQC)
         +tenant_id: int [FK]
         +created_at: timestamp
@@ -362,7 +362,7 @@ direction TB
         +surname: text[100]
         +content: text
         +commentable_id: int -- Morph ID (Project or Blog)
-        +commentable_type: text[50] -- 'PORTFOLIO_PROJECT' | 'BLOG_POST'
+        +commentable_type: enum -- 'PORTFOLIO_PROJECT' | 'BLOG_POST'
         +visitor_id: uuid?
         +ip_address: text[45]?
         +is_visible: boolean
@@ -376,7 +376,7 @@ direction TB
         +id: int [PK]
         +type: enum -- 'LIKE' | 'LOVE' | 'CLAP' | 'FIRE'
         +reactable_id: int -- Morph ID (Project, Blog or Comment) (UQC)
-        +reactable_type: text[50] -- 'PORTFOLIO_PROJECT' | 'BLOG_POST' | 'SOCIAL_COMMENT' | 'MUSIC_TRACK' (UQC)
+        +reactable_type: enum -- 'PORTFOLIO_PROJECT' | 'BLOG_POST' | 'SOCIAL_COMMENT' | 'MUSIC_TRACK' (UQC)
         +visitor_id: uuid (UQC)
         +tenant_id: int [FK]
         +created_at: timestamp

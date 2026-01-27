@@ -7,7 +7,7 @@ export function blogPostStoreApi() {
 		BlogPostStoreResponseDto,
 		BlogPostStoreDto,
 		BlogPostStoreApiError
-	>("/blog-posts", async (url, body) => {
+	>("/blog-post", async (url, body) => {
 		const response = await fetch(`/api/v1${url}`, {
 			method: "POST",
 			body: JSON.stringify(body),

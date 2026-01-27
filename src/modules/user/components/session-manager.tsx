@@ -1,4 +1,4 @@
-import Badge from "@components/extras/Badge";
+import Badge from "@components/extras/badge";
 import { Card } from "@components/extras/card";
 import { formatDateTz } from "@infrastructure/utils/hybrid";
 import { sweetModal } from "@vigilio/sweet";
@@ -120,8 +120,10 @@ export function SessionManager() {
 
 							{!session.is_current && (
 								<button
+									type="button"
 									onClick={() => handleRevoke(session.id)}
 									class="p-2 rounded-lg text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors opacity-0 group-hover:opacity-100"
+									aria-label={`Revoke session for ${session.device}`}
 									title="Revoke Session"
 								>
 									<LogOut size={18} />

@@ -1,4 +1,6 @@
+import { ZodQueryPipe } from "@infrastructure/pipes/zod-query.pipe";
 import { ZodPipe } from "@infrastructure/pipes/zod.pipe";
+import { testimonialQueryDto } from "../dtos/testimonial.query.dto";
 import { Public } from "@modules/auth/decorators/public.decorator";
 import { Roles } from "@modules/auth/decorators/roles.decorator";
 import { AuthenticatedGuard } from "@modules/auth/guards/authenticated.guard";
@@ -45,7 +47,7 @@ import { TestimonialService } from "../services/testimonial.service";
 
 @ApiTags("Testimonios")
 @UseGuards(AuthenticatedGuard)
-@Controller("testimonials")
+@Controller("testimonial")
 export class TestimonialController {
 	constructor(private readonly testimonialService: TestimonialService) {}
 
@@ -59,7 +61,7 @@ export class TestimonialController {
 	})
 	index(
 		@Req() req: Request,
-		@Query() query: TestimonialQueryClassDto,
+		@Query(new ZodQueryPipe(testimonialQueryDto)) query: TestimonialQueryClassDto,
 	): Promise<TestimonialIndexResponseDto> {
 		const tenant_id = req.locals.tenant.id;
 		return this.testimonialService.index(tenant_id, {

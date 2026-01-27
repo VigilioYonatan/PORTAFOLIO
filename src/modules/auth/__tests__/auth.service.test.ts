@@ -7,8 +7,7 @@ import { EventEmitter2 } from "@nestjs/event-emitter";
 import { JwtService } from "@nestjs/jwt";
 import { Test, type TestingModule } from "@nestjs/testing";
 import * as bcrypt from "bcrypt";
-import { ScureBase32Plugin, TOTP } from "otplib";
-import * as qrcode from "qrcode";
+import { TOTP } from "otplib";
 import type { AuthRegisterDto } from "../dtos/register.dto";
 import { AuthService } from "../services/auth.service";
 

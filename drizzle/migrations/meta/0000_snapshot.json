@@ -1,5 +1,5 @@
 {
-	"id": "84dbf5b4-7855-4c4f-878f-e7784e088ca7",
+	"id": "8274dc1f-aa96-44df-8b45-e076f74a209d",
 	"prevId": "00000000-0000-0000-0000-000000000000",
 	"version": "7",
 	"dialect": "postgresql",
@@ -514,6 +514,12 @@
 					"primaryKey": true,
 					"notNull": true
 				},
+				"tenant_id": {
+					"name": "tenant_id",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true
+				},
 				"role": {
 					"name": "role",
 					"type": "chat_role_enum",
@@ -578,9 +584,33 @@
 					"concurrently": false,
 					"method": "btree",
 					"with": {}
+				},
+				"chat_messages_tenant_idx": {
+					"name": "chat_messages_tenant_idx",
+					"columns": [
+						{
+							"expression": "tenant_id",
+							"isExpression": false,
+							"asc": true,
+							"nulls": "last"
+						}
+					],
+					"isUnique": false,
+					"concurrently": false,
+					"method": "btree",
+					"with": {}
 				}
 			},
 			"foreignKeys": {
+				"chat_messages_tenant_id_tenants_id_fk": {
+					"name": "chat_messages_tenant_id_tenants_id_fk",
+					"tableFrom": "chat_messages",
+					"tableTo": "tenants",
+					"columnsFrom": ["tenant_id"],
+					"columnsTo": ["id"],
+					"onDelete": "no action",
+					"onUpdate": "no action"
+				},
 				"chat_messages_conversation_id_conversations_id_fk": {
 					"name": "chat_messages_conversation_id_conversations_id_fk",
 					"tableFrom": "chat_messages",
@@ -852,8 +882,8 @@
 					"primaryKey": false,
 					"notNull": true
 				},
-				"phone": {
-					"name": "phone",
+				"phone_number": {
+					"name": "phone_number",
 					"type": "varchar(50)",
 					"primaryKey": false,
 					"notNull": false
@@ -1248,7 +1278,7 @@
 					"name": "cover",
 					"type": "jsonb",
 					"primaryKey": false,
-					"notNull": true,
+					"notNull": false,
 					"default": "'[]'::jsonb"
 				},
 				"tenant_id": {
@@ -1322,6 +1352,12 @@
 					"primaryKey": false,
 					"notNull": true
 				},
+				"user_id": {
+					"name": "user_id",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true
+				},
 				"type": {
 					"name": "type",
 					"type": "notification_type_enum",
@@ -1331,7 +1367,7 @@
 				},
 				"title": {
 					"name": "title",
-					"type": "varchar(255)",
+					"type": "varchar(100)",
 					"primaryKey": false,
 					"notNull": true
 				},
@@ -1341,18 +1377,18 @@
 					"primaryKey": false,
 					"notNull": true
 				},
+				"link": {
+					"name": "link",
+					"type": "varchar(500)",
+					"primaryKey": false,
+					"notNull": false
+				},
 				"is_read": {
 					"name": "is_read",
 					"type": "boolean",
 					"primaryKey": false,
 					"notNull": true,
 					"default": false
-				},
-				"data": {
-					"name": "data",
-					"type": "jsonb",
-					"primaryKey": false,
-					"notNull": false
 				},
 				"created_at": {
 					"name": "created_at",
@@ -1405,6 +1441,21 @@
 					"concurrently": false,
 					"method": "btree",
 					"with": {}
+				},
+				"notifications_user_idx": {
+					"name": "notifications_user_idx",
+					"columns": [
+						{
+							"expression": "user_id",
+							"isExpression": false,
+							"asc": true,
+							"nulls": "last"
+						}
+					],
+					"isUnique": false,
+					"concurrently": false,
+					"method": "btree",
+					"with": {}
 				}
 			},
 			"foreignKeys": {
@@ -1413,6 +1464,15 @@
 					"tableFrom": "notifications",
 					"tableTo": "tenants",
 					"columnsFrom": ["tenant_id"],
+					"columnsTo": ["id"],
+					"onDelete": "no action",
+					"onUpdate": "no action"
+				},
+				"notifications_user_id_users_id_fk": {
+					"name": "notifications_user_id_users_id_fk",
+					"tableFrom": "notifications",
+					"tableTo": "users",
+					"columnsFrom": ["user_id"],
 					"columnsTo": ["id"],
 					"onDelete": "no action",
 					"onUpdate": "no action"
@@ -1647,8 +1707,21 @@
 					"notNull": true,
 					"default": true
 				},
+				"status": {
+					"name": "status",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "'in_dev'"
+				},
 				"images": {
 					"name": "images",
+					"type": "jsonb",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"seo": {
+					"name": "seo",
 					"type": "jsonb",
 					"primaryKey": false,
 					"notNull": false
@@ -1665,6 +1738,18 @@
 					"primaryKey": false,
 					"notNull": true,
 					"default": "now()"
+				},
+				"start_date": {
+					"name": "start_date",
+					"type": "date",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"end_date": {
+					"name": "end_date",
+					"type": "date",
+					"primaryKey": false,
+					"notNull": false
 				},
 				"updated_at": {
 					"name": "updated_at",
@@ -1760,12 +1845,30 @@
 					"primaryKey": false,
 					"notNull": true
 				},
+				"visitor_id": {
+					"name": "visitor_id",
+					"type": "varchar(50)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"ip_address": {
+					"name": "ip_address",
+					"type": "varchar(45)",
+					"primaryKey": false,
+					"notNull": false
+				},
 				"is_visible": {
 					"name": "is_visible",
 					"type": "boolean",
 					"primaryKey": false,
 					"notNull": true,
 					"default": true
+				},
+				"user_id": {
+					"name": "user_id",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": false
 				},
 				"reply": {
 					"name": "reply",
@@ -1824,6 +1927,21 @@
 					"concurrently": false,
 					"method": "btree",
 					"with": {}
+				},
+				"social_comments_visitor_idx": {
+					"name": "social_comments_visitor_idx",
+					"columns": [
+						{
+							"expression": "visitor_id",
+							"isExpression": false,
+							"asc": true,
+							"nulls": "last"
+						}
+					],
+					"isUnique": false,
+					"concurrently": false,
+					"method": "btree",
+					"with": {}
 				}
 			},
 			"foreignKeys": {
@@ -1832,6 +1950,15 @@
 					"tableFrom": "social_comments",
 					"tableTo": "tenants",
 					"columnsFrom": ["tenant_id"],
+					"columnsTo": ["id"],
+					"onDelete": "no action",
+					"onUpdate": "no action"
+				},
+				"social_comments_user_id_users_id_fk": {
+					"name": "social_comments_user_id_users_id_fk",
+					"tableFrom": "social_comments",
+					"tableTo": "users",
+					"columnsFrom": ["user_id"],
 					"columnsTo": ["id"],
 					"onDelete": "no action",
 					"onUpdate": "no action"
@@ -1936,6 +2063,21 @@
 					"concurrently": false,
 					"method": "btree",
 					"with": {}
+				},
+				"social_reactions_visitor_idx": {
+					"name": "social_reactions_visitor_idx",
+					"columns": [
+						{
+							"expression": "visitor_id",
+							"isExpression": false,
+							"asc": true,
+							"nulls": "last"
+						}
+					],
+					"isUnique": false,
+					"concurrently": false,
+					"method": "btree",
+					"with": {}
 				}
 			},
 			"foreignKeys": {
@@ -1973,7 +2115,7 @@
 				},
 				"techeable_type": {
 					"name": "techeable_type",
-					"type": "varchar(50)",
+					"type": "text",
 					"primaryKey": false,
 					"notNull": true
 				},
@@ -1991,72 +2133,20 @@
 				},
 				"created_at": {
 					"name": "created_at",
-					"type": "timestamp with time zone",
+					"type": "timestamp",
 					"primaryKey": false,
 					"notNull": true,
 					"default": "now()"
 				},
 				"updated_at": {
 					"name": "updated_at",
-					"type": "timestamp with time zone",
+					"type": "timestamp",
 					"primaryKey": false,
 					"notNull": true,
 					"default": "now()"
 				}
 			},
-			"indexes": {
-				"techeables_tenant_idx": {
-					"name": "techeables_tenant_idx",
-					"columns": [
-						{
-							"expression": "tenant_id",
-							"isExpression": false,
-							"asc": true,
-							"nulls": "last"
-						}
-					],
-					"isUnique": false,
-					"concurrently": false,
-					"method": "btree",
-					"with": {}
-				},
-				"techeables_techeable_idx": {
-					"name": "techeables_techeable_idx",
-					"columns": [
-						{
-							"expression": "techeable_type",
-							"isExpression": false,
-							"asc": true,
-							"nulls": "last"
-						},
-						{
-							"expression": "techeable_id",
-							"isExpression": false,
-							"asc": true,
-							"nulls": "last"
-						}
-					],
-					"isUnique": false,
-					"concurrently": false,
-					"method": "btree",
-					"with": {}
-				},
-				"techeables_technology_idx": {
-					"name": "techeables_technology_idx",
-					"columns": [
-						{
-							"expression": "technology_id",
-							"isExpression": false,
-							"asc": true,
-							"nulls": "last"
-						}
-					],
-					"isUnique": false,
-					"concurrently": false,
-					"method": "btree",
-					"with": {}
-				}
-			},
+			"indexes": {},
 			"foreignKeys": {
 				"techeables_technology_id_technologies_id_fk": {
 					"name": "techeables_technology_id_technologies_id_fk",
@@ -2079,14 +2169,14 @@
 			},
 			"compositePrimaryKeys": {},
 			"uniqueConstraints": {
-				"techeables_tenant_unique": {
-					"name": "techeables_tenant_unique",
+				"unique_techeable_technology": {
+					"name": "unique_techeable_technology",
 					"nullsNotDistinct": false,
 					"columns": [
-						"tenant_id",
-						"techeable_type",
 						"techeable_id",
-						"technology_id"
+						"techeable_type",
+						"technology_id",
+						"tenant_id"
 					]
 				}
 			},
@@ -2121,7 +2211,7 @@
 					"name": "icon",
 					"type": "jsonb",
 					"primaryKey": false,
-					"notNull": false,
+					"notNull": true,
 					"default": "'[]'::jsonb"
 				},
 				"tenant_id": {
@@ -2862,13 +2952,13 @@
 				},
 				"start_date": {
 					"name": "start_date",
-					"type": "timestamp with time zone",
+					"type": "date",
 					"primaryKey": false,
 					"notNull": true
 				},
 				"end_date": {
 					"name": "end_date",
-					"type": "timestamp with time zone",
+					"type": "date",
 					"primaryKey": false,
 					"notNull": false
 				},
@@ -2957,7 +3047,7 @@
 				},
 				"milestone_date": {
 					"name": "milestone_date",
-					"type": "timestamp with time zone",
+					"type": "date",
 					"primaryKey": false,
 					"notNull": true
 				},
@@ -3073,7 +3163,7 @@
 		"public.notification_type_enum": {
 			"name": "notification_type_enum",
 			"schema": "public",
-			"values": ["NEW_MESSAGE", "NEW_COMMENT", "SYSTEM_ALERT"]
+			"values": ["LIKE", "COMMENT", "CONTACT", "SYSTEM"]
 		},
 		"public.default_language_enum": {
 			"name": "default_language_enum",
@@ -3088,7 +3178,7 @@
 		"public.reaction_type_enum": {
 			"name": "reaction_type_enum",
 			"schema": "public",
-			"values": ["LIKE", "LOVE", "ROCKET", "FIRE"]
+			"values": ["LIKE", "LOVE", "CLAP", "FIRE"]
 		},
 		"public.technology_category_enum": {
 			"name": "technology_category_enum",
@@ -3103,7 +3193,13 @@
 		"public.timezone_enum": {
 			"name": "timezone_enum",
 			"schema": "public",
-			"values": ["UTC", "America/Lima", "America/New_York"]
+			"values": [
+				"UTC",
+				"America/Lima",
+				"America/New_York",
+				"America/Bogota",
+				"America/Mexico_City"
+			]
 		},
 		"public.plan_enum": {
 			"name": "plan_enum",

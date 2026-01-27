@@ -5,7 +5,7 @@ import type {
 import { useComputed, useSignal } from "@preact/signals";
 import type { UseQuery } from "@vigilio/preact-fetching";
 import type { UsePaginator } from "@vigilio/preact-paginator";
-import type { JSX } from "preact";
+import type { TargetedEvent } from "preact";
 import { useContext, useEffect } from "preact/hooks";
 import {
 	type FieldValues,
@@ -14,7 +14,7 @@ import {
 	type UseFormReturn,
 } from "react-hook-form";
 import { anidarPropiedades } from "../..";
-import { FormControlContext } from "../../Form";
+import { FormControlContext } from "../../form";
 
 export type SavedSearchItem = {
 	id: unknown;
@@ -60,7 +60,7 @@ export function useFormArray<X extends object, T extends object>({
 
 	const valueFormated = (isUnique ? [value] : value || []).filter(Boolean);
 
-	const handleSearchChange = (e: JSX.TargetedEvent<HTMLInputElement>) => {
+	const handleSearchChange = (e: TargetedEvent<HTMLInputElement>) => {
 		const val = (e.target as HTMLInputElement).value;
 		paginator.search.onSearchByName(val);
 		showSuggestions.value = true;

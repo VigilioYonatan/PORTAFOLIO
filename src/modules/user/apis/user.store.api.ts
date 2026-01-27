@@ -9,13 +9,13 @@ export interface UserStoreApiError {
 }
 
 /**
- * userStore - /api/v1/users
+ * userStore - /api/v1/user
  * @method POST
  * @body UserStoreDto
  */
 export function userStoreApi() {
 	return useMutation<UserStoreResponseDto, UserStoreDto, UserStoreApiError>(
-		"/users",
+		"/user",
 		async (url, body) => {
 			const response = await fetch(`/api/v1${url}`, {
 				method: "POST",

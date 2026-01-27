@@ -2,6 +2,7 @@ import { CacheService } from "@infrastructure/providers/cache";
 import { RustFSService } from "@infrastructure/providers/storage/rustfs.service";
 import { Injectable } from "@nestjs/common";
 import { HealthCheckService, MemoryHealthIndicator } from "@nestjs/terminus";
+import type { HealthCheckResponseDto, HealthLivenessResponseDto, HealthReadinessResponseDto } from "../dtos/health.response.dto";
 
 @Injectable()
 export class HealthService {
@@ -11,7 +12,7 @@ export class HealthService {
 		private cacheService: CacheService,
 		private rustfsService: RustFSService,
 	) {}
-	check(): { status: string; timestamp: string } {
+	check(): HealthCheckResponseDto {
 		return { status: "ok", timestamp: new Date().toISOString() };
 	}
 
@@ -49,12 +50,7 @@ export class HealthService {
 		]);
 	}
 
-	async readiness(): Promise<{
-		status: string;
-		services: { redis: string; s3: string };
-		timestamp: string;
-		uptime: number;
-	}> {
+	async readiness(): Promise<HealthReadinessResponseDto> {
 		// En readiness verificamos conexiones críticas
 		const redis = await this.cacheService.checkHealth();
 		// S3 es opcional para arrancar si no es crítico, pero recomendable
@@ -76,7 +72,7 @@ export class HealthService {
 		};
 	}
 
-	liveness(): { status: string; timestamp: string; pid: number } {
+	liveness(): HealthLivenessResponseDto {
 		return {
 			status: "alive",
 			timestamp: new Date().toISOString(),

@@ -14,9 +14,7 @@ import {
 } from "drizzle-orm";
 import type { NodePgDatabase } from "drizzle-orm/node-postgres";
 import type {
-	ChatMessageStoreDto,
 	ConversationQueryDto,
-	ConversationStoreDto,
 } from "../dtos/chat.class.dto";
 import { chatMessageEntity } from "../entities/chat-message.entity";
 import { conversationEntity } from "../entities/conversation.entity";
@@ -31,7 +29,10 @@ export class ChatRepository {
 
 	async storeConversation(
 		tenant_id: number,
-		body: ConversationStoreDto,
+		body: Omit<
+			ConversationSchema,
+			"id" | "tenant_id" | "created_at" | "updated_at"
+		>,
 	): Promise<ConversationSchema> {
 		const [result] = await this.db
 			.insert(conversationEntity)
@@ -42,7 +43,10 @@ export class ChatRepository {
 
 	async storeMessage(
 		tenant_id: number,
-		body: ChatMessageStoreDto,
+		body: Omit<
+			ChatMessageSchema,
+			"id" | "tenant_id" | "created_at" | "updated_at"
+		>,
 	): Promise<ChatMessageSchema> {
 		const [result] = await this.db
 			.insert(chatMessageEntity)

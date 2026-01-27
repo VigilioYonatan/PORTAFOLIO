@@ -2,7 +2,7 @@
 dist/
 .output/
 build/
-
+public/video/
 # Generated
 .astro/
 *.tsbuildinfo

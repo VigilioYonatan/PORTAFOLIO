@@ -7,12 +7,12 @@ export interface ProjectDestroyApiError {
 }
 
 /**
- * projectDestroy - /api/v1/projects/:id
+ * projectDestroy - /api/v1/project/:id
  * @method DELETE
  */
 export function projectDestroyApi() {
 	return useMutation<ProjectDestroyResponseDto, number, ProjectDestroyApiError>(
-		"/projects",
+		"/project",
 		async (url, id) => {
 			const response = await fetch(`/api/v1${url}/${id}`, {
 				method: "DELETE",

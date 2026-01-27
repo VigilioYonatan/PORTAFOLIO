@@ -9,13 +9,13 @@ export interface UserUpdateApiError {
 }
 
 /**
- * userUpdate - /api/v1/users/:id
+ * userUpdate - /api/v1/user/:id
  * @method PATCH
  * @body UserUpdateDto
  */
 export function userUpdateApi(id: number) {
 	return useMutation<UserUpdateResponseDto, UserUpdateDto, UserUpdateApiError>(
-		`/users/${id}`,
+		`/user/${id}`,
 		async (url, body) => {
 			const response = await fetch(`/api/v1${url}`, {
 				method: "PATCH",

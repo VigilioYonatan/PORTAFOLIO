@@ -13,21 +13,18 @@ export function aiConfigUpdateApi() {
 		AiConfigUpdateResponseDto,
 		AiConfigUpdateDto,
 		AiConfigUpdateApiError
-	>(
-		"/ai/config",
-		async (url, body) => {
-			const response = await fetch(`/api/v1${url}`, {
-				method: "PUT",
-				body: JSON.stringify(body),
-				headers: {
-					"Content-Type": "application/json",
-				},
-			});
-			const result = await response.json();
-			if (!response.ok) {
-				throw result;
-			}
-			return result;
-		},
-	);
+	>("/ai-config", async (url, body) => {
+		const response = await fetch(`/api/v1${url}`, {
+			method: "PUT",
+			body: JSON.stringify(body),
+			headers: {
+				"Content-Type": "application/json",
+			},
+		});
+		const result = await response.json();
+		if (!response.ok) {
+			throw result;
+		}
+		return result;
+	});
 }

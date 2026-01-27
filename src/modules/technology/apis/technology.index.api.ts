@@ -1,12 +1,13 @@
+import type { PaginatorResultError } from "@infrastructure/types/client";
 import { useQuery } from "@vigilio/preact-fetching";
-import type { TechnologyIndexResponseDto } from "../dtos/technology.response.dto";
-import type { UseTable } from "@vigilio/preact-table";
 import type { UsePaginator } from "@vigilio/preact-paginator";
+import type { UseTable } from "@vigilio/preact-table";
+import type { TechnologyIndexResponseDto } from "../dtos/technology.response.dto";
 import type { TechnologySchema } from "../schemas/technology.schema";
 
 export type TechnologyIndexSecondaryPaginator = "action";
 export type TechnologyIndexMethods = {
-	refetch: (clean?: boolean) => void;
+	refetch?: (clean?: boolean) => void;
 };
 export type TechnologyIndexTable = UseTable<
 	TechnologySchema,
@@ -14,13 +15,17 @@ export type TechnologyIndexTable = UseTable<
 	TechnologyIndexMethods
 >;
 
+/**
+ * technologyIndex - /api/v1/technology
+ * @method GET
+ */
 export function technologyIndexApi(
 	table: TechnologyIndexTable | null = null,
 	paginator: UsePaginator | null = null,
 	filters?: { limit?: number },
 ) {
-	const query = useQuery<TechnologyIndexResponseDto, any>(
-		"/technologies",
+	const query = useQuery<TechnologyIndexResponseDto, PaginatorResultError>(
+		"/technology",
 		async (url) => {
 			const data = new URLSearchParams();
 

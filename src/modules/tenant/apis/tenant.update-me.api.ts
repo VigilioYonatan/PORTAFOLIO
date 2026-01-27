@@ -9,24 +9,25 @@ export interface TenantUpdateMeApiError {
 }
 
 /**
- * tenantUpdateMe - /api/v1/tenants/me
+ * tenantUpdateMe - /api/v1/tenant/me
  * @method PUT
  * @body TenantUpdateDto
  */
 export function tenantUpdateMeApi() {
-	return useMutation<TenantUpdateMeResponseDto, TenantUpdateDto, TenantUpdateMeApiError>(
-		"/tenants/me",
-		async (url, body) => {
-			const response = await fetch(`/api/v1${url}`, {
-				method: "PUT",
-				body: JSON.stringify(body),
-				headers: { "Content-Type": "application/json" },
-			});
-			const result = await response.json();
-			if (!response.ok) {
-				throw result;
-			}
-			return result;
-		},
-	);
+	return useMutation<
+		TenantUpdateMeResponseDto,
+		TenantUpdateDto,
+		TenantUpdateMeApiError
+	>("/tenant/me", async (url, body) => {
+		const response = await fetch(`/api/v1${url}`, {
+			method: "PUT",
+			body: JSON.stringify(body),
+			headers: { "Content-Type": "application/json" },
+		});
+		const result = await response.json();
+		if (!response.ok) {
+			throw result;
+		}
+		return result;
+	});
 }

@@ -1,13 +1,16 @@
-import type { JSX } from "preact/jsx-runtime";
 import { cn } from "@infrastructure/utils/client/cn";
+import type { ButtonHTMLAttributes } from "preact";
 
-interface ButtonProps extends JSX.HTMLAttributes<HTMLButtonElement> {
+interface ButtonProps extends ButtonHTMLAttributes {
 	variant?: "primary" | "secondary" | "danger" | "outline" | "ghost" | "glitch";
 	size?: "sm" | "md" | "lg" | "icon";
 	isLoading?: boolean;
 	loading_title?: string;
-    disabled?: boolean;
-    type?: "button" | "submit" | "reset";
+	disabled?: boolean;
+	type?: "button" | "submit" | "reset";
+	as?: "button" | "a";
+	href?: string;
+	target?: string;
 }
 
 export default function Button({
@@ -24,7 +27,8 @@ export default function Button({
 		primary:
 			"bg-primary text-primary-foreground hover:bg-primary/90 shadow-[0_0_10px_rgba(6,182,212,0.5)] border border-primary/50",
 		secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
-		danger: "bg-destructive text-destructive-foreground hover:bg-destructive/90",
+		danger:
+			"bg-destructive text-destructive-foreground hover:bg-destructive/90",
 		outline:
 			"border border-input bg-background hover:bg-accent hover:text-accent-foreground",
 		ghost: "hover:bg-accent hover:text-accent-foreground",
@@ -38,9 +42,11 @@ export default function Button({
 		lg: "h-11 px-8 rounded-md",
 		icon: "h-10 w-10 p-2 rounded-md",
 	};
+	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+	const As = (props.as || "button") as any;
 
 	return (
-		<button
+		<As
 			className={cn(
 				"inline-flex font-mono uppercase tracking-wider items-center justify-center whitespace-nowrap ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
 				variants[variant],
@@ -58,6 +64,6 @@ export default function Button({
 			) : (
 				children
 			)}
-		</button>
+		</As>
 	);
 }

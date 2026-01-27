@@ -1,7 +1,4 @@
-import type {
-	PaginatorResult,
-	PaginatorResultError,
-} from "@infrastructure/types/client";
+import type { PaginatorResultError } from "@infrastructure/types/client";
 import { useQuery } from "@vigilio/preact-fetching";
 import type { UseTable } from "@vigilio/preact-table";
 import type { TenantSchema } from "../schemas/tenant.schema";
@@ -17,14 +14,14 @@ export type TenantIndexTable = UseTable<
 >;
 
 /**
- * tenantIndex - /api/v1/tenants
+ * tenantIndex - /api/v1/tenant
  * @method GET
  */
 import type { TenantIndexResponseDto } from "../dtos/tenant.response.dto";
 
 export function tenantIndexApi(table: TenantIndexTable | null) {
 	const query = useQuery<TenantIndexResponseDto, PaginatorResultError>(
-		"/tenants",
+		"/tenant",
 		async (url) => {
 			const data = new URLSearchParams();
 			if (table) {

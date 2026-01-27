@@ -1,7 +1,7 @@
 import { CacheService } from "@infrastructure/providers/cache/cache.service";
 import { Injectable } from "@nestjs/common";
-import type { SocialCommentSchema } from "../schemas/social-comment.schema";
 import type { SocialReactionSchema } from "../schemas/social-reaction.schema";
+import type { SocialCommentQueryDto } from "../dtos/social-comment.query.dto";
 
 @Injectable()
 export class SocialCache {
@@ -17,11 +17,11 @@ export class SocialCache {
 	}
 
 	async getReactionCounts(
-		target_id: number,
-		target_type: SocialReactionSchema["reactable_type"],
+		reactable_id: number,
+		reactable_type: SocialReactionSchema["reactable_type"],
 	): Promise<Record<string, number> | null> {
 		const cached = await this.cacheService.get<Record<string, number>>(
-			this.getReactionKey(target_id, target_type),
+			this.getReactionKey(reactable_id, reactable_type),
 		);
 		return cached || null;
 	}
@@ -47,18 +47,18 @@ export class SocialCache {
 
 	// --- Comments List Cache ---
 
-	private getListKey(tenant_id: number, filters: any): string {
+	private getListKey(tenant_id: number, filters: Record<string, unknown>): string {
 		return `${this.PREFIX}:list:${tenant_id}:${JSON.stringify(filters)}`;
 	}
 
-	async getList<T>(tenant_id: number, filters: any): Promise<T | null> {
+	async getList<T>(tenant_id: number, filters: SocialCommentQueryDto): Promise<T | null> {
 		const cached = await this.cacheService.get<T>(
 			this.getListKey(tenant_id, filters),
 		);
 		return cached || null;
 	}
 
-	async setList<T>(tenant_id: number, filters: any, data: T): Promise<void> {
+	async setList<T>(tenant_id: number, filters: SocialCommentQueryDto, data: T): Promise<void> {
 		await this.cacheService.set(
 			this.getListKey(tenant_id, filters),
 			data,

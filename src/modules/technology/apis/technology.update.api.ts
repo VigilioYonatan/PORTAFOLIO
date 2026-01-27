@@ -13,7 +13,7 @@ export function technologyUpdateApi(id: number) {
 		TechnologyUpdateResponseDto,
 		TechnologyUpdateDto,
 		TechnologyUpdateApiError
-	>(`/technologies/${id}`, async (url, body) => {
+	>(`/technology/${id}`, async (url, body) => {
 		const response = await fetch(`/api/v1${url}`, {
 			method: "PATCH",
 			body: JSON.stringify(body),

@@ -1,7 +1,8 @@
 import { useQuery } from "@vigilio/preact-fetching";
+import type { UsePaginator } from "@vigilio/preact-paginator";
 import type { UseTable } from "@vigilio/preact-table";
-import type { ContactIndexResponseDto } from "../dtos/contact.response.dto";
-import type { ContactMessageSchema } from "../schemas/contact-message.schema";
+import type { ContactIndexResponseDto } from "../dtos/contact-message.response.dto";
+import type { ContactMessageSchema } from "../schemas/contact-message-message.schema";
 
 export type ContactIndexSecondaryPaginator = "action";
 export type ContactIndexMethods = {
@@ -19,18 +20,19 @@ export interface ContactIndexApiError {
 }
 
 /**
- * contactIndex - /api/v1/messages
+ * contactIndex - /api/v1/contact-message
  * @method GET
  */
 export function contactIndexApi(
 	table: ContactIndexTable | null,
+	paginator: UsePaginator | null = null,
 	filters?: {
 		limit?: number;
 		is_read?: boolean;
 	},
 ) {
 	const query = useQuery<ContactIndexResponseDto, ContactIndexApiError>(
-		"/messages",
+		"/contact-message",
 		async (url) => {
 			const data = new URLSearchParams();
 			if (table) {
@@ -55,6 +57,12 @@ export function contactIndexApi(
 					data.append(key, String(value));
 				});
 			}
+
+			if (paginator) {
+				data.append("offset", String(paginator.pagination.value.offset));
+				data.append("limit", String(paginator.pagination.value.limit));
+			}
+
 			if (filters?.limit) {
 				data.append("limit", String(filters.limit));
 			}
@@ -79,6 +87,11 @@ export function contactIndexApi(
 							refetch: query.refetch,
 						},
 						cursor: nextCursor,
+					});
+				}
+				if (paginator) {
+					paginator.updateData({
+						total: data.count,
 					});
 				}
 			},

@@ -1,5 +1,5 @@
 import { paginator } from "@infrastructure/utils/server";
-import { Injectable, Logger, NotFoundException } from "@nestjs/common";
+import { Injectable, Logger } from "@nestjs/common";
 import { SocialCache } from "../caches/social.cache";
 import type {
 	SocialCommentDestroyResponseDto,
@@ -27,44 +27,38 @@ export class SocialService {
 		private readonly socialCache: SocialCache,
 	) {}
 
-	async indexComments(
-		tenant_id: number,
+	async index(
+		post_id: number,
 		query: SocialCommentQueryDto,
 	): Promise<SocialCommentIndexResponseDto> {
-		this.logger.log({ tenant_id }, "Listing social comments");
+		this.logger.log({ post_id }, "Listing social comments");
 
 		return await paginator<SocialCommentQueryDto, SocialCommentSchema>(
 			"/social/comments",
 			{
 				filters: query,
-				cb: async (filters, isClean) => {
-					if (isClean) {
-						const cached = await this.socialCache.getList<
-							[SocialCommentSchema[], number]
-						>(tenant_id, filters);
-						if (cached) return cached;
-					}
-
+				cb: async (filters) => {
 					const result = await this.repository.indexComments(
-						tenant_id,
+						post_id,
 						filters,
 					);
-
-					if (isClean) {
-						await this.socialCache.setList(tenant_id, filters, result);
-					}
 					return result;
 				},
 			},
 		);
 	}
 
-	async storeComment(
+	async store(
 		tenant_id: number,
 		body: SocialCommentStoreDto,
 	): Promise<SocialCommentStoreResponseDto> {
 		this.logger.log({ tenant_id }, "Creating social comment");
-		const comment = await this.repository.storeComment(tenant_id, body);
+		const comment = await this.repository.storeComment(tenant_id, {
+			...body,
+			is_visible: true, // Default to true
+			user_id: null, // No admin user yet
+			reply: null, // No reply yet
+		});
 		await this.socialCache.invalidateLists(tenant_id);
 		return { success: true, comment };
 	}
@@ -76,21 +70,22 @@ export class SocialService {
 	): Promise<SocialReactionToggleResponseDto> {
 		this.logger.log({ tenant_id, visitor_id }, "Toggling social reaction");
 
-		const existing = await this.repository.findReaction(
+		const existing = await this.repository.showReaction(
 			tenant_id,
 			visitor_id,
 			body.reactable_id,
-			body.reactable_type as any,
+			body.reactable_type 
 		);
 
 		if (existing) {
 			if (existing.type === body.type) {
 				// Toggle OFF
-				await this.repository.destroyReaction(existing.id);
+				await this.repository.destroyReaction(tenant_id, existing.id);
 				return { action: "REMOVED" };
 			} else {
 				// Change Type
 				const updated = await this.repository.updateReaction(
+					tenant_id,
 					existing.id,
 					body.type,
 				);
@@ -102,38 +97,38 @@ export class SocialService {
 		const reaction = await this.repository.storeReaction(tenant_id, {
 			...body,
 			visitor_id,
-		} as any);
+		} );
 		return { action: "ADDED", reaction };
 	}
 
 	async getReactionCounts(
-		target_id: number,
-		target_type: SocialReactionSchema["reactable_type"],
+		reactable_id: number,
+		reactable_type: SocialReactionSchema["reactable_type"],
 	): Promise<SocialReactionCountResponseDto> {
-		this.logger.log({ target_id, target_type }, "Fetching reaction counts");
+		this.logger.log({ reactable_id, reactable_type }, "Fetching reaction counts");
 
 		// 1. Try Cache
 		const cached = await this.socialCache.getReactionCounts(
-			target_id,
-			target_type,
+			reactable_id,
+			reactable_type,
 		);
 		if (cached) {
 			return cached;
 		}
 
 		// 2. Try DB
-		const counts = await this.repository.getReactionCounts(
-			target_id,
-			target_type,
+		const counts = await this.repository.showReactionCounts(
+			reactable_id,
+			reactable_type,
 		);
 
 		// 3. Set Cache
-		await this.socialCache.setReactionCounts(target_id, target_type, counts);
+		await this.socialCache.setReactionCounts(reactable_id, reactable_type, counts);
 
 		return counts;
 	}
 
-	async updateComment(
+	async update(
 		tenant_id: number,
 		id: number,
 		body: SocialCommentUpdateDto,
@@ -144,7 +139,7 @@ export class SocialService {
 		return { success: true, comment };
 	}
 
-	async replyComment(
+	async reply(
 		tenant_id: number,
 		id: number,
 		body: { content: string }, // Using content from DTO
@@ -157,7 +152,7 @@ export class SocialService {
 		return { success: true, comment };
 	}
 
-	async destroyComment(
+	async destroy(
 		tenant_id: number,
 		id: number,
 	): Promise<SocialCommentDestroyResponseDto> {

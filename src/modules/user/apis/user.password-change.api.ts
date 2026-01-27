@@ -1,6 +1,6 @@
 import { useMutation } from "@vigilio/preact-fetching";
-import type { UserDestroyResponseDto } from "../dtos/user.response.dto";
 import type { UserPasswordChangeDto } from "../dtos/user.password-change.dto";
+import type { UserDestroyResponseDto } from "../dtos/user.response.dto";
 
 export interface UserPasswordChangeApiError {
 	success: false;
@@ -9,7 +9,7 @@ export interface UserPasswordChangeApiError {
 }
 
 /**
- * userPasswordChange - /api/v1/users/password
+ * userPasswordChange - /api/v1/user/password
  * @method PATCH
  */
 export function userPasswordChangeApi() {
@@ -17,19 +17,16 @@ export function userPasswordChangeApi() {
 		UserDestroyResponseDto,
 		UserPasswordChangeDto,
 		UserPasswordChangeApiError
-	>(
-		"/users/password",
-		async (url, body) => {
-			const response = await fetch(`/api/v1${url}`, {
-				method: "PATCH",
-				body: JSON.stringify(body),
-				headers: { "Content-Type": "application/json" },
-			});
-			const result = await response.json();
-			if (!response.ok) {
-				throw result;
-			}
-			return result;
-		},
-	);
+	>("/user/password", async (url, body) => {
+		const response = await fetch(`/api/v1${url}`, {
+			method: "PATCH",
+			body: JSON.stringify(body),
+			headers: { "Content-Type": "application/json" },
+		});
+		const result = await response.json();
+		if (!response.ok) {
+			throw result;
+		}
+		return result;
+	});
 }

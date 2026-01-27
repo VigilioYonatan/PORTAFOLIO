@@ -13,7 +13,7 @@ export function blogPostUpdateApi(id: number) {
 		BlogPostUpdateResponseDto,
 		BlogPostUpdateDto,
 		BlogPostUpdateApiError
-	>(`/blog-posts/${id}`, async (url, body) => {
+	>(`/blog-post/${id}`, async (url, body) => {
 		const response = await fetch(`/api/v1${url}`, {
 			method: "PUT",
 			body: JSON.stringify(body),

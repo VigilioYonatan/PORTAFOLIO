@@ -1,11 +1,15 @@
+import type { Signal } from "@preact/signals";
 import { useQuery } from "@vigilio/preact-fetching";
 import type { UseTable } from "@vigilio/preact-table";
 import type { MusicTrackIndexResponseDto } from "../dtos/music.response.dto";
 import type { MusicTrackSchema } from "../schemas/music.schema";
+import { musicTrackDestroyApi } from "./music.destroy.api";
 
 export type MusicIndexSecondaryPaginator = "action";
 export type MusicIndexMethods = {
 	refetch: (clean?: boolean) => void;
+	editingMusic: Signal<MusicTrackSchema | null>;
+	destroyMutation: ReturnType<typeof musicTrackDestroyApi>;
 };
 export type MusicIndexTable = UseTable<
 	MusicTrackSchema,
@@ -84,9 +88,6 @@ export function musicIndexApi(
 					table.updateData({
 						result: data.results,
 						count: data.count,
-						methods: {
-							refetch: query.refetch,
-						},
 						cursor: nextCursor,
 					});
 				}

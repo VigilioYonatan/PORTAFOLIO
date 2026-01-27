@@ -1,19 +1,21 @@
 import { lazy, Suspense } from "preact/compat";
 import { Route, Router, Switch } from "wouter-preact";
-import DashboardLayout from "./_components/DashboardLayout";
+import DashboardLayout from "./_components/dashboard.layout";
 
 // Lazy load modules (Updated with separated components)
-const DashboardHome = lazy(() => import("./_components/DashboardHome"));
-const AIWorkspace = lazy(() => import("@modules/ai/components/AIWorkspace"));
-const ProjectManager = lazy(() => import("./_components/projects/ProjectManager"));
-const BlogManager = lazy(() => import("./_components/blog/BlogManager"));
-
-const HRDashboard = lazy(() => import("./_components/hr/HRDashboard"));
-const Inbox = lazy(() => import("./_components/inbox/Inbox"));
-const SharedWorkspace = lazy(
-	() => import("./_components/shared/SharedWorkspace"),
+const DashboardHome = lazy(() => import("./_components/dashboard.home"));
+const AIWorkspace = lazy(() => import("@modules/ai/components/ai-workspace"));
+const ProjectManager = lazy(
+	() => import("./_components/projects/project.manager"),
 );
-const Settings = lazy(() => import("./_components/settings/Settings"));
+const BlogManager = lazy(() => import("./_components/blog/blog.manager"));
+
+const HRDashboard = lazy(() => import("./_components/hr/hr.dashboard"));
+const Inbox = lazy(() => import("./_components/inbox/inbox"));
+const SharedWorkspace = lazy(
+	() => import("./_components/shared/shared.workspace"),
+);
+const Settings = lazy(() => import("./_components/settings/settings"));
 
 export function DashboardRouter() {
 	return (
@@ -31,30 +33,26 @@ export function DashboardRouter() {
 				>
 					<Switch>
 						<Route path="/dashboard" component={DashboardHome} />
-						
-                        {/* Modules */}
+						{/* Modules */}
 						<Route path="/dashboard/ai" component={AIWorkspace} />
 						<Route path="/dashboard/documents" component={AIWorkspace} />
-						
-                        {/* Separated Content Managers */}
+						{/* Separated Content Managers */}
 						<Route path="/dashboard/projects" component={ProjectManager} />
 						<Route path="/dashboard/blog" component={BlogManager} />
-                        <Route path="/dashboard/content" component={ProjectManager} /> {/* Fallback/Legacy */}
-
+						<Route path="/dashboard/content" component={ProjectManager} />{" "}
+						{/* Fallback/Legacy */}
 						<Route path="/dashboard/hr" component={HRDashboard} />
 						<Route path="/dashboard/inbox" component={Inbox} />
-						
 						<Route path="/dashboard/shared" component={SharedWorkspace} />
 						<Route path="/dashboard/tech" component={SharedWorkspace} />
-
 						<Route path="/dashboard/settings" component={Settings} />
-						<Route path="/dashboard/profile" component={Settings} />        {/* Alias for Profile */}
-
+						<Route path="/dashboard/profile" component={Settings} />{" "}
+						{/* Alias for Profile */}
 						{/* Fallback */}
 						<Route>
 							<div class="p-20 text-center text-destructive font-mono text-xs tracking-widest uppercase">
-								<div class="mb-4 text-4xl font-bold">404</div>
-								[ ERROR: CRITICAL_MODULE_MISSING ]
+								<div class="mb-4 text-4xl font-bold">404</div>[ ERROR:
+								CRITICAL_MODULE_MISSING ]
 							</div>
 						</Route>
 					</Switch>
@@ -63,4 +61,3 @@ export function DashboardRouter() {
 		</Router>
 	);
 }
-

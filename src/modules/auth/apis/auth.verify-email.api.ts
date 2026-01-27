@@ -1,6 +1,6 @@
 import { useMutation } from "@vigilio/preact-fetching";
 import type { AuthVerifyEmailResponseDto } from "../dtos/auth.response.dto";
-import type { AuthVerifyEmailDto } from "../dtos/auth.verify-email.dto";
+import type { AuthVerifyEmailDto } from "../dtos/verify-email.dto";
 
 export interface AuthVerifyEmailApiError {
 	success: false;

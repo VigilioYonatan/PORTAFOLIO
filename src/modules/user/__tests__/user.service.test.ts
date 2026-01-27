@@ -140,6 +140,7 @@ describe("UserService", () => {
 				role_id: 2,
 				repeat_password: "Password123!",
 				status: "ACTIVE" as const,
+				phone_number: null,
 			};
 			const newUser = {
 				id: 1,
@@ -156,8 +157,8 @@ describe("UserService", () => {
 				tenant_id,
 				expect.objectContaining({ email: body.email }),
 			);
-			expect(cache.set).toHaveBeenCalledWith(tenant_id, newUser);
 			expect(cache.invalidateLists).toHaveBeenCalledWith(tenant_id);
+
 			expect(result).toEqual({ success: true, user: newUser });
 		});
 	});
@@ -166,7 +167,13 @@ describe("UserService", () => {
 		it("should update a user and invalidate cache", async () => {
 			const tenant_id = 1;
 			const id = 1;
-			const body = { username: "Updated" };
+			const body = {
+				username: "Updated",
+				phone_number: null,
+				status: "ACTIVE" as const,
+				is_mfa_enabled: false,
+				role_id: 1,
+			};
 			const updatedUser = { id, ...body } as UserSchema;
 
 			mockRepository.update.mockResolvedValue(updatedUser);

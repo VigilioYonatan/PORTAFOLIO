@@ -1,9 +1,9 @@
 import { createZodDto } from "nestjs-zod";
 import { socialReactionSchema } from "../schemas/social-reaction.schema";
-import { socialReactionStoreSchema } from "./social-reaction.store.dto";
+import { socialReactionStoreDto } from "./social-reaction.store.dto";
 
 export class SocialReactionStoreClassDto extends createZodDto(
-	socialReactionStoreSchema,
+	socialReactionStoreDto,
 ) {}
 export class SocialReactionResponseClassDto extends createZodDto(
 	socialReactionSchema,

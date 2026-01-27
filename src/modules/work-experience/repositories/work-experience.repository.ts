@@ -2,19 +2,9 @@ import { schema } from "@infrastructure/providers/database/database.schema";
 import { DRIZZLE } from "@infrastructure/providers/database/database.service";
 import { toNull } from "@infrastructure/utils/server";
 import { Inject, Injectable } from "@nestjs/common";
-import {
-	and,
-	asc,
-	desc,
-	eq,
-	getTableColumns,
-	ilike,
-	SQL,
-	sql,
-} from "drizzle-orm";
+import { and, asc, desc, eq, getTableColumns, SQL, sql } from "drizzle-orm";
 import type { NodePgDatabase } from "drizzle-orm/node-postgres";
 import type { WorkExperienceQueryDto } from "../dtos/work-experience.query.dto";
-import type { WorkExperienceStoreDto } from "../dtos/work-experience.store.dto";
 import { workExperienceEntity } from "../entities/work-experience.entity";
 import type { WorkExperienceSchema } from "../schemas/work-experience.schema";
 
@@ -26,7 +16,10 @@ export class WorkExperienceRepository {
 
 	async store(
 		tenant_id: number,
-		body: WorkExperienceStoreDto,
+		body: Omit<
+			WorkExperienceSchema,
+			"id" | "tenant_id" | "created_at" | "updated_at"
+		>,
 	): Promise<WorkExperienceSchema> {
 		const [result] = await this.db
 			.insert(workExperienceEntity)
@@ -100,6 +93,14 @@ export class WorkExperienceRepository {
 				offset,
 				where: baseWhereClause,
 				orderBy: orderBy,
+				columns: {
+					description: false,
+				},
+				extras: {
+					description: sql<string>`substring(${workExperienceEntity.description} from 1 for 3000)`.as(
+						"description",
+					),
+				},
 			}),
 			this.db
 				.select({ count: sql<number>`count(*)` })

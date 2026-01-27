@@ -1,7 +1,8 @@
 import type { Environments } from "@infrastructure/config/server/environments.config";
 import { Injectable, Logger } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import { OpenAI } from "openai";
+import { OpenRouter } from "@openrouter/sdk";
+import type { ChatCompletionMessageParam } from "openai/resources/chat/completions";
 import { type Observable, Subject } from "rxjs";
 import { AiCache } from "../caches/ai.cache";
 import { DEFAULT_AI_CONFIG } from "../const/ai-config.const";
@@ -11,6 +12,7 @@ import type {
 } from "../dtos/ai.response.dto";
 import type { AiConfigUpdateDto } from "../dtos/ai-config.update.dto";
 import { AiConfigRepository } from "../repositories/ai-config.repository";
+import type { Message } from "@openrouter/sdk/models";
 
 @Injectable()
 export class AiService {
@@ -21,17 +23,6 @@ export class AiService {
 		private readonly aiCache: AiCache,
 		private readonly configService: ConfigService<Environments>,
 	) {}
-
-	private getClient(apiKey: string, baseURL?: string): OpenAI {
-		return new OpenAI({
-			apiKey,
-			baseURL: baseURL || "https://openrouter.ai/api/v1",
-            defaultHeaders: {
-                "HTTP-Referer": "https://portfolio.neuro-dev.com", // Site URL
-                "X-Title": "NeuroPortfolio", // Site Title
-            }
-		});
-	}
 
 	async show(tenant_id: number): Promise<AiConfigShowResponseDto> {
 		this.logger.log({ tenant_id }, "Fetching AI configuration");
@@ -65,16 +56,16 @@ export class AiService {
 	): Promise<AiConfigUpdateResponseDto> {
 		this.logger.log({ tenant_id }, "Updating AI configuration");
 
-		const config = await this.aiConfigRepository.update(tenant_id, body);
-		if (!config) {
+		const existing = await this.aiConfigRepository.show(tenant_id);
+		if (!existing) {
 			this.logger.error({ tenant_id }, "AI Configuration not found for update");
 			throw new Error("AI Configuration not found (Update failed)");
 		}
 
+		const config = await this.aiConfigRepository.update(tenant_id, existing.id, body);
+
 		// Invalidate Cache
 		await this.aiCache.invalidate(tenant_id);
-		// Write-through
-		await this.aiCache.set(tenant_id, config);
 
 		return { success: true, config };
 	}
@@ -83,7 +74,7 @@ export class AiService {
 		model: string;
 		temperature: number;
 		system: string;
-		messages: { role: "user" | "assistant" | "system"; content: string }[];
+		messages: ChatCompletionMessageParam[];
 	}): Promise<Observable<{ data: { content: string } }>> {
 		this.logger.log({ model: props.model }, "Generating AI stream");
 
@@ -91,22 +82,29 @@ export class AiService {
 			infer: true,
 		})!;
 
-		const client = this.getClient(apiKey);
+		const openRouter = new OpenRouter({
+			apiKey,
+		});
+
 		const subject = new Subject<{ data: { content: string } }>();
 
 		(async () => {
 			try {
-				const stream = await client.chat.completions.create({
+				const result = await openRouter.chat.send({
 					model: props.model,
 					temperature: props.temperature,
 					messages: [
 						{ role: "system", content: props.system },
-						...props.messages,
-					],
+						...props.messages as Message[],
+					] , // Cast to avoid minor type mismatches between OpenAI and OpenRouter definitions
+					provider: {
+						sort: "price",
+					},
 					stream: true,
 				});
 
-				for await (const chunk of stream) {
+				for await (const chunk of result) {
+					// OpenRouter SDK chunk structure might vary, adapting based on OpenAI compatibility or direct access
 					const content = chunk.choices[0]?.delta?.content || "";
 					if (content) {
 						subject.next({ data: { content } });

@@ -13,9 +13,18 @@ export type BlogCategoryIndexTable = UseTable<
 	BlogCategoryIndexMethods
 >;
 
+export interface BlogCategoryIndexApiError {
+	success: false;
+	message: string;
+}
+
+/**
+ * blogCategoryIndex - /api/v1/blog-category
+ * @method GET
+ */
 export function blogCategoryIndexApi(table: BlogCategoryIndexTable | null) {
-	const query = useQuery<BlogCategoryIndexResponseDto, unknown>(
-		"/blog/categories",
+	const query = useQuery<BlogCategoryIndexResponseDto, BlogCategoryIndexApiError>(
+		"/blog-category",
 		async (url) => {
 			const data = new URLSearchParams();
 			if (table) {

@@ -1,4 +1,6 @@
+import { ZodQueryPipe } from "@infrastructure/pipes/zod-query.pipe";
 import { ZodPipe } from "@infrastructure/pipes/zod.pipe";
+import { workMilestoneQueryDto } from "../dtos/work-milestone.query.dto";
 import { Public } from "@modules/auth/decorators/public.decorator";
 import { Roles } from "@modules/auth/decorators/roles.decorator";
 import { AuthenticatedGuard } from "@modules/auth/guards/authenticated.guard";
@@ -42,12 +44,11 @@ import {
 	type WorkMilestoneUpdateDto,
 	workMilestoneUpdateDto,
 } from "../dtos/work-milestone.update.dto";
-import type { WorkMilestoneSchema } from "../schemas/work-milestone.schema";
 import { WorkMilestoneService } from "../services/work-milestone.service";
 
 @ApiTags("Work Milestones")
 @UseGuards(AuthenticatedGuard, RolesGuard)
-@Controller("api/milestones")
+@Controller("work-milestone")
 export class WorkMilestoneController {
 	constructor(private readonly workMilestoneService: WorkMilestoneService) {}
 
@@ -60,7 +61,8 @@ export class WorkMilestoneController {
 	})
 	async index(
 		@Req() req: Request,
-		@Query() query: WorkMilestoneQueryClassDto,
+		@Query(new ZodQueryPipe(workMilestoneQueryDto))
+		query: WorkMilestoneQueryClassDto,
 	): Promise<WorkMilestoneIndexResponseDto> {
 		return this.workMilestoneService.index(req.locals.tenant.id, query);
 	}

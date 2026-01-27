@@ -38,12 +38,8 @@ export class InitialCacheMiddleware implements NestMiddleware {
 				tenant: tenant!,
 				user: (req.user || null) as UserAuth,
 			};
-			
 		}
 
-		console.log(
-			`➡️  Proceeding to next middleware/guard for ${req.method} ${req.url}`,
-		);
 		return next();
 	}
 }

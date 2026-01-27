@@ -1,6 +1,6 @@
 import { useMutation } from "@vigilio/preact-fetching";
-import type { UserUpdateResponseDto } from "../dtos/user.response.dto";
 import type { UserProfileUpdateDto } from "../dtos/user.profile.update.dto";
+import type { UserUpdateResponseDto } from "../dtos/user.response.dto";
 
 export interface UserProfileUpdateApiError {
 	success: false;
@@ -9,7 +9,7 @@ export interface UserProfileUpdateApiError {
 }
 
 /**
- * userProfileUpdate - /api/v1/users/profile
+ * userProfileUpdate - /api/v1/user/profile
  * @method PATCH
  */
 export function userProfileUpdateApi() {
@@ -17,19 +17,16 @@ export function userProfileUpdateApi() {
 		UserUpdateResponseDto,
 		UserProfileUpdateDto,
 		UserProfileUpdateApiError
-	>(
-		"/users/profile",
-		async (url, body) => {
-			const response = await fetch(`/api/v1${url}`, {
-				method: "PATCH",
-				body: JSON.stringify(body),
-				headers: { "Content-Type": "application/json" },
-			});
-			const result = await response.json();
-			if (!response.ok) {
-				throw result;
-			}
-			return result;
-		},
-	);
+	>("/user/profile", async (url, body) => {
+		const response = await fetch(`/api/v1${url}`, {
+			method: "PATCH",
+			body: JSON.stringify(body),
+			headers: { "Content-Type": "application/json" },
+		});
+		const result = await response.json();
+		if (!response.ok) {
+			throw result;
+		}
+		return result;
+	});
 }

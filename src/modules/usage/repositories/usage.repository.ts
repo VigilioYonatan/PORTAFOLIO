@@ -14,7 +14,7 @@ export class UsageRepository {
 		@Inject(DRIZZLE) private readonly db: NodePgDatabase<typeof schema>,
 	) {}
 
-	async current(tenant_id: number): Promise<UsageQuotaSchema | null> {
+	async showCurrent(tenant_id: number): Promise<UsageQuotaSchema | null> {
 		const now = new Date();
 		const currentYear = now.getFullYear();
 		const currentMonth = now.getMonth() + 1; // JS months are 0-indexed
@@ -30,7 +30,7 @@ export class UsageRepository {
 		return toNull(result);
 	}
 
-	async history(
+	async indexHistory(
 		tenant_id: number,
 		query: UsageQuotaQueryDto,
 	): Promise<UsageQuotaSchema[]> {

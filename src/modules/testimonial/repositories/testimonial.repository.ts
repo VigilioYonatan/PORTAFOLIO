@@ -72,6 +72,14 @@ export class TestimonialRepository {
 				offset: useCursor ? undefined : offset,
 				where: useCursor ? cursorWhereClause : baseWhereClause,
 				orderBy: orderBy,
+				columns: {
+					content: false,
+				},
+				extras: {
+					content: sql<string>`substring(${testimonialEntity.content} from 1 for 3000)`.as(
+						"content",
+					),
+				},
 			}) as Promise<TestimonialSchema[]>,
 			this.db
 				.select({ count: sql<number>`count(*)` })

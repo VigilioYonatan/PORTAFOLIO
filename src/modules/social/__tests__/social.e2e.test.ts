@@ -27,7 +27,7 @@ describe("Social Module (E2E)", () => {
 
 			// 1. Create
 			const createRes = await request(e2e.app.getHttpServer())
-				.post("/api/v1/comments")
+				.post("/api/v1/social-comment")
 				.set("Host", "localhost")
 				.send(payload);
 
@@ -36,7 +36,7 @@ describe("Social Module (E2E)", () => {
 
 			// 2. List
 			const indexRes = await request(e2e.app.getHttpServer())
-				.get("/api/v1/comments")
+				.get("/api/v1/social-comment/1")
 				.set("Host", "localhost");
 
 			expect(indexRes.status).toBe(200);
@@ -44,7 +44,7 @@ describe("Social Module (E2E)", () => {
 
 			// 3. Filter
 			const filterRes = await request(e2e.app.getHttpServer())
-				.get("/api/v1/comments")
+				.get("/api/v1/social-comment/1")
 				.set("Host", "localhost")
 				.query({ commentable_id: 1, commentable_type: "BLOG_POST" });
 
@@ -55,7 +55,7 @@ describe("Social Module (E2E)", () => {
 		it("should handle replies and updates (Admin)", async () => {
 			// 1. Reply
 			await request(e2e.app.getHttpServer())
-				.post(`/api/v1/comments/${commentId}/reply`)
+				.post(`/api/v1/social-comment/${commentId}/reply`)
 				.set("Host", "localhost")
 				.set("x-mock-role", "admin")
 				.send({ content: "Official consolidated reply" })
@@ -63,7 +63,7 @@ describe("Social Module (E2E)", () => {
 
 			// 2. Update status
 			await request(e2e.app.getHttpServer())
-				.patch(`/api/v1/comments/${commentId}`)
+				.patch(`/api/v1/social-comment/${commentId}`)
 				.set("Host", "localhost")
 				.set("x-mock-role", "admin")
 				.send({ is_visible: false })

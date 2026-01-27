@@ -1,6 +1,7 @@
 import { CacheService } from "@infrastructure/providers/cache/cache.service";
 import { toNull } from "@infrastructure/utils/server";
 import { Injectable } from "@nestjs/common";
+import { type BlogPostQueryDto } from "../dtos/blog-post.query.dto";
 import { type BlogPostSchema } from "../schemas/blog-post.schema";
 
 @Injectable()
@@ -55,19 +56,19 @@ export class BlogPostCache {
 		]);
 	}
 
-	async getList<T>(tenant_id: number, query: string) {
+	async getList<T>(tenant_id: number, query: BlogPostQueryDto) {
 		return toNull(
 			await this.cacheService.get<T>(
-				`tenant:${tenant_id}:blog-posts:list:${query}`,
+				`tenant:${tenant_id}:blog-posts:list:${JSON.stringify(query)}`,
 			),
 		);
 	}
 
-	async setList<T>(tenant_id: number, query: string, result: T) {
+	async setList<T>(tenant_id: number, query: BlogPostQueryDto, result: T) {
 		return this.cacheService.set(
-			`tenant:${tenant_id}:blog-posts:list:${query}`,
+			`tenant:${tenant_id}:blog-posts:list:${JSON.stringify(query)}`,
 			result,
-			60 * 1000,
+			this.cacheService.CACHE_TIMES.MINUTE,
 		); // 1 minute cache for lists
 	}
 

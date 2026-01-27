@@ -1,8 +1,9 @@
 import { DRIZZLE } from "@infrastructure/providers/database/database.const";
 import { type schema } from "@infrastructure/providers/database/database.schema";
 import { Inject, Injectable } from "@nestjs/common";
-import { and, desc, eq, sql } from "drizzle-orm";
+import { and, desc, eq, ilike, sql } from "drizzle-orm";
 import { type NodePgDatabase } from "drizzle-orm/node-postgres";
+import type { BlogPostQueryDto } from "../dtos/blog-post.query.dto";
 import { blogPostEntity } from "../entities/blog-post.entity";
 import { type BlogPostSchema } from "../schemas/blog-post.schema";
 
@@ -14,15 +15,11 @@ export class BlogPostRepository {
 
 	async store(
 		tenant_id: number,
-		user_id: number,
-		body: Omit<
-			BlogPostSchema,
-			"id" | "created_at" | "updated_at" | "tenant_id" | "author_id"
-		>,
+		body: Omit<BlogPostSchema, "id" | "tenant_id" | "created_at" | "updated_at">,
 	): Promise<BlogPostSchema> {
 		const [blogPost] = await this.db
 			.insert(blogPostEntity)
-			.values({ ...body, tenant_id, author_id: user_id })
+			.values({ ...body, tenant_id })
 			.returning();
 		return blogPost;
 	}
@@ -78,16 +75,19 @@ export class BlogPostRepository {
 
 	async index(
 		tenant_id: number,
-		limit: number,
-		offset: number,
-		search?: string,
-		// filters
-		category_id?: number,
-		is_published?: boolean,
+		query: BlogPostQueryDto,
 	): Promise<[BlogPostSchema[], number]> {
+		const {
+			limit,
+			offset,
+			search,
+			category_id,
+			is_published,
+		} = query;
+
 		const whereClause = and(
 			eq(blogPostEntity.tenant_id, tenant_id),
-			search ? sql`${blogPostEntity.title} ILIKE ${`%${search}%`}` : undefined,
+			search ? ilike(blogPostEntity.title, `%${search}%`) : undefined,
 			category_id ? eq(blogPostEntity.category_id, category_id) : undefined,
 			is_published !== undefined
 				? eq(blogPostEntity.is_published, is_published)
@@ -98,19 +98,28 @@ export class BlogPostRepository {
 			where: whereClause,
 			limit,
 			offset,
-			orderBy: [desc(blogPostEntity.created_at)],
+			orderBy: [desc(blogPostEntity.id)], // Standardize order
 			with: {
 				category: true,
 				author: true,
 			},
+			columns: {
+				content: false,
+			},
+			extras: {
+				content: sql<string>`substring(${blogPostEntity.content} from 1 for 3000)`.as(
+					"content",
+				),
+			},
 		});
 
-		const [{ total }] = await this.db
+		const total = await this.db
 			.select({ total: sql<number>`count(*)` })
 			.from(blogPostEntity)
-			.where(whereClause);
+			.where(whereClause)
+			.then((res) => Number(res[0].total));
 
-		return [blogPosts as BlogPostSchema[], Number(total)];
+		return [blogPosts as BlogPostSchema[], total];
 	}
 
 	async destroy(tenant_id: number, id: number): Promise<BlogPostSchema> {

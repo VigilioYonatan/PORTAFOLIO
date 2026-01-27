@@ -1,3 +1,4 @@
+/** biome-ignore-all lint/suspicious/noConsole: <explanation> */
 import {
 	seedLocalhostTenant,
 	setupTestDb,
@@ -97,7 +98,7 @@ describe("TenantController (E2E Real DB)", () => {
 	// The setupTestDb() handles cleanup at the start of the test suite
 	// and teardownTestDb() cleans up at the end
 
-	describe("POST /tenants", () => {
+	describe("POST /tenant", () => {
 		it("should create a new tenant in the database", async () => {
 			// Use factory for unique test data (parallel-safe)
 			const dto = TenantFactory.createDto({
@@ -105,19 +106,19 @@ describe("TenantController (E2E Real DB)", () => {
 			});
 
 			const response = await request(app.getHttpServer())
-				.post("/api/v1/tenants")
+				.post("/api/v1/tenant")
 				.set("Host", "localhost")
 				.send(dto);
 
 			console.log(
-				"POST /tenants response:",
+				"POST /tenant response:",
 				response.status,
 				JSON.stringify(response.body, null, 2),
 			);
 
 			// If error, show the full error for debugging
 			if (response.status >= 400) {
-				console.error("POST /tenants ERROR:", response.body);
+				console.error("POST /tenant ERROR:", response.body);
 			}
 
 			expect(response.status).toBe(201);
@@ -135,7 +136,7 @@ describe("TenantController (E2E Real DB)", () => {
 			};
 
 			const response = await request(app.getHttpServer())
-				.post("/api/v1/tenants")
+				.post("/api/v1/tenant")
 				.set("Host", "localhost")
 				.send(invalidDto);
 
@@ -144,22 +145,22 @@ describe("TenantController (E2E Real DB)", () => {
 		});
 	});
 
-	describe("GET /tenants", () => {
-		it("should return paginated tenants from database", async () => {
+	describe("GET /tenant", () => {
+		it("should return paginated tenant from database", async () => {
 			// Use factory for unique test data
 			const dto = TenantFactory.createDto({ plan: "BASIC" });
 
 			await request(app.getHttpServer())
-				.post("/api/v1/tenants")
+				.post("/api/v1/tenant")
 				.set("Host", "localhost")
 				.send(dto);
 
-			// Now list tenants
+			// Now list tenant
 			const response = await request(app.getHttpServer())
-				.get("/api/v1/tenants?limit=10&offset=0")
+				.get("/api/v1/tenant?limit=10&offset=0")
 				.set("Host", "localhost");
 
-			console.log("GET /tenants response:", response.status, response.body);
+			console.log("GET /tenant response:", response.status, response.body);
 
 			expect(response.status).toBe(200);
 			expect(response.body.success).toBe(true);
@@ -169,23 +170,23 @@ describe("TenantController (E2E Real DB)", () => {
 		});
 	});
 
-	describe("GET /tenants/me", () => {
+	describe("GET /tenant/me", () => {
 		it("should return the logged-in user's tenant", async () => {
 			// The middleware has set req.locals.tenant to the localhost tenant
 			// This endpoint should return that tenant
 			const response = await request(app.getHttpServer())
-				.get("/api/v1/tenants/me")
+				.get("/api/v1/tenant/me")
 				.set("Host", "localhost");
 
 			console.log(
-				"GET /tenants/me response:",
+				"GET /tenant/me response:",
 				response.status,
 				JSON.stringify(response.body, null, 2),
 			);
 
 			// If error, show the full error for debugging
 			if (response.status >= 400) {
-				console.error("GET /tenants/me ERROR:", response.body);
+				console.error("GET /tenant/me ERROR:", response.body);
 			}
 
 			expect(response.status).toBe(200);
@@ -199,7 +200,7 @@ describe("TenantController (E2E Real DB)", () => {
 
 		it("should include tenant settings in the response", async () => {
 			const response = await request(app.getHttpServer())
-				.get("/api/v1/tenants/me")
+				.get("/api/v1/tenant/me")
 				.set("Host", "localhost");
 
 			expect(response.status).toBe(200);
@@ -209,13 +210,13 @@ describe("TenantController (E2E Real DB)", () => {
 		});
 	});
 
-	describe("GET /tenants/:id", () => {
+	describe("GET /tenant/:id", () => {
 		it("should return a tenant by ID", async () => {
 			// Use factory for unique test data
 			const dto = TenantFactory.createDto({ plan: "PRO" });
 
 			const createResponse = await request(app.getHttpServer())
-				.post("/api/v1/tenants")
+				.post("/api/v1/tenant")
 				.set("Host", "localhost")
 				.send(dto);
 
@@ -223,10 +224,10 @@ describe("TenantController (E2E Real DB)", () => {
 
 			// Now fetch it
 			const response = await request(app.getHttpServer())
-				.get(`/api/v1/tenants/${tenantId}`)
+				.get(`/api/v1/tenant/${tenantId}`)
 				.set("Host", "localhost");
 
-			console.log("GET /tenants/:id response:", response.status, response.body);
+			console.log("GET /tenant/:id response:", response.status, response.body);
 
 			expect(response.status).toBe(200);
 			expect(response.body.success).toBe(true);
@@ -237,20 +238,20 @@ describe("TenantController (E2E Real DB)", () => {
 
 		it("should return 404 for non-existent tenant", async () => {
 			const response = await request(app.getHttpServer())
-				.get("/api/v1/tenants/999999")
+				.get("/api/v1/tenant/999999")
 				.set("Host", "localhost");
 
 			expect(response.status).toBe(404);
 		});
 	});
 
-	describe("PUT /tenants/:id", () => {
+	describe("PUT /tenant/:id", () => {
 		it("should update an existing tenant", async () => {
 			// Use factory for unique test data
 			const createDto = TenantFactory.createDto();
 
 			const createResponse = await request(app.getHttpServer())
-				.post("/api/v1/tenants")
+				.post("/api/v1/tenant")
 				.set("Host", "localhost")
 				.send(createDto);
 
@@ -270,11 +271,11 @@ describe("TenantController (E2E Real DB)", () => {
 			};
 
 			const response = await request(app.getHttpServer())
-				.put(`/api/v1/tenants/${tenantId}`)
+				.put(`/api/v1/tenant/${tenantId}`)
 				.set("Host", "localhost")
 				.send(updateDto);
 
-			console.log("PUT /tenants/:id response:", response.status, response.body);
+			console.log("PUT /tenant/:id response:", response.status, response.body);
 
 			expect(response.status).toBe(200);
 			expect(response.body.success).toBe(true);
@@ -283,7 +284,7 @@ describe("TenantController (E2E Real DB)", () => {
 		});
 	});
 
-	describe("PUT /tenants/me", () => {
+	describe("PUT /tenant/me", () => {
 		it("should update the logged-in user's own tenant", async () => {
 			// The middleware has already set req.locals.tenant to the localhost tenant
 			// This endpoint should update that tenant
@@ -297,19 +298,19 @@ describe("TenantController (E2E Real DB)", () => {
 			};
 
 			const response = await request(app.getHttpServer())
-				.put("/api/v1/tenants/me")
+				.put("/api/v1/tenant/me")
 				.set("Host", "localhost")
 				.send(updateMeDto);
 
 			console.log(
-				"PUT /tenants/me response:",
+				"PUT /tenant/me response:",
 				response.status,
 				JSON.stringify(response.body, null, 2),
 			);
 
 			// If error, show the full error for debugging
 			if (response.status >= 400) {
-				console.error("PUT /tenants/me ERROR:", response.body);
+				console.error("PUT /tenant/me ERROR:", response.body);
 			}
 
 			expect(response.status).toBe(200);
@@ -332,7 +333,7 @@ describe("TenantController (E2E Real DB)", () => {
 			};
 
 			const response = await request(app.getHttpServer())
-				.put("/api/v1/tenants/me")
+				.put("/api/v1/tenant/me")
 				.set("Host", "localhost")
 				.send(invalidDto);
 
@@ -341,13 +342,13 @@ describe("TenantController (E2E Real DB)", () => {
 		});
 	});
 
-	describe("DELETE /tenants/:id", () => {
+	describe("DELETE /tenant/:id", () => {
 		it("should delete a tenant", async () => {
 			// Use factory for unique test data
 			const createDto = TenantFactory.createDto();
 
 			const createResponse = await request(app.getHttpServer())
-				.post("/api/v1/tenants")
+				.post("/api/v1/tenant")
 				.set("Host", "localhost")
 				.send(createDto);
 
@@ -355,18 +356,18 @@ describe("TenantController (E2E Real DB)", () => {
 
 			// Delete it
 			const response = await request(app.getHttpServer())
-				.delete(`/api/v1/tenants/${tenantId}`)
+				.delete(`/api/v1/tenant/${tenantId}`)
 				.set("Host", "localhost");
 
 			console.log(
-				"DELETE /tenants/:id response:",
+				"DELETE /tenant/:id response:",
 				response.status,
 				JSON.stringify(response.body, null, 2),
 			);
 
 			// If error, show the full error for debugging
 			if (response.status >= 400) {
-				console.error("DELETE /tenants/:id ERROR:", response.body);
+				console.error("DELETE /tenant/:id ERROR:", response.body);
 			}
 
 			expect(response.status).toBe(200);
@@ -374,30 +375,30 @@ describe("TenantController (E2E Real DB)", () => {
 
 			// Verify it's gone
 			const getResponse = await request(app.getHttpServer())
-				.get(`/api/v1/tenants/${tenantId}`)
+				.get(`/api/v1/tenant/${tenantId}`)
 				.set("Host", "localhost");
 
 			expect(getResponse.status).toBe(404);
 		});
 	});
 
-	describe("GET /tenants/settings/me", () => {
+	describe("GET /tenant-setting/settings/me", () => {
 		it("should return the logged-in user's tenant settings", async () => {
 			// The middleware sets req.locals.tenant to the localhost tenant
 			// This endpoint should return that tenant's settings
 			const response = await request(app.getHttpServer())
-				.get("/api/v1/tenants/settings/me")
+				.get("/api/v1/tenant-setting/me")
 				.set("Host", "localhost");
 
 			console.log(
-				"GET /tenants/settings/me response:",
+				"GET /tenant-setting/settings/me response:",
 				response.status,
 				JSON.stringify(response.body, null, 2),
 			);
 
 			// If error, show the full error for debugging
 			if (response.status >= 400) {
-				console.error("GET /tenants/settings/me ERROR:", response.body);
+				console.error("GET /tenant-setting/settings/me ERROR:", response.body);
 			}
 
 			expect(response.status).toBe(200);
@@ -407,7 +408,7 @@ describe("TenantController (E2E Real DB)", () => {
 		});
 	});
 
-	describe("PUT /tenants/settings/me", () => {
+	describe("PUT /tenant-setting/settings/me", () => {
 		it("should update the logged-in user's tenant settings with allowed fields", async () => {
 			// Update settings for the current tenant (localhost)
 			const updateSettingsMeDto = {
@@ -418,19 +419,19 @@ describe("TenantController (E2E Real DB)", () => {
 			};
 
 			const response = await request(app.getHttpServer())
-				.put("/api/v1/tenants/settings/me")
+				.put("/api/v1/tenant-setting/me")
 				.set("Host", "localhost")
 				.send(updateSettingsMeDto);
 
 			console.log(
-				"PUT /tenants/settings/me response:",
+				"PUT /tenant-setting/settings/me response:",
 				response.status,
 				JSON.stringify(response.body, null, 2),
 			);
 
 			// If error, show the full error for debugging
 			if (response.status >= 400) {
-				console.error("PUT /tenants/settings/me ERROR:", response.body);
+				console.error("PUT /tenant-setting/settings/me ERROR:", response.body);
 			}
 
 			expect(response.status).toBe(200);
@@ -457,7 +458,7 @@ describe("TenantController (E2E Real DB)", () => {
 			};
 
 			const response = await request(app.getHttpServer())
-				.put("/api/v1/tenants/settings/me")
+				.put("/api/v1/tenant-setting/me")
 				.set("Host", "localhost")
 				.send(invalidDto);
 
@@ -466,13 +467,13 @@ describe("TenantController (E2E Real DB)", () => {
 		});
 	});
 
-	describe("GET /tenants/:id/settings", () => {
+	describe("GET /tenant-setting/:id/settings", () => {
 		it("should return tenant settings", async () => {
 			// Use factory for unique test data
 			const createDto = TenantFactory.createDto();
 
 			const createResponse = await request(app.getHttpServer())
-				.post("/api/v1/tenants")
+				.post("/api/v1/tenant")
 				.set("Host", "localhost")
 				.send(createDto);
 
@@ -480,11 +481,11 @@ describe("TenantController (E2E Real DB)", () => {
 
 			// Get settings
 			const response = await request(app.getHttpServer())
-				.get(`/api/v1/tenants/${tenantId}/settings`)
+				.get(`/api/v1/tenant-setting/${tenantId}`)
 				.set("Host", "localhost");
 
 			console.log(
-				"GET /tenants/:id/settings response:",
+				"GET /tenant-setting/:id/settings response:",
 				response.status,
 				response.body,
 			);
@@ -496,13 +497,13 @@ describe("TenantController (E2E Real DB)", () => {
 		});
 	});
 
-	describe("PUT /tenants/:id/settings", () => {
+	describe("PUT /tenant-setting/:id/settings", () => {
 		it("should update tenant settings", async () => {
 			// Use factory for unique test data
 			const createDto = TenantFactory.createDto();
 
 			const createResponse = await request(app.getHttpServer())
-				.post("/api/v1/tenants")
+				.post("/api/v1/tenant")
 				.set("Host", "localhost")
 				.send(createDto);
 
@@ -517,12 +518,12 @@ describe("TenantController (E2E Real DB)", () => {
 			};
 
 			const response = await request(app.getHttpServer())
-				.put(`/api/v1/tenants/${tenantId}/settings`)
+				.put(`/api/v1/tenant-setting/${tenantId}`)
 				.set("Host", "localhost")
 				.send(settingsDto);
 
 			console.log(
-				"PUT /tenants/:id/settings response:",
+				"PUT /tenant-setting/:id/settings response:",
 				response.status,
 				response.body,
 			);

@@ -1,3 +1,5 @@
+import { ZodQueryPipe } from "@infrastructure/pipes/zod-query.pipe";
+import { usageQuotaQueryDto } from "../dtos/usage-quota.query.dto";
 import { AuthenticatedGuard } from "@modules/auth/guards/authenticated.guard";
 import { Controller, Get, Query, Req, UseGuards } from "@nestjs/common";
 import { ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
@@ -11,7 +13,6 @@ import type {
 	UsageIndexResponseDto,
 } from "../dtos/usage.response.dto";
 import { UsageQuotaQueryDto } from "../dtos/usage-quota.query.dto";
-import type { UsageQuotaSchema } from "../schemas/usage-quota.schema";
 import { UsageService } from "../services/usage.service";
 
 @ApiTags("Usage")
@@ -24,7 +25,7 @@ export class UsageController {
 	@ApiOperation({ summary: "Get current month usage" })
 	@ApiResponse({ type: UsageIndexResponseClassDto })
 	async index(@Req() req: Request): Promise<UsageIndexResponseDto> {
-		return this.usageService.getCurrentUsage(req.locals.tenant.id);
+		return this.usageService.index(req.locals.tenant.id);
 	}
 
 	@Get("/history")
@@ -32,8 +33,8 @@ export class UsageController {
 	@ApiResponse({ type: UsageHistoryResponseClassDto })
 	async history(
 		@Req() req: Request,
-		@Query() query: UsageQuotaQueryDto,
+		@Query(new ZodQueryPipe(usageQuotaQueryDto)) query: UsageQuotaQueryDto,
 	): Promise<UsageHistoryResponseDto> {
-		return this.usageService.getHistory(req.locals.tenant.id, query);
+		return this.usageService.history(req.locals.tenant.id, query);
 	}
 }

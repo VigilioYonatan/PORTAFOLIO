@@ -8,9 +8,11 @@ export const userStoreDto = userSchema
 		email: true,
 		password: true,
 		role_id: true,
+		phone_number: true,
 		status: true,
 	})
 	.extend({
+		phone_number: userSchema.shape.phone_number.optional(),
 		repeat_password: userSchema.shape.password,
 	})
 	.refine((data) => data.password === data.repeat_password, {

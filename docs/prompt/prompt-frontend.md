@@ -26,11 +26,13 @@
 > **Utilizar las variables de css (OBLIGATORIO):** > **Ten cuidado** Ten cuidado con los overflow-hidden y con los h-screen
 > No harcodear tipos, heredar de los .schemas.ts Pick<ExampleSchema> o Omit<ExampleSchema>, ExampleSchema["field"], pero nunca harcodees tipos osea nada de as "PORTFOLIO_PROJECT" | "BLOG_POST" sino usa ExampleSchema["techeable_type"], es un ejemplo.
 > **NO PONGAS ANTIGRAVITY** No escribas antigavity en el css ni html, nigun lado.
-
+> **lOS NOMBRES DE LOS COMPONENTES EN MINUSCULAS** ejemplo example.store.tsx, example.update.tsx, example.index.tsx,example.show.tsx, example-list.tsx,etc.
 > **NO CREES otro .css** Ya no crees otro archivo .css , todo eso esta en src/assets/css/global.css
 
 > No uses `Date` o `new Date` (API de JS). Usa `dayjs` importado de `@infrastructure/utils/hybrid/date.utils`. Ahí hay más funciones; si no hay, créala, pero usa dayjs.
 > **NO CREES otro .css** Ya no crees otro archivo .css , todo eso esta en src/assets/css/global.css
+> Si usas <label htmlFor=""></label> debes usar el htmlFor="" para que funcione correctamente., si usas <button></button> debes usar el type="button" para que funcione correctamente y aria-label="" para que funcione correctamente.
+> No usar useTable donde no se uses tablas, usar usePaginator.
 
 ```css
 @theme {
@@ -471,7 +473,7 @@ export const onRequest = defineMiddleware((context, next) => {
 
 ```typescript
 // src/hooks/useMotion.ts
-import { useEntranceAnimation, useHoverScale, animate } from "@hooks/useMotion";
+import { useEntranceAnimation, useHoverScale, animate } from "@hooks/use-motion";
 
 // Entrance animation
 function Card() {
@@ -651,7 +653,7 @@ interface Props {
 ### Variables Dinámicas
 
 ```tsx
-<div style={{ "--w": `${percent}%` }} class="w-[var(--w)]" />
+<div style={{ "--w": `${percent}%` }} class="w-(--w)" />
 ```
 
 ---
@@ -705,10 +707,10 @@ type State =
 
 ```typescript
 // Rutas
-const Settings = lazy(() => import("./pages/Settings"));
+const Settings = lazy(() => import("./pages/settings"));
 
 // Componentes pesados
-const Chart = lazy(() => import("./components/Chart"));
+const Chart = lazy(() => import("./components/chart"));
 ```
 
 ### Imágenes, videos y archivos
@@ -853,6 +855,8 @@ const { mutateAsync,mutate, isLoading, isSuccess, ...rest } = useMutation(
 
 Esto es un ejemplo de una tabla para mostrar para que te guies, el diseño puede cambiar dependiendo de la necesidad y el diseño solo es un ejemplo nada mas para que te guies de como usar tablas,etc
 
+No use useTable donde no se usa tabla, usa usePaginator.
+
 **IMPORTANTE: Definición de Tipos para UseTable (Estandarización)**
 
 Al definir los tipos para una tabla en el archivo `*.index.api.ts`, **TIENE QUE ESTAR ARRIBA DE LA FUNCIÓN** y seguir estrictamente esta estructura:
@@ -868,7 +872,7 @@ export type EntityIndexMethods = {
 
 // 3. Unir todo en el tipo de la tabla
 export type EntityIndexTable = UseTable<
-  EntityIndexSchema, // El schema de la entidad
+  Refetch<EntityIndexResponseDto>["results"], // El schema de la entidad
   EntityIndexSecondaryPaginator, // Los paginadores extra
   EntityIndexMethods // Los métodos
 >;
@@ -880,6 +884,8 @@ export type EntityIndexTable = UseTable<
 export function entityIndexApi(table: EntityIndexTable) { ... }
 ```
 
+// NOMBRE DE ESTE ARCHIVO curso_type.index.tsx
+
 ```tsx
 function CursoTypeIndex() {
     const campusContext = useCampusContext();
@@ -889,7 +895,7 @@ function CursoTypeIndex() {
 
 
     const columns: Columns<
-        CursoTypeSchemaFromServer,
+          Refetch<EntityIndexResponseDto>["results"],
         CursoTypeIndexSecondaryPaginator,
         EntityIndexMethods
     > = [
@@ -1333,7 +1339,7 @@ function Component() {
       {component}
       {/* search */}
       <div>
-        <label for="name">Name:</label>
+        <label htmlFor="name">Name:</label>
         <input
           type="text"
           id="name"
@@ -1344,7 +1350,7 @@ function Component() {
       </div>
       {/* limit */}
       <div>
-        <label for="name">limit:</label>
+        <label htmlFor="name">limit:</label>
         <input
           type="number"
           id="name"
@@ -1405,6 +1411,8 @@ function Component() {
 
 ## Importante al imprimir informacion en el frontend de una api
 
+tenant.show.tsx
+
 ```tsx
 // ✅ Correcto, es mas limpio
 const tenantShowQuery = tenantShowApi(id);
@@ -1459,6 +1467,8 @@ return <div>{JSON.stringify(tenantShowQuery.data)}</div>;
     }, [tenantShowQuery.isSuccess, tenantShowQuery.data]);
 
 // ✅ Correcto
+
+// nombre del archivo example.update.tsx
 interface ExampleUpdateProps {
     id: number;
    refetch:( data: Refetch<ExampleIndexResponseDto["results"]>):void //  aca va el tipo de la tabla para poder transformar
@@ -1630,6 +1640,7 @@ function UserUpdate({ user, refetch }: UserUpdateProps) {
 ```
 
 Importante poner codigo duro dentro de los componentes, es mejor crear un archivo constante y ahi poner y tiparlo.
+Nombre del archivo: example.store.tsx
 
 ```ts
 function ExampleStore() {
@@ -2143,7 +2154,7 @@ mode: "all",
 });
 
 <div>
-  <label>Género</label>
+  <label htmlFor="gender">Género</label>
   <div>
     {/* Opción Masculino */}
     <label>
@@ -2156,7 +2167,7 @@ mode: "all",
     </label>
 
     {/* Opción Femenino */}
-    <label>
+    <label htmlFor="gender">
       <input
         type="radio"
         value="femenino"
@@ -2308,7 +2319,7 @@ import type { UseTable } from "@vigilio/preact-table";
 
 export type ExampleIndexSecondaryPaginator = "action";
 export type ExampleIndexTable = UseTable<
-ExampleIndexSchema,
+Refetch<ExampleIndexResponseDto>["results"],
 ExampleIndexSecondaryPaginator
 
 > ;
@@ -3251,7 +3262,7 @@ _Optimizaciones críticas para una experiencia 60fps constante._
 ### Loading & Splitting
 
 1.  **Route Lazy Loading**: Divide y vencerás.
-    > _Example_: `const Settings = lazy(() => import('./pages/Settings'));`.
+    > _Example_: `const Settings = lazy(() => import('./pages/settings'));`.
 2.  **Component Lazy Loading**: Widgets pesados se cargan "on-demand".
     > _Example_: Carga `Recharts` solo cuando el usuario hace scroll a la sección Stats.
 3.  **Image Formats**: AVIF/WebP obligatorio.

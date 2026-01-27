@@ -475,7 +475,7 @@ export const onRequest = defineMiddleware((context, next) => {
 
 ```typescript
 // src/hooks/useMotion.ts
-import { useEntranceAnimation, useHoverScale, animate } from "@hooks/useMotion";
+import { useEntranceAnimation, useHoverScale, animate } from "@hooks/use-motion";
 
 // Entrance animation
 function Card() {

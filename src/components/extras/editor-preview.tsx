@@ -1,6 +1,6 @@
 import { Eye, EyeOff } from "lucide-preact";
 import { useEffect, useRef } from "preact/hooks";
-import Button from "./Button";
+import Button from "./button";
 
 interface EditorPreviewProps {
 	content: string;
@@ -39,12 +39,12 @@ function EditorPreview({
 			} min-h-[100px] transition-all duration-300 ${className}`}
 		>
 			{/* Barra superior pegajosa */}
-			<div class="sticky top-0 z-20 flex justify-end p-2 bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/60 ">
+			<div class="sticky top-0 z-20 flex justify-end p-2 bg-white/80 backdrop-blur supports-backdrop-filter:bg-white/60 ">
 				<Button
 					variant="outline"
 					size="sm"
 					onClick={onClosePreview}
-					className="flex gap-2 items-center w-[200px] !py-5"
+					className="flex gap-2 items-center w-[200px] py-5!"
 					type="button"
 				>
 					{isShowPreview ? (

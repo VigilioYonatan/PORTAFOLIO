@@ -1,8 +1,8 @@
+import { ZodQueryPipe } from "@infrastructure/pipes/zod-query.pipe";
 import { ZodPipe } from "@infrastructure/pipes/zod.pipe";
-import type { PaginatorResult } from "@infrastructure/utils/server";
+import { projectQueryDto } from "../dtos/project.query.dto";
 import { Public } from "@modules/auth/decorators/public.decorator";
 import { Roles } from "@modules/auth/decorators/roles.decorator";
-import { AuthenticatedGuard } from "@modules/auth/guards/authenticated.guard";
 import {
 	Body,
 	Controller,
@@ -15,7 +15,6 @@ import {
 	Put,
 	Query,
 	Req,
-	UseGuards,
 } from "@nestjs/common";
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
 import type { Request } from "express";
@@ -39,12 +38,10 @@ import {
 	type ProjectUpdateDto,
 	projectUpdateDto,
 } from "../dtos/project.update.dto";
-import type { ProjectSchema } from "../schemas/project.schema";
 import { ProjectService } from "../services/project.service";
 
 @ApiTags("Proyectos")
-@UseGuards(AuthenticatedGuard)
-@Controller("projects")
+@Controller("project")
 export class ProjectController {
 	constructor(private readonly projectService: ProjectService) {}
 
@@ -58,7 +55,7 @@ export class ProjectController {
 	})
 	index(
 		@Req() req: Request,
-		@Query() query: ProjectQueryClassDto,
+		@Query(new ZodQueryPipe(projectQueryDto)) query: ProjectQueryClassDto,
 	): Promise<ProjectIndexResponseDto> {
 		return this.projectService.index(req.locals.tenant.id, query);
 	}
@@ -75,7 +72,7 @@ export class ProjectController {
 		@Req() req: Request,
 		@Param("slug") slug: string,
 	): Promise<ProjectShowResponseClassDto> {
-		return this.projectService.showBySlug((req as any).locals.tenant.id, slug);
+		return this.projectService.showBySlug(req.locals.tenant.id, slug);
 	}
 
 	@HttpCode(201)
@@ -92,7 +89,7 @@ export class ProjectController {
 		@Req() req: Request,
 		@Body(new ZodPipe(projectStoreDto)) body: ProjectStoreDto,
 	): Promise<ProjectStoreResponseClassDto> {
-		return this.projectService.store((req as any).locals.tenant.id, body);
+		return this.projectService.store(req.locals.tenant.id, body);
 	}
 
 	@HttpCode(200)
@@ -110,7 +107,7 @@ export class ProjectController {
 		@Param("id", ParseIntPipe) id: number,
 		@Body(new ZodPipe(projectUpdateDto)) body: ProjectUpdateDto,
 	): Promise<ProjectUpdateResponseClassDto> {
-		return this.projectService.update((req as any).locals.tenant.id, id, body);
+		return this.projectService.update(req.locals.tenant.id, id, body);
 	}
 
 	@HttpCode(200)
@@ -126,7 +123,7 @@ export class ProjectController {
 		@Req() req: Request,
 		@Param("id", ParseIntPipe) id: number,
 	): Promise<ProjectDestroyResponseClassDto> {
-		return this.projectService.destroy((req as any).locals.tenant.id, id);
+		return this.projectService.destroy(req.locals.tenant.id, id);
 	}
 
 	@HttpCode(200)
@@ -142,6 +139,6 @@ export class ProjectController {
 		@Req() req: Request,
 		@Param("id", ParseIntPipe) id: number,
 	): Promise<ProjectSyncResponseClassDto> {
-		return this.projectService.sync((req as any).locals.tenant.id, id);
+		return this.projectService.sync(req.locals.tenant.id, id);
 	}
 }

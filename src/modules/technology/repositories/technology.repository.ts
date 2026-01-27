@@ -3,7 +3,6 @@ import { DRIZZLE } from "@infrastructure/providers/database/database.service";
 import { toNull } from "@infrastructure/utils/server";
 import { Inject, Injectable } from "@nestjs/common";
 import {
-	AnyColumn,
 	and,
 	asc,
 	desc,
@@ -11,16 +10,13 @@ import {
 	getTableColumns,
 	ilike,
 	lt,
-	or,
 	SQL,
 	sql,
 } from "drizzle-orm";
 import { NodePgDatabase } from "drizzle-orm/node-postgres";
-import { TechnologyQueryDto } from "../dtos/technology.query.dto";
-import { TechnologyStoreDto } from "../dtos/technology.store.dto";
-import { TechnologyUpdateDto } from "../dtos/technology.update.dto";
+import type { TechnologyQueryDto } from "../dtos/technology.query.dto";
 import { technologyEntity } from "../entities/technology.entity";
-import { TechnologySchema } from "../schemas/technology.schema";
+import type { TechnologySchema } from "../schemas/technology.schema";
 
 @Injectable()
 export class TechnologyRepository {

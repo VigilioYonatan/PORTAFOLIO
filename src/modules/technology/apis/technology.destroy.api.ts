@@ -11,13 +11,12 @@ export function technologyDestroyApi() {
 		TechnologyDestroyResponseDto,
 		number,
 		TechnologyDestroyApiError
-	>("/technologies", async (url, id) => {
-			const response = await fetch(`/api/v1${url}/${id}`, {
-				method: "DELETE",
-			});
-			const result = await response.json();
-			if (!response.ok) throw result;
-			return result;
-		},
-	);
+	>("/technology", async (url, id) => {
+		const response = await fetch(`/api/v1${url}/${id}`, {
+			method: "DELETE",
+		});
+		const result = await response.json();
+		if (!response.ok) throw result;
+		return result;
+	});
 }

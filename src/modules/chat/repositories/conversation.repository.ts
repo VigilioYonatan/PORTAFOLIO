@@ -3,7 +3,6 @@ import { DRIZZLE } from "@infrastructure/providers/database/database.service";
 import { Inject, Injectable } from "@nestjs/common";
 import { and, asc, desc, eq } from "drizzle-orm";
 import type { NodePgDatabase } from "drizzle-orm/node-postgres";
-import type { ConversationStoreDto } from "../dtos/conversation.store.dto";
 import { chatMessageEntity } from "../entities/chat-message.entity";
 import { conversationEntity } from "../entities/conversation.entity";
 import { type ChatMessageSchema } from "../schemas/chat-message.schema";
@@ -17,15 +16,16 @@ export class ConversationRepository {
 
 	async store(
 		tenant_id: number,
-		body: ConversationStoreDto & { ip_address: string },
+		body: Omit<
+			ConversationSchema,
+			"id" | "tenant_id" | "created_at" | "updated_at"
+		>,
 	): Promise<ConversationSchema> {
 		const [result] = await this.db
 			.insert(conversationEntity)
 			.values({
 				...body,
 				tenant_id,
-				mode: "AI", // Default to AI as per schema/rules
-				is_active: true,
 			})
 			.returning();
 		return result;
@@ -44,7 +44,7 @@ export class ConversationRepository {
 		return result || null;
 	}
 
-	async getRecentForAnalysis(
+	async indexRecentForAnalysis(
 		tenant_id: number,
 		limit_count: number,
 	): Promise<(ConversationSchema & { messages: ChatMessageSchema[] })[]> {

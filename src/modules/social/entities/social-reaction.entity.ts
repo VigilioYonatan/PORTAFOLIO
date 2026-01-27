@@ -20,6 +20,13 @@ export const reactionTypeEnum = pgEnum("reaction_type_enum", [
 	"FIRE",
 ]);
 
+export const reactableTypeEnum = pgEnum("reactable_type_enum", [
+	"PORTFOLIO_PROJECT",
+	"BLOG_POST",
+	"SOCIAL_COMMENT",
+	"MUSIC_TRACK",
+]);
+
 export const socialReactionEntity = pgTable(
 	"social_reactions",
 	{
@@ -29,9 +36,7 @@ export const socialReactionEntity = pgTable(
 			.references(() => tenantEntity.id),
 		type: reactionTypeEnum().notNull().default("LIKE"),
 		reactable_id: integer().notNull(),
-		reactable_type: varchar({ length: 50 })
-			.$type<SocialReactionSchema["reactable_type"]>()
-			.notNull(),
+		reactable_type: reactableTypeEnum().notNull(),
 		visitor_id: varchar({ length: 100 }).notNull(),
 		created_at: timestamp({ withTimezone: true, mode: "date" })
 			.notNull()

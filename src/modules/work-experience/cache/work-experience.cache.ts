@@ -2,6 +2,7 @@ import { CacheService } from "@infrastructure/providers/cache/cache.service";
 import { toNull } from "@infrastructure/utils/server";
 import { Injectable } from "@nestjs/common";
 import type { WorkExperienceSchema } from "../schemas/work-experience.schema";
+import type { WorkExperienceQueryDto } from "../dtos/work-experience.query.dto";
 
 @Injectable()
 export class WorkExperienceCache {
@@ -13,8 +14,8 @@ export class WorkExperienceCache {
 		return `${this.PREFIX}:${tenant_id}:${id}`;
 	}
 
-	private getListKey(tenant_id: number): string {
-		return `${this.PREFIX}:list:${tenant_id}`;
+	private getListKey(tenant_id: number, query: WorkExperienceQueryDto): string {
+		return `${this.PREFIX}:list:${tenant_id}:${JSON.stringify(query)}`;
 	}
 
 	async get(
@@ -35,18 +36,34 @@ export class WorkExperienceCache {
 		);
 	}
 
+	async getList<T>(
+		tenant_id: number,
+		query: WorkExperienceQueryDto,
+	): Promise<T | null> {
+		const key = this.getListKey(tenant_id, query);
+		const cached = await this.cacheService.get<T>(key);
+		return toNull(cached);
+	}
+
+	async setList<T>(
+		tenant_id: number,
+		query: WorkExperienceQueryDto,
+		result: T,
+	): Promise<void> {
+		const key = this.getListKey(tenant_id, query);
+		await this.cacheService.set(
+			key,
+			result,
+			this.cacheService.CACHE_TIMES.DAYS_1, // Experiences don't change often
+		);
+	}
+
 	async invalidate(tenant_id: number, id: number): Promise<void> {
 		await this.cacheService.del(this.getKey(tenant_id, id));
 	}
 
 	async invalidateLists(tenant_id: number): Promise<void> {
-		// Invalidate list queries. Since caching strategy for lists usually involves query params,
-		// we might need to invalidate by pattern if we cache lists strictly match query params.
-		// For now, if we don't strictly cache lists by query (or we invalidate them all on update):
 		const pattern = `${this.PREFIX}:list:${tenant_id}:*`;
 		await this.cacheService.deleteByPattern(pattern);
 	}
-
-	// Helper for list caching if needed, though simple invalidation is often safer for CRUD.
-	// Assuming invalidation of all lists for tenant on change is acceptable for this scale.
 }

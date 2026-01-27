@@ -36,7 +36,7 @@ function Accordion({
 	return (
 		<div
 			class={cn(
-				"bg-card border border-border rounded-[var(--radius-lg)] overflow-hidden transition-all",
+				"bg-card border border-border rounded-(--radius-lg) overflow-hidden transition-all",
 				className,
 			)}
 		>

@@ -3,7 +3,7 @@ import {
 	authEndImpersonateResponseDto,
 	authForgotPasswordResponseDto,
 	authImpersonateResponseDto,
-	authLoginResponseClassSchema,
+	authLoginResponseClassDto,
 	authLogoutResponseDto,
 	authMfaDisableResponseDto,
 	authMfaSetupResponseDto,
@@ -15,7 +15,7 @@ import {
 } from "./auth.response.dto";
 
 export class AuthLoginResponseClassDto extends createZodDto(
-	authLoginResponseClassSchema,
+	authLoginResponseClassDto,
 ) {}
 export class AuthRegisterResponseClassDto extends createZodDto(
 	authRegisterResponseDto,

@@ -13,11 +13,9 @@ import {
 	sql,
 } from "drizzle-orm";
 import type { NodePgDatabase } from "drizzle-orm/node-postgres";
-import { MusicQueryDto } from "../dtos/music.query.dto";
-import { MusicStoreDto } from "../dtos/music.store.dto";
-import { MusicUpdateDto } from "../dtos/music.update.dto";
+import type { MusicQueryDto } from "../dtos/music.query.dto";
 import { musicTrackEntity } from "../entities/music.entity";
-import { MusicTrackSchema } from "../schemas/music.schema";
+import type { MusicTrackSchema } from "../schemas/music.schema";
 
 @Injectable()
 export class MusicTrackRepository {
@@ -27,19 +25,22 @@ export class MusicTrackRepository {
 
 	async store(
 		tenant_id: number,
-		body: MusicStoreDto,
+		body: Omit<
+			MusicTrackSchema,
+			"id" | "tenant_id" | "created_at" | "updated_at"
+		>,
 	): Promise<MusicTrackSchema> {
 		const [result] = await this.db
 			.insert(musicTrackEntity)
 			.values({ ...body, tenant_id })
 			.returning();
-		return result as MusicTrackSchema;
+		return result;
 	}
 
 	async update(
 		tenant_id: number,
 		id: number,
-		body: MusicUpdateDto,
+		body: Partial<MusicTrackSchema>,
 	): Promise<MusicTrackSchema> {
 		const [result] = await this.db
 			.update(musicTrackEntity)

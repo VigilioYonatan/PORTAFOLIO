@@ -1,5 +1,5 @@
 import { useMutation } from "@vigilio/preact-fetching";
-import type { PortfolioConfigResponseDto } from "../dtos/portfolio-config.response.dto";
+import type { PortfolioConfigCvResponseDto } from "../dtos/portfolio-config.response.dto";
 import type { PortfolioConfigUpdateDto } from "../dtos/portfolio-config.update.dto";
 
 export interface PortfolioConfigUpdateApiError {
@@ -9,16 +9,16 @@ export interface PortfolioConfigUpdateApiError {
 }
 
 /**
- * portfolioConfigUpdate - /api/v1/portfolio-configs
+ * portfolioConfigUpdate - /api/v1/config
  * @method PATCH
  * @body PortfolioConfigUpdateDto
  */
 export function portfolioConfigUpdateApi() {
 	return useMutation<
-		PortfolioConfigResponseDto,
+		PortfolioConfigCvResponseDto,
 		PortfolioConfigUpdateDto,
 		PortfolioConfigUpdateApiError
-	>("/portfolio-configs", async (url, body) => {
+	>("/config", async (url, body) => {
 		const response = await fetch(`/api/v1${url}`, {
 			method: "PATCH",
 			body: JSON.stringify(body),

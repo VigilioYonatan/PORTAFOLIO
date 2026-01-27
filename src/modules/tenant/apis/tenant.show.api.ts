@@ -3,12 +3,12 @@ import type { TenantResponseDto } from "../dtos/tenant.response.dto";
 import type { TenantShowSchema } from "../schemas/tenant.schema";
 
 /**
- * tenantShow - /api/v1/tenants/:id
+ * tenantShow - /api/v1/tenant/:id
  * @method GET
  */
 export function tenantShowApi(id: number) {
 	return useQuery<TenantResponseDto, TenantShowApiError>(
-		`/tenants/${id}`,
+		`/tenant/${id}`,
 		async (url) => {
 			const response = await fetch(`/api/v1${url}`);
 			const result = await response.json();

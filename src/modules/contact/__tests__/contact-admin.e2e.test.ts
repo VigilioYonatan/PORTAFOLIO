@@ -31,6 +31,7 @@ describe("Contact Admin (E2E)", () => {
 		expect(loginRes.status).toBe(200);
 		authCookie = loginRes.get("Set-Cookie")?.[0] ?? "";
 		if (!authCookie)
+			// biome-ignore lint/suspicious/noConsole: <explanation>
 			console.error("Login failed to return cookie", loginRes.body);
 	});
 
@@ -43,7 +44,7 @@ describe("Contact Admin (E2E)", () => {
 
 		beforeAll(async () => {
 			const res = await request(e2e.app.getHttpServer())
-				.post("/api/v1/contact")
+				.post("/api/v1/contact-message")
 				.set("Host", "localhost")
 				.send({
 					name: "Test User",
@@ -55,9 +56,9 @@ describe("Contact Admin (E2E)", () => {
 			messageId = res.body.message.id;
 		});
 
-		it("should list contact messages", async () => {
+		it("should list contact contact", async () => {
 			const response = await request(e2e.app.getHttpServer())
-				.get("/api/v1/messages")
+				.get("/api/v1/contact-message")
 				.set("Host", "localhost")
 				.set("Cookie", authCookie);
 
@@ -67,7 +68,7 @@ describe("Contact Admin (E2E)", () => {
 
 		it("should mark message as read", async () => {
 			const response = await request(e2e.app.getHttpServer())
-				.patch(`/api/v1/messages/${messageId}`)
+				.patch(`/api/v1/contact-message/${messageId}`)
 				.set("Host", "localhost")
 				.set("Cookie", authCookie)
 				.send({ is_read: true });
@@ -78,7 +79,7 @@ describe("Contact Admin (E2E)", () => {
 
 		it("should delete message", async () => {
 			const response = await request(e2e.app.getHttpServer())
-				.delete(`/api/v1/messages/${messageId}`)
+				.delete(`/api/v1/contact-message/${messageId}`)
 				.set("Host", "localhost")
 				.set("Cookie", authCookie);
 

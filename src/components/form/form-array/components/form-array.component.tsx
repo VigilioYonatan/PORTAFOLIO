@@ -8,7 +8,7 @@ import type { UsePaginator } from "@vigilio/preact-paginator";
 import { Search } from "lucide-preact";
 import type { JSX } from "preact";
 import type { Path } from "react-hook-form";
-import Loader from "../../../extras/Loader";
+import Loader from "../../../extras/loader";
 import {
 	type SavedSearchItem,
 	useFormArray,

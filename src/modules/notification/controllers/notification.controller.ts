@@ -1,4 +1,6 @@
+import { ZodQueryPipe } from "@infrastructure/pipes/zod-query.pipe";
 import { ZodPipe } from "@infrastructure/pipes/zod.pipe";
+import { notificationQueryDto } from "../dtos/notification.query.dto";
 import { Roles } from "@modules/auth/decorators/roles.decorator";
 import {
 	Body,
@@ -32,7 +34,7 @@ import {
 import { NotificationService } from "../services/notification.service";
 
 @ApiTags("Notifications")
-@Controller("notifications")
+@Controller("notification")
 @Roles(1) // ADMIN
 export class NotificationController {
 	constructor(private readonly notificationService: NotificationService) {}
@@ -45,10 +47,11 @@ export class NotificationController {
 	})
 	index(
 		@Req() req: Request,
-		@Query() query: NotificationQueryClassDto,
+		@Query(new ZodQueryPipe(notificationQueryDto))
+		query: NotificationQueryClassDto,
 	): Promise<NotificationIndexResponseDto> {
 		const tenant_id = req.locals.tenant.id;
-		return this.notificationService.indexNotifications(tenant_id, query);
+		return this.notificationService.index(tenant_id, query);
 	}
 
 	@Patch("/:id")
@@ -63,7 +66,7 @@ export class NotificationController {
 		@Param("id", ParseIntPipe) id: number,
 		@Body(new ZodPipe(notificationUpdateDto)) body: NotificationUpdateDto,
 	): Promise<NotificationUpdateResponseDto> {
-		return this.notificationService.updateNotification(
+		return this.notificationService.update(
 			req.locals.tenant.id,
 			id,
 			body,
@@ -79,7 +82,7 @@ export class NotificationController {
 		type: NotificationDestroyAllResponseClassDto,
 	})
 	destroyAll(@Req() req: Request): Promise<NotificationDestroyAllResponseDto> {
-		return this.notificationService.destroyAllNotifications(
+		return this.notificationService.destroyAll(
 			req.locals.tenant.id,
 		);
 	}

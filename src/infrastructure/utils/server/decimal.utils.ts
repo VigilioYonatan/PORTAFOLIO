@@ -1,7 +1,17 @@
 import { customType } from "drizzle-orm/pg-core";
 
-export const decimalCustom = (name: string, precision = 10, scale = 2) =>
-	customType<{ data: number; driverData: string }>({
+export const decimalCustom = (
+	nameOrPrecision?: string | number,
+	precisionArg = 10,
+	scaleArg = 2,
+) => {
+	const name = typeof nameOrPrecision === "string" ? nameOrPrecision : "";
+	const precision =
+		typeof nameOrPrecision === "number" ? nameOrPrecision : precisionArg;
+	const scale =
+		typeof nameOrPrecision === "string" ? scaleArg : (precisionArg ?? 2);
+
+	return customType<{ data: number; driverData: string }>({
 		dataType() {
 			return `numeric(${precision}, ${scale})`;
 		},
@@ -12,3 +22,4 @@ export const decimalCustom = (name: string, precision = 10, scale = 2) =>
 			return value.toFixed(scale);
 		},
 	})(name);
+};

@@ -9,24 +9,26 @@ export interface DocumentsStoreApiError {
 }
 
 /**
- * documentsStore - /api/v1/documents
+ * documentsStore - /api/v1/document
  * @method POST
  * @body DocumentStoreDto
  */
 export function documentsStoreApi() {
-	return useMutation<DocumentStoreResponseDto, DocumentStoreDto, DocumentsStoreApiError>(
-		"/documents",
-		async (url, body) => {
-			const response = await fetch(`/api/v1${url}`, {
-				method: "POST",
-				body: JSON.stringify(body),
-				headers: { "Content-Type": "application/json" },
-			});
-			const result = await response.json();
-			if (!response.ok) {
-				throw result;
-			}
-			return result;
-		},
-	);
+	return useMutation<
+		DocumentStoreResponseDto,
+		DocumentStoreDto | FormData,
+		DocumentsStoreApiError
+	>("/document", async (url, body) => {
+		const isFormData = body instanceof FormData;
+		const response = await fetch(`/api/v1${url}`, {
+			method: "POST",
+			body: isFormData ? body : JSON.stringify(body),
+			headers: isFormData ? {} : { "Content-Type": "application/json" },
+		});
+		const result = await response.json();
+		if (!response.ok) {
+			throw result;
+		}
+		return result;
+	});
 }

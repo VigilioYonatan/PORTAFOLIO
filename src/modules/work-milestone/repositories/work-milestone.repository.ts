@@ -25,7 +25,6 @@ export class WorkMilestoneRepository {
 			sortBy,
 			sortDir,
 			cursor,
-			search,
 		} = query;
 
 		const baseWhere: SQL[] = [eq(workMilestoneEntity.tenant_id, tenant_id)];

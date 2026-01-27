@@ -1,7 +1,6 @@
 import { schema } from "@infrastructure/providers/database/database.schema";
 import { DRIZZLE } from "@infrastructure/providers/database/database.service";
 import { toNull } from "@infrastructure/utils/server";
-import type { FilesSchema } from "@modules/uploads/schemas/upload.schema";
 import { Inject, Injectable } from "@nestjs/common";
 import {
 	and,
@@ -163,7 +162,7 @@ export class UserRepository {
 
 	async store(
 		tenant_id: number,
-		body: Omit<UserSchema, "id" | "created_at" | "updated_at">,
+		body: Omit<UserSchema, "id" | "tenant_id" | "created_at" | "updated_at">,
 	): Promise<UserShowSchema> {
 		const [result] = await this.db
 			.insert(userEntity)

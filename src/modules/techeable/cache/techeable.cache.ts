@@ -1,7 +1,5 @@
 import { CacheService } from "@infrastructure/providers/cache/cache.service";
-import { toNull } from "@infrastructure/utils/server";
 import { Injectable } from "@nestjs/common";
-import type { TecheableSchema } from "../schemas/techeable.schema";
 
 @Injectable()
 export class TecheableCache {

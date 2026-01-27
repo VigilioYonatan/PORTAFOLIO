@@ -18,7 +18,6 @@ import {
 	type AiConfigUpdateDto,
 	aiConfigUpdateDto,
 } from "../dtos/ai-config.update.dto";
-import type { AiConfigSchema } from "../schemas/ai-config.schema";
 import { AiConfigService } from "../services/ai-config.service";
 
 @ApiTags("AI Config")

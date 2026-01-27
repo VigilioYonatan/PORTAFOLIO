@@ -3,7 +3,6 @@ import { ZodQueryPipe } from "@infrastructure/pipes/zod-query.pipe";
 import { Public } from "@modules/auth/decorators/public.decorator";
 import { Roles } from "@modules/auth/decorators/roles.decorator";
 import { AuthenticatedGuard } from "@modules/auth/guards/authenticated.guard";
-import { RolesGuard } from "@modules/auth/guards/roles.guard";
 import {
 	Body,
 	Controller,
@@ -45,29 +44,23 @@ import {
 } from "../dtos/tenant.update-me.dto";
 import { TenantService } from "../services/tenant.service";
 
-// Assuming ResponseDto is a generic response type that needs to be imported or defined.
-// For the purpose of this edit, I will add a placeholder import.
-// If ResponseDto is meant to be one of the existing DTOs, please clarify.
-// import { ResponseDto } from 'path/to/response.dto'; // Placeholder
-
 @ApiTags("Tenants")
-@UseGuards(AuthenticatedGuard, RolesGuard)
-@Controller("tenants")
+@UseGuards(AuthenticatedGuard)
+@Controller("tenant")
 export class TenantController {
 	constructor(private readonly tenantService: TenantService) {}
 
-	@Public()
 	@Get("/")
-	@ApiOperation({ summary: "Listar tenants paginados" })
+	@Roles(1) // Admin only
+	@ApiOperation({ summary: "Listar inquilinos (Solo Admin)" })
 	@ApiResponse({
 		status: 200,
 		type: TenantIndexResponseClassDto,
-		description: "Lista de tenants paginada",
+		description: "Lista de inquilinos paginada",
 	})
 	index(
 		@Query(new ZodQueryPipe(tenantQueryDto)) query: TenantQueryClassDto,
 	): Promise<TenantIndexResponseClassDto> {
-		// Changed from Promise<TenantIndexResponseClassDto> to Promise<ResponseDto>
 		return this.tenantService.index(query);
 	}
 
@@ -92,7 +85,6 @@ export class TenantController {
 		description: "Detalle del tenant",
 	})
 	async show(
-		@Req() req: Request,
 		@Param("id", ParseIntPipe) id: number,
 	): Promise<TenantShowResponseClassDto> {
 		return this.tenantService.show(id);
@@ -109,7 +101,6 @@ export class TenantController {
 		description: "Tenant creado exitosamente",
 	})
 	store(
-		@Req() req: Request,
 		@Body(new ZodPipe(tenantStoreDto)) body: TenantStoreDto,
 	): Promise<TenantStoreResponseClassDto> {
 		return this.tenantService.store(body);
@@ -144,7 +135,6 @@ export class TenantController {
 		description: "Tenant actualizado",
 	})
 	update(
-		@Req() req: Request,
 		@Param("id", ParseIntPipe) id: number,
 		@Body(new ZodPipe(tenantUpdateDto)) body: TenantUpdateDto,
 	): Promise<TenantUpdateResponseClassDto> {
@@ -160,10 +150,8 @@ export class TenantController {
 		description: "Tenant eliminado",
 	})
 	destroy(
-		@Req() req: Request,
 		@Param("id", ParseIntPipe) id: number,
 	): Promise<TenantDestroyResponseClassDto> {
-		// Changed from Promise<TenantDestroyResponseClassDto> to Promise<ResponseDto>
 		return this.tenantService.destroy(id);
 	}
 }

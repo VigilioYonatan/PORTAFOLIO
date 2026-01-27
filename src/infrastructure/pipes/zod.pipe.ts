@@ -21,7 +21,6 @@ export class ZodPipe<T> implements PipeTransform<unknown, T> {
 			if (error instanceof ZodError) {
 				// Return generic 400 with issues
 				const issues = error.issues;
-				console.log("Zod Validation Errors:", JSON.stringify(issues, null, 2));
 				throw new BadRequestException({
 					message: "Validation failed",
 					errors: issues,

@@ -32,7 +32,7 @@ import { TecheableService } from "../services/techeable.service";
 
 @ApiTags("Techeables")
 @UseGuards(AuthenticatedGuard, RolesGuard)
-@Controller("techeables")
+@Controller("techeable")
 export class TecheableController {
 	constructor(private readonly techeableService: TecheableService) {}
 

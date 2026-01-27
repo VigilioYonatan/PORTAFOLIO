@@ -1,6 +1,9 @@
+/** biome-ignore-all lint/suspicious/noConsole: <explanation> */
+/** biome-ignore-all lint/suspicious/noExplicitAny: <explanation> */
 import { existsSync } from "node:fs";
 import path from "node:path";
 import { schema } from "@infrastructure/providers/database/database.schema";
+import * as bcrypt from "bcrypt";
 import { config } from "dotenv";
 import { sql } from "drizzle-orm";
 import { drizzle, type NodePgDatabase } from "drizzle-orm/node-postgres";
@@ -11,7 +14,6 @@ import {
 } from "drizzle-orm/pglite";
 import { migrate } from "drizzle-orm/pglite/migrator";
 import { Pool } from "pg";
-import * as bcrypt from "bcrypt";
 
 let usingDedicatedTestDb = false;
 export type TestDb =
@@ -88,7 +90,6 @@ export async function getTestDb(): Promise<TestDb> {
 	db = drizzle(pool, { schema, logger: true });
 
 	// Standalone migration for real PG (idempotent - only runs new migrations)
-	console.log("📜 Running migrations on PostgreSQL...");
 	try {
 		await migrateNodePg(db as NodePgDatabase<typeof schema>, {
 			migrationsFolder: path.join(process.cwd(), "drizzle/migrations"),
@@ -145,7 +146,7 @@ export async function cleanAllTestData(database: TestDb): Promise<void> {
           END IF;
         END $$;`,
 			);
-		} catch (err) {
+		} catch (_err) {
 			// Tables might not exist yet on first run, ignore error
 			console.warn("⚠️ cleanAllTestData skipped - tables may not exist yet");
 		}

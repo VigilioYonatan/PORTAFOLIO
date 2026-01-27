@@ -6,7 +6,7 @@ import {
 	type PathValue,
 	type UseFormReturn,
 } from "react-hook-form";
-import { FormControlContext } from "../../Form";
+import { FormControlContext } from "../../form";
 import type { FormColorProps } from "../types";
 
 export type FormColorMode = "palette" | "picker";

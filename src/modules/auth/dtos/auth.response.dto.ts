@@ -14,7 +14,7 @@ export const authLoginResponseDto = z.object({
 export type AuthLoginResponseApi = z.infer<typeof authLoginResponseDto>;
 
 // NestJS/Swagger compatibility schema
-export const authLoginResponseClassSchema = z.object({
+export const authLoginResponseClassDto = z.object({
 	success: z.boolean(),
 	mfa_required: z.boolean(),
 	temp_token: z.string().optional(),

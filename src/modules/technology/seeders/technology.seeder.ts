@@ -90,7 +90,7 @@ export class TechnologySeeder {
 			});
 
 			if (!exists) {
-				await this.db.insert(technologyEntity).values(tech as any).returning();
+				await this.db.insert(technologyEntity).values(tech).returning();
 			}
 		}
 	}

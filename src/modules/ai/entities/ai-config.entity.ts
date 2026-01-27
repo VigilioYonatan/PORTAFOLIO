@@ -10,7 +10,6 @@ import {
 	serial,
 	text,
 	timestamp,
-	unique,
 } from "drizzle-orm/pg-core";
 import type { AiConfigSchema } from "../schemas/ai-config.schema";
 
@@ -28,7 +27,7 @@ export const aiModelConfigEntity = pgTable(
 		embedding_dimensions: integer().notNull().default(1536),
 
 		system_prompt: text(),
-		temperature: decimalCustom("temperature", 3, 2).notNull().default(0.7),
+		temperature: decimalCustom(3, 2).notNull().default(0.7),
 		max_tokens: integer().notNull().default(2000),
 
 		chunk_size: integer().notNull().default(1000),

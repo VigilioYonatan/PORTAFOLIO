@@ -23,7 +23,18 @@ export class AiConfigService {
 		body: AiConfigUpdateDto,
 	): Promise<AiConfigUpdateResponseDto> {
 		this.logger.log({ tenant_id }, "Updating AI Config");
-		const config = await this.aiConfigRepository.update(tenant_id, body);
+		const existing = await this.aiConfigRepository.show(tenant_id);
+		let config: AiConfigSchema;
+
+		if (!existing) {
+			config = await this.aiConfigRepository.store(tenant_id, body);
+		} else {
+			config = await this.aiConfigRepository.update(
+				tenant_id,
+				existing.id,
+				body,
+			);
+		}
 		return { success: true, config };
 	}
 }

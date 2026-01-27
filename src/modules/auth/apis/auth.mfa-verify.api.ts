@@ -1,6 +1,6 @@
 import { useMutation } from "@vigilio/preact-fetching";
 import type { AuthMfaVerifyResponseDto } from "../dtos/auth.response.dto";
-import type { AuthMfaVerifyDto } from "../dtos/auth.mfa-verify.dto";
+import type { AuthMfaVerifyDto } from "../dtos/mfa-verify.dto";
 
 export interface AuthMfaVerifyApiError {
 	success: false;

@@ -32,13 +32,12 @@ export class BlogPostService {
 		this.logger.log({ tenant_id, userId }, "Creating blog post");
 		const slug = slugify(body.title);
 
-		const blogPost = await this.repository.store(tenant_id, userId, {
+		const blogPost = await this.repository.store(tenant_id, {
 			...body,
 			slug,
+			author_id: userId,
 		});
 
-		await this.blogPostCache.set(tenant_id, blogPost.id, blogPost);
-		await this.blogPostCache.setBySlug(tenant_id, blogPost.slug, blogPost);
 		await this.blogPostCache.invalidateLists(tenant_id);
 
 		return { success: true, post: blogPost };
@@ -50,15 +49,20 @@ export class BlogPostService {
 		body: BlogPostUpdateDto,
 	): Promise<BlogPostUpdateResponseDto> {
 		this.logger.log({ tenant_id, id }, "Updating blog post");
-		const blogPost = await this.repository.update(tenant_id, id, body);
+
+		const updates: Partial<BlogPostSchema> = { ...body };
+		if (body.title) {
+			updates.slug = slugify(body.title);
+		}
+
+		const blogPost = await this.repository.update(tenant_id, id, updates);
 
 		if (!blogPost) {
 			this.logger.warn({ tenant_id, id }, "Blog post not found for update");
 			throw new NotFoundException("Blog post not found");
 		}
 
-		await this.blogPostCache.set(tenant_id, blogPost.id, blogPost);
-		await this.blogPostCache.setBySlug(tenant_id, blogPost.slug, blogPost);
+		await this.blogPostCache.invalidate(tenant_id, blogPost.id, blogPost.slug);
 		await this.blogPostCache.invalidateLists(tenant_id);
 
 		return { success: true, post: blogPost };
@@ -116,30 +120,21 @@ export class BlogPostService {
 		return paginator<BlogPostQueryDto, BlogPostSchema>("/blog/posts", {
 			filters: query,
 			cb: async (filters, isClean) => {
+				// If clean query, try cache first
 				if (isClean) {
 					const cached = await this.blogPostCache.getList<
 						[BlogPostSchema[], number]
-					>(tenant_id, JSON.stringify(filters));
+					>(tenant_id, filters);
 					if (cached) return cached;
 				}
 
-				const [data, total] = await this.repository.index(
-					tenant_id,
-					filters.limit ?? 10,
-					filters.offset ?? 0,
-					filters.search,
-					filters.category_id,
-					filters.is_published,
-				);
+				const result = await this.repository.index(tenant_id, filters);
 
 				if (isClean) {
-					await this.blogPostCache.setList(tenant_id, JSON.stringify(filters), [
-						data,
-						total,
-					]);
+					await this.blogPostCache.setList(tenant_id, filters, result);
 				}
 
-				return [data, total];
+				return result;
 			},
 		});
 	}

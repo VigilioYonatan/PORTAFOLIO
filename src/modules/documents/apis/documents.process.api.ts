@@ -7,21 +7,22 @@ export interface DocumentsProcessApiError {
 }
 
 /**
- * documentsProcess - /api/v1/documents/:id/process
+ * documentsProcess - /api/v1/document/:id/process
  * @method POST
  */
 export function documentsProcessApi() {
-	return useMutation<DocumentProcessResponseDto, number, DocumentsProcessApiError>(
-		"/documents",
-		async (url, id) => {
-			const response = await fetch(`/api/v1${url}/${id}/process`, {
-				method: "POST",
-			});
-			const result = await response.json();
-			if (!response.ok) {
-				throw result;
-			}
-			return result;
-		},
-	);
+	return useMutation<
+		DocumentProcessResponseDto,
+		number,
+		DocumentsProcessApiError
+	>("/document", async (url, id) => {
+		const response = await fetch(`/api/v1${url}/${id}/process`, {
+			method: "POST",
+		});
+		const result = await response.json();
+		if (!response.ok) {
+			throw result;
+		}
+		return result;
+	});
 }

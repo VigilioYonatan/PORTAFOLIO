@@ -6,7 +6,6 @@ import type {
 } from "../dtos/techeable.response.dto";
 import type { TecheableStoreDto } from "../dtos/techeable.store.dto";
 import { TecheableRepository } from "../repositories/techeable.repository";
-import type { TecheableSchema } from "../schemas/techeable.schema";
 
 @Injectable()
 export class TecheableService {

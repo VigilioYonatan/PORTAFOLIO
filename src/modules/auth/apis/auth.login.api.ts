@@ -6,6 +6,9 @@ export interface AuthLoginApiError {
 	success: false;
 	message: string;
 	body: keyof AuthLoginDto;
+	is_locked?: boolean;
+	lockout_end_at?: string;
+	remaining_attempts?: number;
 }
 
 /**

@@ -9,7 +9,7 @@ export interface TenantSettingUpdateApiError {
 }
 
 /**
- * tenantSettingUpdate - /api/v1/tenants/:id/settings
+ * tenantSettingUpdate - /api/v1/tenant/:id/settings
  * @method PUT
  * @body TenantSettingUpdateDto
  */
@@ -18,7 +18,7 @@ export function tenantSettingUpdateApi(tenant_id: number) {
 		TenantSettingResponseDto,
 		TenantSettingUpdateDto,
 		TenantSettingUpdateApiError
-	>(`/tenants/${tenant_id}/settings`, async (url, body) => {
+	>(`/tenant/${tenant_id}/settings`, async (url, body) => {
 		const response = await fetch(`/api/v1${url}`, {
 			method: "PUT",
 			body: JSON.stringify(body),

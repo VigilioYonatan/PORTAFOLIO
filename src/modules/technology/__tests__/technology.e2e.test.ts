@@ -37,7 +37,7 @@ describe("Technology Module (E2E)", () => {
 			const dto = TechnologyFactory.createStoreDto({ category: "BACKEND" });
 
 			const response = await request(e2e.app.getHttpServer())
-				.post("/api/v1/technologies")
+				.post("/api/v1/technology")
 				.set("Host", "localhost")
 				.set("Authorization", `Bearer ${adminAccessToken}`)
 				.set("x-mock-role", "admin")
@@ -51,7 +51,7 @@ describe("Technology Module (E2E)", () => {
 	describe("GET /technologies", () => {
 		it("should list technologies (Public)", async () => {
 			const response = await request(e2e.app.getHttpServer())
-				.get("/api/v1/technologies")
+				.get("/api/v1/technology")
 				.set("Host", "localhost");
 
 			expect(response.status).toBe(200);
@@ -63,7 +63,7 @@ describe("Technology Module (E2E)", () => {
 		it("should update a technology", async () => {
 			const createDto = TechnologyFactory.createStoreDto();
 			const createRes = await request(e2e.app.getHttpServer())
-				.post("/api/v1/technologies")
+				.post("/api/v1/technology")
 				.set("Host", "localhost")
 				.set("Authorization", `Bearer ${adminAccessToken}`)
 				.set("x-mock-role", "admin")
@@ -75,7 +75,7 @@ describe("Technology Module (E2E)", () => {
 			});
 
 			const response = await request(e2e.app.getHttpServer())
-				.put(`/api/v1/technologies/${id}`)
+				.put(`/api/v1/technology/${id}`)
 				.set("Host", "localhost")
 				.set("Authorization", `Bearer ${adminAccessToken}`)
 				.set("x-mock-role", "admin")
@@ -90,7 +90,7 @@ describe("Technology Module (E2E)", () => {
 		it("should delete a technology", async () => {
 			const createDto = TechnologyFactory.createStoreDto();
 			const createRes = await request(e2e.app.getHttpServer())
-				.post("/api/v1/technologies")
+				.post("/api/v1/technology")
 				.set("Host", "localhost")
 				.set("Authorization", `Bearer ${adminAccessToken}`)
 				.set("x-mock-role", "admin")
@@ -99,7 +99,7 @@ describe("Technology Module (E2E)", () => {
 			const id = createRes.body.technology.id;
 
 			const response = await request(e2e.app.getHttpServer())
-				.delete(`/api/v1/technologies/${id}`)
+				.delete(`/api/v1/technology/${id}`)
 				.set("Host", "localhost")
 				.set("Authorization", `Bearer ${adminAccessToken}`)
 				.set("x-mock-role", "admin");

@@ -15,7 +15,7 @@ export type UserIndexTable = UseTable<
 >;
 
 /**
- * userIndex - /api/v1/users
+ * userIndex - /api/v1/user
  * @method GET
  */
 import type { UserIndexResponseDto } from "../dtos/user.response.dto";
@@ -23,11 +23,9 @@ import type { UserIndexResponseDto } from "../dtos/user.response.dto";
 export function userIndexApi(
 	table: UserIndexTable | null = null,
 	paginator: UsePaginator | null = null,
-	roleFilter?: number | null,
-	statusFilter?: string | null,
 ) {
 	const query = useQuery<UserIndexResponseDto, PaginatorResultError>(
-		"/users",
+		"/user",
 		async (url) => {
 			const data = new URLSearchParams();
 			if (table) {
@@ -63,12 +61,6 @@ export function userIndexApi(
 				}
 			}
 
-			if (roleFilter) {
-				data.append("role_id", String(roleFilter));
-			}
-			if (statusFilter) {
-				data.append("status", statusFilter);
-			}
 			const response = await fetch(`/api/v1${url}?${data}`);
 			const results = await response.json();
 			if (!response.ok) {

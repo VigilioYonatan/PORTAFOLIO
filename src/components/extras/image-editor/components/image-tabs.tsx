@@ -1,4 +1,4 @@
-import Button from "@components/extras/Button";
+import Button from "@components/extras/button";
 import { cn } from "@infrastructure/utils/client";
 import type { JSX } from "preact/jsx-runtime";
 

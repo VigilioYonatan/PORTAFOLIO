@@ -1,8 +1,8 @@
-import { useRef, useEffect } from "preact/hooks";
-import { createPortal } from "preact/compat";
-import type { JSX } from "preact/jsx-runtime";
 import { cn } from "@infrastructure/utils/client/cn";
 import { XIcon } from "lucide-preact";
+import { createPortal } from "preact/compat";
+import { useEffect, useRef } from "preact/hooks";
+import type { JSX } from "preact/jsx-runtime";
 
 interface ModalProps {
 	isOpen: boolean;

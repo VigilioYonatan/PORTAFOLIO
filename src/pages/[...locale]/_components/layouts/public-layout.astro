@@ -4,14 +4,13 @@ import "@pages/_main.ts";
 import "@assets/css/global.css";
 import { getLangFromUrl, useTranslations } from "@src/i18n";
 
-import TerminalLogo from "../TerminalLogo";
-import NavLinks from "../NavLinks";
-import NeuroPlayer from "../NeuroPlayer";
-import FloatingActionChat from "../FloatingActionChat";
+import TerminalLogo from "../terminal.logo";
+import NavLinks from "../nav.links";
+import NeuroPlayer from "../neuro.player";
+import FloatingActionChat from "../floating-action.chat";
 import { Moon, Sun, Github, Activity } from "lucide-preact";
 
 const lang = getLangFromUrl(Astro.url);
-const t = useTranslations(lang);
 
 const {
   title = "Portfolio | Senior Developer",

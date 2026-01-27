@@ -33,8 +33,25 @@ export class WorkExperienceService {
 			"/experiences",
 			{
 				filters: query,
-				cb: async (filters, _isClean) => {
-					return await this.workExperienceRepository.index(tenant_id, filters);
+				cb: async (filters, isClean) => {
+					// If clean query, try cache first
+					if (isClean) {
+						const cached = await this.workExperienceCache.getList<
+							[WorkExperienceSchema[], number]
+						>(tenant_id, filters);
+						if (cached) return cached;
+					}
+
+					const result = await this.workExperienceRepository.index(
+						tenant_id,
+						filters,
+					);
+
+					if (isClean) {
+						await this.workExperienceCache.setList(tenant_id, filters, result);
+					}
+
+					return result;
 				},
 			},
 		);
@@ -62,7 +79,7 @@ export class WorkExperienceService {
 			await this.workExperienceCache.set(tenant_id, experience);
 		}
 
-		return { success: true, experience: experience };
+		return { success: true, experience };
 	}
 
 	async store(
@@ -76,10 +93,9 @@ export class WorkExperienceService {
 		);
 
 		// Cache Write-Through + Invalidate lists
-		await this.workExperienceCache.set(tenant_id, experience);
 		await this.workExperienceCache.invalidateLists(tenant_id);
 
-		return { success: true, experience: experience };
+		return { success: true, experience };
 	}
 
 	async update(
@@ -106,7 +122,7 @@ export class WorkExperienceService {
 		await this.workExperienceCache.invalidate(tenant_id, id);
 		await this.workExperienceCache.invalidateLists(tenant_id);
 
-		return { success: true, experience: experience };
+		return { success: true, experience };
 	}
 
 	async destroy(

@@ -4,7 +4,6 @@ import {
 	setupTestDb,
 	type TestDb,
 } from "@infrastructure/config/server/setup-test-db";
-import { schema } from "@infrastructure/providers/database/database.schema";
 import { DRIZZLE } from "@infrastructure/providers/database/database.service";
 import { SessionConfigService } from "@modules/auth/config/session.config";
 import { AuthenticatedGuard } from "@modules/auth/guards/authenticated.guard";

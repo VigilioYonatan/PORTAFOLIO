@@ -1,4 +1,5 @@
 import { paginator } from "@infrastructure/utils/server";
+import type { AiConfigSchema } from "@modules/ai/schemas/ai-config.schema";
 import { AiService } from "@modules/ai/services/ai.service";
 import { ConversationService } from "@modules/chat/services/conversation.service";
 import { Injectable, Logger } from "@nestjs/common";
@@ -31,7 +32,7 @@ export class AiInsightService {
 		this.logger.log({ tenant_id }, "Listing AI insights");
 
 		return await paginator<AiInsightQueryDto, AiInsightSchema>(
-			"/analytics/insights",
+			"/ai-insight",
 			{
 				filters: query,
 				cb: async (filters, isClean) => {
@@ -84,7 +85,7 @@ export class AiInsightService {
 			.slice(0, 10000);
 
 		// 3. Get AI Config
-		let config;
+		let config: AiConfigSchema | null = null;
 		try {
 			const configRes = await this.aiService.show(tenant_id);
 			config = configRes.config;

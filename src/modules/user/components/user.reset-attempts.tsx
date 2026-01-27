@@ -18,7 +18,7 @@ export function ResetAttemptsButton({ userId }: ResetAttemptsButtonProps) {
 			confirmButtonText: "Resetear",
 		}).then(({ isConfirmed }) => {
 			if (isConfirmed) {
-				resetMutation.mutate(undefined, {
+				resetMutation.mutate(null, {
 					onSuccess() {
 						sweetModal({
 							icon: "success",
@@ -29,7 +29,7 @@ export function ResetAttemptsButton({ userId }: ResetAttemptsButtonProps) {
 					},
 					onError() {
 						sweetModal({
-							icon: "error",
+							icon: "danger",
 							title: "Error al resetear intentos",
 						});
 					},

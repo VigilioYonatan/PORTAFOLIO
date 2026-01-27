@@ -1,5 +1,5 @@
 import { useContext } from "preact/hooks";
-import { VigilioTableContext } from "./VigilioTable";
+import { VigilioTableContext } from "./vigilio-table";
 
 function Limit() {
 	const table = useContext(VigilioTableContext);

@@ -1,9 +1,8 @@
-import type { PaginatorResult } from "@infrastructure/utils/server/helpers";
 import { paginator } from "@infrastructure/utils/server/helpers";
 import { Injectable, Logger, NotFoundException } from "@nestjs/common";
 import { TestimonialCache } from "../cache/testimonial.cache";
 import type { TestimonialQueryDto } from "../dtos/testimonial.query.dto";
-import type { TestimonialIndexResponseDto } from "../dtos/testimonial.response.dto";
+import type { TestimonialIndexResponseDto, TestimonialStoreResponseDto, TestimonialUpdateResponseDto, TestimonialDestroyResponseDto } from "../dtos/testimonial.response.dto";
 import type { TestimonialStoreDto } from "../dtos/testimonial.store.dto";
 import type { TestimonialUpdateDto } from "../dtos/testimonial.update.dto";
 import { TestimonialRepository } from "../repositories/testimonial.repository";
@@ -56,23 +55,22 @@ export class TestimonialService {
 	async store(
 		tenant_id: number,
 		body: TestimonialStoreDto,
-	): Promise<{ success: true; testimonial: TestimonialSchema }> {
+	): Promise<TestimonialStoreResponseDto> {
 		this.logger.log({ author_name: body.author_name }, "Creating testimonial");
 
 		const testimonial = await this.testimonialRepository.store(tenant_id, body);
 
 		// Cache Write-Through + Invalidate lists
-		await this.testimonialCache.set(testimonial);
 		await this.testimonialCache.invalidateLists();
 
-		return { success: true, testimonial: testimonial };
+		return { success: true, testimonial };
 	}
 
 	async update(
 		tenant_id: number,
 		id: number,
 		body: TestimonialUpdateDto,
-	): Promise<{ success: true; testimonial: TestimonialSchema }> {
+	): Promise<TestimonialUpdateResponseDto> {
 		this.logger.log({ id }, "Updating testimonial");
 
 		// Verificar que existe
@@ -91,13 +89,13 @@ export class TestimonialService {
 		await this.testimonialCache.invalidate(id);
 		await this.testimonialCache.invalidateLists();
 
-		return { success: true, testimonial: testimonial };
+		return { success: true, testimonial };
 	}
 
 	async destroy(
 		tenant_id: number,
 		id: number,
-	): Promise<{ success: true; message: string }> {
+	): Promise<TestimonialDestroyResponseDto> {
 		this.logger.log({ id }, "Deleting testimonial");
 
 		// Verificar que existe

@@ -9,7 +9,7 @@ export interface ProjectUpdateApiError {
 }
 
 /**
- * projectUpdate - /api/v1/projects/:id
+ * projectUpdate - /api/v1/project/:id
  * @method PUT
  * @body ProjectUpdateDto
  */
@@ -18,7 +18,7 @@ export function projectUpdateApi(id: number) {
 		ProjectUpdateResponseDto,
 		ProjectUpdateDto,
 		ProjectUpdateApiError
-	>(`/projects/${id}`, async (url, body) => {
+	>(`/project/${id}`, async (url, body) => {
 		const response = await fetch(`/api/v1${url}`, {
 			method: "PUT",
 			body: JSON.stringify(body),

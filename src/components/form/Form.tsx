@@ -1,9 +1,10 @@
 import { createContext, type JSX } from "preact";
 import type { FieldValues, UseFormReturn } from "react-hook-form";
 
-// biome-ignore lint/suspicious/noExplicitAny: Context default value type
 export const FormControlContext = createContext<
+	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 	UseFormReturn<any, unknown, FieldValues>
+	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 >({} as UseFormReturn<any, unknown, FieldValues>);
 
 interface FormProps<T extends object> extends UseFormReturn<T> {
@@ -25,7 +26,7 @@ export function Form<T extends object>({
 	...rest
 }: FormProps<T>) {
 	return (
-		<FormControlContext.Provider value={rest as any}>
+		<FormControlContext.Provider value={rest}>
 			<form
 				noValidate
 				onSubmit={rest.handleSubmit(onSubmit)}

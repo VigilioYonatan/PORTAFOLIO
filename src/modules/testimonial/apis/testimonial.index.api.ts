@@ -1,11 +1,15 @@
+import type { Signal } from "@preact/signals";
 import { useQuery } from "@vigilio/preact-fetching";
 import type { UseTable } from "@vigilio/preact-table";
 import type { TestimonialIndexResponseDto } from "../dtos/testimonial.response.dto";
 import type { TestimonialSchema } from "../schemas/testimonial.schema";
+import { testimonialDestroyApi } from "./testimonial.destroy.api";
 
 export type TestimonialIndexSecondaryPaginator = "action";
 export type TestimonialIndexMethods = {
 	refetch: (clean?: boolean) => void;
+	testimonialEdit: Signal<TestimonialSchema | null>;
+	destroyMutation: ReturnType<typeof testimonialDestroyApi>;
 };
 export type TestimonialIndexTable = UseTable<
 	TestimonialSchema,
@@ -80,9 +84,6 @@ export function testimonialIndexApi(
 					table.updateData({
 						result: data.results,
 						count: data.count,
-						methods: {
-							refetch: query.refetch,
-						},
 						cursor: nextCursor,
 					});
 				}

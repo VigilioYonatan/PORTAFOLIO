@@ -13,7 +13,7 @@ export function blogCategoryUpdateApi(id: number) {
 		BlogCategoryUpdateResponseDto,
 		BlogCategoryUpdateDto,
 		BlogCategoryUpdateApiError
-	>(`/blog/categories/${id}`, async (url, body) => {
+	>(`/blog-category/${id}`, async (url, body) => {
 		const response = await fetch(`/api/v1${url}`, {
 			method: "PATCH",
 			body: JSON.stringify(body),

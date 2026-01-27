@@ -1,8 +1,8 @@
 import { useQuery } from "@vigilio/preact-fetching";
-import type { UseTable } from "@vigilio/preact-table";
-import type { DocumentSchema } from "../schemas/document.schema";
-import type { DocumentIndexResponseDto } from "../dtos/document.response.dto";
 import type { UsePaginator } from "@vigilio/preact-paginator";
+import type { UseTable } from "@vigilio/preact-table";
+import type { DocumentIndexResponseDto } from "../dtos/document.response.dto";
+import type { DocumentSchema } from "../schemas/document.schema";
 
 export type DocumentIndexSecondaryPaginator = "action";
 export type DocumentIndexMethods = {
@@ -14,12 +14,21 @@ export type DocumentIndexTable = UseTable<
 	DocumentIndexMethods
 >;
 
+export interface DocumentIndexApiError {
+	success: false;
+	message: string;
+}
+
+/**
+ * documentsIndex - /api/v1/document
+ * @method GET
+ */
 export function documentsIndexApi(
 	table: DocumentIndexTable | null = null,
 	paginator: UsePaginator | null = null,
 ) {
-	const query = useQuery<DocumentIndexResponseDto, any>(
-		"/documents",
+	const query = useQuery<DocumentIndexResponseDto, DocumentIndexApiError>(
+		"/document",
 		async (url) => {
 			const data = new URLSearchParams();
 			if (table) {

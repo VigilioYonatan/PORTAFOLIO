@@ -1,6 +1,4 @@
-// @vitest-environment happy-dom
-
-import { render, screen } from "@testing-library/preact";
+import { render } from "@testing-library/preact";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { UserFactory } from "./user.factory";
 

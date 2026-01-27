@@ -14,8 +14,6 @@ import {
 } from "drizzle-orm";
 import type { NodePgDatabase } from "drizzle-orm/node-postgres";
 import type { SocialCommentQueryDto } from "../dtos/social-comment.query.dto";
-import type { SocialCommentStoreDto } from "../dtos/social-comment.store.dto";
-import type { SocialReactionStoreDto } from "../dtos/social-reaction.store.dto";
 import { socialCommentEntity } from "../entities/social-comment.entity";
 import { socialReactionEntity } from "../entities/social-reaction.entity";
 import { type SocialCommentSchema } from "../schemas/social-comment.schema";
@@ -29,27 +27,33 @@ export class SocialRepository {
 
 	async storeComment(
 		tenant_id: number,
-		body: SocialCommentStoreDto,
+		body: Omit<
+			SocialCommentSchema,
+			"id" | "tenant_id" | "created_at" | "updated_at"
+		>,
 	): Promise<SocialCommentSchema> {
 		const [result] = await this.db
 			.insert(socialCommentEntity)
-			.values({ ...body, tenant_id } as any)
+			.values({ ...body, tenant_id })
 			.returning();
-		return result as any;
+		return result;
 	}
 
 	async storeReaction(
 		tenant_id: number,
-		body: SocialReactionStoreDto,
+		body: Omit<
+			SocialReactionSchema,
+			"id" | "tenant_id" | "created_at" | "updated_at"
+		>,
 	): Promise<SocialReactionSchema> {
 		const [result] = await this.db
 			.insert(socialReactionEntity)
-			.values({ ...body, tenant_id } as any)
+			.values({ ...body, tenant_id })
 			.returning();
-		return result as any;
+		return result;
 	}
 
-	async findReaction(
+	async showReaction(
 		tenant_id: number,
 		visitor_id: string,
 		reactable_id: number,
@@ -67,36 +71,47 @@ export class SocialRepository {
 	}
 
 	async updateReaction(
+		tenant_id: number,
 		id: number,
-		type: "LIKE" | "LOVE" | "CLAP" | "FIRE",
+		type: SocialReactionSchema["type"],
 	): Promise<SocialReactionSchema> {
 		const [result] = await this.db
 			.update(socialReactionEntity)
 			.set({ type })
-			.where(eq(socialReactionEntity.id, id))
+			.where(
+				and(
+					eq(socialReactionEntity.id, id),
+					eq(socialReactionEntity.tenant_id, tenant_id),
+				),
+			)
 			.returning();
-		return result as any;
+		return result;
 	}
 
-	async destroyReaction(id: number): Promise<void> {
+	async destroyReaction(tenant_id: number, id: number): Promise<void> {
 		await this.db
 			.delete(socialReactionEntity)
-			.where(eq(socialReactionEntity.id, id));
+			.where(
+				and(
+					eq(socialReactionEntity.id, id),
+					eq(socialReactionEntity.tenant_id, tenant_id),
+				),
+			);
 	}
 
 	async indexComments(
 		tenant_id: number,
 		query: SocialCommentQueryDto,
 	): Promise<[SocialCommentSchema[], number]> {
-		const { limit, offset, target_id, target_type, sortBy, sortDir, search } =
+		const { limit, offset, commentable_id, commentable_type, sortBy, sortDir, search } =
 			query;
 
 		const baseWhere: SQL[] = [eq(socialCommentEntity.tenant_id, tenant_id)];
 
-		if (target_id)
-			baseWhere.push(eq(socialCommentEntity.commentable_id, target_id));
-		if (target_type)
-			baseWhere.push(eq(socialCommentEntity.commentable_type, target_type));
+		if (commentable_id)
+			baseWhere.push(eq(socialCommentEntity.commentable_id, commentable_id));
+		if (commentable_type)
+			baseWhere.push(eq(socialCommentEntity.commentable_type, commentable_type));
 		if (search)
 			baseWhere.push(ilike(socialCommentEntity.content, `%${search}%`));
 
@@ -118,6 +133,18 @@ export class SocialRepository {
 				offset,
 				where: baseWhereClause,
 				orderBy: orderBy,
+				columns: {
+					content: false,
+					reply: false,
+				},
+				extras: {
+					content: sql<string>`substring(${socialCommentEntity.content} from 1 for 3000)`.as(
+						"content",
+					),
+					reply: sql<string>`substring(${socialCommentEntity.reply} from 1 for 3000)`.as(
+						"reply",
+					),
+				},
 			}),
 			this.db
 				.select({ count: sql<number>`count(*)` })
@@ -126,7 +153,7 @@ export class SocialRepository {
 				.then((result) => Number(result[0].count)),
 		]);
 
-		return result as any;
+		return result;
 	}
 
 	async updateComment(
@@ -144,7 +171,7 @@ export class SocialRepository {
 				),
 			)
 			.returning();
-		return result as any;
+		return result;
 	}
 
 	async destroyComment(
@@ -160,10 +187,10 @@ export class SocialRepository {
 				),
 			)
 			.returning();
-		return result as any;
+		return result;
 	}
 
-	async getReactionCounts(
+	async showReactionCounts(
 		reactable_id: number,
 		reactable_type: SocialReactionSchema["reactable_type"],
 	): Promise<Record<string, number>> {

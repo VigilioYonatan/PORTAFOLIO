@@ -9,7 +9,7 @@ export interface ChatMessagePublicStoreApiError {
 }
 
 /**
- * chatMessagePublicStore - /api/v1/chat/messages/public
+ * chatMessagePublicStore - /api/v1/chat/contact/public
  * @method POST
  * @body ChatMessagePublicStoreDto
  */
@@ -18,7 +18,7 @@ export function chatMessagePublicStoreApi(conversationId: number) {
 		ChatMessagePublicStoreResponseDto,
 		ChatMessagePublicStoreDto,
 		ChatMessagePublicStoreApiError
-	>(`/chat/conversations/${conversationId}/messages`, async (url, body) => {
+	>(`/chat/conversations/${conversationId}/contact`, async (url, body) => {
 		const response = await fetch(`/api/v1${url}`, {
 			method: "POST",
 			body: JSON.stringify(body),

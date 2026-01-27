@@ -1,16 +1,16 @@
 import { PortfolioConfigCache } from "@modules/portfolio-config/cache/portfolio-config.cache";
 import type { PortfolioConfigUpdateDto } from "@modules/portfolio-config/dtos/portfolio-config.update.dto";
 import { PortfolioConfigRepository } from "@modules/portfolio-config/repositories/portfolio-config.repository";
-import type {
-	PortfolioConfigSchema,
-	PortfolioConfigShowSchema,
-} from "@modules/portfolio-config/schemas/portfolio-config.schema";
+import type { PortfolioConfigShowSchema } from "@modules/portfolio-config/schemas/portfolio-config.schema";
+import type { ProjectSchema } from "@modules/project/schemas/project.schema";
 import { ProjectService } from "@modules/project/services/project.service";
+import type { WorkExperienceSchema } from "@modules/work-experience/schemas/work-experience.schema";
 import { WorkExperienceService } from "@modules/work-experience/services/work-experience.service";
 import { Injectable, Logger, NotFoundException } from "@nestjs/common";
 import type {
 	PortfolioConfigShowResponseDto,
 	PortfolioConfigUpdateResponseDto,
+	PortfolioConfigCvResultDto,
 } from "../dtos/portfolio-config.response.dto";
 
 @Injectable()
@@ -84,11 +84,7 @@ export class PortfolioConfigService {
 	 * @returns Buffer con contenido del CV y metadatos
 	 * @throws NotFoundException si no existe configuración
 	 */
-	async downloadCv(tenant_id: number): Promise<{
-		buffer: Buffer;
-		filename: string;
-		contentType: string;
-	}> {
+	async downloadCv(tenant_id: number): Promise<PortfolioConfigCvResultDto> {
 		this.logger.log({ tenant_id }, "Generating CV for download");
 
 		// 1. Fetch all data in parallel
@@ -130,8 +126,8 @@ export class PortfolioConfigService {
 	 */
 	private generateCvContent(
 		config: PortfolioConfigShowSchema,
-		experiences: any[],
-		projects: any[],
+		experiences: WorkExperienceSchema[],
+		projects: ProjectSchema[],
 	): string {
 		const sections: string[] = [];
 
@@ -172,7 +168,7 @@ export class PortfolioConfigService {
 			sections.push("[ EXPERIENCIA LABORAL ]");
 			for (const exp of experiences) {
 				const startDateObj = new Date(exp.start_date);
-				const start = !isNaN(startDateObj.getTime())
+				const start = !Number.isNaN(startDateObj.getTime())
 					? startDateObj.toLocaleDateString("es-ES", {
 							year: "numeric",
 							month: "long",
@@ -184,7 +180,7 @@ export class PortfolioConfigService {
 					end = "Actualidad";
 				} else if (exp.end_date) {
 					const endDateObj = new Date(exp.end_date);
-					end = !isNaN(endDateObj.getTime())
+					end = !Number.isNaN(endDateObj.getTime())
 						? endDateObj.toLocaleDateString("es-ES", {
 								year: "numeric",
 								month: "long",

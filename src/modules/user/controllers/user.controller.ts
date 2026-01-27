@@ -1,11 +1,8 @@
 import { ZodPipe } from "@infrastructure/pipes/zod.pipe";
 import { ZodQueryPipe } from "@infrastructure/pipes/zod-query.pipe";
-import type { PaginatorResult } from "@infrastructure/utils/server/helpers";
-import { Public } from "@modules/auth/decorators/public.decorator";
 import { Roles } from "@modules/auth/decorators/roles.decorator";
 import { AuthenticatedGuard } from "@modules/auth/guards/authenticated.guard";
 import {
-	BadRequestException,
 	Body,
 	Controller,
 	Delete,
@@ -42,16 +39,11 @@ import { UserStoreClassDto } from "../dtos/user.store.class.dto";
 import { type UserStoreDto, userStoreDto } from "../dtos/user.store.dto";
 import { UserUpdateClassDto } from "../dtos/user.update.class.dto";
 import { type UserUpdateDto, userUpdateDto } from "../dtos/user.update.dto";
-import {
-	type UserAuth,
-	type UserIndexSchema,
-	type UserShowSchema,
-} from "../schemas/user.schema";
 import { UserService } from "../services/user.service";
 
 @ApiTags("Usuarios")
 @UseGuards(AuthenticatedGuard)
-@Controller("users")
+@Controller("user")
 export class UserController {
 	constructor(private readonly userService: UserService) {}
 

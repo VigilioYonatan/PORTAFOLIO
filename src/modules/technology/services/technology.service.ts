@@ -60,10 +60,9 @@ export class TechnologyService {
 		this.logger.log({ tenant_id }, "Creating technology");
 		const technology = await this.repository.store(tenant_id, body);
 
-		await this.technologyCache.set(tenant_id, technology);
 		await this.technologyCache.invalidateLists(tenant_id);
 
-		return { success: true, technology: technology };
+		return { success: true, technology };
 	}
 
 	async update(
@@ -80,7 +79,7 @@ export class TechnologyService {
 		await this.technologyCache.invalidate(tenant_id, id);
 		await this.technologyCache.invalidateLists(tenant_id);
 
-		return { success: true, technology: technology };
+		return { success: true, technology };
 	}
 
 	async show(
@@ -102,7 +101,7 @@ export class TechnologyService {
 			await this.technologyCache.set(tenant_id, technology);
 		}
 
-		return { success: true, technology: technology };
+		return { success: true, technology };
 	}
 
 	async destroy(

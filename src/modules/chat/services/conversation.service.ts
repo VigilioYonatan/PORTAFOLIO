@@ -26,6 +26,10 @@ export class ConversationService {
 		const conversation = await this.conversationRepository.store(tenant_id, {
 			...body,
 			ip_address,
+			mode: "AI",
+			is_active: true,
+			title: body.title || "New Conversation",
+			user_id: null,
 		});
 
 		return { success: true, conversation };
@@ -42,7 +46,7 @@ export class ConversationService {
 			{ tenant_id, limit_count },
 			"Fetching recent conversations for analysis",
 		);
-		return this.conversationRepository.getRecentForAnalysis(
+		return this.conversationRepository.indexRecentForAnalysis(
 			tenant_id,
 			limit_count,
 		);

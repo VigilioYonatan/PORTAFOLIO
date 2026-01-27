@@ -1,11 +1,6 @@
-import {
-	createHmac,
-	randomBytes,
-	randomUUID,
-	timingSafeEqual,
-} from "node:crypto";
+import { randomUUID } from "node:crypto";
+import { slugify } from "@infrastructure/utils/hybrid";
 import type { Environments } from "@infrastructure/config/server";
-import { MailService } from "@infrastructure/providers/mail/mail.service";
 import {
 	decrypt,
 	encrypt,
@@ -254,59 +249,40 @@ export class AuthService {
 			last_login_at: null,
 			deleted_at: null,
 			last_ip_address: null,
-			tenant_id,
 		});
 
 		return newUser;
 	}
 
 	async register(
-		tenant_id_ignored: number,
+		_tenant_id: number,
 		registerDto: AuthRegisterDto,
 	): Promise<AuthLoginResponseApi> {
 		this.logger.log(`Registering new tenant and user: ${registerDto.email}`);
 
 		// 1. Create Tenant
-		// Slug/Domain uniqueness is handled by DB constraints or Repository check.
-		// Ideally check before to return friendly error.
-
-		// We assume slug generation happens inside TenantRepository.store or we do it here if needed.
-		// Given the structure, TenantRepository probably handles creation.
-		// Let's create the tenant.
-		const newTenant = await this.tenantRepository.store({
+		const tenant = await this.tenantRepository.store({
 			name: registerDto.tenant_name,
-			email: registerDto.email, // Tenant contact email same as owner
-			plan: "FREE",
+			slug: slugify(registerDto.tenant_name),
+			email: registerDto.email,
+			plan: "ENTERPRISE", // Default plan for register
 			is_active: true,
-			slug: registerDto.tenant_name
-				.toLowerCase()
-				.replace(/ /g, "-")
-				.replace(/[^\w-]+/g, ""),
 			address: null,
-			domain: null,
 			logo: null,
-			phone: registerDto.phone_number ?? null,
+			phone: null,
+			domain: null,
 			trial_ends_at: null,
 		});
 
-		const tenant_id = newTenant.id;
-
 		// 2. Create User linked to new Tenant
-		const username = registerDto.username; // Explicitly passed
-
-		// Check if user exists happens inside store generally or we rely on unique constraint fail
-		// but good to have friendly error if possible.
-		// Since it's a new tenant, user shouldn't exist in THIS tenant, but email serves as global identifier sometimes?
-		// Rules say: Email unique per tenant.
-
-		const { user } = await this.userService.store(tenant_id, {
+		const { user } = await this.userService.store(tenant.id, {
 			email: registerDto.email,
-			username: username,
+			username: registerDto.username,
 			password: registerDto.password,
 			repeat_password: registerDto.repeat_password,
-			role_id: 3, // OWNER role (assuming 3 is OWNER, need to verify roles const)
+			role_id: 3, // Assuming 3 is OWNER
 			status: "ACTIVE",
-			// phone_number: registerDto.phone_number,
+			phone_number: registerDto.phone_number ?? null,
 		});
 
 		// Login the new user

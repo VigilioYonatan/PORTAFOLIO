@@ -1,17 +1,17 @@
 import type { SeoMetadataSchema } from "@infrastructure/schemas/seo.schema";
 import type { Entity } from "@infrastructure/types/server";
 import { now } from "@infrastructure/utils/hybrid/date.utils";
-import { tenantEntity } from "@modules/tenant/entities/tenant.entity";
 import { techeableEntity } from "@modules/techeable/entities/techeable.entity";
+import { tenantEntity } from "@modules/tenant/entities/tenant.entity";
 import type { FilesSchema } from "@modules/uploads/schemas/upload.schema";
 import type { InferSelectModel } from "drizzle-orm";
 import { relations } from "drizzle-orm";
 import {
 	boolean,
-	date as pgDate,
 	index,
 	integer,
 	jsonb,
+	date as pgDate,
 	pgTable,
 	serial,
 	text,

@@ -8,7 +8,7 @@ import type {
 	PathValue,
 	UseFormReturn,
 } from "react-hook-form";
-import { FormControlContext } from "../../Form";
+import { FormControlContext } from "../../form";
 import type { FormFileProps } from "../types";
 
 export function useFormFile<T extends object>({
@@ -104,8 +104,7 @@ export function useFormFile<T extends object>({
 			// 2. CALLBACK DE ÉXITO: Actualizamos el Formulario con FilesSchema[]
 			// Esto ocurre solo cuando la subida termina exitosamente.
 
-			// biome-ignore lint/suspicious/noExplicitAny: Legacy support
-			const currentFormValues = form.getValues(name) as any;
+			const currentFormValues = form.getValues(name);
 			let newValue: Array<{
 				key: string;
 				name: string;

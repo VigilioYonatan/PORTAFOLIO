@@ -1,7 +1,7 @@
-import { computed,  signal } from "@preact/signals";
-import { musicTrackIndexFetch } from "@modules/music/apis/music.index.api";
 import { printFileWithDimension } from "@infrastructure/utils/hybrid";
+import { musicTrackIndexFetch } from "@modules/music/apis/music.index.api";
 import { DIMENSION_IMAGE } from "@modules/uploads/const/upload.const";
+import { computed, signal } from "@preact/signals";
 
 export interface MusicTrack {
 	id: string;
@@ -70,20 +70,16 @@ function initAudio() {
 		// NOTE: We only connect if we are actually playing and user gesture allowed it
 		// Simpler implementation: Check if context is suspended
 	} catch (e) {
+		// biome-ignore lint/suspicious/noConsole: <explanation>
 		console.warn("Web Audio API not supported or blocked", e);
 	}
 }
 
 function connectAudioNodes() {
 	if (!audioContext || !analyser || !audioElement || sourceNode) return;
-
-	try {
-		sourceNode = audioContext.createMediaElementSource(audioElement);
-		sourceNode.connect(analyser);
-		analyser.connect(audioContext.destination);
-	} catch (e) {
-		console.error("Error connecting audio nodes:", e);
-	}
+	sourceNode = audioContext.createMediaElementSource(audioElement);
+	sourceNode.connect(analyser);
+	analyser.connect(audioContext.destination);
 }
 
 function togglePlay() {
@@ -103,6 +99,7 @@ function togglePlay() {
 		cancelAnimation();
 	} else {
 		audioElement.play().catch((e) => {
+			// biome-ignore lint/suspicious/noConsole: <explanation>
 			console.warn("Autoplay blocked, waiting for interaction", e);
 		});
 		isPlaying.value = true;
@@ -231,7 +228,9 @@ function startAnimationLoop() {
 		// Simple Beat Detection
 		if (avgBass > 200 && !beatDetected.value) {
 			beatDetected.value = true;
-			setTimeout(() => (beatDetected.value = false), 100);
+			setTimeout(() => {
+				beatDetected.value = false;
+			}, 100);
 		}
 
 		animationFrameId = requestAnimationFrame(update);
@@ -300,7 +299,6 @@ function toggleFavorite(trackId: string) {
 	// In a real app, sync with backend here
 }
 
-
 async function loadMoreTracks() {
 	if (isLoadingMore.value || !hasMore.value) return;
 
@@ -309,8 +307,6 @@ async function loadMoreTracks() {
 		const offset = trackList.value.length;
 		// Use the standardized API fetcher
 		const data = await musicTrackIndexFetch("/music", null, offset, 10);
-		console.log({data});
-		
 
 		// data is MusicTrackIndexResponseDto
 		if (data.success && data.results.length > 0) {
@@ -318,8 +314,8 @@ async function loadMoreTracks() {
 				id: String(t.id),
 				title: t.title,
 				artist: t.artist || "Unknown",
-				src: printFileWithDimension(t.audio_file,null)[0] ,
-				cover: printFileWithDimension(t.cover,DIMENSION_IMAGE.sm)[0] ,
+				src: printFileWithDimension(t.audio_file, null)[0],
+				cover: printFileWithDimension(t.cover, DIMENSION_IMAGE.sm)[0],
 			}));
 			addTracks(mapped);
 			page.value++;
@@ -330,6 +326,7 @@ async function loadMoreTracks() {
 			hasMore.value = false;
 		}
 	} catch (e) {
+		// biome-ignore lint/suspicious/noConsole: <explanation>
 		console.error("Error loading more tracks:", e);
 	} finally {
 		isLoadingMore.value = false;

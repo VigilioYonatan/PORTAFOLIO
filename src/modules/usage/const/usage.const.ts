@@ -3,8 +3,6 @@
  * Color thresholds, chart colors, and formatting helpers
  */
 
-import type { UsageQuotaSchema } from "../schemas/usage-quota.schema";
-
 // Quota types with their display properties
 export const QUOTA_TYPES = {
 	documents: {

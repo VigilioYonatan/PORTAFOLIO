@@ -1,7 +1,7 @@
 ---
 import WebLayout from "../_components/layouts/web-layout/index.astro";
-import FuturisticMDX from "@modules/blog/components/FuturisticMDX";
-import SocialHub from "@modules/blog/components/SocialHub";
+import FuturisticMDX from "@modules/blog/components/futuristic-mdx";
+import SocialHub from "@modules/blog/components/social-hub";
 import { GithubIcon, GlobeIcon } from "lucide-preact";
 
 const { slug } = Astro.params;
@@ -22,7 +22,7 @@ const content = `
       >
       </div>
       <div class="container mx-auto px-4 relative z-20 pb-12">
-        <h1 class="text-4xl md:text-6xl font-black font-mono mb-4 text-white">
+        <h1 class="text-4xl md:text-6xl font-black mb-4 text-white">
           PORTFOLIO_V4
         </h1>
         <div class="flex gap-4">
@@ -47,7 +47,7 @@ const content = `
     >
       <div class="md:col-span-2">
         <div class="mb-8">
-          <h3 class="font-mono font-bold text-primary mb-2">IMPACT_SUMMARY</h3>
+          <h3 class="font-mono text-primary mb-2">IMPACT_SUMMARY</h3>
           <p class="text-xl">
             Increased user engagement by 40% through sound-reactive UI
             components.

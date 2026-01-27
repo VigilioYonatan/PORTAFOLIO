@@ -1,8 +1,15 @@
-import type { JSX } from "preact/jsx-runtime";
 import { cn } from "@infrastructure/utils/client/cn";
+import type { JSX } from "preact/jsx-runtime";
 
 interface BadgeProps extends JSX.HTMLAttributes<HTMLDivElement> {
-	variant?: "default" | "secondary" | "destructive" | "outline" | "matrix" | "success" | "warning";
+	variant?:
+		| "default"
+		| "secondary"
+		| "destructive"
+		| "outline"
+		| "matrix"
+		| "success"
+		| "warning";
 }
 
 export default function Badge({
@@ -22,8 +29,7 @@ export default function Badge({
 			"border-primary/50 text-primary bg-primary/10 hover:bg-primary/20 animate-pulse",
 		success:
 			"border-transparent bg-emerald-500 text-white hover:bg-emerald-500/80",
-		warning:
-			"border-transparent bg-amber-500 text-white hover:bg-amber-500/80",
+		warning: "border-transparent bg-amber-500 text-white hover:bg-amber-500/80",
 	};
 
 	return (

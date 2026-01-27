@@ -1,5 +1,6 @@
+import { ZodQueryPipe } from "@infrastructure/pipes/zod-query.pipe";
 import { ZodPipe } from "@infrastructure/pipes/zod.pipe";
-import type { PaginatorResult } from "@infrastructure/utils/server";
+import { musicQueryDto } from "../dtos/music.query.dto";
 import { Public } from "@modules/auth/decorators/public.decorator";
 import { Roles } from "@modules/auth/decorators/roles.decorator";
 import { AuthenticatedGuard } from "@modules/auth/guards/authenticated.guard";
@@ -24,7 +25,6 @@ import { MusicQueryClassDto } from "../dtos/music.class.dto";
 import {
 	MusicTrackDestroyResponseClassDto,
 	MusicTrackIndexResponseClassDto,
-	MusicTrackShowResponseClassDto,
 	MusicTrackStoreResponseClassDto,
 	MusicTrackUpdateResponseClassDto,
 } from "../dtos/music.response.class.dto";
@@ -36,14 +36,13 @@ import type {
 } from "../dtos/music.response.dto";
 import { type MusicStoreDto, musicStoreDto } from "../dtos/music.store.dto";
 import { type MusicUpdateDto, musicUpdateDto } from "../dtos/music.update.dto";
-import type { MusicTrackSchema } from "../schemas/music.schema";
-import { MusicTrackService } from "../services/music.service";
+import { MusicService } from "../services/music.service";
 
 @ApiTags("Música")
 @UseGuards(AuthenticatedGuard, RolesGuard)
 @Controller("music")
-export class MusicTrackController {
-	constructor(private readonly musicService: MusicTrackService) {}
+export class MusicController {
+	constructor(private readonly musicService: MusicService) {}
 
 	@Public()
 	@Get("/")
@@ -55,7 +54,7 @@ export class MusicTrackController {
 	})
 	index(
 		@Req() req: Request,
-		@Query() query: MusicQueryClassDto,
+		@Query(new ZodQueryPipe(musicQueryDto)) query: MusicQueryClassDto,
 	): Promise<MusicTrackIndexResponseDto> {
 		const tenant_id = req.locals.tenant.id;
 		return this.musicService.index(tenant_id, query);

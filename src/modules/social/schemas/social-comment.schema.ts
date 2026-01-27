@@ -11,7 +11,7 @@ export const socialCommentSchema = z
 		commentable_type: z.enum(["PORTFOLIO_PROJECT", "BLOG_POST"]), // Tipo de entidad relacionada
 		visitor_id: z.string().uuid().nullable(), // Identificador del visitante (opcional)
 		ip_address: z.string().max(45).nullable(), // Dirección IP del visitante (opcional)
-		is_visible: z.boolean().default(true), // ¿Es visible en el sitio?
+		is_visible: z.boolean(), // ¿Es visible en el sitio?
 		tenant_id: z.number().int().positive(), // ID del tenant
 		user_id: z.number().int().positive().nullable(), // ID del admin que responde (opcional)
 		reply: z.string().nullable(), // Respuesta del administrador (opcional)

@@ -22,7 +22,7 @@ export function testimonialDestroyApi() {
 		const result = await response.json();
 		if (!response.ok) {
 			throw result;
-			}
+		}
 		return result;
 	});
 }

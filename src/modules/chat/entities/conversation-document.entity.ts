@@ -1,5 +1,4 @@
 import { documentEntity } from "@modules/documents/entities/document.entity";
-import { relations } from "drizzle-orm";
 import { integer, pgTable, primaryKey, timestamp } from "drizzle-orm/pg-core";
 import { conversationEntity } from "./conversation.entity";
 

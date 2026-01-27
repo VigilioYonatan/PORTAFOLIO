@@ -33,18 +33,9 @@ export class DocumentRepository {
 	 */
 	async store(
 		tenant_id: number,
-		user_id: number,
 		body: Omit<
 			DocumentSchema,
-			| "id"
-			| "tenant_id"
-			| "user_id"
-			| "created_at"
-			| "updated_at"
-			| "chunk_count"
-			| "is_indexed"
-			| "status"
-			| "processed_at"
+			"id" | "tenant_id" | "created_at" | "updated_at"
 		>,
 	): Promise<DocumentSchema> {
 		const [result] = await this.db
@@ -52,10 +43,6 @@ export class DocumentRepository {
 			.values({
 				...body,
 				tenant_id,
-				user_id,
-				chunk_count: 0,
-				is_indexed: false,
-				status: "PENDING",
 			})
 			.returning();
 		return result as DocumentSchema;

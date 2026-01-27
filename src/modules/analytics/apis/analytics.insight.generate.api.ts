@@ -7,7 +7,7 @@ export interface AnalyticsInsightGenerateApiError {
 }
 
 /**
- * analyticsInsightGenerate - /api/v1/analytics/insight/generate
+ * analyticsInsightGenerate - /api/v1/ai-insight/generate
  * @method POST
  */
 export function analyticsInsightGenerateApi() {
@@ -15,7 +15,7 @@ export function analyticsInsightGenerateApi() {
 		AiInsightGenerateResponseDto,
 		any,
 		AnalyticsInsightGenerateApiError
-	>("/analytics/insight/generate", async (url, body) => {
+	>("/ai-insight/generate", async (url, body) => {
 		const response = await fetch(`/api/v1${url}`, {
 			method: "POST",
 			body: JSON.stringify(body),

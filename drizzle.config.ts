@@ -11,18 +11,12 @@ if (isTest && existsSync(".env.test")) {
 	config();
 }
 
-const dbUrl = process.env.DATABASE_URL;
-
-if (!dbUrl) {
-	console.error("❌ DATABASE_URL is not defined in the environment");
-}
-
 export default defineConfig({
 	dialect: "postgresql",
 	schema: "./src/**/*.entity.ts",
 	out: "./drizzle/migrations",
 	dbCredentials: {
-		url: dbUrl!,
+		url: process.env.DATABASE_URL!,
 	},
 	verbose: true,
 	strict: true,

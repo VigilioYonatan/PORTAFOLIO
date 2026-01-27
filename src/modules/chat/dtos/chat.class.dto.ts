@@ -5,22 +5,22 @@ import { createZodDto } from "nestjs-zod";
 import { chatMessageSchema } from "../schemas/chat-message.schema";
 import { conversationSchema } from "../schemas/conversation.schema";
 
-export const conversationStoreSchema = conversationSchema.omit({
+export const conversationStoreDto = conversationSchema.omit({
 	id: true,
 	tenant_id: true,
 	created_at: true,
 	updated_at: true,
 });
 
-export type ConversationStoreDto = z.infer<typeof conversationStoreSchema>;
+export type ConversationStoreDto = z.infer<typeof conversationStoreDto>;
 
-export const chatMessageStoreSchema = chatMessageSchema.omit({
+export const chatMessageStoreDto = chatMessageSchema.omit({
 	id: true,
 	created_at: true,
 	updated_at: true,
 });
 
-export type ChatMessageStoreDto = z.infer<typeof chatMessageStoreSchema>;
+export type ChatMessageStoreDto = z.infer<typeof chatMessageStoreDto>;
 
 export const conversationQueryDto = conversationSchema
 	.pick({
@@ -33,26 +33,26 @@ export const conversationQueryDto = conversationSchema
 
 export type ConversationQueryDto = z.infer<typeof conversationQueryDto>;
 
-export const conversationIndexResponseSchema =
+export const conversationIndexResponseDto =
 	createPaginatorSchema(conversationSchema);
 
-export const chatMessagePublicStoreSchema = chatMessageSchema.pick({
+export const chatMessagePublicStoreDto = chatMessageSchema.pick({
 	content: true,
 });
 
 export type ChatMessagePublicStoreDto = z.infer<
-	typeof chatMessagePublicStoreSchema
+	typeof chatMessagePublicStoreDto
 >;
 
 export class ChatMessagePublicStoreClassDto extends createZodDto(
-	chatMessagePublicStoreSchema,
+	chatMessagePublicStoreDto,
 ) {}
 
 export class ConversationStoreClassDto extends createZodDto(
-	conversationStoreSchema,
+	conversationStoreDto,
 ) {}
 export class ChatMessageStoreClassDto extends createZodDto(
-	chatMessageStoreSchema,
+	chatMessageStoreDto,
 ) {}
 export class ConversationQueryClassDto extends createZodDto(
 	conversationQueryDto,
@@ -64,5 +64,5 @@ export class ChatMessageResponseClassDto extends createZodDto(
 	chatMessageSchema,
 ) {}
 export class ConversationIndexResponseClassDto extends createZodDto(
-	conversationIndexResponseSchema,
+	conversationIndexResponseDto,
 ) {}

@@ -3,8 +3,8 @@ import { schema } from "@infrastructure/providers/database/database.schema";
 import { DRIZZLE } from "@infrastructure/providers/database/database.service";
 import { now } from "@infrastructure/utils/hybrid";
 import { Inject, Injectable } from "@nestjs/common";
-import { type NodePgDatabase } from "drizzle-orm/node-postgres";
 import { type InferInsertModel } from "drizzle-orm";
+import { type NodePgDatabase } from "drizzle-orm/node-postgres";
 import { workExperienceEntity } from "../entities/work-experience.entity";
 
 @Injectable()

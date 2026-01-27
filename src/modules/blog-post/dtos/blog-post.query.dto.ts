@@ -1,12 +1,13 @@
 import { querySchema } from "@infrastructure/schemas/query.schema";
 import { z } from "zod";
+import { blogPostSchema } from "../schemas/blog-post.schema";
 
-export const blogPostQuerySchema = querySchema.extend({
-	category_id: z.coerce.number().int().positive().optional(),
-	is_published: z
-		.enum(["true", "false"])
-		.transform((val) => val === "true")
-		.optional(),
-});
+export const blogPostQueryDto = blogPostSchema
+	.pick({
+		category_id: true,
+		is_published: true,
+	})
+	.partial()
+	.extend(querySchema.shape);
 
-export type BlogPostQueryDto = z.infer<typeof blogPostQuerySchema>;
+export type BlogPostQueryDto = z.infer<typeof blogPostQueryDto>;

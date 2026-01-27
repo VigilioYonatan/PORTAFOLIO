@@ -1,5 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/preact";
-import { describe, expect, it, vi } from "vitest";
+import { render, screen } from "@testing-library/preact";
 import TerminalLogo from "../terminal-logo";
 
 describe("TerminalLogo", () => {

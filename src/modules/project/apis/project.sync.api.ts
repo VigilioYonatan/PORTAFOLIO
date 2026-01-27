@@ -7,12 +7,12 @@ export interface ProjectSyncApiError {
 }
 
 /**
- * projectSync - /api/v1/projects/sync
+ * projectSync - /api/v1/project/sync
  * @method POST
  */
 export function projectSyncApi() {
 	return useMutation<ProjectSyncResponseDto, number, ProjectSyncApiError>(
-		"/projects",
+		"/project",
 		async (url, id) => {
 			const response = await fetch(`/api/v1${url}/${id}/sync`, {
 				method: "POST",

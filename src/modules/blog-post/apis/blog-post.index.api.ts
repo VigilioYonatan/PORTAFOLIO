@@ -1,8 +1,8 @@
 import { useQuery } from "@vigilio/preact-fetching";
+import type { UsePaginator } from "@vigilio/preact-paginator";
 import type { UseTable } from "@vigilio/preact-table";
 import type { BlogPostIndexResponseDto } from "../dtos/blog-post.response.dto";
 import type { BlogPostSchema } from "../schemas/blog-post.schema";
-import type { UsePaginator } from "@vigilio/preact-paginator";
 
 export type BlogPostIndexSecondaryPaginator = "action";
 export type BlogPostIndexMethods = {
@@ -14,7 +14,15 @@ export type BlogPostIndexTable = UseTable<
 	BlogPostIndexMethods
 >;
 
+export interface BlogPostIndexApiError {
+	success: false;
+	message: string;
+}
 
+/**
+ * blogPostIndex - /api/v1/blog-post
+ * @method GET
+ */
 export function blogPostIndexApi(
 	table: BlogPostIndexTable | null = null,
 	paginator: UsePaginator | null = null,
@@ -23,8 +31,8 @@ export function blogPostIndexApi(
 		category_id?: number | null;
 	},
 ) {
-	const query = useQuery<BlogPostIndexResponseDto, unknown>(
-		"/blog/posts",
+	const query = useQuery<BlogPostIndexResponseDto, BlogPostIndexApiError>(
+		"/blog-post",
 		async (url) => {
 			const data = new URLSearchParams();
 			if (table) {

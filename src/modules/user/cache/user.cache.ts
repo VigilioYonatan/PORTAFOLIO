@@ -4,7 +4,6 @@ import { Injectable } from "@nestjs/common";
 import type { UserQueryDto } from "../dtos/user.query.dto";
 import type {
 	UserIndexSchema,
-	UserSchema,
 	UserShowByEmailToLoginSchema,
 	UserShowSchema,
 } from "../schemas/user.schema";

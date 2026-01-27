@@ -6,14 +6,17 @@ import {
 	screen,
 	waitFor,
 } from "@testing-library/preact";
-import { sweetModal } from "@vigilio/sweet";
+
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { authMfaSetupApi, authMfaVerifyApi } from "../../apis/auth.mfa.api";
+import { authMfaSetupApi } from "../../apis/auth.mfa-setup.api";
+import { authMfaVerifyApi } from "../../apis/auth.mfa-verify.api";
 import MfaSetup from "../mfa-setup";
 
 // Mock the APIs
-vi.mock("../../apis/auth.mfa.api", () => ({
+vi.mock("../../apis/auth.mfa-setup.api", () => ({
 	authMfaSetupApi: vi.fn(),
+}));
+vi.mock("../../apis/auth.mfa-verify.api", () => ({
 	authMfaVerifyApi: vi.fn(),
 }));
 

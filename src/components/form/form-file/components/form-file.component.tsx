@@ -1,15 +1,15 @@
-import Badge from "@components/extras/Badge";
-import Button from "@components/extras/Button";
+import Badge from "@components/extras/badge";
+import Button from "@components/extras/button";
 import { Card, CardContent } from "@components/extras/card";
 import ImageEditor from "@components/extras/image-editor";
-import Modal from "@components/extras/Modal";
+import Modal from "@components/extras/modal";
 import { cn, sizeIcon } from "@infrastructure/utils/client";
 import {
 	typeTextExtensions,
 	UPLOAD_CONFIG,
 } from "@modules/uploads/const/upload.const";
 import type { FilesSchema } from "@modules/uploads/schemas/upload.schema";
-import { ImageIcon, Pencil, Upload, X, XIcon } from "lucide-preact";
+import { ImageIcon, Pencil, Upload, XIcon } from "lucide-preact";
 import { anidarPropiedades } from "../..";
 import { useFormFile } from "../hooks/use-form-file.hook";
 import { formatFileSize, getFileTypeColor, getIcon } from "../libs";
@@ -231,110 +231,127 @@ export function FormFile<T extends object>(props: FormFileProps<T>) {
 					)}
 				>
 					<CardContent className="p-4 flex flex-col justify-center min-h-[inherit]">
-					{/* A. ESTADO VACÍO (Si no hay uploads pendientes ni archivos existentes) */}
-					{fileList.value.filter((f) => f.status !== "COMPLETED").length ===
-						0 && existingGroups.length === 0 ? (
-						<div className="flex flex-col items-center justify-center text-center py-6">
-							<div className="mb-3 p-3 bg-muted rounded-full">
-								{isUploading.value ? (
-									<span className="animate-spin h-6 w-6 border-2 border-primary border-t-transparent rounded-full block" />
-								) : (
-									<Upload {...sizeIcon.large} class="text-muted-foreground" />
-								)}
+						{/* A. ESTADO VACÍO (Si no hay uploads pendientes ni archivos existentes) */}
+						{fileList.value.filter((f) => f.status !== "COMPLETED").length ===
+							0 && existingGroups.length === 0 ? (
+							<div className="flex flex-col items-center justify-center text-center py-6">
+								<div className="mb-3 p-3 bg-muted rounded-full">
+									{isUploading.value ? (
+										<span className="animate-spin h-6 w-6 border-2 border-primary border-t-transparent rounded-full block" />
+									) : (
+										<Upload {...sizeIcon.large} class="text-muted-foreground" />
+									)}
+								</div>
+								<p className="text-sm font-medium text-foreground">
+									{isDrag.value
+										? "¡Suelta aquí!"
+										: placeholder || "Haz clic o arrastra archivos"}
+								</p>
+								<p className="text-xs text-muted-foreground mt-1 px-4">
+									{typesText}
+								</p>
 							</div>
-							<p className="text-sm font-medium text-foreground">
-								{isDrag.value
-									? "¡Suelta aquí!"
-									: placeholder || "Haz clic o arrastra archivos"}
-							</p>
-							<p className="text-xs text-muted-foreground mt-1 px-4">
-								{typesText}
-							</p>
-						</div>
-					) : (
-						/* B. LISTA DE ARCHIVOS (GRID) */
-						<div
-							className={cn(
-								"grid gap-3",
-								fileList.value.filter((f) => f.status !== "COMPLETED").length +
-									existingGroups.length >
-									1
-									? "grid-cols-1 md:grid-cols-2"
-									: "grid-cols-1",
-							)}
-						>
-							{/* Mostrar archivos EXISTENTES primero (FilesSchema) */}
-							{existingGroups.map((group) => {
-								// Elegir el archivo principal para mostrar (priorizar la variante MÁS GRANDE)
-								const mainFile =
-									group.find((f) => !f.dimension) || // Original sin dimensión
-									group.sort(
-										(a, b) => (b.dimension || 0) - (a.dimension || 0),
-									)[0]; // O la más grande
+						) : (
+							/* B. LISTA DE ARCHIVOS (GRID) */
+							<div
+								className={cn(
+									"grid gap-3",
+									fileList.value.filter((f) => f.status !== "COMPLETED")
+										.length +
+										existingGroups.length >
+										1
+										? "grid-cols-1 md:grid-cols-2"
+										: "grid-cols-1",
+								)}
+							>
+								{/* Mostrar archivos EXISTENTES primero (FilesSchema) */}
+								{existingGroups.map((group) => {
+									// Elegir el archivo principal para mostrar (priorizar la variante MÁS GRANDE)
+									const mainFile =
+										group.find((f) => !f.dimension) || // Original sin dimensión
+										group.sort(
+											(a, b) => (b.dimension || 0) - (a.dimension || 0),
+										)[0]; // O la más grande
 
-								return (
-									<ExistingFileCard
-										key={mainFile.key}
-										file={mainFile}
-										onRemove={() => {
-											handleRemoveExisting(group.map((f) => f.key));
-										}}
-									/>
-								);
-							})}
-
-							{/* Mostrar archivos EN PROCESO DE SUBIDA (FileState) */}
-							{fileList.value
-								.filter((f) => f.status !== "COMPLETED")
-								.map((fileState) => (
-									<div
-										key={fileState.id}
-										class="group relative flex items-start gap-3 p-3 rounded-lg border bg-card shadow-sm hover:shadow-md transition-all pr-10"
-										onClick={(e) => e.stopPropagation()}
-									>
-										{/* Botón Borrar (X arriba a la derecha) */}
-										<Button
-											type="button"
-											variant="ghost"
-											size="sm"
-											className="absolute top-1 right-1 h-7 w-7 rounded-full text-muted-foreground hover:text-destructive hover:bg-destructive/10 z-20 flex items-center justify-center p-0"
-											onClick={(e) => {
-												e.preventDefault();
-												e.stopPropagation();
-												handleRemove(fileState);
+									return (
+										<ExistingFileCard
+											key={mainFile.key}
+											file={mainFile}
+											onRemove={() => {
+												handleRemoveExisting(group.map((f) => f.key));
 											}}
-											title="Eliminar archivo"
+										/>
+									);
+								})}
+
+								{/* Mostrar archivos EN PROCESO DE SUBIDA (FileState) */}
+								{fileList.value
+									.filter((f) => f.status !== "COMPLETED")
+									.map((fileState) => (
+										<div
+											key={fileState.id}
+											class="group relative flex items-start gap-3 p-3 rounded-lg border bg-card shadow-sm hover:shadow-md transition-all pr-10"
+											onClick={(e) => e.stopPropagation()}
 										>
-											<XIcon {...sizeIcon.small} />
-										</Button>
-
-										{/* Preview Thumbnail */}
-										<div class="w-16 h-16 rounded-lg bg-muted shrink-0 overflow-hidden flex items-center justify-center border border-border relative">
-											{fileState.file.type.startsWith("image/") ? (
-												<img
-													src={URL.createObjectURL(fileState.file)}
-													alt="preview"
-													class="w-full h-full object-cover"
-												/>
-											) : (
-												getIcon(fileState.file.type)
-											)}
-
-											{/* Overlay de acciones rápidas (Editor/Info) */}
-											<div
-												class={cn(
-													"absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1 rounded-lg",
-													fileState.file.type.startsWith("image/") &&
-														"cursor-pointer",
-												)}
+											{/* Botón Borrar (X arriba a la derecha) */}
+											<Button
+												type="button"
+												variant="ghost"
+												size="sm"
+												className="absolute top-1 right-1 h-7 w-7 rounded-full text-muted-foreground hover:text-destructive hover:bg-destructive/10 z-20 flex items-center justify-center p-0"
 												onClick={(e) => {
+													e.preventDefault();
 													e.stopPropagation();
-													if (fileState.file.type.startsWith("image/")) {
-														editingImage.value = fileState.file;
-													}
+													handleRemove(fileState);
 												}}
+												title="Eliminar archivo"
 											>
-												{fileState.file.type.startsWith("image/") && (
+												<XIcon {...sizeIcon.small} />
+											</Button>
+
+											{/* Preview Thumbnail */}
+											<div class="w-16 h-16 rounded-lg bg-muted shrink-0 overflow-hidden flex items-center justify-center border border-border relative">
+												{fileState.file.type.startsWith("image/") ? (
+													<img
+														src={URL.createObjectURL(fileState.file)}
+														alt="preview"
+														title={fileState.file.name}
+														width={100}
+														height={100}
+														class="w-full h-full object-cover"
+													/>
+												) : (
+													getIcon(fileState.file.type)
+												)}
+
+												{/* Overlay de acciones rápidas (Editor/Info) */}
+												<div
+													class={cn(
+														"absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1 rounded-lg",
+														fileState.file.type.startsWith("image/") &&
+															"cursor-pointer",
+													)}
+													onClick={(e) => {
+														e.stopPropagation();
+														if (fileState.file.type.startsWith("image/")) {
+															editingImage.value = fileState.file;
+														}
+													}}
+												>
+													{fileState.file.type.startsWith("image/") && (
+														<Button
+															type="button"
+															size="sm"
+															variant="ghost"
+															className="h-6 w-6 text-white hover:text-primary hover:bg-white/20"
+															onClick={(e) => {
+																e.stopPropagation();
+																editingImage.value = fileState.file;
+															}}
+														>
+															<Pencil {...sizeIcon.small} />
+														</Button>
+													)}
 													<Button
 														type="button"
 														size="sm"
@@ -342,102 +359,89 @@ export function FormFile<T extends object>(props: FormFileProps<T>) {
 														className="h-6 w-6 text-white hover:text-primary hover:bg-white/20"
 														onClick={(e) => {
 															e.stopPropagation();
-															editingImage.value = fileState.file;
+															showFileInfo.value = fileState.file;
 														}}
 													>
 														<Pencil {...sizeIcon.small} />
 													</Button>
-												)}
-												<Button
-													type="button"
-													size="sm"
-													variant="ghost"
-													className="h-6 w-6 text-white hover:text-primary hover:bg-white/20"
-													onClick={(e) => {
-														e.stopPropagation();
-														showFileInfo.value = fileState.file;
-													}}
-												>
-													<Pencil {...sizeIcon.small} />
-												</Button>
-											</div>
-										</div>
-
-										{/* Info del Archivo */}
-										<div class="flex-1 min-w-0 flex flex-col justify-center h-16">
-											<p
-												class="text-sm font-medium truncate pr-2"
-												title={fileState.file.name}
-											>
-												{fileState.file.name}
-											</p>
-
-											<div class="flex items-center gap-2 mt-1">
-												<Badge
-													variant="outline"
-													className={cn(
-														"text-[10px] px-1 h-5",
-														getFileTypeColor(fileState.file.type),
-													)}
-												>
-													{fileState.file.type.split("/")[1]?.toUpperCase() ||
-														"FILE"}
-												</Badge>
-												<span class="text-[10px] text-muted-foreground">
-													{formatFileSize(fileState.file.size)}
-												</span>
+												</div>
 											</div>
 
-											{/* STATUS BAR */}
-											<div class="mt-1.5 flex items-center gap-2 h-4">
-												{(fileState.status === "PENDING" ||
-													fileState.status === "UPLOADING") && (
-													<div class="flex-1">
-														<div class="w-full bg-secondary rounded-full h-1.5 relative overflow-hidden">
-															<div
-																class={cn(
-																	"h-1.5 rounded-full transition-all duration-300",
-																	fileState.status === "PENDING"
-																		? "bg-muted-foreground"
-																		: "bg-primary",
-																)}
-																style={{
-																	width: `${fileState.progress}%`,
-																}}
-															/>
-														</div>
-														<div class="flex justify-between items-center mt-0.5">
-															<span class="text-[10px] text-muted-foreground">
-																{fileState.status === "PENDING"
-																	? "En cola..."
-																	: "Subiendo..."}
-															</span>
-															<span class="text-[10px] font-semibold text-primary">
-																{fileState.progress}%
-															</span>
-														</div>
-													</div>
-												)}
+											{/* Info del Archivo */}
+											<div class="flex-1 min-w-0 flex flex-col justify-center h-16">
+												<p
+													class="text-sm font-medium truncate pr-2"
+													title={fileState.file.name}
+												>
+													{fileState.file.name}
+												</p>
 
-												{fileState.status === "COMPLETED" && (
-													<div class="flex items-center gap-1 text-primary">
-														<div class="h-1.5 w-1.5 rounded-full bg-primary" />
-														<span class="text-[10px] font-bold">
-															Completado
-														</span>
-													</div>
-												)}
-												{fileState.status === "ERROR" && (
-													<span class="text-[10px] text-destructive font-bold">
-														Error
+												<div class="flex items-center gap-2 mt-1">
+													<Badge
+														variant="outline"
+														className={cn(
+															"text-[10px] px-1 h-5",
+															getFileTypeColor(fileState.file.type),
+														)}
+													>
+														{fileState.file.type.split("/")[1]?.toUpperCase() ||
+															"FILE"}
+													</Badge>
+													<span class="text-[10px] text-muted-foreground">
+														{formatFileSize(fileState.file.size)}
 													</span>
-												)}
+												</div>
+
+												{/* STATUS BAR */}
+												<div class="mt-1.5 flex items-center gap-2 h-4">
+													{(fileState.status === "PENDING" ||
+														fileState.status === "UPLOADING") && (
+														<div class="flex-1">
+															<div class="w-full bg-secondary rounded-full h-1.5 relative overflow-hidden">
+																<div
+																	class={cn(
+																		"h-1.5 rounded-full transition-all duration-300",
+																		fileState.status === "PENDING"
+																			? "bg-muted-foreground"
+																			: "bg-primary",
+																	)}
+																	style={{
+																		width: `${fileState.progress}%`,
+																	}}
+																/>
+															</div>
+															<div class="flex justify-between items-center mt-0.5">
+																<span class="text-[10px] text-muted-foreground">
+																	{fileState.status === "PENDING"
+																		? "En cola..."
+																		: "Subiendo..."}
+																</span>
+																<span class="text-[10px] font-semibold text-primary">
+																	{fileState.progress}%
+																</span>
+															</div>
+														</div>
+													)}
+
+													{fileState.status === "COMPLETED" && (
+														<div class="flex items-center gap-1 text-primary">
+															<div class="h-1.5 w-1.5 rounded-full bg-primary" />
+															<span class="text-[10px] font-bold">
+																Completado
+															</span>
+														</div>
+													)}
+													{fileState.status === "ERROR" && (
+														<span class="text-[10px] text-destructive font-bold">
+															Error
+														</span>
+													)}
+												</div>
 											</div>
 										</div>
-									</div>
-								))}
-						</div>
-					)}
+									))}
+							</div>
+						)}
 					</CardContent>
 				</Card>
 			</div>
@@ -501,9 +505,11 @@ export function FormFile<T extends object>(props: FormFileProps<T>) {
 				contentClassName="max-w-md"
 			>
 				<div class="flex flex-col gap-4">
-					<FileInfo 
-						file={showFileInfo.value!} 
-						title={<div className="font-bold text-lg mb-4">Detalles del Archivo</div>}
+					<FileInfo
+						file={showFileInfo.value!}
+						title={
+							<div className="font-bold text-lg mb-4">Detalles del Archivo</div>
+						}
 					/>
 				</div>
 			</Modal>

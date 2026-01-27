@@ -7,12 +7,12 @@ export interface TenantDestroyApiError {
 }
 
 /**
- * tenantDestroy - /api/v1/tenants/:id
+ * tenantDestroy - /api/v1/tenant/:id
  * @method DELETE
  */
 export function tenantDestroyApi() {
 	return useMutation<TenantDestroyResponseDto, number, TenantDestroyApiError>(
-		"/tenants",
+		"/tenant",
 		async (url, id) => {
 			const response = await fetch(`/api/v1${url}/${id}`, {
 				method: "DELETE",

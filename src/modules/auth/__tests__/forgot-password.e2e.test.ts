@@ -13,7 +13,7 @@ import { UserService } from "@modules/user/services/user.service";
 import { WebPath } from "@modules/web/routers/web.routers";
 import type { INestApplication } from "@nestjs/common";
 import { RequestMethod, VersioningType } from "@nestjs/common";
-import { APP_GUARD, Reflector } from "@nestjs/core";
+import { APP_GUARD } from "@nestjs/core";
 import { Test, TestingModule } from "@nestjs/testing";
 import { AppModule } from "@src/app.module";
 
@@ -24,7 +24,6 @@ describe("Auth Forgot Password (E2E)", () => {
 	let app: INestApplication;
 	let userService: UserService;
 	let db: TestDb;
-	let mailService: MailService;
 	const mockMailService = {
 		sendMail: vi.fn().mockResolvedValue(true),
 	};
@@ -59,7 +58,6 @@ describe("Auth Forgot Password (E2E)", () => {
 		});
 
 		userService = moduleRef.get<UserService>(UserService);
-		mailService = moduleRef.get<MailService>(MailService);
 		db = moduleRef.get(DRIZZLE);
 
 		const sessionConfig =
@@ -125,7 +123,6 @@ describe("Auth Forgot Password (E2E)", () => {
 		// BUT the middleware will throw InternalServerErrorException ("Tenant not found") if the host is not mapped.
 		// So we can check that it doesn't find the user if the host is technically valid but for a different tenant.
 		// Let's seed ANOTHER tenant.
-		const { sql } = await import("drizzle-orm");
 		const tenant2 = await db
 			.insert(schema.tenantEntity)
 			.values({

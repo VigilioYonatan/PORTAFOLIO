@@ -13,7 +13,7 @@ export function technologyStoreApi() {
 		TechnologyStoreResponseDto,
 		TechnologyStoreDto,
 		TechnologyStoreApiError
-	>("/technologies", async (url, body) => {
+	>("/technology", async (url, body) => {
 		const response = await fetch(`/api/v1${url}`, {
 			method: "POST",
 			body: JSON.stringify(body),

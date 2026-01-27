@@ -33,18 +33,18 @@ export class HybridAuthGuard extends AuthGuard("jwt") {
 		//   request.locals = {} as any;
 		// }
 
-		 // 1. Check Session (Passport Session)
-		if (request.isAuthenticated && request.isAuthenticated()) {
-		  return true;
+		// 1. Check Session (Passport Session)
+		if (request.isAuthenticated?.()) {
+			return true;
 		}
 
 		// 2. Try JWT via AuthGuard('jwt')
 		try {
 			const result = (await super.canActivate(context)) as boolean;
 			if (result) {
-				const request = context.switchToHttp().getRequest<Request>();
-				if (!request.locals) request.locals = {} as any;
-				request.locals.user = request.user as UserAuth;
+				// const request = context.switchToHttp().getRequest<Request>();
+				// if (!request.locals) request.locals = {} ;
+				// request.locals.user = request.user as UserAuth;
 			}
 			return result;
 		} catch (_e) {

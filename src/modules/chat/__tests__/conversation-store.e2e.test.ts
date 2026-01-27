@@ -7,7 +7,7 @@ import { Test } from "@nestjs/testing";
 import request from "supertest";
 import { AppModule } from "../../../app.module";
 
-describe("Conversation - POST /conversations (E2E)", () => {
+describe("Conversation - POST /conversation (E2E)", () => {
 	let app: INestApplication;
 	let tenantId: number;
 
@@ -44,7 +44,7 @@ describe("Conversation - POST /conversations (E2E)", () => {
 		}
 	});
 
-	describe("POST /api/v1/conversations (16.1)", () => {
+	describe("POST /api/v1/conversation (16.1)", () => {
 		it("should create a new conversation for an anonymous visitor", async () => {
 			const body = {
 				visitor_id: "f47ac10b-58cc-4372-a567-0e02b2c3d479",
@@ -52,11 +52,12 @@ describe("Conversation - POST /conversations (E2E)", () => {
 			};
 
 			const response = await request(app.getHttpServer())
-				.post("/api/v1/conversations")
+				.post("/api/v1/conversation")
 				.set("Host", "localhost")
 				.send(body);
 
 			if (response.status !== 201) {
+				// biome-ignore lint/suspicious/noConsole: <explanation>
 				console.log("Conversation Create Failure:", response.body);
 			}
 
@@ -76,7 +77,7 @@ describe("Conversation - POST /conversations (E2E)", () => {
 			};
 
 			const response = await request(app.getHttpServer())
-				.post("/api/v1/conversations")
+				.post("/api/v1/conversation")
 				.set("Host", "localhost")
 				.send(body);
 
@@ -91,7 +92,7 @@ describe("Conversation - POST /conversations (E2E)", () => {
 			};
 
 			const response = await request(app.getHttpServer())
-				.post("/api/v1/conversations")
+				.post("/api/v1/conversation")
 				.set("Host", "localhost")
 				.send(body);
 
@@ -102,7 +103,7 @@ describe("Conversation - POST /conversations (E2E)", () => {
 			const body = {};
 
 			const response = await request(app.getHttpServer())
-				.post("/api/v1/conversations")
+				.post("/api/v1/conversation")
 				.set("Host", "localhost")
 				.send(body);
 
@@ -116,7 +117,7 @@ describe("Conversation - POST /conversations (E2E)", () => {
 			};
 
 			const response = await request(app.getHttpServer())
-				.post("/api/v1/conversations")
+				.post("/api/v1/conversation")
 				.set("Host", "localhost")
 				.send(body);
 
@@ -130,7 +131,7 @@ describe("Conversation - POST /conversations (E2E)", () => {
 			};
 
 			const response = await request(app.getHttpServer())
-				.post("/api/v1/conversations")
+				.post("/api/v1/conversation")
 				.set("Host", "localhost")
 				.send(body);
 

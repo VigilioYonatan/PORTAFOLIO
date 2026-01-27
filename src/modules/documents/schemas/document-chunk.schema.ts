@@ -1,6 +1,5 @@
 import { z } from "@infrastructure/config/zod-i18n.config";
 import { timeStampSchema } from "@infrastructure/schemas/time_stamp.schema";
-import { filesSchema } from "@modules/uploads/schemas/upload.schema";
 
 /**
  * Document Schema for RAG (Retrieval-Augmented Generation) system

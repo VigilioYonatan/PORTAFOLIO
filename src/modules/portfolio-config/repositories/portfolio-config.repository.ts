@@ -7,7 +7,7 @@ import type {
 	PortfolioConfigShowSchema,
 } from "@modules/portfolio-config/schemas/portfolio-config.schema";
 import { Inject, Injectable } from "@nestjs/common";
-import { and, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import type { NodePgDatabase } from "drizzle-orm/node-postgres";
 
 @Injectable()

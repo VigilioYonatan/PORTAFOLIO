@@ -29,6 +29,7 @@ export class UserFactory {
 			repeat_password: password,
 			status: "ACTIVE",
 			role_id: 1,
+			phone_number: null,
 			...overrides,
 		};
 	}

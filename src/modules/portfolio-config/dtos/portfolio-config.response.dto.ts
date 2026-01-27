@@ -46,3 +46,15 @@ export const portfolioConfigCvResponseDto = z
 export type PortfolioConfigCvResponseDto = z.infer<
 	typeof portfolioConfigCvResponseDto
 >;
+
+/**
+ * Internal Result DTO for Service -> Controller communication for file download
+ */
+export const portfolioConfigCvResultDto = z.object({
+	buffer: z.any(), // Buffer
+	filename: z.string(),
+	contentType: z.string(),
+});
+export type PortfolioConfigCvResultDto = z.infer<
+	typeof portfolioConfigCvResultDto
+>;

@@ -1,6 +1,5 @@
 import { schema } from "@infrastructure/providers/database/database.schema";
 import { DRIZZLE } from "@infrastructure/providers/database/database.service";
-import { slugify } from "@infrastructure/utils/hybrid/slug.utils";
 import { toNull } from "@infrastructure/utils/server";
 import { Inject, Injectable, Logger } from "@nestjs/common";
 import {
@@ -17,7 +16,6 @@ import {
 } from "drizzle-orm";
 import type { NodePgDatabase } from "drizzle-orm/node-postgres";
 import type { TenantQueryDto } from "../dtos/tenant.query.dto";
-import type { TenantStoreDto } from "../dtos/tenant.store.dto";
 import { tenantEntity } from "../entities/tenant.entity";
 import { tenantSettingEntity } from "../entities/tenant-setting.entity";
 import type { TenantSchema, TenantShowSchema } from "../schemas/tenant.schema";
@@ -94,6 +92,14 @@ export class TenantRepository {
 				where: useCursor ? cursorWhereClause : baseWhereClause,
 				orderBy: orderBy, // Use dynamic orderBy
 				with: { setting: true },
+				columns: {
+					address: false,
+				},
+				extras: {
+					address: sql<string>`substring(${tenantEntity.address} from 1 for 3000)`.as(
+						"address",
+					),
+				},
 			}),
 			this.db
 				.select({ count: sql<number>`count(*)` })
@@ -105,18 +111,21 @@ export class TenantRepository {
 	}
 
 	store(
-		body: Omit<TenantSchema, "id" | "created_at" | "updated_at">,
-	): Promise<TenantSchema> {
-		const slug = slugify(body.name);
+		body: Omit<TenantSchema, "id" | "tenant_id" | "created_at" | "updated_at">,
+	): Promise<TenantShowSchema> {
 		return this.db.transaction(async (tx) => {
 			const [tenant] = await tx
 				.insert(tenantEntity)
-				.values({ ...body, slug })
+				.values({ ...body })
 				.returning();
-			await tx.insert(tenantSettingEntity).values({ tenant_id: tenant.id });
-			return tenant;
+			const [setting] = await tx
+				.insert(tenantSettingEntity)
+				.values({ tenant_id: tenant.id })
+				.returning();
+			return { ...tenant, setting };
 		});
 	}
+
 
 	async update(id: number, body: Partial<TenantSchema>): Promise<TenantSchema> {
 		const [result] = await this.db

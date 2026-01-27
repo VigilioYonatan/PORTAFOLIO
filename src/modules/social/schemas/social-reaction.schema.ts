@@ -4,7 +4,7 @@ import { timeStampSchema } from "@infrastructure/schemas/time_stamp.schema";
 export const socialReactionSchema = z
 	.object({
 		id: z.number().int().positive(), // Identificador único
-		type: z.enum(["LIKE", "LOVE", "CLAP", "FIRE"]).default("LIKE"), // Tipo de reacción, requerido
+		type: z.enum(["LIKE", "LOVE", "CLAP", "FIRE"]), // Tipo de reacción, requerido
 		reactable_id: z.number().int().positive(), // Identificador de la entidad reaccionada
 		reactable_type: z.enum([
 			"PORTFOLIO_PROJECT",
@@ -12,7 +12,7 @@ export const socialReactionSchema = z
 			"SOCIAL_COMMENT",
 			"MUSIC_TRACK",
 		]), // Tipo de entidad reaccionada
-		visitor_id: z.string().uuid(), // Identificador único del visitante (requerido)
+		visitor_id: z.uuid(), // Identificador único del visitante (requerido)
 		tenant_id: z.number().int().positive(), // ID del tenant
 		...timeStampSchema.shape, // created_at, updated_at
 	})

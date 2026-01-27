@@ -12,7 +12,8 @@ export function useTranslations(lang: keyof typeof ui = defaultLang) {
 		params?: Record<string, string | number>,
 	) {
 		let translation: string =
-			(ui[lang] as any)[key] || (ui[defaultLang] as any)[key];
+			(ui[lang] as (typeof ui)[typeof defaultLang])[key] ||
+			ui[defaultLang][key];
 		if (params) {
 			for (const [k, v] of Object.entries(params)) {
 				translation = translation.replace(`{${k}}`, String(v));

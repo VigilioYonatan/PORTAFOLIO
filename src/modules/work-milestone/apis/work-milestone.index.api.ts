@@ -1,8 +1,8 @@
 import { useQuery } from "@vigilio/preact-fetching";
+import type { UsePaginator } from "@vigilio/preact-paginator";
 import type { UseTable } from "@vigilio/preact-table";
 import type { WorkMilestoneIndexResponseDto } from "../dtos/work-milestone.response.dto";
 import type { WorkMilestoneSchema } from "../schemas/work-milestone.schema";
-import type { UsePaginator } from "@vigilio/preact-paginator";
 
 export type WorkMilestoneIndexSecondaryPaginator = "action";
 export type WorkMilestoneIndexMethods = {
@@ -14,13 +14,22 @@ export type WorkMilestoneIndexTable = UseTable<
 	WorkMilestoneIndexMethods
 >;
 
+export interface WorkMilestoneIndexApiError {
+	success: false;
+	message: string;
+}
+
+/**
+ * workMilestoneIndex - /api/v1/work-milestone?work_experience_id=${experienceId}
+ * @method GET
+ */
 export function workMilestoneIndexApi(
 	experienceId: number,
 	table: WorkMilestoneIndexTable | null = null,
 	paginator: UsePaginator | null = null,
 ) {
-	const query = useQuery<WorkMilestoneIndexResponseDto, unknown>(
-		`/work-experience/${experienceId}/milestones`,
+	const query = useQuery<WorkMilestoneIndexResponseDto, WorkMilestoneIndexApiError>(
+		`/work-milestone?work_experience_id=${experienceId}`,
 		async (url) => {
 			const data = new URLSearchParams();
 			if (table) {

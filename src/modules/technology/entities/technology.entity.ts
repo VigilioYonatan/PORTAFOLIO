@@ -22,6 +22,8 @@ export const technologyCategoryEnum = pgEnum("technology_category_enum", [
 	"DATABASE",
 	"DEVOPS",
 	"LANGUAGE",
+	"MOBILE",
+	"AI",
 ]);
 
 export const technologyEntity = pgTable(

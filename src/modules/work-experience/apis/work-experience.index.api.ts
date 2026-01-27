@@ -1,8 +1,8 @@
 import { useQuery } from "@vigilio/preact-fetching";
+import type { UsePaginator } from "@vigilio/preact-paginator";
 import type { UseTable } from "@vigilio/preact-table";
 import type { WorkExperienceIndexResponseDto } from "../dtos/work-experience.response.dto";
 import type { WorkExperienceSchema } from "../schemas/work-experience.schema";
-import type { UsePaginator } from "@vigilio/preact-paginator";
 
 export type WorkExperienceIndexSecondaryPaginator = "action";
 export type WorkExperienceIndexMethods = {
@@ -19,6 +19,10 @@ export interface WorkExperienceIndexApiError {
 	message: string;
 }
 
+/**
+ * workExperienceIndex - /api/v1/experiences
+ * @method GET
+ */
 export function workExperienceIndexApi(
 	table: WorkExperienceIndexTable | null = null,
 	paginator: UsePaginator | null = null,

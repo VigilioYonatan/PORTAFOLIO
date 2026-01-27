@@ -1,9 +1,9 @@
-import Button from "@components/extras/Button";
+import Button from "@components/extras/button";
 import { sizeIcon } from "@infrastructure/utils/client";
 import { sweetAlert } from "@vigilio/sweet";
 import { Search, Trash2 } from "lucide-preact";
 import { useContext } from "preact/hooks";
-import { VigilioTableContext } from "./VigilioTable";
+import { VigilioTableContext } from "./vigilio-table";
 
 interface ToolsProps {
 	onRemoveAll?: (props: number[]) => void;

@@ -9,14 +9,16 @@ import {
 	eq,
 	getTableColumns,
 	ilike,
+	lt,
 	SQL,
 	sql,
 } from "drizzle-orm";
 import type { NodePgDatabase } from "drizzle-orm/node-postgres";
 import type { ProjectQueryDto } from "../dtos/project.query.dto";
-import type { ProjectStoreDto } from "../dtos/project.store.dto";
+import { techeableEntity } from "@modules/techeable/entities/techeable.entity";
 import { projectEntity } from "../entities/project.entity";
-import type { ProjectSchema } from "../schemas/project.schema";
+import type { ProjectSchema, ProjectWithRelations } from "../schemas/project.schema";
+
 
 @Injectable()
 export class ProjectRepository {
@@ -26,20 +28,43 @@ export class ProjectRepository {
 
 	async store(
 		tenant_id: number,
-		body: ProjectStoreDto,
+		body: Omit<
+			ProjectSchema,
+			"id" | "tenant_id" | "created_at" | "updated_at"
+		>,
 	): Promise<ProjectSchema> {
+		// 1. Crear el proyecto
 		const [result] = await this.db
 			.insert(projectEntity)
 			.values({ ...body, tenant_id })
 			.returning();
+
 		return result;
 	}
 
-	async update(
-		id: number,
+	async storeTecheables(
 		tenant_id: number,
+		project_id: number,
+		technology_ids: number[],
+	): Promise<void> {
+		if (technology_ids.length === 0) return;
+
+		await this.db.insert(techeableEntity).values(
+			technology_ids.map((techId) => ({
+				techeable_id: project_id,
+				techeable_type: "PORTFOLIO_PROJECT" as const,
+				technology_id: techId,
+				tenant_id,
+			})),
+		);
+	}
+
+	async update(
+		tenant_id: number,
+		id: number,
 		body: Partial<ProjectSchema>,
 	): Promise<ProjectSchema> {
+		// 1. Update Project
 		const [result] = await this.db
 			.update(projectEntity)
 			.set({ ...body })
@@ -47,18 +72,32 @@ export class ProjectRepository {
 				and(eq(projectEntity.id, id), eq(projectEntity.tenant_id, tenant_id)),
 			)
 			.returning();
+
 		return result;
+	}
+
+	async destroyTecheables(tenant_id: number, project_id: number): Promise<void> {
+		await this.db
+			.delete(techeableEntity)
+			.where(
+				and(
+					eq(techeableEntity.techeable_id, project_id),
+					eq(techeableEntity.techeable_type, "PORTFOLIO_PROJECT" as const),
+					eq(techeableEntity.tenant_id, tenant_id),
+				),
+			);
 	}
 
 	async showBySlug(
 		tenant_id: number,
 		slug: string,
-	): Promise<ProjectSchema | null> {
+	): Promise<ProjectWithRelations | null> {
 		const result = await this.db.query.projectEntity.findFirst({
 			where: and(
 				eq(projectEntity.tenant_id, tenant_id),
 				eq(projectEntity.slug, slug),
 			),
+			with: {techeables:true},
 		});
 		return toNull(result);
 	}
@@ -76,8 +115,17 @@ export class ProjectRepository {
 	async index(
 		tenant_id: number,
 		query: ProjectQueryDto,
-	): Promise<[ProjectSchema[], number]> {
-		const { limit, offset, is_featured, is_visible, sortBy, sortDir } = query;
+	): Promise<[ProjectWithRelations[], number]> {
+		const {
+			limit,
+			offset,
+			is_featured,
+			is_visible,
+			sortBy,
+			sortDir,
+			search,
+			cursor,
+		} = query;
 
 		const baseWhere: SQL[] = [eq(projectEntity.tenant_id, tenant_id)];
 
@@ -87,8 +135,17 @@ export class ProjectRepository {
 		if (is_visible !== undefined) {
 			baseWhere.push(eq(projectEntity.is_visible, is_visible));
 		}
+		if (search) {
+			baseWhere.push(ilike(projectEntity.title, `%${search}%`));
+		}
 
 		const baseWhereClause = and(...baseWhere);
+
+		const cursorWhere: SQL[] = [...baseWhere];
+		if (cursor) {
+			cursorWhere.push(lt(projectEntity.id, Number(cursor)));
+		}
+		const cursorWhereClause = and(...cursorWhere);
 
 		// Default sort by sort_order ASC (typical for portfolio)
 		let orderBy: SQL<unknown>[] = [asc(projectEntity.sort_order)];
@@ -101,24 +158,44 @@ export class ProjectRepository {
 			}
 		}
 
+		// Project default is sort_order ASC, which is NOT compatible with ID cursor (lt).
+		// Only enable cursor if sorting by ID DESC.
+		const isCursorCompatible = sortBy === "id" && sortDir === "DESC";
+		const useCursor = cursor && isCursorCompatible;
+
 		const result = await Promise.all([
 			this.db.query.projectEntity.findMany({
-				limit,
-				offset,
-				where: baseWhereClause,
+				limit: useCursor ? (limit ?? 10) + 1 : limit,
+				offset: useCursor ? undefined : offset,
+				where: useCursor ? cursorWhereClause! : baseWhereClause!,
 				orderBy: orderBy,
+				with: {
+					techeables: true,
+				},
+				columns: {
+					content: false,
+					impact_summary: false,
+				},
+				extras: {
+					content: sql<string>`substring(${projectEntity.content} from 1 for 3000)`.as(
+						"content",
+					),
+					impact_summary: sql<string>`substring(${projectEntity.impact_summary} from 1 for 3000)`.as(
+						"impact_summary",
+					),
+				},
 			}),
 			this.db
 				.select({ count: sql<number>`count(*)` })
 				.from(projectEntity)
-				.where(baseWhereClause)
+				.where(baseWhereClause!)
 				.then((result) => Number(result[0].count)),
 		]);
 
 		return result;
 	}
 
-	async destroy(id: number, tenant_id: number): Promise<ProjectSchema> {
+	async destroy(tenant_id: number, id: number): Promise<ProjectSchema> {
 		const [result] = await this.db
 			.delete(projectEntity)
 			.where(

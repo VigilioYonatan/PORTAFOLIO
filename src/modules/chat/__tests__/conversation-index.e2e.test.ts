@@ -7,7 +7,7 @@ import { Test } from "@nestjs/testing";
 import request from "supertest";
 import { AppModule } from "../../../app.module";
 
-describe("Conversation - GET /conversations (E2E)", () => {
+describe("Conversation - GET /conversation (E2E)", () => {
 	let app: INestApplication;
 	let tenantId: number;
 
@@ -53,11 +53,11 @@ describe("Conversation - GET /conversations (E2E)", () => {
 		}
 	});
 
-	describe("GET /api/v1/conversations (Index)", () => {
-		it("should return paginated conversations", async () => {
+	describe("GET /api/v1/conversation (Index)", () => {
+		it("should return paginated conversation", async () => {
 			// Create a conversation first
 			await request(app.getHttpServer())
-				.post("/api/v1/conversations")
+				.post("/api/v1/conversation")
 				.set("Host", "localhost")
 				.send({
 					visitor_id: "f47ac10b-58cc-4372-a567-0e02b2c3d479",
@@ -66,7 +66,7 @@ describe("Conversation - GET /conversations (E2E)", () => {
 
 			// Create another one
 			await request(app.getHttpServer())
-				.post("/api/v1/conversations")
+				.post("/api/v1/conversation")
 				.set("Host", "localhost")
 				.send({
 					visitor_id: "f47ac10b-58cc-4372-a567-0e02b2c3d488",

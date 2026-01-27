@@ -2,11 +2,11 @@ import { paginator } from "@infrastructure/utils/server/helpers";
 import { NotFoundException } from "@nestjs/common";
 import { Test, TestingModule } from "@nestjs/testing";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { ContactCache } from "../cache/contact.cache";
-import type { ContactStoreDto } from "../dtos/contact.store.dto";
-import { ContactRepository } from "../repositories/contact.repository";
-import type { ContactMessageSchema } from "../schemas/contact-message.schema";
-import { ContactService } from "../services/contact.service";
+import { ContactCache } from "../cache/contact-message.cache";
+import type { ContactStoreDto } from "../dtos/contact-message.store.dto";
+import { ContactRepository } from "../repositories/contact-message.repository";
+import type { ContactMessageSchema } from "../schemas/contact-message-message.schema";
+import { ContactService } from "../services/contact-message.service";
 
 vi.mock("@infrastructure/utils/server/helpers", () => ({
 	paginator: vi.fn(),
@@ -75,7 +75,7 @@ describe("ContactService", () => {
 			const result = await service.store(1, body);
 
 			expect(result.success).toBe(true);
-			expect(result.data).toEqual(mockMessage);
+			expect(result.message).toEqual(mockMessage);
 			expect(repository.store).toHaveBeenCalledWith(
 				1,
 				expect.objectContaining({ ...body, is_read: false }),
@@ -84,7 +84,7 @@ describe("ContactService", () => {
 	});
 
 	describe("index", () => {
-		it("should return paginated messages", async () => {
+		it("should return paginated contact", async () => {
 			const query = { limit: 10, offset: 0 };
 			// Mock paginator properly
 			vi.mocked(paginator).mockResolvedValue({
@@ -112,7 +112,7 @@ describe("ContactService", () => {
 			const result = await service.markAsRead(1, 1, { is_read: true });
 
 			expect(result.success).toBe(true);
-			expect(result.data.is_read).toBe(true);
+			expect(result.message.is_read).toBe(true);
 			expect(repository.update).toHaveBeenCalledWith(1, 1, { is_read: true });
 		});
 

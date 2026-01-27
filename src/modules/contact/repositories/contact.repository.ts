@@ -71,6 +71,14 @@ export class ContactRepository {
 				offset: useCursor ? undefined : offset,
 				where: useCursor ? cursorWhereClause : baseWhereClause,
 				orderBy: orderBy,
+				columns: {
+					message: false,
+				},
+				extras: {
+					message: sql<string>`substring(${contactMessageEntity.message} from 1 for 3000)`.as(
+						"message",
+					),
+				},
 			}),
 			this.db
 				.select({ count: sql<number>`count(*)` })
@@ -85,7 +93,7 @@ export class ContactRepository {
 		tenant_id: number | null,
 		body: Omit<
 			ContactMessageSchema,
-			"id" | "created_at" | "updated_at" | "tenant_id"
+			"id" | "tenant_id" | "created_at" | "updated_at"
 		>,
 	): Promise<ContactMessageSchema> {
 		const [result] = await this.db

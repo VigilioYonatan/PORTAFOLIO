@@ -32,7 +32,7 @@ export const chatMessageEntity = pgTable(
 			.references(() => tenantEntity.id),
 		role: chatRoleEnum().notNull().default("USER"),
 		content: text().notNull(),
-		sources: jsonb().$type<any[]>().notNull().default([]),
+		sources: jsonb().$type<ChatMessageSchema["sources"]>().notNull().default([]),
 		is_read: boolean().notNull().default(false),
 		conversation_id: integer()
 			.notNull()

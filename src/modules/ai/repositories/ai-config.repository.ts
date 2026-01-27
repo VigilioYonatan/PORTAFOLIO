@@ -22,32 +22,20 @@ export class AiConfigRepository {
 
 	async update(
 		tenant_id: number,
+		id: number,
 		body: Partial<AiConfigSchema>,
 	): Promise<AiConfigSchema> {
-		const existing = await this.show(tenant_id);
-
-		if (existing) {
-			const [result] = await this.db
-				.update(aiModelConfigEntity)
-				.set(body)
-				.where(
-					and(
-						eq(aiModelConfigEntity.id, existing.id),
-						eq(aiModelConfigEntity.tenant_id, tenant_id),
-					),
-				)
-				.returning();
-			return result;
-		} else {
-			// Body must have enough fields if inserting, but since it's global config,
-			// it should be seeded or handled by service with defaults.
-			// Drizzle will complain if fields are missing.
-			const [result] = await this.db
-				.insert(aiModelConfigEntity)
-				.values({ ...body, tenant_id } as any)
-				.returning();
-			return result;
-		}
+		const [result] = await this.db
+			.update(aiModelConfigEntity)
+			.set(body)
+			.where(
+				and(
+					eq(aiModelConfigEntity.id, id),
+					eq(aiModelConfigEntity.tenant_id, tenant_id),
+				),
+			)
+			.returning();
+		return result;
 	}
 
 	async store(

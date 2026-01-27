@@ -28,18 +28,21 @@ export function ResetPasswordForm({
 	});
 
 	function onSubmit(data: AuthResetPasswordDto) {
-		resetPasswordMutation.mutate({ ...data, token }, {
-			onSuccess() {
-				sweetModal({
-					title: t("auth.reset.success.title"),
-					text: t("auth.reset.success.message"),
-					icon: "success",
-					confirmButtonText: t("auth.reset.success.back"),
-				}).then(() => {
-					window.location.href = "/auth/login";
-				});
+		resetPasswordMutation.mutate(
+			{ ...data, token },
+			{
+				onSuccess() {
+					sweetModal({
+						title: t("auth.reset.success.title"),
+						text: t("auth.reset.success.message"),
+						icon: "success",
+						confirmButtonText: t("auth.reset.success.back"),
+					}).then(() => {
+						window.location.href = "/auth/login";
+					});
+				},
 			},
-		});
+		);
 	}
 
 	return (

@@ -1,7 +1,6 @@
-import { cn } from "@infrastructure/utils/client";
 import { useContext } from "preact/hooks";
 import type { JSX } from "preact/jsx-runtime";
-import { type TableContext, VigilioTableContext } from "./VigilioTable";
+import { type TableContext, VigilioTableContext } from "./vigilio-table";
 
 interface TableProps {
 	className?: string;

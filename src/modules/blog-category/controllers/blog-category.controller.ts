@@ -1,4 +1,6 @@
+import { ZodQueryPipe } from "@infrastructure/pipes/zod-query.pipe";
 import { ZodPipe } from "@infrastructure/pipes/zod.pipe";
+import { blogCategoryQueryDto } from "../dtos/blog-category.query.dto";
 import { Public } from "@modules/auth/decorators/public.decorator";
 import { Roles } from "@modules/auth/decorators/roles.decorator";
 import {
@@ -12,7 +14,6 @@ import {
 	Put,
 	Query,
 	Req,
-	UsePipes,
 } from "@nestjs/common";
 import {
 	ApiBearerAuth,
@@ -29,20 +30,18 @@ import {
 	BlogCategoryStoreResponseClassDto,
 	BlogCategoryUpdateResponseClassDto,
 } from "../dtos/blog-category.response.class.dto";
-import { BlogCategoryStoreClassDto } from "../dtos/blog-category.store.class.dto";
 import {
 	type BlogCategoryStoreDto,
-	blogCategoryStoreSchema,
+	blogCategoryStoreDto,
 } from "../dtos/blog-category.store.dto";
-import { BlogCategoryUpdateClassDto } from "../dtos/blog-category.update.class.dto";
 import {
 	type BlogCategoryUpdateDto,
-	blogCategoryUpdateSchema,
+	blogCategoryUpdateDto,
 } from "../dtos/blog-category.update.dto";
 import { BlogCategoryService } from "../services/blog-category.service";
 
 @ApiTags("Blog Categories")
-@Controller("blog/categories")
+@Controller("blog-category")
 export class BlogCategoryController {
 	constructor(private readonly service: BlogCategoryService) {}
 
@@ -52,7 +51,8 @@ export class BlogCategoryController {
 	@ApiResponse({ status: 200, description: "List of blog categories" })
 	async index(
 		@Req() req: Request,
-		@Query() query: BlogCategoryQueryClassDto,
+		@Query(new ZodQueryPipe(blogCategoryQueryDto))
+		query: BlogCategoryQueryClassDto,
 	): Promise<BlogCategoryIndexResponseClassDto> {
 		const tenant_id = req.locals.tenant.id;
 		return this.service.index(tenant_id, query);
@@ -77,7 +77,7 @@ export class BlogCategoryController {
 	@ApiResponse({ status: 201, description: "Blog category created" })
 	async store(
 		@Req() req: Request,
-		@Body(new ZodPipe(blogCategoryStoreSchema)) body: BlogCategoryStoreDto,
+		@Body(new ZodPipe(blogCategoryStoreDto)) body: BlogCategoryStoreDto,
 	): Promise<BlogCategoryStoreResponseClassDto> {
 		const tenant_id = req.locals.tenant.id;
 		return this.service.store(tenant_id, body);
@@ -91,7 +91,7 @@ export class BlogCategoryController {
 	async update(
 		@Req() req: Request,
 		@Param("id", ParseIntPipe) id: number,
-		@Body(new ZodPipe(blogCategoryUpdateSchema)) body: BlogCategoryUpdateDto,
+		@Body(new ZodPipe(blogCategoryUpdateDto)) body: BlogCategoryUpdateDto,
 	): Promise<BlogCategoryUpdateResponseClassDto> {
 		const tenant_id = req.locals.tenant.id;
 		return this.service.update(tenant_id, id, body);

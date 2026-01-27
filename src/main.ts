@@ -6,8 +6,6 @@ import { astroProxy } from "@infrastructure/utils/server";
 import { SessionConfigService } from "@modules/auth/config/session.config";
 import { ConfigService } from "@nestjs/config";
 import { NestFactory } from "@nestjs/core";
-import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
-import { apiReference } from "@scalar/nestjs-api-reference";
 import express, { json, urlencoded } from "express";
 import { Logger } from "nestjs-pino";
 import { AppModule } from "./app.module";

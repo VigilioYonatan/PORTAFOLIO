@@ -1,6 +1,6 @@
 import { useQuery } from "@vigilio/preact-fetching";
-import type { UseTable } from "@vigilio/preact-table";
 import type { UsePaginator } from "@vigilio/preact-paginator";
+import type { UseTable } from "@vigilio/preact-table";
 import type { NotificationIndexResponseDto } from "../dtos/notification.response.dto";
 import type { NotificationSchema } from "../schemas/notification.schema";
 
@@ -14,13 +14,22 @@ export type NotificationIndexTable = UseTable<
 	NotificationIndexMethods
 >;
 
+export interface NotificationIndexApiError {
+	success: false;
+	message: string;
+}
+
+/**
+ * notificationIndex - /api/v1/notification
+ * @method GET
+ */
 export function notificationIndexApi(
 	table: NotificationIndexTable | null = null,
 	paginator: UsePaginator | null = null,
 	filters?: { limit?: number; offset?: number },
 ) {
-	const query = useQuery<NotificationIndexResponseDto, unknown>(
-		"/notifications",
+	const query = useQuery<NotificationIndexResponseDto, NotificationIndexApiError>(
+		"/notification",
 		async (url) => {
 			const data = new URLSearchParams();
 

@@ -1,3 +1,4 @@
+/** biome-ignore-all lint/suspicious/noConsole: <explanation> */
 import type { INestApplication } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import { Test, type TestingModule } from "@nestjs/testing";
@@ -8,6 +9,7 @@ import {
 	seedLocalhostTenant,
 	setupTestDb,
 } from "../../../infrastructure/config/server/setup-test-db";
+import { configureApp } from "@infrastructure/config/server/app.config";
 
 describe("WorkMilestoneModule (e2e)", () => {
 	let app: INestApplication;
@@ -26,6 +28,8 @@ describe("WorkMilestoneModule (e2e)", () => {
 		db = await setupTestDb();
 
 		app = moduleFixture.createNestApplication();
+	
+		configureApp(app);
 		jwtService = moduleFixture.get(JwtService);
 
 		await app.init();
@@ -65,7 +69,7 @@ describe("WorkMilestoneModule (e2e)", () => {
 		}
 	});
 
-	describe("POST /api/milestones", () => {
+	describe("POST /work-milestone", () => {
 		it("should create a new milestone (Admin)", async () => {
 			const payload = {
 				title: "Launched MVP",
@@ -76,7 +80,7 @@ describe("WorkMilestoneModule (e2e)", () => {
 			};
 
 			const response = await request(app.getHttpServer())
-				.post("/api/milestones")
+				.post("/api/v1/work-milestone")
 				.set("host", "localhost")
 				.set("Accept", "application/json")
 				.set("Authorization", `Bearer ${adminToken}`)
@@ -84,7 +88,7 @@ describe("WorkMilestoneModule (e2e)", () => {
 
 			if (response.status !== 201) {
 				console.error(
-					"❌ POST /api/milestones failed:",
+					"❌ POST /work-milestone failed:",
 					JSON.stringify(response.body, null, 2),
 				);
 			}
@@ -96,11 +100,11 @@ describe("WorkMilestoneModule (e2e)", () => {
 		});
 	});
 
-	describe("GET /api/milestones", () => {
+	describe("GET /work-milestone", () => {
 		it("should list milestones for an experience (Public)", async () => {
 			const response = await request(app.getHttpServer())
-				.get("/api/milestones")
-				.query({ experience_id: experienceId })
+				.get("/api/v1/work-milestone")
+				.query({ work_experience_id: experienceId })
 				.set("host", "localhost")
 				.set("Accept", "application/json");
 
@@ -111,7 +115,7 @@ describe("WorkMilestoneModule (e2e)", () => {
 		});
 	});
 
-	describe("PUT /api/milestones/:id", () => {
+	describe("PUT /work-milestone/:id", () => {
 		it("should update a milestone (Admin)", async () => {
 			const payload = {
 				title: "Updated Milestone",
@@ -122,7 +126,7 @@ describe("WorkMilestoneModule (e2e)", () => {
 			};
 
 			const response = await request(app.getHttpServer())
-				.put(`/api/milestones/${milestoneId}`)
+				.put(`/api/v1/work-milestone/${milestoneId}`)
 				.set("host", "localhost")
 				.set("Accept", "application/json")
 				.set("Authorization", `Bearer ${adminToken}`)
@@ -130,7 +134,7 @@ describe("WorkMilestoneModule (e2e)", () => {
 
 			if (response.status !== 200) {
 				console.error(
-					"❌ PUT /api/milestones/:id failed:",
+					"❌ PUT /work-milestone/:id failed:",
 					JSON.stringify(response.body, null, 2),
 				);
 			}
@@ -149,7 +153,7 @@ describe("WorkMilestoneModule (e2e)", () => {
 			};
 
 			await request(app.getHttpServer())
-				.put("/api/milestones/999999")
+				.put("/api/v1/work-milestone/999999")
 				.set("host", "localhost")
 				.set("Accept", "application/json")
 				.set("Authorization", `Bearer ${adminToken}`)
@@ -158,17 +162,17 @@ describe("WorkMilestoneModule (e2e)", () => {
 		});
 	});
 
-	describe("DELETE /api/milestones/:id", () => {
+	describe("DELETE /work-milestone/:id", () => {
 		it("should delete a milestone (Admin)", async () => {
 			const response = await request(app.getHttpServer())
-				.delete(`/api/milestones/${milestoneId}`)
+				.delete(`/api/v1/work-milestone/${milestoneId}`)
 				.set("host", "localhost")
 				.set("Accept", "application/json")
 				.set("Authorization", `Bearer ${adminToken}`);
 
 			if (response.status !== 200) {
 				console.error(
-					"❌ DELETE /api/milestones/:id failed:",
+					"❌ DELETE /work-milestone/:id failed:",
 					JSON.stringify(response.body, null, 2),
 				);
 			}
@@ -178,7 +182,7 @@ describe("WorkMilestoneModule (e2e)", () => {
 
 		it("should return 404 for non-existent milestone", async () => {
 			await request(app.getHttpServer())
-				.delete("/api/milestones/999999")
+				.delete("/api/v1/work-milestone/999999")
 				.set("host", "localhost")
 				.set("Accept", "application/json")
 				.set("Authorization", `Bearer ${adminToken}`)

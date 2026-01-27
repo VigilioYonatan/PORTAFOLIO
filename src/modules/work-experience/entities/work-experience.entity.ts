@@ -5,9 +5,9 @@ import type { InferSelectModel } from "drizzle-orm";
 import { relations } from "drizzle-orm";
 import {
 	boolean,
-	date as pgDate,
 	index,
 	integer,
+	date as pgDate,
 	pgTable,
 	serial,
 	text,

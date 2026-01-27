@@ -9,7 +9,7 @@ export interface ProjectStoreApiError {
 }
 
 /**
- * projectStore - /api/v1/projects
+ * projectStore - /api/v1/project
  * @method POST
  * @body ProjectStoreDto
  */
@@ -18,7 +18,7 @@ export function projectStoreApi() {
 		ProjectStoreResponseDto,
 		ProjectStoreDto,
 		ProjectStoreApiError
-	>("/projects", async (url, body) => {
+	>("/project", async (url, body) => {
 		const response = await fetch(`/api/v1${url}`, {
 			method: "POST",
 			body: JSON.stringify(body),

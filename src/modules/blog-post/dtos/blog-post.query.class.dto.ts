@@ -1,4 +1,4 @@
 import { createZodDto } from "nestjs-zod";
-import { blogPostQuerySchema } from "./blog-post.query.dto";
+import { blogPostQueryDto } from "./blog-post.query.dto";
 
-export class BlogPostQueryClassDto extends createZodDto(blogPostQuerySchema) {}
+export class BlogPostQueryClassDto extends createZodDto(blogPostQueryDto) {}

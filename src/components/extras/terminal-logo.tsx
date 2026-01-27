@@ -1,4 +1,4 @@
-import { useGlitchHover } from "@hooks/useMotion";
+import { useGlitchHover } from "@hooks/use-motion";
 import { cn } from "@infrastructure/utils/client";
 
 interface TerminalLogoProps {

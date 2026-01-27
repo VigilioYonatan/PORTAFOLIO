@@ -51,8 +51,7 @@ export async function renderMarkdown(content: string): Promise<string> {
 				theme: "dracula",
 			});
 			return html;
-		} catch (e) {
-			console.warn(`Failed to highlight code block with lang: ${language}`, e);
+		} catch (_e) {
 			// Fallback to simple code block
 			return `<pre><code class="language-${language}">${text}</code></pre>`;
 		}

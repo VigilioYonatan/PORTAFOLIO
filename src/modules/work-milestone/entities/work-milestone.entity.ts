@@ -5,9 +5,9 @@ import { workExperienceEntity } from "@modules/work-experience/entities/work-exp
 import type { InferSelectModel } from "drizzle-orm";
 import { relations } from "drizzle-orm";
 import {
-	date as pgDate,
 	index,
 	integer,
+	date as pgDate,
 	pgTable,
 	serial,
 	timestamp,
@@ -22,7 +22,7 @@ export const workMilestoneEntity = pgTable(
 		title: varchar({ length: 100 }).notNull(),
 		description: varchar({ length: 500 }).notNull(),
 		icon: varchar({ length: 100 }),
-		milestone_date: pgDate({mode:"date"}).notNull(),
+		milestone_date: pgDate({ mode: "date" }).notNull(),
 		sort_order: integer().notNull().default(0),
 		work_experience_id: integer()
 			.notNull()

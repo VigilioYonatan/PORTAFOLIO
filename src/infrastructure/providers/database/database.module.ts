@@ -39,7 +39,6 @@ const logger = new Logger("DatabaseModule");
 				// Verificar conexión a la base de datos
 				try {
 					const client = await pool.connect();
-					await client.query("CREATE EXTENSION IF NOT EXISTS vector;");
 					client.release();
 					logger.log("\x1b[32m✓ Base de datos conectada correctamente\x1b[0m");
 				} catch (error) {

@@ -1,12 +1,13 @@
-import { z } from "@infrastructure/config/zod-i18n.config";
+import { querySchema } from "@infrastructure/schemas/query.schema";
 import { createZodDto } from "nestjs-zod";
 import { usageQuotaSchema } from "../schemas/usage-quota.schema";
 
-export const usageQuotaQuerySchema = usageQuotaSchema
+export const usageQuotaQueryDto = usageQuotaSchema
 	.pick({
 		year: true,
 		month: true,
 	})
-	.partial();
+	.partial()
+	.extend(querySchema.shape);
 
-export class UsageQuotaQueryDto extends createZodDto(usageQuotaQuerySchema) {}
+export class UsageQuotaQueryDto extends createZodDto(usageQuotaQueryDto) {}

@@ -105,6 +105,7 @@ export default function MfaSetup({ onSuccess }: { onSuccess?: () => void }) {
 							<img
 								src={setupApi.data.qr_code}
 								alt="MFA QR Code"
+								title="MFA QR Code"
 								width={180}
 								height={180}
 								class="block mix-blend-multiply"
@@ -122,10 +123,10 @@ export default function MfaSetup({ onSuccess }: { onSuccess?: () => void }) {
 
 				<div class="space-y-6 relative z-10">
 					<div class="space-y-3">
-						<label class="text-sm font-bold flex items-center gap-2 text-white">
+						<h3 class="text-sm font-bold flex items-center gap-2 text-white">
 							<Smartphone {...sizeIcon.small} class="text-primary" />
 							Manual Entry
-						</label>
+						</h3>
 						<p class="text-xs text-zinc-500 leading-relaxed font-medium">
 							If you can't scan the QR code, enter this secret key manually in
 							your authenticator app.

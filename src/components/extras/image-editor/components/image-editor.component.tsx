@@ -9,7 +9,8 @@ import {
 	RotateCw,
 	XIcon,
 } from "lucide-preact";
-import Button from "../../Button";
+import type { JSX } from "preact/jsx-runtime";
+import Button from "../../button";
 import { Card } from "../../card";
 import {
 	type ImageEditorProps,
@@ -18,9 +19,9 @@ import {
 import ImageSlider from "./image-slider";
 import ImageTabs from "./image-tabs";
 
-import type { JSX } from "preact/jsx-runtime";
-
-function ImageEditor(props: ImageEditorProps & { title?: JSX.Element | string }) {
+function ImageEditor(
+	props: ImageEditorProps & { title?: JSX.Element | string },
+) {
 	const {
 		canvasRef,
 		filters,
@@ -51,10 +52,10 @@ function ImageEditor(props: ImageEditorProps & { title?: JSX.Element | string })
 	const { onClose } = props;
 
 	return (
-		<Card className="w-full max-w-6xl max-h-[90vh] overflow-hidden">
-			<Card.content className="p-0">
+		<Card class="w-full max-w-6xl max-h-[90vh] overflow-hidden">
+			<Card.content class="p-0">
 				{props.title && (
-					<div className="flex items-center gap-2 text-xl font-bold p-4 border-b border-border">
+					<div class="flex items-center gap-2 text-xl font-bold p-4 border-b border-border">
 						{props.title}
 					</div>
 				)}

@@ -13,7 +13,7 @@ export function blogCategoryStoreApi() {
 		BlogCategoryStoreResponseDto,
 		BlogCategoryStoreDto,
 		BlogCategoryStoreApiError
-	>("/blog/categories", async (url, body) => {
+	>("/blog-category", async (url, body) => {
 		const response = await fetch(`/api/v1${url}`, {
 			method: "POST",
 			body: JSON.stringify(body),

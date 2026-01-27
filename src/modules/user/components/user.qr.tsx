@@ -29,6 +29,7 @@ export function UserQr({ user }: UserQrProps) {
 				<img
 					src={qrUrl}
 					alt={`QR Code for ${user.username}`}
+					title={`QR Code for ${user.username}`}
 					width={200}
 					height={200}
 					class="block"

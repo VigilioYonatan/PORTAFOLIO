@@ -11,13 +11,12 @@ export function blogPostDestroyApi() {
 		BlogPostDestroyResponseDto,
 		number,
 		BlogPostDestroyApiError
-	>("/blog-posts", async (url, id) => {
-			const response = await fetch(`/api/v1${url}/${id}`, {
-				method: "DELETE",
-			});
-			const result = await response.json();
-			if (!response.ok) throw result;
-			return result;
-		},
-	);
+	>("/blog-post", async (url, id) => {
+		const response = await fetch(`/api/v1${url}/${id}`, {
+			method: "DELETE",
+		});
+		const result = await response.json();
+		if (!response.ok) throw result;
+		return result;
+	});
 }

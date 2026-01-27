@@ -1,4 +1,6 @@
+import { ZodQueryPipe } from "@infrastructure/pipes/zod-query.pipe";
 import { ZodPipe } from "@infrastructure/pipes/zod.pipe";
+import { workExperienceQueryDto } from "../dtos/work-experience.query.dto";
 import { Public } from "@modules/auth/decorators/public.decorator";
 import { Roles } from "@modules/auth/decorators/roles.decorator";
 import { AuthenticatedGuard } from "@modules/auth/guards/authenticated.guard";
@@ -41,26 +43,25 @@ import {
 	type WorkExperienceUpdateDto,
 	workExperienceUpdateDto,
 } from "../dtos/work-experience.update.dto";
-import { type WorkExperienceSchema } from "../schemas/work-experience.schema";
 import { WorkExperienceService } from "../services/work-experience.service";
 
 @ApiTags("Work Experience")
 @UseGuards(AuthenticatedGuard)
-@Controller("experiences")
+@Controller("work-experience")
 export class WorkExperienceController {
 	constructor(private readonly workExperienceService: WorkExperienceService) {}
 
 	@Public()
 	@Get("/")
-	@ApiOperation({ summary: "Listar experiencias laborales" })
+	@ApiOperation({ summary: "List work experiences" })
 	@ApiResponse({
 		status: 200,
 		type: WorkExperienceIndexResponseClassDto,
-		description: "Lista de experiencias laborales paginadas",
 	})
-	index(
+	async index(
 		@Req() req: Request,
-		@Query() query: WorkExperienceQueryClassDto,
+		@Query(new ZodQueryPipe(workExperienceQueryDto))
+		query: WorkExperienceQueryClassDto,
 	): Promise<WorkExperienceIndexResponseDto> {
 		const tenant_id = req.locals.tenant.id;
 		return this.workExperienceService.index(tenant_id, query);

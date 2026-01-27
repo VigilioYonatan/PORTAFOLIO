@@ -3,7 +3,7 @@ import { Test, TestingModule } from "@nestjs/testing";
 import { vi } from "vitest";
 import { WorkMilestoneCache } from "../cache/work-milestone.cache";
 import { WorkMilestoneRepository } from "../repositories/work-milestone.repository";
-import { WorkMilestoneSchema } from "../schemas/work-milestone.schema";
+import type { WorkMilestoneSchema } from "../schemas/work-milestone.schema";
 import { WorkMilestoneService } from "./work-milestone.service";
 
 describe("WorkMilestoneService", () => {

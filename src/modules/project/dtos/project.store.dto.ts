@@ -8,6 +8,7 @@ export const projectStoreDto = projectSchema.omit({
 	github_stars: true,
 	github_forks: true,
 	languages_stats: true,
-});
-
+}).extend({
+	techeables: z.array(z.number()),
+})
 export type ProjectStoreDto = z.infer<typeof projectStoreDto>;

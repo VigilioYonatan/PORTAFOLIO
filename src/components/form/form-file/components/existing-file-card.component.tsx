@@ -1,6 +1,8 @@
-import Badge from "@components/extras/Badge";
-import Button from "@components/extras/Button";
+import Badge from "@components/extras/badge";
+import Button from "@components/extras/button";
 import { cn, sizeIcon } from "@infrastructure/utils/client";
+import { printFileWithDimension } from "@infrastructure/utils/hybrid/file.utils";
+import { DIMENSION_IMAGE } from "@modules/uploads/const/upload.const";
 import type { FilesSchema } from "@modules/uploads/schemas/upload.schema";
 import { XIcon } from "lucide-preact";
 import { formatFileSize, getFileTypeColor, getIcon } from "../libs";
@@ -31,8 +33,11 @@ export function ExistingFileCard({
 			<div class="w-16 h-16 rounded-lg bg-muted shrink-0 overflow-hidden flex items-center justify-center border border-border">
 				{isImage ? (
 					<img
-						src={"/" + file.key}
+						src={printFileWithDimension([file], DIMENSION_IMAGE.xs)[0]}
 						alt={file.name}
+						title={file.name}
+						width={DIMENSION_IMAGE.xs}
+						height={DIMENSION_IMAGE.xs}
 						class="w-full h-full object-cover"
 					/>
 				) : (

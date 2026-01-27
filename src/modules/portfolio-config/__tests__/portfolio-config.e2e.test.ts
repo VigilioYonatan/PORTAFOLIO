@@ -1,15 +1,5 @@
-import { configureApp } from "@infrastructure/config/server/app.config";
 import { E2EApp } from "@infrastructure/config/server/e2e-app";
-import {
-	setupTestDb,
-	type TestDb,
-} from "@infrastructure/config/server/setup-test-db";
-import { CacheService } from "@infrastructure/providers/cache/cache.service";
-import type { INestApplication } from "@nestjs/common";
-import { Test } from "@nestjs/testing";
-import { AppModule } from "@src/app.module";
 import { sql } from "drizzle-orm";
-import type { Request } from "express";
 import request from "supertest";
 
 describe("Portfolio Config E2E Tests", () => {
@@ -53,7 +43,7 @@ describe("Portfolio Config E2E Tests", () => {
 			)
 		`);
 
-		// Seed projects
+		// Seed project
 		await db.execute(sql`
 			INSERT INTO projects (
 				tenant_id, title, slug, description, content, impact_summary, is_visible, sort_order, start_date

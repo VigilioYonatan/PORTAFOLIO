@@ -73,12 +73,19 @@ export class DocumentService {
 	): Promise<DocumentStoreResponseDto> {
 		this.logger.log({ tenant_id, user_id }, "Uploading document");
 
-		const document = await this.repository.store(tenant_id, user_id, body);
+		const document = await this.repository.store(tenant_id, {
+			...body,
+			user_id,
+			chunk_count: 0,
+			is_indexed: false,
+			status: "PENDING",
+			processed_at: null,
+		});
 
 		// Invalidate lists cache
 		await this.cache.invalidateLists(tenant_id);
 
-		return { success: true, document: document };
+		return { success: true, document };
 	}
 
 	/**
@@ -103,7 +110,7 @@ export class DocumentService {
 			await this.cache.set(tenant_id, document);
 		}
 
-		return { success: true, document: document };
+		return { success: true, document };
 	}
 
 	/**
@@ -125,7 +132,7 @@ export class DocumentService {
 		await this.cache.invalidate(tenant_id, id);
 		await this.cache.invalidateLists(tenant_id);
 
-		return { success: true, document: document };
+		return { success: true, document };
 	}
 
 	/**

@@ -18,7 +18,7 @@ import type {
 import type { ProjectStoreDto } from "../dtos/project.store.dto";
 import type { ProjectUpdateDto } from "../dtos/project.update.dto";
 import { ProjectRepository } from "../repositories/project.repository";
-import type { ProjectSchema } from "../schemas/project.schema";
+import type {  ProjectWithRelations } from "../schemas/project.schema";
 
 @Injectable()
 export class ProjectService {
@@ -35,10 +35,25 @@ export class ProjectService {
 	): Promise<ProjectIndexResponseDto> {
 		this.logger.log({ tenant_id }, "Listing projects");
 
-		return await paginator<ProjectQueryDto, ProjectSchema>("/projects", {
+		return await paginator<ProjectQueryDto, ProjectWithRelations>("/projects", {
 			filters: query,
-			cb: async (filters, _isClean) => {
-				return await this.projectRepository.index(tenant_id, filters);
+			cb: async (filters, isClean) => {
+				// If clean query, try cache first
+				if (isClean) {
+					// 1. Try Cache
+					const cached = await this.projectCache.getList(tenant_id, filters);
+					if (cached) {
+						return cached;
+					}
+				}
+				// 2. Try DB
+				const result = await this.projectRepository.index(tenant_id, filters);
+				if (isClean) {
+					// 3. Set Cache (Only for clean queries)
+					await this.projectCache.setList(tenant_id, filters, result);
+				}
+
+				return result;
 			},
 		});
 	}
@@ -48,10 +63,24 @@ export class ProjectService {
 		body: ProjectStoreDto,
 	): Promise<ProjectStoreResponseDto> {
 		this.logger.log({ tenant_id }, "Creating project");
-		const project = await this.projectRepository.store(tenant_id, body);
+		const { techeables, ...rest } = body;
+		// 1. Store Project
+		const project = await this.projectRepository.store(tenant_id, {
+			...rest,
+			github_stars: 0,
+			github_forks: 0,
+			languages_stats: [],
+		});
 
-		// Cache Write-Through + Invalidate lists
-		await this.projectCache.setBySlug(tenant_id, project);
+		// 2. Store Relations
+		if (techeables && techeables.length > 0) {
+			await this.projectRepository.storeTecheables(
+				tenant_id,
+				project.id,
+				techeables,
+			);
+		}
+
 		await this.projectCache.invalidateLists(tenant_id);
 
 		return { success: true, project };
@@ -63,10 +92,21 @@ export class ProjectService {
 		body: ProjectUpdateDto,
 	): Promise<ProjectUpdateResponseDto> {
 		this.logger.log({ tenant_id, id }, "Updating project");
-		const project = await this.projectRepository.update(id, tenant_id, body);
+		const { techeables, ...rest } = body;
+
+		// 1. Update Project
+		const project = await this.projectRepository.update(tenant_id, id, rest);
 		if (!project) {
 			this.logger.warn({ tenant_id, id }, "Project not found for update");
 			throw new NotFoundException(`Project #${id} not found`);
+		}
+
+		// 2. Sync Relations
+		if (techeables) {
+			await this.projectRepository.destroyTecheables(tenant_id, id);
+			if (techeables.length > 0) {
+				await this.projectRepository.storeTecheables(tenant_id, id, techeables);
+			}
 		}
 
 		await this.projectCache.invalidate(tenant_id, project.slug);
@@ -105,7 +145,7 @@ export class ProjectService {
 		id: number,
 	): Promise<ProjectDestroyResponseDto> {
 		this.logger.log({ tenant_id, id }, "Deleting project");
-		const project = await this.projectRepository.destroy(id, tenant_id);
+		const project = await this.projectRepository.destroy(tenant_id, id);
 
 		if (!project) {
 			this.logger.warn({ tenant_id, id }, "Project not found for deletion");
@@ -173,7 +213,7 @@ export class ProjectService {
 			const langData = await langRes.json();
 
 			// 4. Update Project
-			await this.projectRepository.update(id, tenant_id, {
+			await this.projectRepository.update(tenant_id, id, {
 				github_stars: repoData.stargazers_count,
 				github_forks: repoData.forks_count,
 				languages_stats: langData,
@@ -191,7 +231,7 @@ export class ProjectService {
 			this.logger.error({ error }, "Error syncing with GitHub");
 			if (error instanceof BadRequestException) throw error;
 			throw new BadRequestException(
-				"Unexpected error syncing with GitHub: " + (error as Error).message,
+				`Unexpected error syncing with GitHub: ${(error as Error).message}`,
 			);
 		}
 	}

@@ -1,4 +1,4 @@
-import type { UserIndexSchema, UserSchema } from "../schemas/user.schema";
+import type { UserSchema } from "../schemas/user.schema";
 
 /**
  * User status options for filtering

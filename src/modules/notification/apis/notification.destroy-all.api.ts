@@ -7,7 +7,7 @@ export interface NotificationDestroyAllApiError {
 }
 
 /**
- * notificationDestroyAll - /api/v1/notifications
+ * notificationDestroyAll - /api/v1/notification
  * @method DELETE
  */
 export function notificationDestroyAllApi() {
@@ -15,7 +15,7 @@ export function notificationDestroyAllApi() {
 		NotificationDestroyAllResponseDto,
 		void,
 		NotificationDestroyAllApiError
-	>("/notifications", async (url) => {
+	>("/notification", async (url) => {
 		const response = await fetch(`/api/v1${url}`, {
 			method: "DELETE",
 		});

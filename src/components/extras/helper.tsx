@@ -10,7 +10,7 @@ function Helper({ children, top, right = 2 }: HelperProps) {
 		<button
 			type="button"
 			aria-label="?"
-			class="absolute bg-primary w-[20px] h-[20px] -right-2 -top-2 rounded-full text-primary-foreground group z-[99] font-bold"
+			class="absolute bg-primary w-[20px] h-[20px] -right-2 -top-2 rounded-full text-primary-foreground group z-99 font-bold"
 			onClick={(e) => {
 				e.stopPropagation();
 			}}

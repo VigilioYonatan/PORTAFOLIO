@@ -67,3 +67,10 @@ export const uploadDeleteResponseDto = z.object({
 	}),
 });
 export type UploadDeleteResponseDto = z.infer<typeof uploadDeleteResponseDto>;
+
+export const uploadFormidableResponseDto = z.object({
+	success: z.boolean(),
+	data: z.array(filesSchema()),
+	fields: z.any(), // Fields from formidable can be complex, verify if strict typing is needed or any is acceptable for now
+});
+export type UploadFormidableResponseDto = z.infer<typeof uploadFormidableResponseDto>;

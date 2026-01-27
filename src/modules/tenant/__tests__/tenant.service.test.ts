@@ -1,6 +1,6 @@
 import type { PaginatorResult } from "@infrastructure/utils/server/helpers";
 import { paginator } from "@infrastructure/utils/server/helpers";
-import { BadRequestException, NotFoundException } from "@nestjs/common";
+import { NotFoundException } from "@nestjs/common";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { TenantCache } from "../caches/tenant.cache";
 import type { TenantStoreDto } from "../dtos/tenant.store.dto";
@@ -86,7 +86,7 @@ describe("TenantService", () => {
 	});
 
 	describe("index", () => {
-		it("should return paginated tenants", async () => {
+		it("should return paginated tenant", async () => {
 			const query = { limit: 10, offset: 0 };
 			const mockPaginatedResult: PaginatorResult<TenantSchema> = {
 				success: true,

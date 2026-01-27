@@ -4,6 +4,8 @@ import type { Refetch } from "@infrastructure/types/client";
 import { cn } from "@infrastructure/utils/client";
 import { handlerError } from "@infrastructure/utils/client/handler-error";
 import { now } from "@infrastructure/utils/hybrid";
+import { printFileWithDimension } from "@infrastructure/utils/hybrid/file.utils";
+import { DIMENSION_IMAGE } from "@modules/uploads/const/upload.const";
 import { sweetModal } from "@vigilio/sweet";
 import { Edit, Phone, User } from "lucide-preact";
 import { useForm } from "react-hook-form";
@@ -32,13 +34,13 @@ export function UserUpdate({ user, refetch }: UserUpdateProps) {
 	});
 
 	const roles = USER_ROLE_OPTIONS.filter((r) => r.key !== "all").map((r) => ({
-		key: r.key as number,
+		key: r.key,
 		value: r.value,
 	}));
 
 	const statuses = USER_STATUS_OPTIONS.filter((s) => s.key !== "all").map(
 		(s) => ({
-			key: s.key as string,
+			key: s.key,
 			value: s.value,
 		}),
 	);
@@ -77,10 +79,13 @@ export function UserUpdate({ user, refetch }: UserUpdateProps) {
 			{/* Header with User Info */}
 			<div class="flex items-center gap-4 pb-4 border-b border-border">
 				<div class="w-14 h-14 rounded-full bg-gradient-to-br from-primary/20 to-primary/40 flex items-center justify-center overflow-hidden border-2 border-border">
-					{user.avatar?.[0]?.key ? (
+					{user.avatar?.[0] ? (
 						<img
-							src={`/uploads/${user.avatar[0].key}`}
+							src={printFileWithDimension(user.avatar, DIMENSION_IMAGE.xs)[0]}
 							alt={user.username}
+							title={user.username}
+							width={DIMENSION_IMAGE.xs}
+							height={DIMENSION_IMAGE.xs}
 							class="w-full h-full object-cover"
 						/>
 					) : (

@@ -1,7 +1,8 @@
 import { CacheService } from "@infrastructure/providers/cache/cache.service";
-import { type PaginatorResult, toNull } from "@infrastructure/utils/server";
-import { Inject, Injectable } from "@nestjs/common";
+import { toNull } from "@infrastructure/utils/server";
+import { Injectable } from "@nestjs/common";
 import type { BlogCategoryEntity } from "../entities/blog-category.entity";
+import type { BlogCategoryQueryDto } from "../dtos/blog-category.query.dto";
 
 @Injectable()
 export class BlogCategoryCache {
@@ -38,7 +39,7 @@ export class BlogCategoryCache {
 
 	async getList<T>(
 		tenant_id: number,
-		query: unknown,
+		query: BlogCategoryQueryDto,
 	): Promise<[T[], number] | null> {
 		const key = `${this.getListCacheKeyPattern(tenant_id)}:${JSON.stringify(query)}`;
 		const cached = await this.cacheService.get<[T[], number]>(key);
@@ -47,7 +48,7 @@ export class BlogCategoryCache {
 
 	async setList<T>(
 		tenant_id: number,
-		query: unknown,
+		query: BlogCategoryQueryDto,
 		result: [T[], number],
 	): Promise<void> {
 		const key = `${this.getListCacheKeyPattern(tenant_id)}:${JSON.stringify(query)}`;

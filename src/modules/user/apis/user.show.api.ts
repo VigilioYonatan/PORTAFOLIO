@@ -3,12 +3,12 @@ import type { UserResponseDto } from "../dtos/user.response.dto";
 import type { UserShowSchema } from "../schemas/user.schema";
 
 /**
- * userShow - /api/v1/users/:id
+ * userShow - /api/v1/user/:id
  * @method GET
  */
 export function userShowApi(id: number) {
 	return useQuery<UserResponseDto, UserShowApiError>(
-		`/users/${id}`,
+		`/user/${id}`,
 		async (url) => {
 			const response = await fetch(`/api/v1${url}`);
 			const result = await response.json();

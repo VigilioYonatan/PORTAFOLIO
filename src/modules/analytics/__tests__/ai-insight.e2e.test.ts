@@ -1,13 +1,10 @@
 import { E2EApp } from "@infrastructure/config/server/e2e-app";
 import { aiModelConfigEntity } from "@modules/ai/entities/ai-config.entity";
 import { AiService } from "@modules/ai/services/ai.service";
-import { aiInsightEntity } from "@modules/analytics/entities/ai-insight.entity";
 import { chatMessageEntity } from "@modules/chat/entities/chat-message.entity";
 import { conversationEntity } from "@modules/chat/entities/conversation.entity";
 import { userEntity } from "@modules/user/entities/user.entity";
-import { type INestApplication } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
-import { Test, TestingModule } from "@nestjs/testing";
 import { eq } from "drizzle-orm";
 import { of } from "rxjs";
 import request from "supertest";
@@ -74,8 +71,8 @@ describe("AiInsightController (e2e)", () => {
 		vi.clearAllMocks();
 	});
 
-	describe("POST /analytics/insights/generate", () => {
-		it("should generate insights from conversations", async () => {
+	describe("POST /ai-insight/generate", () => {
+		it("should generate insights from conversation", async () => {
 			const [conv] = await appDb
 				.insert(conversationEntity)
 				.values({
@@ -107,14 +104,14 @@ describe("AiInsightController (e2e)", () => {
 						content: JSON.stringify({
 							themes: ["React", "Experience"],
 							sentiment: "POSITIVE",
-							actions: ["Highlight React projects"],
+							actions: ["Highlight React project"],
 						}),
 					},
 				}),
 			);
 
 			const response = await request(e2e.app.getHttpServer())
-				.post("/api/v1/analytics/insights/generate")
+				.post("/api/v1/ai-insight/generate")
 				.set("Authorization", `Bearer ${adminAccessToken}`)
 				.set("Host", "localhost")
 				.set("x-mock-role", "admin")
@@ -125,10 +122,10 @@ describe("AiInsightController (e2e)", () => {
 		});
 	});
 
-	describe("GET /analytics/insights", () => {
+	describe("GET /ai-insight", () => {
 		it("should list generated insights", async () => {
 			const response = await request(e2e.app.getHttpServer())
-				.get("/api/v1/analytics/insights")
+				.get("/api/v1/ai-insight")
 				.set("Authorization", `Bearer ${adminAccessToken}`)
 				.set("Host", "localhost")
 				.set("x-mock-role", "admin")

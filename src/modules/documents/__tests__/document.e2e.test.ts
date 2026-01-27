@@ -37,7 +37,7 @@ describe("Document Module (E2E)", () => {
 			const dto = DocumentFactory.createDto();
 
 			const response = await request(e2e.app.getHttpServer())
-				.post("/api/v1/documents")
+				.post("/api/v1/document")
 				.set("Host", "localhost")
 				.set("Authorization", `Bearer ${adminAccessToken}`)
 				.set("x-mock-role", "admin")
@@ -51,7 +51,7 @@ describe("Document Module (E2E)", () => {
 			const dto = DocumentFactory.createDtoWithNullMetadata();
 
 			const response = await request(e2e.app.getHttpServer())
-				.post("/api/v1/documents")
+				.post("/api/v1/document")
 				.set("Host", "localhost")
 				.set("Authorization", `Bearer ${adminAccessToken}`)
 				.set("x-mock-role", "admin")
@@ -65,7 +65,7 @@ describe("Document Module (E2E)", () => {
 	describe("GET /documents", () => {
 		it("should list documents (Admin)", async () => {
 			const response = await request(e2e.app.getHttpServer())
-				.get("/api/v1/documents")
+				.get("/api/v1/document")
 				.set("Host", "localhost")
 				.set("Authorization", `Bearer ${adminAccessToken}`)
 				.set("x-mock-role", "admin");
@@ -79,7 +79,7 @@ describe("Document Module (E2E)", () => {
 		it("should process a document for RAG", async () => {
 			const createDto = DocumentFactory.createDto();
 			const createResponse = await request(e2e.app.getHttpServer())
-				.post("/api/v1/documents")
+				.post("/api/v1/document")
 				.set("Host", "localhost")
 				.set("Authorization", `Bearer ${adminAccessToken}`)
 				.set("x-mock-role", "admin")
@@ -88,7 +88,7 @@ describe("Document Module (E2E)", () => {
 			const documentId = createResponse.body.document.id;
 
 			const response = await request(e2e.app.getHttpServer())
-				.post(`/api/v1/documents/${documentId}/process`)
+				.post(`/api/v1/document/${documentId}/process`)
 				.set("Host", "localhost")
 				.set("Authorization", `Bearer ${adminAccessToken}`)
 				.set("x-mock-role", "admin");
@@ -102,7 +102,7 @@ describe("Document Module (E2E)", () => {
 		it("should get document details", async () => {
 			const createDto = DocumentFactory.createDto();
 			const createResponse = await request(e2e.app.getHttpServer())
-				.post("/api/v1/documents")
+				.post("/api/v1/document")
 				.set("Host", "localhost")
 				.set("Authorization", `Bearer ${adminAccessToken}`)
 				.set("x-mock-role", "admin")
@@ -111,7 +111,7 @@ describe("Document Module (E2E)", () => {
 			const documentId = createResponse.body.document.id;
 
 			const response = await request(e2e.app.getHttpServer())
-				.get(`/api/v1/documents/${documentId}`)
+				.get(`/api/v1/document/${documentId}`)
 				.set("Host", "localhost")
 				.set("Authorization", `Bearer ${adminAccessToken}`)
 				.set("x-mock-role", "admin");
@@ -125,7 +125,7 @@ describe("Document Module (E2E)", () => {
 		it("should update a document", async () => {
 			const createDto = DocumentFactory.createDto();
 			const createResponse = await request(e2e.app.getHttpServer())
-				.post("/api/v1/documents")
+				.post("/api/v1/document")
 				.set("Host", "localhost")
 				.set("Authorization", `Bearer ${adminAccessToken}`)
 				.set("x-mock-role", "admin")
@@ -135,7 +135,7 @@ describe("Document Module (E2E)", () => {
 			const updateDto = DocumentFactory.createDto({ title: "Updated Title" });
 
 			const response = await request(e2e.app.getHttpServer())
-				.put(`/api/v1/documents/${documentId}`)
+				.put(`/api/v1/document/${documentId}`)
 				.set("Host", "localhost")
 				.set("Authorization", `Bearer ${adminAccessToken}`)
 				.set("x-mock-role", "admin")
@@ -150,7 +150,7 @@ describe("Document Module (E2E)", () => {
 		it("should delete a document", async () => {
 			const createDto = DocumentFactory.createDto();
 			const createResponse = await request(e2e.app.getHttpServer())
-				.post("/api/v1/documents")
+				.post("/api/v1/document")
 				.set("Host", "localhost")
 				.set("Authorization", `Bearer ${adminAccessToken}`)
 				.set("x-mock-role", "admin")
@@ -159,7 +159,7 @@ describe("Document Module (E2E)", () => {
 			const documentId = createResponse.body.document.id;
 
 			const response = await request(e2e.app.getHttpServer())
-				.delete(`/api/v1/documents/${documentId}`)
+				.delete(`/api/v1/document/${documentId}`)
 				.set("Host", "localhost")
 				.set("Authorization", `Bearer ${adminAccessToken}`)
 				.set("x-mock-role", "admin");

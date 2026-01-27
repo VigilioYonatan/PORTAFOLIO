@@ -12,10 +12,10 @@ describe("Contact (E2E)", () => {
 		await e2e.close();
 	});
 
-	describe("POST /api/v1/contact", () => {
+	describe("POST /api/v1/contact-message", () => {
 		it("should record a contact message via tenant host", async () => {
 			const response = await request(e2e.app.getHttpServer())
-				.post("/api/v1/contact")
+				.post("/api/v1/contact-message")
 				.set("Host", "localhost")
 				.send({
 					name: "John Doe",
@@ -33,7 +33,7 @@ describe("Contact (E2E)", () => {
 
 		it("should record a contact message without tenant context", async () => {
 			const response = await request(e2e.app.getHttpServer())
-				.post("/api/v1/contact")
+				.post("/api/v1/contact-message")
 				.set("Host", "unknown-host.com")
 				.send({
 					name: "Jane Smith",
@@ -50,7 +50,7 @@ describe("Contact (E2E)", () => {
 
 		it("should fail with invalid email", async () => {
 			await request(e2e.app.getHttpServer())
-				.post("/api/v1/contact")
+				.post("/api/v1/contact-message")
 				.set("Host", "localhost")
 				.send({
 					name: "John Doe",
@@ -63,10 +63,10 @@ describe("Contact (E2E)", () => {
 		});
 	});
 
-	describe("GET /api/v1/messages", () => {
-		it("should list contact messages for admin", async () => {
+	describe("GET /api/v1/contact-message", () => {
+		it("should list contact contact for admin", async () => {
 			await request(e2e.app.getHttpServer())
-				.post("/api/v1/contact")
+				.post("/api/v1/contact-message")
 				.set("Host", "localhost")
 				.send({
 					name: "Lister",
@@ -77,7 +77,7 @@ describe("Contact (E2E)", () => {
 				});
 
 			const response = await request(e2e.app.getHttpServer())
-				.get("/api/v1/messages")
+				.get("/api/v1/contact-message")
 				.set("Host", "localhost")
 				.set("x-mock-role", "admin");
 
@@ -87,10 +87,10 @@ describe("Contact (E2E)", () => {
 		});
 	});
 
-	describe("PATCH /api/v1/messages/:id", () => {
+	describe("PATCH /api/v1/contact-message/:id", () => {
 		it("should mark contact message as read", async () => {
 			const created = await request(e2e.app.getHttpServer())
-				.post("/api/v1/contact")
+				.post("/api/v1/contact-message")
 				.set("Host", "localhost")
 				.send({
 					name: "Reader",
@@ -103,7 +103,7 @@ describe("Contact (E2E)", () => {
 			const id = created.body.message.id;
 
 			const response = await request(e2e.app.getHttpServer())
-				.patch(`/api/v1/messages/${id}`)
+				.patch(`/api/v1/contact-message/${id}`)
 				.send({ is_read: true })
 				.set("Host", "localhost")
 				.set("x-mock-role", "admin");
@@ -113,10 +113,10 @@ describe("Contact (E2E)", () => {
 		});
 	});
 
-	describe("DELETE /api/v1/messages/:id", () => {
+	describe("DELETE /api/v1/contact-message/:id", () => {
 		it("should delete contact message", async () => {
 			const created = await request(e2e.app.getHttpServer())
-				.post("/api/v1/contact")
+				.post("/api/v1/contact-message")
 				.set("Host", "localhost")
 				.send({
 					name: "To Delete",
@@ -129,7 +129,7 @@ describe("Contact (E2E)", () => {
 			const id = created.body.message.id;
 
 			const response = await request(e2e.app.getHttpServer())
-				.delete(`/api/v1/messages/${id}`)
+				.delete(`/api/v1/contact-message/${id}`)
 				.set("Host", "localhost")
 				.set("x-mock-role", "admin");
 

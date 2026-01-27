@@ -1,5 +1,5 @@
+import { ZodQueryPipe } from "@infrastructure/pipes/zod-query.pipe";
 import { ZodPipe } from "@infrastructure/pipes/zod.pipe";
-import type { PaginatorResult } from "@infrastructure/utils/server";
 import { Public } from "@modules/auth/decorators/public.decorator";
 import { Roles } from "@modules/auth/decorators/roles.decorator";
 import { AuthenticatedGuard } from "@modules/auth/guards/authenticated.guard";
@@ -24,18 +24,10 @@ import {
 	ApiTags,
 } from "@nestjs/swagger";
 import type { Request } from "express";
-import { BlogPostQueryClassDto } from "../dtos/blog-post.query.class.dto";
 import {
 	type BlogPostQueryDto,
-	blogPostQuerySchema,
+	blogPostQueryDto,
 } from "../dtos/blog-post.query.dto";
-import {
-	BlogPostDestroyResponseClassDto,
-	BlogPostIndexResponseClassDto,
-	BlogPostShowResponseClassDto,
-	BlogPostStoreResponseClassDto,
-	BlogPostUpdateResponseClassDto,
-} from "../dtos/blog-post.response.class.dto";
 import type {
 	BlogPostDestroyResponseDto,
 	BlogPostIndexResponseDto,
@@ -43,21 +35,18 @@ import type {
 	BlogPostStoreResponseDto,
 	BlogPostUpdateResponseDto,
 } from "../dtos/blog-post.response.dto";
-import { BlogPostStoreClassDto } from "../dtos/blog-post.store.class.dto";
 import {
 	type BlogPostStoreDto,
 	blogPostStoreDto,
 } from "../dtos/blog-post.store.dto";
-import { BlogPostUpdateClassDto } from "../dtos/blog-post.update.class.dto";
 import {
 	type BlogPostUpdateDto,
 	blogPostUpdateDto,
 } from "../dtos/blog-post.update.dto";
-import type { BlogPostSchema } from "../schemas/blog-post.schema";
 import { BlogPostService } from "../services/blog-post.service";
 
 @ApiTags("Blog Post")
-@Controller("blog/posts")
+@Controller("blog-post")
 @UseGuards(AuthenticatedGuard, RolesGuard)
 export class BlogPostController {
 	constructor(private readonly service: BlogPostService) {}
@@ -67,7 +56,7 @@ export class BlogPostController {
 	@ApiOperation({ summary: "List blog posts (Public)" })
 	async index(
 		@Req() req: Request,
-		@Query(new ZodPipe(blogPostQuerySchema)) query: BlogPostQueryDto,
+		@Query(new ZodQueryPipe(blogPostQueryDto)) query: BlogPostQueryDto,
 	): Promise<BlogPostIndexResponseDto> {
 		const result = await this.service.index(req.locals.tenant.id, query);
 		return result;

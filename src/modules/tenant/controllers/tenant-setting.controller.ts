@@ -30,12 +30,12 @@ import { TenantService } from "../services/tenant.service";
 
 @ApiTags("Tenant Settings")
 @UseGuards(AuthenticatedGuard, RolesGuard)
-@Controller("tenants")
+@Controller("tenant-setting")
 export class TenantSettingController {
 	constructor(private readonly tenantService: TenantService) {}
 
 	@Roles(1, 3) // Admin, Owner
-	@Get("settings/me")
+	@Get("/me")
 	@ApiOperation({ summary: "Leer configuración propia" })
 	@ApiResponse({
 		status: 200,
@@ -48,7 +48,7 @@ export class TenantSettingController {
 
 	@Roles(1, 3) // Admin, Owner
 	@HttpCode(200)
-	@Put("settings/me")
+	@Put("/me")
 	@ApiOperation({ summary: "Actualizar configuración propia" })
 	@ApiBody({ type: TenantSettingUpdateMeClassDto })
 	@ApiResponse({
@@ -64,7 +64,7 @@ export class TenantSettingController {
 	}
 
 	@Roles(1) // Admin
-	@Get(":id/settings")
+	@Get(":id")
 	@ApiOperation({ summary: "Leer configuración de un tenant" })
 	@ApiResponse({
 		status: 200,
@@ -72,7 +72,6 @@ export class TenantSettingController {
 		description: "Configuración del tenant",
 	})
 	show(
-		@Req() req: Request,
 		@Param("id", ParseIntPipe) id: number,
 	): Promise<TenantSettingResponseClassDto> {
 		return this.tenantService.showSettings(id);
@@ -80,7 +79,7 @@ export class TenantSettingController {
 
 	@Roles(1) // Admin
 	@HttpCode(200)
-	@Put(":id/settings")
+	@Put(":id")
 	@ApiOperation({ summary: "Actualizar configuración de un tenant" })
 	@ApiBody({ type: TenantSettingUpdateClassDto })
 	@ApiResponse({
@@ -89,7 +88,6 @@ export class TenantSettingController {
 		description: "Configuración actualizada",
 	})
 	update(
-		@Req() req: Request,
 		@Param("id", ParseIntPipe) id: number,
 		@Body(new ZodPipe(tenantSettingUpdateDto)) body: TenantSettingUpdateDto,
 	): Promise<TenantSettingResponseClassDto> {

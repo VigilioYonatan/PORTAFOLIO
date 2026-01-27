@@ -1,9 +1,8 @@
-import Badge from "@components/extras/Badge";
+import Badge from "@components/extras/badge";
 import { Card } from "@components/extras/card";
 import Form, { formSelectNumber } from "@components/form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { cn, handlerError, sizeIcon } from "@infrastructure/utils/client";
-import { now } from "@infrastructure/utils/hybrid";
 import { aiConfigShowApi } from "@modules/ai/apis/ai.config.show.api";
 import { aiConfigUpdateApi } from "@modules/ai/apis/ai.config.update.api";
 import type { AiConfigUpdateDto } from "@modules/ai/dtos/ai-config.update.dto";
@@ -19,7 +18,7 @@ import {
 	Palette,
 	Sparkles,
 } from "lucide-preact";
-import type { JSX } from "preact";
+import type { JSX } from "preact/jsx-runtime";
 import { type UseFormReturn, useForm } from "react-hook-form";
 import { tenantShowApi } from "../apis/tenant.show.api";
 import { tenantUpdateMeApi } from "../apis/tenant.update-me.api";
@@ -132,7 +131,7 @@ function SettingsContent({
 
 	// AI Config Form
 	const aiConfigForm = useForm<AiConfigUpdateDto>({
-		resolver: zodResolver(aiConfigUpdateDto) as any,
+		resolver: zodResolver(aiConfigUpdateDto),
 		mode: "all",
 		defaultValues: aiConfig,
 	});
@@ -318,81 +317,26 @@ function BrandingSection({
 			</Form>
 
 			<Form {...settingsForm} onSubmit={() => {}}>
-				{/* Primary Color */}
-				<div class="space-y-2">
-					<label class="text-sm font-medium text-foreground">
-						Primary Color
-					</label>
-					<div class="flex items-center gap-2">
-						<div
-							class="w-12 h-12 rounded-lg border-2 border-border cursor-pointer hover:ring-2 hover:ring-primary/50 transition-all shrink-0"
-							style={{ backgroundColor: colorPrimary }}
-							onClick={() => {
-								document.getElementById("color-primary")?.click();
-							}}
-						/>
-						<input
-							id="color-primary"
-							type="color"
-							class="sr-only"
-							value={colorPrimary}
-							onChange={(e) => {
-								settingsForm.setValue("color_primary", e.currentTarget.value);
-							}}
-						/>
-						<input
-							type="text"
-							class="flex-1 border border-border rounded-lg px-3 py-2 text-sm bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
-							value={colorPrimary}
-							onChange={(e) => {
-								settingsForm.setValue("color_primary", e.currentTarget.value);
-							}}
-							placeholder="#1FA0A2"
-						/>
-					</div>
-				</div>
-
-				{/* Secondary Color */}
-				<div class="space-y-2">
-					<label class="text-sm font-medium text-foreground">
-						Secondary Color
-					</label>
-					<div class="flex items-center gap-2">
-						<div
-							class="w-12 h-12 rounded-lg border-2 border-border cursor-pointer hover:ring-2 hover:ring-primary/50 transition-all shrink-0"
-							style={{ backgroundColor: colorSecondary }}
-							onClick={() => {
-								document.getElementById("color-secondary")?.click();
-							}}
-						/>
-						<input
-							id="color-secondary"
-							type="color"
-							class="sr-only"
-							value={colorSecondary}
-							onChange={(e) => {
-								settingsForm.setValue("color_secondary", e.currentTarget.value);
-							}}
-						/>
-						<input
-							type="text"
-							class="flex-1 border border-border rounded-lg px-3 py-2 text-sm bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
-							value={colorSecondary}
-							onChange={(e) => {
-								settingsForm.setValue("color_secondary", e.currentTarget.value);
-							}}
-							placeholder="#6066F1"
-						/>
-					</div>
+				<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+					<Form.control.color
+						title="Primary Color"
+						name="color_primary"
+						placeholder="#1FA0A2"
+					/>
+					<Form.control.color
+						title="Secondary Color"
+						name="color_secondary"
+						placeholder="#6066F1"
+					/>
 				</div>
 			</Form>
 
 			{/* Live Preview */}
 			<div class="space-y-2">
-				<label class="text-xs text-muted-foreground uppercase tracking-wider">
+				<p class="text-xs text-muted-foreground uppercase tracking-wider">
 					Live Preview
-				</label>
-				<Card className="p-4 bg-gradient-to-br from-background to-muted border-border">
+				</p>
+				<Card className="p-4 bg-linear-to-br from-background to-muted border-border">
 					<div
 						class="p-6 rounded-lg text-white font-bold text-lg flex items-center justify-center"
 						style={{
@@ -461,9 +405,9 @@ function ModelIntelligenceSection({
 				<Form {...aiConfigForm} onSubmit={() => {}}>
 					{/* Default LLM Provider */}
 					<div class="space-y-3">
-						<label class="text-sm font-medium text-foreground">
+						<p class="text-sm font-medium text-foreground">
 							Default LLM Provider
-						</label>
+						</p>
 						<div class="grid grid-cols-1 gap-2">
 							{LLM_ENGINE_OPTIONS.map((option) => {
 								const isSelected =
@@ -501,9 +445,9 @@ function ModelIntelligenceSection({
 
 					{/* Global System Prompt */}
 					<div class="space-y-2">
-						<label class="text-sm font-medium text-foreground">
+						<p class="text-sm font-medium text-foreground">
 							Global System Prompt
-						</label>
+						</p>
 						<p class="text-xs text-muted-foreground mb-2">
 							Applied to all new chats
 						</p>
@@ -517,9 +461,9 @@ function ModelIntelligenceSection({
 					{/* Creativity Temperature */}
 					<div class="space-y-3">
 						<div class="flex items-center justify-between">
-							<label class="text-sm font-medium text-foreground">
+							<p class="text-sm font-medium text-foreground">
 								Creativity (Temperature)
-							</label>
+							</p>
 							<span class="text-xs text-muted-foreground">
 								{temperature?.toFixed(1) || "0.7"}
 							</span>
@@ -578,9 +522,9 @@ function CostControlSection({ canEditAI }: { canEditAI: boolean }) {
 				<>
 					{/* Monthly Budget Cap */}
 					<div class="space-y-2">
-						<label class="text-sm font-medium text-foreground">
+						<p class="text-sm font-medium text-foreground">
 							Monthly Budget Cap
-						</label>
+						</p>
 						<div class="flex items-center gap-2">
 							<span class="text-2xl font-bold">$500</span>
 							<span class="text-xs text-muted-foreground">/mo</span>
@@ -613,8 +557,16 @@ function CostControlSection({ canEditAI }: { canEditAI: boolean }) {
 								Stop requests when budget met
 							</div>
 						</div>
-						<label class="relative inline-flex items-center cursor-pointer">
-							<input type="checkbox" class="sr-only peer" checked />
+						<label
+							htmlFor="hard-limit-toggle"
+							class="relative inline-flex items-center cursor-pointer"
+						>
+							<input
+								id="hard-limit-toggle"
+								type="checkbox"
+								class="sr-only peer"
+								checked
+							/>
 							<div class="w-11 h-6 bg-muted peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary" />
 						</label>
 					</div>

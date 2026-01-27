@@ -1,6 +1,6 @@
-import Badge from "@components/extras/Badge";
+import Badge from "@components/extras/badge";
 import { Card } from "@components/extras/card";
-import Modal from "@components/extras/Modal";
+import Modal from "@components/extras/modal";
 import Form from "@components/form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { cn, handlerError, sizeIcon } from "@infrastructure/utils/client";
@@ -8,11 +8,10 @@ import {
 	formatDateTz,
 	printFileWithDimension,
 } from "@infrastructure/utils/hybrid";
-import { authMfaDisableApi } from "@modules/auth/apis/auth.mfa.api";
+import { authMfaDisableApi } from "@modules/auth/apis/auth.mfa-disable.api";
 import MfaSetup from "@modules/auth/components/mfa-setup";
 import {
 	DIMENSION_IMAGE,
-	typeTextExtensions,
 	UPLOAD_CONFIG,
 } from "@modules/uploads/const/upload.const";
 import { useSignal } from "@preact/signals";
@@ -27,7 +26,6 @@ import {
 	Lock,
 	Mail,
 	Phone,
-	Save,
 	Shield,
 	Smartphone,
 	User,
@@ -85,7 +83,7 @@ export default function ProfileIndex() {
 
 	function onProfileUpdate(body: UserProfileUpdateDto) {
 		profileMutation.mutate(body, {
-			onSuccess(data) {
+			onSuccess() {
 				authStore.methods.onUserUpdate(body);
 				sweetModal({
 					icon: "success",
@@ -201,11 +199,14 @@ export default function ProfileIndex() {
 												)[0]
 											}
 											alt={user.username}
+											title={user.username}
+											width={DIMENSION_IMAGE.md}
+											height={DIMENSION_IMAGE.md}
 											class="w-full h-full object-cover"
 										/>
 									</div>
 									<label
-										for="avatar-upload"
+										htmlFor="avatar-upload"
 										class="absolute -bottom-2 -right-2 w-10 h-10 bg-primary text-primary-foreground rounded-xl flex items-center justify-center cursor-pointer shadow-lg hover:bg-primary/90 transition-all hover:scale-110 active:scale-95 z-10"
 									>
 										<Camera {...sizeIcon.small} />
@@ -249,6 +250,7 @@ export default function ProfileIndex() {
 								className="hidden"
 							>
 								<Form.control.file<UserAvatarUpdateDto>
+									id="avatar-upload"
 									name="avatar"
 									title="Avatar"
 									entity="user"

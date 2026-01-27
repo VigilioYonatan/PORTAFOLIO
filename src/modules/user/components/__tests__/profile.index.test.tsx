@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 
-import { authMfaDisableApi } from "@modules/auth/apis/auth.mfa.api";
+import { authMfaDisableApi } from "@modules/auth/apis/auth.mfa-disable.api";
 import { useAuthStore } from "@src/stores/auth.store";
 import { fireEvent, render, screen, waitFor } from "@testing-library/preact";
 import { sweetModal } from "@vigilio/sweet";
@@ -16,7 +16,7 @@ vi.mock("../../apis/user.password-change.api");
 vi.mock("../../apis/user.avatar-update.api", () => ({
 	userAvatarUpdateApi: () => ({ mutate: vi.fn(), isLoading: false }),
 }));
-vi.mock("@modules/auth/apis/auth.mfa.api");
+vi.mock("@modules/auth/apis/auth.mfa-disable.api");
 vi.mock("@vigilio/sweet", async () => {
 	const { mockVigilioSweet } = await import(
 		"@src/infrastructure/tests/mock-utils"
@@ -40,7 +40,7 @@ vi.mock("@components/form", () => {
 	);
 	MockForm.control = ({ name, title, placeholder, defaultValue }: any) => (
 		<div>
-			<label>{title}</label>
+			<label htmlFor={name}>{title}</label>
 			<input
 				name={name}
 				placeholder={placeholder}
@@ -49,9 +49,9 @@ vi.mock("@components/form", () => {
 			/>
 		</div>
 	);
-	MockForm.control.file = ({ name, title }: any) => (
+	(MockForm.control as any).file = ({ name, title }: any) => (
 		<div>
-			<label>{title}</label>
+			<label htmlFor={name}>{title}</label>
 			<input type="file" data-testid={`input-${name}`} />
 		</div>
 	);

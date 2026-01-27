@@ -1,15 +1,15 @@
-import Button from "@components/extras/Button";
+import Button from "@components/extras/button";
 
 function View404() {
 	return (
 		<div class="relative flex flex-col items-center justify-center min-h-screen bg-background p-4 overflow-hidden">
 			{/* Scanline Effect */}
-			<div class="pointer-events-none absolute inset-0 z-10 w-full h-full bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[length:100%_4px,3px_100%] animate-scanline" />
+			<div class="pointer-events-none absolute inset-0 z-10 w-full h-full bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-size-[100%_4px,3px_100%] animate-scanline" />
 
 			<div class="relative z-20 flex flex-col items-center gap-6 max-w-2xl text-center">
 				<div class="relative">
 					<h1
-						class="text-9xl font-black text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary animate-pulse-slow select-none"
+						class="text-9xl font-black text-transparent bg-clip-text bg-linear-to-r from-primary to-secondary animate-pulse-slow select-none"
 						style={{
 							textShadow:
 								"2px 2px 0px var(--color-destructive), -2px -2px 0px var(--color-primary)",

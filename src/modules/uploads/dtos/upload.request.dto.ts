@@ -21,7 +21,7 @@ export type UploadMultipartSignPartDto = z.infer<
 	typeof uploadMultipartSignPartDto
 >;
 
-export const completedPartSchema = z.object({
+export const completedPartDto = z.object({
 	ETag: z.string().min(1),
 	PartNumber: z.number().int().positive(),
 });
@@ -29,7 +29,7 @@ export const completedPartSchema = z.object({
 export const uploadMultipartCompleteDto = z.object({
 	key: z.string().min(1),
 	uploadId: z.string().min(1),
-	parts: z.array(completedPartSchema),
+	parts: z.array(completedPartDto),
 });
 export type UploadMultipartCompleteDto = z.infer<
 	typeof uploadMultipartCompleteDto

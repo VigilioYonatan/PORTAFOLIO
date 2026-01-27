@@ -1,10 +1,8 @@
-import { ZodPipe } from "@infrastructure/pipes/zod.pipe";
-import type { PaginatorResult } from "@infrastructure/utils/server";
-import { Public } from "@modules/auth/decorators/public.decorator";
+import { ZodQueryPipe } from "@infrastructure/pipes/zod-query.pipe";
+import { conversationQueryDto } from "./dtos/chat.class.dto";
 import { Roles } from "@modules/auth/decorators/roles.decorator";
 import { AuthenticatedGuard } from "@modules/auth/guards/authenticated.guard";
 import {
-	Body,
 	Controller,
 	Get,
 	Param,
@@ -13,25 +11,13 @@ import {
 	Req,
 	UseGuards,
 } from "@nestjs/common";
-import { ApiBody, ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
+import { ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
 import type { Request } from "express";
-import {
-	ChatMessagePublicStoreClassDto,
-	ChatMessageResponseClassDto,
-	ChatMessageStoreClassDto,
-	ConversationQueryClassDto,
-	ConversationResponseClassDto,
-	ConversationStoreClassDto,
-	chatMessagePublicStoreSchema,
-	chatMessageStoreSchema,
-	conversationStoreSchema,
-} from "./dtos/chat.class.dto";
+import { ConversationQueryClassDto } from "./dtos/chat.class.dto";
 import {
 	ChatMessageIndexResponseClassDto,
 	ConversationIndexResponseClassDto,
 } from "./dtos/chat.response.class.dto";
-import { type ChatMessageSchema } from "./schemas/chat-message.schema";
-import { type ConversationSchema } from "./schemas/conversation.schema";
 import { ChatService } from "./services/chat.service";
 
 @ApiTags("Chat & Community")
@@ -49,10 +35,11 @@ export class ChatController {
 	})
 	async index(
 		@Req() req: Request,
-		@Query() query: ConversationQueryClassDto,
+		@Query(new ZodQueryPipe(conversationQueryDto))
+		query: ConversationQueryClassDto,
 	): Promise<ConversationIndexResponseClassDto> {
 		const tenant_id = req.locals.tenant.id;
-		const result = await this.chatService.indexConversations(tenant_id, query);
+		const result = await this.chatService.index(tenant_id, query);
 		return result;
 	}
 

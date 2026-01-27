@@ -1,5 +1,4 @@
 import { UPLOAD_CONFIG } from "@modules/uploads/const/upload.const";
-import { filesSchema } from "@modules/uploads/schemas/upload.schema";
 import type { TechnologyStoreDto } from "../dtos/technology.store.dto";
 import type { TechnologySchema } from "../schemas/technology.schema";
 

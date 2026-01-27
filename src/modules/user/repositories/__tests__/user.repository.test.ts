@@ -14,7 +14,6 @@ describe("UserRepository", () => {
 		select: vi.fn(),
 		from: vi.fn(),
 		where: vi.fn(),
-		then: vi.fn(),
 		insert: vi.fn(),
 		values: vi.fn(),
 		returning: vi.fn(),

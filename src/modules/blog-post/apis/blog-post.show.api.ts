@@ -3,7 +3,7 @@ import type { BlogPostShowResponseDto } from "../dtos/blog-post.response.dto";
 
 export function blogPostShowApi(id: number | null) {
 	return useQuery<BlogPostShowResponseDto, unknown>(
-		`/blog/posts/${id}`,
+		`/blog-post/${id}`,
 		async (url) => {
 			const response = await fetch(`/api/v1${url}`);
 			const result = await response.json();

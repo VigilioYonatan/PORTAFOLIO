@@ -1,6 +1,6 @@
 import { TenantRepository } from "@modules/tenant/repositories/tenant.repository";
 import { UserService } from "@modules/user/services/user.service";
-import { BadRequestException, NotFoundException } from "@nestjs/common";
+import { BadRequestException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { EventEmitter2 } from "@nestjs/event-emitter";
 import { JwtService } from "@nestjs/jwt";

@@ -16,7 +16,7 @@ export interface WorkMilestoneStoreApiError {
 export function workMilestoneStoreApi() {
 	return useMutation<
 		WorkMilestoneStoreResponseDto,
-		WorkMilestoneStoreDto ,
+		WorkMilestoneStoreDto,
 		WorkMilestoneStoreApiError
 	>("/work-milestones", async (url, body) => {
 		const response = await fetch(`/api/v1${url}`, {

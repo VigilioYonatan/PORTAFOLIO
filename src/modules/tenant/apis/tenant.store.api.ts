@@ -1,21 +1,15 @@
 import { useMutation } from "@vigilio/preact-fetching";
-/**
- * tenantStore - /api/v1/tenants
- * @method POST
- * @body TenantStoreDto
- */
 import type { TenantResponseDto } from "../dtos/tenant.response.dto";
 import type { TenantStoreDto } from "../dtos/tenant.store.dto";
-import type { TenantSchema } from "../schemas/tenant.schema";
 
 /**
- * tenantStore - /api/v1/tenants
+ * tenantStore - /api/v1/tenant
  * @method POST
  * @body TenantStoreDto
  */
 export function tenantStoreApi() {
 	return useMutation<TenantResponseDto, TenantStoreDto, TenantStoreApiError>(
-		"/tenants",
+		"/tenant",
 		async (url, body) => {
 			const response = await fetch(`/api/v1${url}`, {
 				method: "POST",

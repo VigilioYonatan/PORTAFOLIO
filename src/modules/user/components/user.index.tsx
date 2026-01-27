@@ -1,12 +1,13 @@
-import Badge from "@components/extras/Badge";
+import Badge from "@components/extras/badge";
 import { Card } from "@components/extras/card";
-import EllipsisMenu from "@components/extras/EllipsisMenu";
-import Modal from "@components/extras/Modal";
-import VigilioTable from "@components/table";
+import EllipsisMenu from "@components/extras/ellipsis-menu";
+import Modal from "@components/extras/modal";
+import VigilioTable from "@components/tables";
 import { cn, sizeIcon } from "@infrastructure/utils/client";
 import dayjs from "@infrastructure/utils/hybrid/date.utils";
+import { printFileWithDimension } from "@infrastructure/utils/hybrid/file.utils";
+import { DIMENSION_IMAGE } from "@modules/uploads/const/upload.const";
 import { useComputed, useSignal } from "@preact/signals";
-import type { Columns } from "@vigilio/preact-table";
 import { useTable } from "@vigilio/preact-table";
 import { sweetModal } from "@vigilio/sweet";
 import type { LucideIcon } from "lucide-preact";
@@ -30,7 +31,6 @@ import { userDestroyApi } from "../apis/user.destroy.api";
 import {
 	type UserIndexMethods,
 	type UserIndexSecondaryPaginator,
-	type UserIndexTable,
 	userIndexApi,
 } from "../apis/user.index.api";
 import { getRoleBadgeInfo, USER_ROLE_OPTIONS } from "../const/user.const";
@@ -45,15 +45,10 @@ import { UserUpdate } from "./user.update";
 export type UserViewMode = "users" | "roles" | "activity";
 
 export default function UserIndex() {
-	// Signals for filters
-	const roleFilter = useSignal<number | "all">("all");
-	const mfaFilter = useSignal<string>("all");
-
 	// Bulk selection state
 	const selectedUsers = useSignal<Set<number>>(new Set());
 	const selectAll = useSignal<boolean>(false);
 
-	// View state
 	// View state
 	const view = useSignal<UserViewMode>("users");
 
@@ -63,239 +58,238 @@ export default function UserIndex() {
 	const userShow = useSignal<UserIndexSchema | null>(null);
 	const userQr = useSignal<UserIndexSchema | null>(null);
 
-	// Columns definition
-	const columns: Columns<
+	const userDestroy = userDestroyApi();
+
+	const table = useTable<
 		UserIndexSchema,
 		UserIndexSecondaryPaginator,
 		UserIndexMethods
-	> = [
-		{
-			key: "select",
-			header: "",
-			cell: (row) => (
-				<input
-					type="checkbox"
-					class="w-4 h-4 rounded border-border text-primary focus:ring-primary cursor-pointer"
-					checked={selectedUsers.value.has(row.id)}
-					onChange={(e) => {
-						const newSet = new Set(selectedUsers.value);
-						if (e.currentTarget.checked) {
-							newSet.add(row.id);
-						} else {
-							newSet.delete(row.id);
-						}
-						selectedUsers.value = newSet;
-					}}
-				/>
-			),
-		},
-		{
-			key: "username",
-			header: "USERNAME",
-			cell: (row) => (
-				<div class="flex items-center gap-3">
-					<div
-						data-testid={`avatar-${row.id}`}
-						class="w-9 h-9 rounded-full bg-gradient-to-br from-primary/20 to-primary/40 flex items-center justify-center shrink-0 overflow-hidden border border-border"
-					>
-						{row.avatar?.[0]?.key ? (
-							<img
-								src={`/uploads/${row.avatar[0].key}`}
-								alt={row.username}
-								class="w-full h-full object-cover"
-							/>
-						) : (
-							<span class="text-xs font-bold text-primary">
-								{row.username.slice(0, 2).toUpperCase()}
-							</span>
-						)}
+	>({
+		columns: [
+			{
+				key: "select",
+				header: "",
+				cell: (row) => (
+					<input
+						type="checkbox"
+						class="w-4 h-4 rounded border-border text-primary focus:ring-primary cursor-pointer"
+						checked={selectedUsers.value.has(row.id)}
+						onChange={(e) => {
+							const newSet = new Set(selectedUsers.value);
+							if (e.currentTarget.checked) {
+								newSet.add(row.id);
+							} else {
+								newSet.delete(row.id);
+							}
+							selectedUsers.value = newSet;
+						}}
+					/>
+				),
+			},
+			{
+				key: "username",
+				header: "USERNAME",
+				isSort: true,
+				cell: (row) => (
+					<div class="flex items-center gap-3">
+						<div
+							data-testid={`avatar-${row.id}`}
+							class="w-10 h-10 rounded-full bg-primary/10 border border-primary/20 overflow-hidden flex items-center justify-center shrink-0"
+						>
+							{row.avatar?.[0] ? (
+								<img
+									src={
+										printFileWithDimension(row.avatar, DIMENSION_IMAGE.xs)[0]
+									}
+									alt={row.username}
+									title={row.username}
+									width={DIMENSION_IMAGE.xs}
+									height={DIMENSION_IMAGE.xs}
+									class="w-full h-full object-cover"
+								/>
+							) : (
+								<span class="text-xs font-black text-primary">
+									{row.username.charAt(0).toUpperCase()}
+								</span>
+							)}
+						</div>
+						<span class="font-medium text-foreground">{row.username}</span>
 					</div>
-					<span class="font-medium text-foreground">{row.username}</span>
-				</div>
-			),
-		},
-		{
-			key: "email",
-			header: "EMAIL ADDRESS",
-			cell: (row) => <span class="text-muted-foreground">{row.email}</span>,
-		},
-		{
-			key: "role_id",
-			header: "ROLE",
-			cell: (row) => {
-				const roleInfo = getRoleBadgeInfo(row.role_id);
-				return (
-					<Badge
-						data-testid={`role-${row.id}`}
-						variant={roleInfo.variant as any}
-						className="uppercase"
-					>
-						{roleInfo.label}
-					</Badge>
-				);
+				),
 			},
-		},
-		{
-			key: "is_mfa_enabled",
-			header: "MFA STATUS",
-			cell: (row) => {
-				return row.is_mfa_enabled ? (
-					<Badge
-						data-testid={`mfa-${row.id}`}
-						variant="success"
-						className="uppercase"
-					>
-						<span class="w-2 h-2 rounded-full bg-green-500 mr-2" />
-						Enabled
-					</Badge>
-				) : row.qr_code_token ? (
-					<Badge
-						data-testid={`mfa-${row.id}`}
-						variant="warning"
-						className="uppercase"
-					>
-						<span class="w-2 h-2 rounded-full bg-yellow-500 mr-2" />
-						Pending
-					</Badge>
-				) : (
-					<span class="text-muted-foreground text-sm">Not set</span>
-				);
+			{
+				key: "email",
+				header: "EMAIL ADDRESS",
+				isSort: true,
+				cell: (row) => <span class="text-muted-foreground">{row.email}</span>,
 			},
-		},
-		{
-			key: "last_login_at",
-			header: "LAST ACTIVE",
-			cell: (row) => {
-				if (!row.last_login_at) {
-					return <span class="text-muted-foreground text-sm">Never</span>;
-				}
-				const loginDate = dayjs(row.last_login_at);
-				const nowTime = dayjs();
-				const diffMins = nowTime.diff(loginDate, "minute");
-				const diffHours = nowTime.diff(loginDate, "hour");
-				const diffDays = nowTime.diff(loginDate, "day");
-
-				let timeAgo: string;
-				if (diffMins < 1) {
-					timeAgo = "Just now";
-				} else if (diffMins < 60) {
-					timeAgo = `${diffMins} minutes ago`;
-				} else if (diffHours < 24) {
-					timeAgo = `${diffHours} hours ago`;
-				} else {
-					timeAgo = `${diffDays} days ago`;
-				}
-
-				return <span class="text-sm text-foreground">{timeAgo}</span>;
-			},
-		},
-		{
-			key: "action",
-			header: "ACTIONS",
-			cell: (row, _, methods) => (
-				<div class="flex justify-end pr-2">
-					<EllipsisMenu isLoading={userDestroy.isLoading || false}>
-						<button
-							type="button"
-							class="w-full flex items-center gap-2 px-4 py-2 text-sm text-foreground hover:bg-muted transition-colors"
-							onClick={() => {
-								userShow.value = row;
-							}}
+			{
+				key: "role_id",
+				header: "ROLE",
+				isSort: true,
+				cell: (row) => {
+					const roleInfo = getRoleBadgeInfo(row.role_id);
+					return (
+						<Badge
+							data-testid={`role-${row.id}`}
+							variant={roleInfo.variant}
+							className="uppercase"
 						>
-							<Eye size={14} />
-							View Details
-						</button>
-						<button
-							type="button"
-							class="w-full flex items-center gap-2 px-4 py-2 text-sm text-foreground hover:bg-muted transition-colors"
-							onClick={() => {
-								userUpdate.value = row;
-							}}
+							{roleInfo.label}
+						</Badge>
+					);
+				},
+			},
+			{
+				key: "is_mfa_enabled",
+				header: "MFA STATUS",
+				isSort: true,
+				cell: (row) => {
+					return row.is_mfa_enabled ? (
+						<Badge
+							data-testid={`mfa-${row.id}`}
+							variant="success"
+							className="uppercase"
 						>
-							<Edit size={14} />
-							Edit User
-						</button>
-						{row.qr_code_token ? (
+							<span class="w-2 h-2 rounded-full bg-green-500 mr-2" />
+							Enabled
+						</Badge>
+					) : row.qr_code_token ? (
+						<Badge
+							data-testid={`mfa-${row.id}`}
+							variant="warning"
+							className="uppercase"
+						>
+							<span class="w-2 h-2 rounded-full bg-yellow-500 mr-2" />
+							Pending
+						</Badge>
+					) : (
+						<span class="text-muted-foreground text-sm">Not set</span>
+					);
+				},
+			},
+			{
+				key: "last_login_at",
+				header: "LAST ACTIVE",
+				isSort: true,
+				cell: (row) => {
+					if (!row.last_login_at) {
+						return <span class="text-muted-foreground text-sm">Never</span>;
+					}
+					const loginDate = dayjs(row.last_login_at);
+					const nowTime = dayjs();
+					const diffMins = nowTime.diff(loginDate, "minute");
+					const diffHours = nowTime.diff(loginDate, "hour");
+					const diffDays = nowTime.diff(loginDate, "day");
+
+					let timeAgo: string;
+					if (diffMins < 1) {
+						timeAgo = "Just now";
+					} else if (diffMins < 60) {
+						timeAgo = `${diffMins} minutes ago`;
+					} else if (diffHours < 24) {
+						timeAgo = `${diffHours} hours ago`;
+					} else {
+						timeAgo = `${diffDays} days ago`;
+					}
+
+					return <span class="text-sm text-foreground">{timeAgo}</span>;
+				},
+			},
+			{
+				key: "action",
+				header: "ACTIONS",
+				cell: (row) => (
+					<div class="flex justify-end pr-2">
+						<EllipsisMenu isLoading={userDestroy.isLoading || false}>
 							<button
 								type="button"
 								class="w-full flex items-center gap-2 px-4 py-2 text-sm text-foreground hover:bg-muted transition-colors"
 								onClick={() => {
-									userQr.value = row;
+									userShow.value = row;
 								}}
 							>
-								<QrCode size={14} />
-								View QR Code
+								<Eye size={14} />
+								View Details
 							</button>
-						) : (
-							<></>
-						)}
-						<div class="h-px bg-border my-1" />
-						<button
-							type="button"
-							class="w-full flex items-center gap-2 px-4 py-2 text-sm text-destructive hover:bg-destructive/10 transition-colors"
-							onClick={() => {
-								sweetModal({
-									title: "Delete User?",
-									text: "This action cannot be undone. The user will be soft-deleted.",
-									icon: "danger",
-									showCancelButton: true,
-									confirmButtonText: "Delete",
-								}).then(({ isConfirmed }) => {
-									if (isConfirmed) {
-										userDestroy.mutate(row.id, {
-											onSuccess() {
-												table.updateData((results, count) => ({
-													result: results.filter((item) => item.id !== row.id),
-													count: count - 1,
-												}));
-												sweetModal({
-													icon: "success",
-													title: "User deleted",
-													timer: 1500,
-													showConfirmButton: false,
-												});
-											},
-										});
-									}
-								});
-							}}
-						>
-							<Trash size={14} />
-							Delete User
-						</button>
-					</EllipsisMenu>
-				</div>
-			),
-		},
-	];
-
-	// Initialize table
-	const table = useTable({
-		columns,
+							<button
+								type="button"
+								class="w-full flex items-center gap-2 px-4 py-2 text-sm text-foreground hover:bg-muted transition-colors"
+								onClick={() => {
+									userUpdate.value = row;
+								}}
+							>
+								<Edit size={14} />
+								Edit User
+							</button>
+							{row.qr_code_token ? (
+								<button
+									type="button"
+									class="w-full flex items-center gap-2 px-4 py-2 text-sm text-foreground hover:bg-muted transition-colors"
+									onClick={() => {
+										userQr.value = row;
+									}}
+								>
+									<QrCode size={14} />
+									View QR Code
+								</button>
+							) : null}
+							<div class="h-px bg-border my-1" />
+							<button
+								type="button"
+								class="w-full flex items-center gap-2 px-4 py-2 text-sm text-destructive hover:bg-destructive/10 transition-colors"
+								onClick={() => {
+									sweetModal({
+										title: "Delete User?",
+										text: "This action cannot be undone. The user will be soft-deleted.",
+										icon: "danger",
+										showCancelButton: true,
+										confirmButtonText: "Delete",
+									}).then(({ isConfirmed }) => {
+										if (isConfirmed) {
+											userDestroy.mutate(row.id, {
+												onSuccess() {
+													table.updateData((results, count) => ({
+														result: results.filter(
+															(item) => item.id !== row.id,
+														),
+														count: count - 1,
+													}));
+													sweetModal({
+														icon: "success",
+														title: "User deleted",
+														timer: 1500,
+														showConfirmButton: false,
+													});
+												},
+											});
+										}
+									});
+								}}
+							>
+								<Trash size={14} />
+								Delete User
+							</button>
+						</EllipsisMenu>
+					</div>
+				),
+			},
+		],
 		pagination: { limit: 10 },
 	});
 
-	// API hooks
-	const userIndex = userIndexApi(
-		table,
-		null, // paginator
-		roleFilter.value === "all" ? null : roleFilter.value,
-		null, // Status filter removed
-	);
-	const userDestroy = userDestroyApi();
+	const userIndex = userIndexApi(table);
 
-	// Refetch on filter & pagination changes
 	useEffect(() => {
 		userIndex.refetch();
 	}, [
-		roleFilter.value,
-		mfaFilter.value,
 		table.pagination.value.offset,
 		table.pagination.value.limit,
 		table.search.debounceTerm,
+		table.sort.value,
+		table.filters.value,
 	]);
 
-	// Stats from real data
 	const stats = {
 		total: userIndex.data?.count || 0,
 		totalChange: "+12%",
@@ -304,11 +298,9 @@ export default function UserIndex() {
 		pendingInvites: 18,
 	};
 
-	// Computed for bulk actions
 	const selectedCount = useComputed(() => selectedUsers.value.size);
 	const hasSelection = useComputed(() => selectedUsers.value.size > 0);
 
-	// Handle bulk role change
 	function handleBulkRoleChange() {
 		sweetModal({
 			title: "Change Role",
@@ -317,7 +309,6 @@ export default function UserIndex() {
 			showCancelButton: true,
 		}).then(({ isConfirmed }) => {
 			if (isConfirmed) {
-				// TODO: Implement bulk role change API
 				sweetModal({
 					icon: "success",
 					title: "Role updated",
@@ -329,7 +320,6 @@ export default function UserIndex() {
 		});
 	}
 
-	// Handle bulk ban
 	function handleBulkBan() {
 		sweetModal({
 			title: "Ban Users?",
@@ -339,7 +329,6 @@ export default function UserIndex() {
 			confirmButtonText: "Ban Users",
 		}).then(({ isConfirmed }) => {
 			if (isConfirmed) {
-				// TODO: Implement bulk ban API
 				sweetModal({
 					icon: "success",
 					title: "Users banned",
@@ -352,7 +341,6 @@ export default function UserIndex() {
 		});
 	}
 
-	// Handle export CSV
 	function handleExportCSV() {
 		sweetModal({
 			title: "Export Users",
@@ -362,7 +350,6 @@ export default function UserIndex() {
 			confirmButtonText: "Export",
 		}).then(({ isConfirmed }) => {
 			if (isConfirmed) {
-				// TODO: Implement CSV export
 				sweetModal({
 					icon: "success",
 					title: "Export started",
@@ -374,7 +361,6 @@ export default function UserIndex() {
 		});
 	}
 
-	// Calculate showing range
 	const offset = table.pagination.value.offset;
 	const limit = table.pagination.value.limit;
 	const total = stats.total;
@@ -383,7 +369,6 @@ export default function UserIndex() {
 
 	return (
 		<div class="flex flex-col gap-6 pb-20">
-			{/* Breadcrumb & Header */}
 			<div class="flex flex-col gap-4">
 				<div class="text-xs text-muted-foreground uppercase tracking-wide">
 					DASHBOARD / <span class="text-foreground">USERS</span>
@@ -413,7 +398,6 @@ export default function UserIndex() {
 				</div>
 			</div>
 
-			{/* Tabs */}
 			<div class="flex gap-1 p-1 bg-muted/30 rounded-xl w-fit border border-border">
 				<button
 					type="button"
@@ -461,7 +445,6 @@ export default function UserIndex() {
 
 			{view.value === "users" ? (
 				<>
-					{/* Stats Cards */}
 					<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
 						<StatCard
 							title="Total Users"
@@ -485,12 +468,9 @@ export default function UserIndex() {
 						/>
 					</div>
 
-					{/* Filters and Table */}
-					<Card className="p-0 overflow-hidden">
-						{/* Filter Bar */}
+					<Card class="p-0 overflow-hidden">
 						<div class="p-4 border-b border-border">
 							<div class="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
-								{/* Search */}
 								<div class="relative w-full lg:max-w-sm">
 									<Search
 										size={16}
@@ -508,20 +488,21 @@ export default function UserIndex() {
 								</div>
 
 								<div class="flex flex-wrap gap-3 items-center">
-									{/* Role Filter */}
 									<div class="relative">
 										<select
 											class="appearance-none px-4 py-2.5 pr-9 text-sm border border-border rounded-lg bg-background hover:bg-muted transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary/50"
-											value={roleFilter.value}
+											value={table.filters.value.role_id as number}
 											onChange={(e) => {
-												roleFilter.value =
+												table.filters.update(
+													"role_id",
 													e.currentTarget.value === "all"
-														? "all"
-														: Number(e.currentTarget.value);
+														? null
+														: Number(e.currentTarget.value),
+												);
 											}}
 										>
 											{USER_ROLE_OPTIONS.map((option) => (
-												<option key={option.key} value={option.key}>
+												<option key={option.key} value={option.key || "all"}>
 													{option.value}
 												</option>
 											))}
@@ -532,18 +513,27 @@ export default function UserIndex() {
 										/>
 									</div>
 
-									{/* MFA Filter */}
 									<div class="relative">
 										<select
 											class="appearance-none px-4 py-2.5 pr-9 text-sm border border-border rounded-lg bg-background hover:bg-muted transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary/50"
-											value={mfaFilter.value}
+											value={
+												table.filters.value.is_mfa_enabled === null
+													? "all"
+													: table.filters.value.is_mfa_enabled
+														? "enabled"
+														: "disabled"
+											}
 											onChange={(e) => {
-												mfaFilter.value = e.currentTarget.value;
+												table.filters.update(
+													"is_mfa_enabled",
+													e.currentTarget.value === "all"
+														? null
+														: e.currentTarget.value === "enabled",
+												);
 											}}
 										>
 											<option value="all">All MFA Status</option>
 											<option value="enabled">Enabled</option>
-											<option value="pending">Pending</option>
 											<option value="disabled">Not Set</option>
 										</select>
 										<ChevronDown
@@ -552,7 +542,6 @@ export default function UserIndex() {
 										/>
 									</div>
 
-									{/* Showing count */}
 									<span class="text-sm text-muted-foreground">
 										Showing {showingFrom}-{showingTo} of{" "}
 										{total.toLocaleString()} users
@@ -561,7 +550,6 @@ export default function UserIndex() {
 							</div>
 						</div>
 
-						{/* Table */}
 						<VigilioTable query={userIndex} table={table}>
 							<VigilioTable.table>
 								<VigilioTable.thead>
@@ -594,7 +582,6 @@ export default function UserIndex() {
 				</div>
 			)}
 
-			{/* Bulk Actions Bar */}
 			{hasSelection.value ? (
 				<div class="fixed bottom-0 left-0 right-0 bg-card border-t border-border shadow-lg z-40">
 					<div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
@@ -620,6 +607,7 @@ export default function UserIndex() {
 						</div>
 						<div class="flex items-center gap-3">
 							<button
+								key="bulk-role"
 								type="button"
 								class="flex items-center gap-2 px-4 py-2 border border-border rounded-lg text-sm font-medium hover:bg-muted transition-colors"
 								onClick={handleBulkRoleChange}
@@ -628,6 +616,7 @@ export default function UserIndex() {
 								CHANGE ROLE
 							</button>
 							<button
+								key="bulk-ban"
 								type="button"
 								class="flex items-center gap-2 px-4 py-2 bg-destructive text-destructive-foreground rounded-lg text-sm font-medium hover:bg-destructive/90 transition-colors"
 								onClick={handleBulkBan}
@@ -640,7 +629,6 @@ export default function UserIndex() {
 				</div>
 			) : null}
 
-			{/* Create Modal */}
 			<Modal
 				isOpen={userStore.value}
 				onClose={() => {
@@ -656,10 +644,12 @@ export default function UserIndex() {
 						}));
 						userStore.value = false;
 					}}
+					onClose={() => {
+						userStore.value = false;
+					}}
 				/>
 			</Modal>
 
-			{/* Update Modal */}
 			<Modal
 				isOpen={!!userUpdate.value}
 				onClose={() => {
@@ -667,21 +657,22 @@ export default function UserIndex() {
 				}}
 				contentClassName="max-w-lg w-full"
 			>
-				<UserUpdate
-					user={userUpdate.value!}
-					refetch={(data) => {
-						table.updateData((old, count) => ({
-							result: old.map((item) =>
-								item.id === data.id ? { ...item, ...data } : item,
-							),
-							count,
-						}));
-						userUpdate.value = null;
-					}}
-				/>
+				{userUpdate.value && (
+					<UserUpdate
+						user={userUpdate.value}
+						refetch={(data) => {
+							table.updateData((old, count) => ({
+								result: old.map((item) =>
+									item.id === data.id ? { ...item, ...data } : item,
+								),
+								count,
+							}));
+							userUpdate.value = null;
+						}}
+					/>
+				)}
 			</Modal>
 
-			{/* Show Modal */}
 			<Modal
 				isOpen={!!userShow.value}
 				onClose={() => {
@@ -689,10 +680,9 @@ export default function UserIndex() {
 				}}
 				contentClassName="max-w-lg w-full"
 			>
-				<UserShow user={userShow.value!} />
+				{userShow.value && <UserShow user={userShow.value} />}
 			</Modal>
 
-			{/* QR Modal */}
 			<Modal
 				isOpen={!!userQr.value}
 				onClose={() => {
@@ -700,7 +690,7 @@ export default function UserIndex() {
 				}}
 				contentClassName="max-w-sm w-full"
 			>
-				<UserQr user={userQr.value!} />
+				{userQr.value && <UserQr user={userQr.value} />}
 			</Modal>
 		</div>
 	);

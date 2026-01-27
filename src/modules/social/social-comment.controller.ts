@@ -1,5 +1,6 @@
+import { ZodQueryPipe } from "@infrastructure/pipes/zod-query.pipe";
 import { ZodPipe } from "@infrastructure/pipes/zod.pipe";
-import type { PaginatorResult } from "@infrastructure/utils/server";
+import { socialCommentQueryDto } from "./dtos/social-comment.query.dto";
 import { Public } from "@modules/auth/decorators/public.decorator";
 import { Roles } from "@modules/auth/decorators/roles.decorator";
 import { AuthenticatedGuard } from "@modules/auth/guards/authenticated.guard";
@@ -38,27 +39,22 @@ import { socialCommentStoreDto } from "./dtos/social-comment.store.dto";
 import { SocialCommentUpdateClassDto } from "./dtos/social-comment.update.class.dto";
 import type { SocialCommentUpdateDto } from "./dtos/social-comment.update.dto";
 import { socialCommentUpdateDto } from "./dtos/social-comment.update.dto";
-import type { SocialCommentSchema } from "./schemas/social-comment.schema";
 import { SocialService } from "./services/social.service";
 
 @ApiTags("Social Comments")
-@Controller("comments")
+@Controller("social-comment")
 export class SocialCommentController {
 	constructor(private readonly socialService: SocialService) {}
 
+	@Get("/:post_id")
 	@Public()
-	@Get("/")
-	@ApiOperation({ summary: "Listar comentarios (paginado)" })
-	@ApiResponse({
-		status: 200,
-		type: SocialCommentIndexResponseClassDto,
-	})
-	index(
-		@Req() req: Request,
-		@Query() query: SocialCommentQueryClassDto,
+	@ApiOperation({ summary: "Get comments for a blog post" })
+	@ApiResponse({ status: 200, type: SocialCommentIndexResponseClassDto })
+	async index(
+		@Param("post_id", ParseIntPipe) post_id: number,
+		@Query(new ZodQueryPipe(socialCommentQueryDto)) query: SocialCommentQueryClassDto,
 	): Promise<SocialCommentIndexResponseDto> {
-		const tenant_id = req.locals.tenant.id;
-		return this.socialService.indexComments(tenant_id, query);
+		return this.socialService.index(post_id, query);
 	}
 
 	@Public()
@@ -75,7 +71,7 @@ export class SocialCommentController {
 		@Body(new ZodPipe(socialCommentStoreDto)) body: SocialCommentStoreDto,
 	): Promise<SocialCommentStoreResponseClassDto> {
 		const tenant_id = req.locals.tenant.id;
-		return this.socialService.storeComment(tenant_id, body);
+		return this.socialService.store(tenant_id, body);
 	}
 
 	@Patch("/:id")
@@ -93,7 +89,7 @@ export class SocialCommentController {
 		@Body(new ZodPipe(socialCommentUpdateDto)) body: SocialCommentUpdateDto,
 	): Promise<SocialCommentUpdateResponseClassDto> {
 		const tenant_id = req.locals.tenant.id;
-		return this.socialService.updateComment(tenant_id, id, body);
+		return this.socialService.update(tenant_id, id, body);
 	}
 
 	@HttpCode(200)
@@ -112,7 +108,7 @@ export class SocialCommentController {
 		@Body(new ZodPipe(socialCommentReplyDto)) body: SocialCommentReplyDto,
 	): Promise<SocialCommentReplyResponseClassDto> {
 		const tenant_id = req.locals.tenant.id;
-		return this.socialService.replyComment(tenant_id, id, body);
+		return this.socialService.reply(tenant_id, id, body);
 	}
 
 	@HttpCode(200)
@@ -130,6 +126,6 @@ export class SocialCommentController {
 		@Param("id", ParseIntPipe) id: number,
 	): Promise<SocialCommentDestroyResponseClassDto> {
 		const tenant_id = req.locals.tenant.id;
-		return this.socialService.destroyComment(tenant_id, id);
+		return this.socialService.destroy(tenant_id, id);
 	}
 }

@@ -1,18 +1,15 @@
-import type { BlogPostSchema } from "@modules/blog-post/schemas/blog-post.schema";
 import { BlogPostService } from "@modules/blog-post/services/blog-post.service";
 import { ContactService } from "@modules/contact/services/contact.service";
-import type { MusicTrackSchema } from "@modules/music/schemas/music.schema";
-import { MusicTrackService } from "@modules/music/services/music.service";
-import type { ProjectSchema } from "@modules/project/schemas/project.schema";
+import { MusicService } from "@modules/music/services/music.service";
 import { ProjectService } from "@modules/project/services/project.service";
-import type { WorkExperienceSchema } from "@modules/work-experience/schemas/work-experience.schema";
 import { WorkExperienceService } from "@modules/work-experience/services/work-experience.service";
 import { Injectable } from "@nestjs/common";
+import type { WebBlogResponseDto, WebBlogSlugResponseDto, WebContactResponseDto, WebIndexResponseDto, WebPageResponseDto, WebProjectSlugResponseDto } from "../dtos/web.response.dto";
 
 @Injectable()
 export class WebService {
 	constructor(
-		private readonly musicService: MusicTrackService,
+		private readonly musicService: MusicService,
 		private readonly contactService: ContactService,
 		private readonly blogPostService: BlogPostService,
 		private readonly projectService: ProjectService,
@@ -23,12 +20,7 @@ export class WebService {
 	 * Fetch props for the index (home) page.
 	 * Returns portfolio data with related entities.
 	 */
-	async index(): Promise<{
-		title: string;
-		description: string;
-		musicTracks: MusicTrackSchema[];
-		experiences: WorkExperienceSchema[];
-	}> {
+	async index(): Promise<WebIndexResponseDto> {
 		const { results: musicTracks } = await this.musicService.index(1, {
 			limit: 10,
 			offset: 0,
@@ -46,26 +38,21 @@ export class WebService {
 		};
 	}
 
-	async pricing(): Promise<{ title: string; description: string }> {
+	async pricing(): Promise<WebPageResponseDto> {
 		return {
 			title: "Pricing | Pylot ",
 			description: "Simple, transparent pricing for every stage of growth.",
 		};
 	}
 
-	async about(): Promise<{ title: string; description: string }> {
+	async about(): Promise<WebPageResponseDto> {
 		return {
 			title: "About Us | Pylot ",
 			description: "Learn more about our mission and team.",
 		};
 	}
 
-	async contact(): Promise<{
-		title: string;
-		description: string;
-		email: string;
-		phone: string;
-	}> {
+	async contact(): Promise<WebContactResponseDto> {
 		// Mock data or fetch from ContactService configuration if available
 		// For now using static data as per typical contact page requirements or could fetch from a settings service
 		return {
@@ -76,7 +63,7 @@ export class WebService {
 		};
 	}
 
-	async features(): Promise<{ title: string; description: string }> {
+	async features(): Promise<WebPageResponseDto> {
 		return {
 			title: "Features | Pylot ",
 			description: "Explore the powerful features of Pylot .",
@@ -86,13 +73,7 @@ export class WebService {
 	async blog(
 		page = 1,
 		limit = 9,
-	): Promise<{
-		title: string;
-		description: string;
-		posts: BlogPostSchema[];
-		total: number;
-	}> {
-		console.log(JSON.stringify({ page, limit }));
+	): Promise<WebBlogResponseDto> {
 		const { results: posts, count: total } = await this.blogPostService.index(
 			1,
 			{
@@ -100,7 +81,6 @@ export class WebService {
 				offset: (page - 1) * limit,
 			},
 		);
-		console.log({ posts });
 
 		return {
 			title: "Blog | Pylot ",
@@ -112,7 +92,7 @@ export class WebService {
 
 	async blogSlug(
 		slug: string,
-	): Promise<{ title: string; description: string; post: BlogPostSchema }> {
+	): Promise<WebBlogSlugResponseDto> {
 		// Use specific method to find by slug confirmed in BlogPostService
 		const { post } = await this.blogPostService.showBySlug(1, slug);
 
@@ -123,11 +103,7 @@ export class WebService {
 		};
 	}
 
-	async projectSlug(slug: string): Promise<{
-		title: string;
-		description: string;
-		project: ProjectSchema;
-	}> {
+	async projectSlug(slug: string): Promise<WebProjectSlugResponseDto> {
 		const { project } = await this.projectService.showBySlug(1, slug);
 
 		return {

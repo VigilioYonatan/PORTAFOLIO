@@ -1,10 +1,5 @@
 import { AuthenticatedGuard } from "@modules/auth/guards/authenticated.guard";
-import {
-	BadRequestException,
-	type CanActivate,
-	ForbiddenException,
-	NotFoundException,
-} from "@nestjs/common";
+import { type CanActivate, ForbiddenException } from "@nestjs/common";
 import { Test, type TestingModule } from "@nestjs/testing";
 import type { Request } from "express";
 import { UserQueryClassDto } from "../../dtos/user.query.class.dto";

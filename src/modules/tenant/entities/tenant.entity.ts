@@ -4,7 +4,6 @@ import type { FilesSchema } from "@modules/uploads/schemas/upload.schema";
 import { type InferSelectModel } from "drizzle-orm";
 import {
 	boolean,
-	date,
 	jsonb,
 	pgEnum,
 	pgTable,

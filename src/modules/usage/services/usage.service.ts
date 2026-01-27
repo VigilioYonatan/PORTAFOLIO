@@ -1,4 +1,3 @@
-import { CacheService } from "@infrastructure/providers/cache/cache.service";
 import { Injectable, Logger } from "@nestjs/common";
 import { UsageCache } from "../caches/usage.cache";
 import type {
@@ -7,7 +6,6 @@ import type {
 } from "../dtos/usage.response.dto";
 import type { UsageQuotaQueryDto } from "../dtos/usage-quota.query.dto";
 import { UsageRepository } from "../repositories/usage.repository";
-import type { UsageQuotaSchema } from "../schemas/usage-quota.schema";
 
 @Injectable()
 export class UsageService {
@@ -22,13 +20,13 @@ export class UsageService {
 	 * Get current month's usage.
 	 * Creates the record if it doesn't exist (Lazy Initialization).
 	 */
-	async getCurrentUsage(tenant_id: number): Promise<UsageIndexResponseDto> {
+	async index(tenant_id: number): Promise<UsageIndexResponseDto> {
 		// 1. Try Cache
 		let usage = await this.usageCache.getCurrent(tenant_id);
 
 		if (!usage) {
 			// 2. Try DB
-			usage = await this.usageRepository.current(tenant_id);
+			usage = await this.usageRepository.showCurrent(tenant_id);
 
 			if (!usage) {
 				this.logger.log(
@@ -53,7 +51,7 @@ export class UsageService {
 		return { success: true, usage };
 	}
 
-	async getHistory(
+	async history(
 		tenant_id: number,
 		query: UsageQuotaQueryDto,
 	): Promise<UsageHistoryResponseDto> {
@@ -62,7 +60,7 @@ export class UsageService {
 
 		if (!history) {
 			// 2. Try DB
-			history = await this.usageRepository.history(tenant_id, query);
+			history = await this.usageRepository.indexHistory(tenant_id, query);
 			// 3. Set Cache (1h TTL)
 			await this.usageCache.setHistory(tenant_id, query, history);
 		}

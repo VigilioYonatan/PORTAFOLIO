@@ -53,7 +53,9 @@ export class ContactService {
 		query: ContactQueryDto,
 	): Promise<ContactIndexResponseDto> {
 		this.logger.log({ tenant_id }, "Listing contact messages");
-		return await paginator<ContactQueryDto, ContactMessageSchema>("/contact", {
+		return await paginator<ContactQueryDto, ContactMessageSchema>(
+			"/contact-message",
+			{
 			filters: query,
 			cb: async (filters, isClean) => {
 				if (isClean) {

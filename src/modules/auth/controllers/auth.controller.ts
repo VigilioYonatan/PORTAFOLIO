@@ -1,5 +1,4 @@
 import { ZodPipe } from "@infrastructure/pipes/zod.pipe";
-import type { UserAuth } from "@modules/user/schemas/user.schema";
 import {
 	Body,
 	Controller,
@@ -43,7 +42,6 @@ import {
 	authImpersonateDto,
 } from "../dtos/impersonate.dto";
 import { AuthLoginDtoClass } from "../dtos/login.class.dto";
-import { type AuthLoginDto, authLoginDto } from "../dtos/login.dto";
 import { AuthMfaDisableClassDto } from "../dtos/mfa-disable.class.dto";
 import {
 	type AuthMfaDisableDto,
@@ -68,7 +66,6 @@ import {
 	type AuthVerifyEmailDto,
 	authVerifyEmailDto,
 } from "../dtos/verify-email.dto";
-import { AuthenticatedGuard } from "../guards/authenticated.guard";
 import { GoogleAuthGuard } from "../guards/google-auth.guard";
 import { JwtAuthGuard } from "../guards/jwt-auth.guard";
 import { LocalAuthGuard } from "../guards/local-auth.guard";
@@ -86,10 +83,7 @@ export class AuthController {
 	@ApiOperation({ summary: "Login with email and password" })
 	@ApiBody({ type: AuthLoginDtoClass })
 	@ApiResponse({ status: 200, type: AuthLoginResponseClassDto })
-	async login(
-		@Req() req: Request,
-		@Body(new ZodPipe(authLoginDto)) body: AuthLoginDto,
-	): Promise<AuthLoginResponseClassDto> {
+	async login(@Req() req: Request): Promise<AuthLoginResponseClassDto> {
 		// LocalStrategy validated user and populated req.user and LocalAuthGuard synced it to req.locals.user
 		const user = req.locals.user!;
 		return this.authService.login(user);
@@ -143,7 +137,10 @@ export class AuthController {
 		description: "Datos de configuración MFA generados",
 	})
 	async setupMfa(@Req() req: Request): Promise<AuthMfaSetupResponseClassDto> {
-		return this.authService.setupMfa(req.locals.tenant?.id, req.locals.user!.id);
+		return this.authService.setupMfa(
+			req.locals.tenant?.id,
+			req.locals.user!.id,
+		);
 	}
 
 	@UseGuards(JwtAuthGuard)

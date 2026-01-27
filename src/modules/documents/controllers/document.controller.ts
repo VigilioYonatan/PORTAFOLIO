@@ -1,4 +1,6 @@
+import { ZodQueryPipe } from "@infrastructure/pipes/zod-query.pipe";
 import { ZodPipe } from "@infrastructure/pipes/zod.pipe";
+import { documentQueryDto } from "../dtos/document.query.dto";
 import { Roles } from "@modules/auth/decorators/roles.decorator";
 import { AuthenticatedGuard } from "@modules/auth/guards/authenticated.guard";
 import {
@@ -29,7 +31,6 @@ import {
 import type {
 	DocumentDestroyResponseDto,
 	DocumentIndexResponseDto,
-	DocumentProcessResponseDto,
 	DocumentShowResponseDto,
 	DocumentStoreResponseDto,
 	DocumentUpdateResponseDto,
@@ -43,7 +44,7 @@ import { DocumentService } from "../services/document.service";
 
 @ApiTags("Documentos (RAG)")
 @UseGuards(AuthenticatedGuard)
-@Controller("documents")
+@Controller("document")
 export class DocumentController {
 	constructor(private readonly documentService: DocumentService) {}
 
@@ -60,7 +61,7 @@ export class DocumentController {
 	})
 	index(
 		@Req() req: Request,
-		@Query() query: DocumentQueryClassDto,
+		@Query(new ZodQueryPipe(documentQueryDto)) query: DocumentQueryClassDto,
 	): Promise<DocumentIndexResponseDto> {
 		return this.documentService.index(req.locals.tenant.id, query);
 	}

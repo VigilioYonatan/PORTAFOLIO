@@ -2,7 +2,6 @@ import {
 	type CanActivate,
 	type ExecutionContext,
 	Injectable,
-	Logger,
 	UnauthorizedException,
 } from "@nestjs/common";
 import { Reflector } from "@nestjs/core";
@@ -10,7 +9,6 @@ import { IS_PUBLIC_KEY } from "../decorators/public.decorator";
 
 @Injectable()
 export class AuthenticatedGuard implements CanActivate {
-	private readonly logger = new Logger(AuthenticatedGuard.name);
 
 	constructor(private readonly reflector: Reflector) {}
 

@@ -126,7 +126,7 @@ export function ForgotPasswordForm({ lang = "es" }: ForgotPasswordFormProps) {
 				{/* Error Message */}
 				{forgotPasswordMutation.error ? (
 					<div
-						class="p-4 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-xs font-mono font-bold tracking-wide text-center"
+						class="p-4 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-xs font-mono tracking-wide text-center"
 						data-testid="error-message"
 					>
 						[ERROR]: {forgotPasswordMutation.error.message}

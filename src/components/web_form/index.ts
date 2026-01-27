@@ -1,16 +1,15 @@
-import type { FieldErrors } from "react-hook-form";
-import WebFormVigilio from "./WebForm";
-import WebFormArray from "./WebFormArray";
-import WebFormButtonSubmit from "./WebFormButtonSubmit";
-import FormControl from "./WebFormControl";
-import WebFormFile from "./WebFormFile";
-import WebFormSelect from "./WebFormSelect";
-import WebFormSelectInput from "./WebFormSelectInput";
+import WebFormVigilio from "./web-form";
+import WebFormArray from "./web-form.array";
+import WebFormButtonSubmit from "./web-form.button-submit";
+import FormControl from "./web-form.control";
+import WebFormFile from "./web-form.file";
+import WebFormSelect from "./web-form.select";
+import WebFormSelectInput from "./web-form.select-input";
 
 export { anidarPropiedades } from "./utils";
 
-import { FormToggle } from "../form/FormToggle";
-import WebFormArea from "./WebFormArea";
+import { FormToggle } from "../form/form.toggle";
+import WebFormArea from "./web-form.area";
 
 const WebForm = Object.assign(WebFormVigilio, {
 	control: Object.assign(FormControl, {

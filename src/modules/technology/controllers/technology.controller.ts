@@ -1,4 +1,6 @@
+import { ZodQueryPipe } from "@infrastructure/pipes/zod-query.pipe";
 import { ZodPipe } from "@infrastructure/pipes/zod.pipe";
+import { technologyQueryDto } from "../dtos/technology.query.dto";
 import { Public } from "@modules/auth/decorators/public.decorator";
 import { Roles } from "@modules/auth/decorators/roles.decorator";
 import { AuthenticatedGuard } from "@modules/auth/guards/authenticated.guard";
@@ -44,12 +46,11 @@ import {
 	type TechnologyUpdateDto,
 	technologyUpdateDto,
 } from "../dtos/technology.update.dto";
-import type { TechnologySchema } from "../schemas/technology.schema";
 import { TechnologyService } from "../services/technology.service";
 
 @ApiTags("Tecnologías")
 @UseGuards(AuthenticatedGuard, RolesGuard)
-@Controller("technologies")
+@Controller("technology")
 export class TechnologyController {
 	constructor(private readonly technologyService: TechnologyService) {}
 
@@ -62,7 +63,7 @@ export class TechnologyController {
 	})
 	index(
 		@Req() req: Request,
-		@Query() query: TechnologyQueryClassDto,
+		@Query(new ZodQueryPipe(technologyQueryDto)) query: TechnologyQueryClassDto,
 	): Promise<TechnologyIndexResponseApi> {
 		return this.technologyService.index(req.locals.tenant.id, query);
 	}

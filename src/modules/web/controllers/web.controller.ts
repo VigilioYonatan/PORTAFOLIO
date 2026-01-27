@@ -23,7 +23,7 @@ export class WebController {
 		@Req() req: Request,
 		@Res() res: Response,
 		@Next() next: NextFunction,
-	) {
+	): Promise<void> {
 		const props = await this.webService.index();
 		return await astroRender(props)(req, res, next);
 	}

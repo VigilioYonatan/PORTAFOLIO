@@ -1,16 +1,16 @@
 import { type PaginatorResult, paginator } from "@infrastructure/utils/server";
+import { type MusicTrackDestroyResponseDto, type MusicTrackShowResponseDto, type MusicTrackStoreResponseDto, type MusicTrackUpdateResponseDto } from "../dtos/music.response.dto";
 import { Injectable, Logger, NotFoundException } from "@nestjs/common";
 import { MusicTrackCache } from "../cache/music.cache";
 import type { MusicQueryDto } from "../dtos/music.query.dto";
-import type { MusicTrackIndexResponseDto } from "../dtos/music.response.dto";
 import type { MusicStoreDto } from "../dtos/music.store.dto";
 import type { MusicUpdateDto } from "../dtos/music.update.dto";
 import { MusicTrackRepository } from "../repositories/music.repository";
 import type { MusicTrackSchema } from "../schemas/music.schema";
 
 @Injectable()
-export class MusicTrackService {
-	private readonly logger = new Logger(MusicTrackService.name);
+export class MusicService {
+	private readonly logger = new Logger(MusicService.name);
 
 	constructor(
 		private readonly repository: MusicTrackRepository,
@@ -46,7 +46,7 @@ export class MusicTrackService {
 	async store(
 		tenant_id: number,
 		body: MusicStoreDto,
-	): Promise<{ success: true; music: MusicTrackSchema }> {
+	): Promise<MusicTrackStoreResponseDto> {
 		this.logger.log({ tenant_id }, "Creating music track");
 		const music = await this.repository.store(tenant_id, body);
 
@@ -58,7 +58,7 @@ export class MusicTrackService {
 	async show(
 		tenant_id: number,
 		id: number,
-	): Promise<{ success: true; music: MusicTrackSchema }> {
+	): Promise<MusicTrackShowResponseDto> {
 		this.logger.log({ tenant_id, id }, "Showing music track");
 		const music = await this.repository.showById(tenant_id, id);
 		if (!music) {
@@ -71,7 +71,7 @@ export class MusicTrackService {
 		tenant_id: number,
 		id: number,
 		body: MusicUpdateDto,
-	): Promise<{ success: true; music: MusicTrackSchema }> {
+	): Promise<MusicTrackUpdateResponseDto> {
 		this.logger.log({ tenant_id, id }, "Updating music track");
 
 		await this.show(tenant_id, id);
@@ -86,7 +86,7 @@ export class MusicTrackService {
 	async destroy(
 		tenant_id: number,
 		id: number,
-	): Promise<{ success: true; message: string }> {
+	): Promise<MusicTrackDestroyResponseDto> {
 		this.logger.log({ tenant_id, id }, "Deleting music track");
 
 		await this.show(tenant_id, id);

@@ -1,8 +1,5 @@
 import { NO_IMAGE_FOUND } from "@infrastructure/consts/hybrid";
-import type { TenantSchema } from "@modules/tenant/schemas/tenant.schema";
-import type { UserSchema } from "@modules/user/schemas/user.schema";
 import type { FilesSchema } from "../schemas/upload.schema";
-import type { OnlyFiles } from "../types";
 
 /**
  * MIMETYPES

@@ -1,6 +1,6 @@
 import { useMutation } from "@vigilio/preact-fetching";
-import type { ContactUpdateResponseDto } from "../dtos/contact.response.dto";
-import type { ContactUpdateDto } from "../dtos/contact.update.dto";
+import type { ContactUpdateResponseDto } from "../dtos/contact-message.response.dto";
+import type { ContactUpdateDto } from "../dtos/contact-message.update.dto";
 
 export interface ContactUpdateApiError {
 	success: false;
@@ -8,23 +8,24 @@ export interface ContactUpdateApiError {
 }
 
 /**
- * contactUpdate - /api/v1/contacts/:id
+ * contactUpdate - /api/v1/contact-message/:id
  * @method PATCH
  */
 export function contactUpdateApi(id: number) {
-	return useMutation<ContactUpdateResponseDto, ContactUpdateDto, ContactUpdateApiError>(
-		`/contacts/${id}`,
-		async (url, body) => {
-			const response = await fetch(`/api/v1${url}`, {
-				method: "PATCH",
-				body: JSON.stringify(body),
-				headers: { "Content-Type": "application/json" },
-			});
-			const result = await response.json();
-			if (!response.ok) {
-				throw result;
-			}
-			return result;
-		},
-	);
+	return useMutation<
+		ContactUpdateResponseDto,
+		ContactUpdateDto,
+		ContactUpdateApiError
+	>(`/contact-message/${id}`, async (url, body) => {
+		const response = await fetch(`/api/v1${url}`, {
+			method: "PATCH",
+			body: JSON.stringify(body),
+			headers: { "Content-Type": "application/json" },
+		});
+		const result = await response.json();
+		if (!response.ok) {
+			throw result;
+		}
+		return result;
+	});
 }

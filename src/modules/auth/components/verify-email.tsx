@@ -7,10 +7,6 @@ import {
 } from "lucide-preact";
 import { useEffect } from "preact/hooks";
 import { authVerifyEmailApi } from "../apis/auth.verify-email.api";
-import {
-	type AuthVerifyEmailDto,
-	authVerifyEmailDto,
-} from "../dtos/verify-email.dto";
 
 interface VerifyEmailProps {
 	token: string;

@@ -6,6 +6,7 @@ import {
 } from "@infrastructure/schemas/time_stamp.schema";
 import { UPLOAD_CONFIG } from "@modules/uploads/const/upload.const";
 import { filesSchema } from "@modules/uploads/schemas/upload.schema";
+import type { TecheableSchema } from "@modules/techeable/schemas/techeable.schema";
 
 export const projectSchema = z
 	.object({
@@ -31,16 +32,19 @@ export const projectSchema = z
 		is_featured: z.boolean(),
 		is_visible: z.boolean(),
 		status: z.enum(["live", "in_dev", "archived"]),
-		images: z.array(filesSchema(UPLOAD_CONFIG.project.images!.dimensions)).nullable(), // JSONB: Project screenshots/images
+		images: z
+			.array(filesSchema(UPLOAD_CONFIG.project.images!.dimensions))
+			.nullable(), // JSONB: Project screenshots/images
 		start_date: customDateSchema,
 		end_date: customDateSchema.nullable(),
 		seo: seoMetadataSchema.nullable(),
-		techeables: z
-			.array(z.object({ id: z.number(), technology_id: z.number() }))
-			.optional(),
 		tenant_id: z.number().int().positive(),
 		...timeStampSchema.shape,
 	})
 	.strict();
 
+
 export type ProjectSchema = z.infer<typeof projectSchema>;
+export type ProjectWithRelations = ProjectSchema & {
+	techeables: TecheableSchema[];
+};
