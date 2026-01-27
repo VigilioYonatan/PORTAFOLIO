@@ -14,15 +14,15 @@ export default function ProjectManager() {
 					</div>
 					<div>
 						<h1 class="text-3xl font-black text-white tracking-tighter uppercase italic">
-							{">"} PROJECT_NODES_v1.0
+							{">"} NODOS_PROYECTO_v1.0
 						</h1>
 						<div class="flex items-center gap-3 mt-1">
 							<span class="text-[9px] text-primary font-mono uppercase tracking-[0.4em]">
-								Portfolio_Manager
+								Gestor_Portafolio
 							</span>
 							<span class="w-1 h-1 bg-white/20 rounded-full" />
 							<span class="text-[9px] text-muted-foreground font-mono uppercase tracking-[0.4em]">
-								Github_Sync_Ready
+								Sinc_Github_Lista
 							</span>
 						</div>
 					</div>
@@ -31,14 +31,14 @@ export default function ProjectManager() {
 				<div class="flex items-center gap-2 bg-zinc-950/60 p-1.5 border border-white/10 rounded-sm backdrop-blur-md">
 					<div class="flex items-center gap-3 px-6 py-2.5 bg-primary/10 border border-primary/20 text-primary font-mono text-[10px] font-black uppercase tracking-widest rounded-sm">
 						<DatabaseIcon size={12} />
-						ACTIVE_VIEW
+						VISTA_ACTIVA
 					</div>
 				</div>
 			</div>
 
 			<div class="min-h-[600px] relative">
 				{/* Decoration */}
-				<div class="absolute -left-4 top-0 bottom-0 w-px bg-gradient-to-b from-transparent via-primary/20 to-transparent" />
+				<div class="absolute -left-4 top-0 bottom-0 w-px bg-linear-to-b from-transparent via-primary/20 to-transparent" />
 
 				<div class="animate-in fade-in slide-in-from-bottom-2 duration-500">
 					<ProjectTable />

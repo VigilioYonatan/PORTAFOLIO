@@ -18,10 +18,10 @@ export default function DashboardHeader() {
 				<div class="flex items-center gap-3 text-[10px] font-mono uppercase tracking-[0.3em] text-muted-foreground">
 					<div class="w-2 h-2 rounded-full bg-primary/20 border border-primary/40 shadow-glow animate-pulse" />
 					<span class="text-white font-black group hover:text-primary transition-colors cursor-pointer">
-						SYS_ROOT
+						RAÍZ_SIS
 					</span>
 					<span class="opacity-20">/</span>
-					<span class="text-primary/80 font-bold">RAG_PROTOCOL_INIT</span>
+					<span class="text-primary/80 font-bold">PROTOCOLO_RAG_INI</span>
 					<span class="opacity-20">/</span>
 					<span class="animate-pulse">_</span>
 				</div>
@@ -36,11 +36,11 @@ export default function DashboardHeader() {
 					<div class="flex flex-col gap-1">
 						<div class="flex items-center gap-2 text-[8px] text-primary text-glow font-black tracking-widest uppercase">
 							<Activity size={10} class="animate-pulse" />
-							<span>STATUS: ONLINE</span>
+							<span>ESTADO: EN LÍNEA</span>
 						</div>
 						<div class="flex items-center gap-2 text-[8px] text-muted-foreground font-bold tracking-widest uppercase opacity-60">
 							<WifiIcon size={10} />
-							<span>LATENCY: 12ms</span>
+							<span>LATENCIA: 12ms</span>
 						</div>
 					</div>
 
@@ -49,11 +49,11 @@ export default function DashboardHeader() {
 					<div class="flex flex-col gap-1">
 						<div class="flex items-center gap-2 text-[8px] text-white tracking-widest uppercase font-bold">
 							<Cpu size={10} />
-							<span>LOAD: 12.4%</span>
+							<span>CARGA: 12.4%</span>
 						</div>
 						<div class="flex items-center gap-2 text-[8px] text-muted-foreground font-bold tracking-widest uppercase opacity-60">
 							<ShieldCheckIcon size={10} />
-							<span>SECURE_LINK</span>
+							<span>ENLACE_SEGURO</span>
 						</div>
 					</div>
 				</div>
@@ -88,12 +88,12 @@ export default function DashboardHeader() {
 				<div class="h-8 w-px bg-white/5 mx-2" />
 
 				<div class="flex items-center gap-4 group cursor-pointer">
-					<div class="flex flex-col items-end hidden sm:flex">
+					<div class="flex-col items-end hidden sm:flex">
 						<span class="text-[10px] font-black tracking-[0.2em] uppercase text-white group-hover:text-primary transition-colors">
-							DEV_ADMIN
+							ADMIN_DEV
 						</span>
 						<span class="text-[8px] text-primary/60 font-bold tracking-widest uppercase">
-							SYS.ONLINE
+							SIS.EN_LÍNEA
 						</span>
 					</div>
 					<div class="w-10 h-10 rounded-sm border border-primary/30 bg-primary/10 flex items-center justify-center overflow-hidden relative group-hover:border-primary transition-colors">

@@ -1,0 +1,58 @@
+---
+import WebLayout from "./_components/layouts/web-layout/index.astro";
+import ContactForm from "./_components/contact.form";
+import { getLangFromUrl, useTranslations } from "../../i18n";
+import SystemIntro from "./_components/system.intro";
+import { Mail, Phone, MapPin } from "lucide-preact";
+import TechOrbit from "./_components/tech.orbit";
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+---
+
+<WebLayout title={t("metadata.contact.title")}>
+    <SystemIntro lang={lang} client:load />
+    <main class="relative flex flex-col items-center min-h-[90vh] justify-center py-20 overflow-hidden">
+        
+        {/* Background Tech Orbit */}
+        <div class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-20">
+            <TechOrbit client:load />
+        </div>
+
+        <div class="container mx-auto px-4 z-10 flex flex-col lg:flex-row items-center justify-center gap-12 lg:gap-20">
+            {/* Left: Contact Info */}
+            <div class="flex flex-col gap-8 max-w-md animate-in fade-in slide-in-from-left-8 duration-700">
+                <div>
+                     <div class="p-1 px-3 bg-primary/10 border border-primary/20 inline-block rounded-sm mb-4">
+                        <span class="text-[9px] font-bold text-primary tracking-[0.3em] uppercase">
+                            {t("contact.channel")}
+                        </span>
+                    </div>
+                    <h1 class="text-4xl md:text-5xl font-black text-white mb-4">
+                        {t("contact.title")}
+                    </h1>
+                    <p class="text-muted-foreground font-mono">
+                        {t("contact.subtitle")}
+                    </p>
+                </div>
+
+                <div class="space-y-6 font-mono text-sm">
+                    <div class="flex items-center gap-4 text-muted-foreground hover:text-primary transition-colors cursor-default group">
+                        <div class="w-10 h-10 rounded bg-secondary flex items-center justify-center border border-white/5 group-hover:border-primary/50 transition-colors">
+                            <Mail class="w-5 h-5" />
+                        </div>
+                        <div class="flex flex-col">
+                            <span class="text-xs opacity-50 uppercase tracking-wider">{t("contact.email_label")}</span>
+                            <span class="text-white">contact@vigilio.dev</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Right: Form */}
+            <div class="w-full max-w-[600px] animate-in fade-in slide-in-from-right-8 duration-700 delay-200">
+                <ContactForm lang={lang} client:load />
+            </div>
+        </div>
+    </main>
+</WebLayout>

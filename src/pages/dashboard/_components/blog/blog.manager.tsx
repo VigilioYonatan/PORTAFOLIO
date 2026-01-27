@@ -15,15 +15,15 @@ export default function BlogManager() {
 					</div>
 					<div>
 						<h1 class="text-3xl font-black text-white tracking-tighter uppercase italic">
-							{">"} BLOG_ARTICLES_v2.0
+							{">"} ARTÍCULOS_BLOG
 						</h1>
 						<div class="flex items-center gap-3 mt-1">
 							<span class="text-[9px] text-primary font-mono uppercase tracking-[0.4em]">
-								Content_Engine
+								Motor_Contenido
 							</span>
 							<span class="w-1 h-1 bg-white/20 rounded-full" />
 							<span class="text-[9px] text-muted-foreground font-mono uppercase tracking-[0.4em]">
-								SEO_Optimized
+								Optimizado_SEO
 							</span>
 						</div>
 					</div>
@@ -32,7 +32,7 @@ export default function BlogManager() {
 				<div class="flex items-center gap-2 bg-zinc-950/60 p-1.5 border border-white/10 rounded-sm backdrop-blur-md">
 					<div class="flex items-center gap-3 px-6 py-2.5 bg-primary/10 border border-primary/20 text-primary font-mono text-[10px] font-black uppercase tracking-widest rounded-sm">
 						<FileCodeIcon size={12} />
-						ACTIVE_VIEW
+						VISTA_ACTIVA
 					</div>
 				</div>
 			</div>
@@ -45,7 +45,7 @@ export default function BlogManager() {
 					<div class="lg:col-span-3">
 						<div class="sticky top-24 bg-zinc-950/40 border border-white/5 p-4 rounded-sm backdrop-blur-md">
 							<div class="mb-4 px-2 flex justify-between items-center text-[9px] font-black tracking-[0.2em] text-zinc-500 uppercase">
-								<span>Filter_Tags</span>
+								<span>Filtrar_Etiquetas</span>
 								<List size={10} />
 							</div>
 							<CategoryManager />

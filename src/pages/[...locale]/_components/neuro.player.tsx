@@ -13,6 +13,8 @@ import {
 	ListMusicIcon,
 	PauseIcon,
 	PlayIcon,
+	RepeatIcon,
+	Repeat1Icon,
 	StepBackIcon,
 	StepForwardIcon,
 	Volume2Icon,
@@ -36,8 +38,9 @@ export default function NeuroPlayer() {
 		favorites,
 		bassIntensity,
 		midIntensity,
+		repeatMode,
 	} = audioStore.state;
-	const { togglePlay, nextTrack, prevTrack, setVolume, toggleFavorite } =
+	const { togglePlay, nextTrack, prevTrack, setVolume, toggleFavorite, toggleRepeat } =
 		audioStore.methods;
 
 	const isOpenPlaylist = useSignal(false);
@@ -119,7 +122,7 @@ export default function NeuroPlayer() {
 			</div>
 
 			{/* TOP SECTION: IMAGE & VISUALIZER */}
-			<div class="relative w-full aspect-video md:aspect-[4/3] rounded-xl overflow-hidden bg-zinc-900 border border-white/5 group font-sans">
+			<div class="relative w-full aspect-video md:aspect-4/3 rounded-xl overflow-hidden bg-zinc-900 border border-white/5 group font-sans">
 				{/* 1. Dynamic Background Layer */}
 				<div class="absolute inset-0 w-full h-full flex items-center justify-center overflow-hidden">
 					<div
@@ -138,7 +141,7 @@ export default function NeuroPlayer() {
 				<div class="absolute inset-0 z-20 flex flex-col justify-end p-3 pb-4">
 					{/* Visualizer - Very compact */}
 					<div class="w-full flex justify-center mb-1">
-						<div class="w-3/4 h-8 opacity-80">
+						<div class="w-full h-8 opacity-80">
 							<MonstercatVisualizer />
 						</div>
 					</div>
@@ -283,6 +286,24 @@ export default function NeuroPlayer() {
 								aria-label="Next Track"
 							>
 								<StepForwardIcon size={16} />
+							</button>
+							<button
+								type="button"
+								onClick={toggleRepeat}
+								class={cn(
+									"transition-all hover:scale-110",
+									repeatMode.value !== "off"
+										? "text-primary"
+										: "text-white/40 hover:text-white",
+								)}
+								aria-label="Toggle Repeat"
+								title={`Repeat: ${repeatMode.value}`}
+							>
+								{repeatMode.value === "one" ? (
+									<Repeat1Icon size={16} />
+								) : (
+									<RepeatIcon size={16} />
+								)}
 							</button>
 						</div>
 

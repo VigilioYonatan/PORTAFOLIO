@@ -64,19 +64,19 @@ export default function ProjectUpdate({
 
 	function onProjectUpdate(body: ProjectUpdateDto) {
 		sweetModal({
-			title: "CONFIRM_UPDATE?",
-			text: `Synchronize changes for "${project.title}"?`,
+			title: "¿CONFIRMAR ACTUALIZACIÓN?",
+			text: `¿Guardar cambios para "${project.title}"?`,
 			icon: "warning",
 			showCancelButton: true,
-			confirmButtonText: "SYNC",
+			confirmButtonText: "GUARDAR",
 		}).then(({ isConfirmed }) => {
 			if (isConfirmed) {
 				projectUpdateMutation.mutate(body, {
 					onSuccess(data) {
 						sweetModal({
 							icon: "success",
-							title: "SYSTEM_UPDATED",
-							text: "Project records synchronized.",
+							title: "PROYECTO ACTUALIZADO",
+							text: "Cambios guardados correctamente.",
 						});
 						refetch({
 							...project,
@@ -86,7 +86,7 @@ export default function ProjectUpdate({
 						onClose();
 					},
 					onError(error) {
-						handlerError(projectUpdateForm, error, "Sync Error");
+						handlerError(projectUpdateForm, error, "Error de actualización");
 					},
 				});
 			}
@@ -108,24 +108,24 @@ export default function ProjectUpdate({
 		<div class="p-1">
 			<div class="flex flex-col gap-1 border-b border-white/5 pb-6 mb-6">
 				<span class="text-[9px] font-black tracking-[0.5em] text-primary uppercase animate-pulse">
-					EDIT_RECORD_MODE_ACTIVE
+					EDITANDO PROYECTO
 				</span>
 				<h2 class="text-2xl font-black tracking-tight text-foreground uppercase flex items-center gap-3">
 					<Smartphone size={24} class="text-primary" />
-					Update project node
+					Actualizar Proyecto
 				</h2>
 			</div>
 			<Form {...projectUpdateForm} onSubmit={onProjectUpdate}>
 				<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 					<Form.control<ProjectUpdateDto>
 						name="title"
-						title="PROJECT_TITLE"
+						title="TÍTULO PROYECTO"
 						ico={<Type size={18} />}
-						placeholder="E.g. Neural Link Interface"
+						placeholder="Ej: Neural Link Interface"
 					/>
 					<Form.control<ProjectUpdateDto>
 						name="slug"
-						title="SYSTEM_SLUG"
+						title="SLUG SISTEMA"
 						ico={<LinkIcon size={18} />}
 						placeholder="neural-link-interface"
 					/>
@@ -133,35 +133,35 @@ export default function ProjectUpdate({
 
 				<Form.control.area<ProjectUpdateDto>
 					name="description"
-					title="SUMMARY_LOG"
-					placeholder="High-level technical summary..."
+					title="DESCRIPCIÓN CORTA"
+					placeholder="Resumen técnico de alto nivel..."
 					rows={2}
 				/>
 
 				<Form.control.area<ProjectUpdateDto>
 					name="impact_summary"
-					title="IMPACT_SUMMARY"
-					placeholder="Senior results and impact metrics..."
+					title="RESUMEN DE IMPACTO"
+					placeholder="Resultados senior y métricas de impacto..."
 					rows={2}
 				/>
 
 				<div class="space-y-1">
 					<FormMKDEditor<ProjectUpdateDto>
 						name="content"
-						title="CORE_DOCUMENTATION (MDX)"
+						title="DOCUMENTACIÓN PRINCIPAL (MDX)"
 					/>
 				</div>
 
 				<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 					<Form.control<ProjectUpdateDto>
 						name="repo_url"
-						title="SOURCE_UPLINK (GitHub)"
+						title="REPOSITORIO (GitHub)"
 						ico={<LinkIcon size={18} />}
 						placeholder="https://github.com/..."
 					/>
 					<Form.control<ProjectUpdateDto>
 						name="website_url"
-						title="LIVE_DEPLOYMENT"
+						title="SITIO WEB (Deploy)"
 						ico={<LinkIcon size={18} />}
 						placeholder="https://..."
 					/>
@@ -170,13 +170,13 @@ export default function ProjectUpdate({
 				<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 					<Form.control<ProjectUpdateDto>
 						name="start_date"
-						title="INIT_DATE"
+						title="FECHA INICIO"
 						type="date"
 						ico={<Calendar size={18} />}
 					/>
 					<Form.control<ProjectUpdateDto>
 						name="end_date"
-						title="COMPLETION_DATE"
+						title="FECHA FIN"
 						type="date"
 						ico={<Calendar size={18} />}
 					/>
@@ -184,28 +184,28 @@ export default function ProjectUpdate({
 
 				<Form.control.select<ProjectUpdateDto>
 					name="status"
-					title="UPLINK_STATUS"
+					title="ESTADO"
 					ico={<Info size={18} />}
 					array={PROJECT_STATUS_OPTIONS}
-					placeholder="Select status..."
+					placeholder="Seleccionar estado..."
 				/>
 
 				<div class="flex flex-wrap gap-6 py-2">
 					<div class="flex items-center gap-8 bg-zinc-900/50 p-4 rounded-xl border border-white/5">
 						<Form.control.toggle<ProjectUpdateDto>
 							name="is_visible"
-							title="PUBLIC_VISIBILITY"
+							title="VISIBILIDAD PÚBLICA"
 						/>
 						<Form.control.toggle<ProjectUpdateDto>
 							name="is_featured"
-							title="FEATURE_ON_HERO"
+							title="DESTACAR EN HERO"
 						/>
 					</div>
 				</div>
 
 				<Form.control<ProjectUpdateDto>
 					name="sort_order"
-					title="SORT_ORDER"
+					title="ORDEN DE PRIORIDAD"
 					type="number"
 					placeholder="0"
 					ico={<Info size={18} />}
@@ -214,12 +214,12 @@ export default function ProjectUpdate({
 
 				<div class="space-y-4 pt-4 border-t border-white/5">
 					<h3 class="text-sm font-semibold text-muted-foreground uppercase tracking-widest flex items-center gap-2">
-						<Layers size={14} class="text-primary" /> Stack Module
+						<Layers size={14} class="text-primary" /> Stack Tecnológico
 					</h3>
 					<Form.control.multiSelect<ProjectUpdateDto>
 						name="techeables"
-						title="TECHNOLOGY_STACK"
-						placeholder="Add technologies..."
+						title="TECNOLOGÍAS"
+						placeholder="Añadir tecnologías..."
 						ico={<Search size={18} />}
 						array={
 							technologiesQuery.data?.results.map((t) => ({
@@ -233,26 +233,26 @@ export default function ProjectUpdate({
 
 				<div class="space-y-4 pt-4 border-t border-white/5">
 					<h3 class="text-sm font-semibold text-muted-foreground uppercase tracking-widest flex items-center gap-2">
-						<Info size={14} class="text-primary" /> Meta Optimization (SEO)
+						<Info size={14} class="text-primary" /> Optimización Meta (SEO)
 					</h3>
 					<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 						<Form.control<ProjectUpdateDto>
 							name="seo.title"
-							title="SEO_TITLE"
-							placeholder="Project title for search engines"
+							title="TÍTULO SEO"
+							placeholder="Título del proyecto para buscadores"
 						/>
 						<Form.control.area<ProjectUpdateDto>
 							name="seo.description"
-							title="SEO_DESCRIPTION"
-							placeholder="Meta description (150-160 chars recommended)"
+							title="DESCRIPCIÓN SEO"
+							placeholder="Meta descripción (150-160 caracteres recomendado)"
 							rows={2}
 						/>
 					</div>
 				</div>
 
 				<Form.button.submit
-					title="SYNC_CHANGES"
-					loading_title="SYNCING..."
+					title="GUARDAR CAMBIOS"
+					loading_title="GUARDANDO..."
 					isLoading={projectUpdateMutation.isLoading || false}
 					disabled={projectUpdateMutation.isLoading || false}
 				/>

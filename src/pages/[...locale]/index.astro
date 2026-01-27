@@ -9,13 +9,18 @@ import type { WorkExperienceSchema } from "@modules/work-experience/schemas/work
 import SectionTitle from "@components/extras/section-title.astro";
 import SystemIntro from "./_components/system.intro";
 import Button from "@components/extras/Button";
+import { getLangFromUrl, useTranslations } from "../../i18n";
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+
 const { experiences } = Astro.locals.props as {
   experiences: WorkExperienceSchema[];
 };
 ---
 
 <WebLayout>
-  <SystemIntro client:load />
+  <SystemIntro lang={lang} client:load />
   <main class="relative flex flex-col items-center">
     {/* Hero Section with Tech Orbit Background */}
     <section
@@ -31,7 +36,7 @@ const { experiences } = Astro.locals.props as {
       <div
         class="container mx-auto px-4 z-10 flex flex-col items-center gap-12"
       >
-        <HeroTerminal client:load />
+        <HeroTerminal lang={lang} client:load />
 
         <div
           class="flex flex-wrap gap-6 justify-center animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-500"
@@ -41,7 +46,7 @@ const { experiences } = Astro.locals.props as {
             size="lg"
             className="gap-3 group shadow-glow px-10"
           >
-            <span class="tracking-[0.2em] font-bold">PROJECT_EXPLORER</span>
+            <span class="tracking-[0.2em] font-bold">{t("home.explorer")}</span>
             <ArrowRight
               {...sizeIcon.small}
               className="group-hover:translate-x-1 transition-transform"
@@ -53,7 +58,7 @@ const { experiences } = Astro.locals.props as {
             className="gap-3 px-10 border-white/20 hover:bg-white/5"
           >
             <Download {...sizeIcon.small} />
-            <span class="tracking-[0.2em]">DOWNLOAD_CV.pdf</span>
+            <span class="tracking-[0.2em]">{t("home.cv")}</span>
           </Button>
         </div>
       </div>
@@ -64,7 +69,7 @@ const { experiences } = Astro.locals.props as {
       class="w-full relative z-10 py-32 border-t border-white/5 bg-zinc-950/20"
     >
       <div class="container mx-auto px-4">
-        <SectionTitle title="EXPERIENCE_TRACE" />
+        <SectionTitle title={t("home.experience")} />
         <WaveTimeline experiences={experiences} client:load />
       </div>
     </section>

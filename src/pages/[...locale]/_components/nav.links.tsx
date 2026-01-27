@@ -8,6 +8,7 @@ import {
 	MailIcon,
 	RssIcon,
 } from "lucide-preact";
+import { ui, defaultLang } from "../../../i18n/ui";
 
 interface NavLinksProps {
 	lang: string;
@@ -16,12 +17,15 @@ interface NavLinksProps {
 }
 
 export default function NavLinks({ lang, vertical, className }: NavLinksProps) {
+    const currentLang = (lang in ui ? lang : defaultLang) as keyof typeof ui;
+    const t = (key: keyof typeof ui[typeof defaultLang]) => ui[currentLang][key];
+
 	const links: { href: string; label: string; icon: LucideIcon }[] = [
-		{ href: `/${lang}`, label: "HOME", icon: HomeIcon },
-		{ href: `/${lang}/projects`, label: "PROJECTS", icon: GridIcon },
-		{ href: `/${lang}/blog`, label: "BLOG_LOG", icon: RssIcon },
-		{ href: `/${lang}/experience`, label: "EXP_TREE", icon: DatabaseIcon },
-		{ href: `/${lang}/contact`, label: "CONTACT", icon: MailIcon },
+		{ href: `/${lang}`, label: t("header.home"), icon: HomeIcon },
+		{ href: `/${lang}/projects`, label: t("header.projects"), icon: GridIcon },
+		{ href: `/${lang}/blog`, label: t("header.blog"), icon: RssIcon },
+		{ href: `/${lang}/experience`, label: t("header.briefcase"), icon: DatabaseIcon },
+		{ href: `/${lang}/contact`, label: t("header.contact"), icon: MailIcon },
 	];
 
 	return (

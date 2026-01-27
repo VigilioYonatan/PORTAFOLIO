@@ -1,11 +1,17 @@
 import { useEntranceAnimation } from "@hooks/use-motion";
 import { audioStore } from "@stores/audio.store";
 import { useEffect, useRef } from "preact/hooks";
+import { type Lang, useTranslations } from "@src/i18n";
 
-export default function HeroTerminal() {
+interface HeroTerminalProps {
+    lang?: Lang;
+}
+
+export default function HeroTerminal({ lang = "es" }: HeroTerminalProps) {
 	const containerRef = useEntranceAnimation(0.2);
 	const { bassIntensity, beatDetected } = audioStore.state;
 	const glowRef = useRef<HTMLDivElement>(null);
+    const t = useTranslations(lang);
 
 	// Removed internal boot logic as it is now handled by Global SystemIntro
 
@@ -72,11 +78,11 @@ export default function HeroTerminal() {
 								<div class="space-y-2 flex-1">
 									<div class="p-1 px-3 bg-primary/10 border border-primary/20 inline-block rounded-sm">
 										<span class="text-[9px] font-bold text-primary tracking-[0.3em] uppercase">
-											MULTI_PLATFORM : ONLINE
+											{t("home.hero.badge")}
 										</span>
 									</div>
 									<h1 class="text-6xl md:text-8xl font-black tracking-tighter text-white leading-none">
-										SOFTWARE
+										{t("home.hero.software")}
 										<br />
 										<span
 											class="text-primary text-glow transition-all duration-75"
@@ -84,7 +90,7 @@ export default function HeroTerminal() {
 												textShadow: `0 0 ${20 + bassIntensity.value * 40}px rgba(6,182,212,0.6)`,
 											}}
 										>
-											ENGINEER_AI
+											{t("home.hero.engineer")}
 										</span>
 									</h1>
 								</div>
@@ -93,14 +99,15 @@ export default function HeroTerminal() {
 							<div class="space-y-2 font-mono text-xs md:text-sm text-muted-foreground mt-6">
 								<p class="flex items-center gap-2">
 									<span class="text-primary">&gt;</span>
-									Architecting intelligent{" "}
-									<span class="text-foreground">AI & Automatization</span>{" "}
-									solutions...
+									{t("home.hero.desc1")}{" "}
+									<span class="text-foreground">{t("home.hero.desc1_highlight")}</span>{" "}
+									{t("home.hero.desc1_end")}
 								</p>
 								<p class="flex items-center gap-2">
 									<span class="text-primary">&gt;</span>
-									Crafting immersive{" "}
-									<span class="text-foreground">Web & Mobile</span> experiences.
+									{t("home.hero.desc2")}{" "}
+									<span class="text-foreground">{t("home.hero.desc2_highlight")}</span>
+                                    {t("home.hero.desc2_end")}
 								</p>
 								<p class="opacity-40 text-[10px] mt-4">
 									## Stack: Python, PyTorch, React, NestJS, Docker, AWS.
@@ -115,7 +122,7 @@ export default function HeroTerminal() {
 									class="px-8 py-3 bg-primary text-primary-foreground font-bold text-[11px] tracking-widest uppercase hover:bg-primary/90 transition-all shadow-(0_0_20px_rgba(6,182,212,0.3)) active:scale-95 flex items-center gap-3 group"
 								>
 									<div class="w-3 h-3 border-2 border-primary-foreground rounded-full border-t-transparent animate-spin-slow group-hover:animate-spin" />
-									EXECUTE_PROTOCOL
+									{t("home.hero.execute")}
 								</button>
 								<button
 									type="button"
@@ -123,7 +130,7 @@ export default function HeroTerminal() {
 									class="px-8 py-3 bg-transparent border border-white/20 text-white font-bold text-[11px] tracking-widest uppercase hover:bg-white/5 transition-all active:scale-95 flex items-center gap-3"
 								>
 									<span class="text-white/40">&lt; &gt;</span>
-									SOURCE
+									{t("home.hero.source")}
 								</button>
 							</div>
 						</div>

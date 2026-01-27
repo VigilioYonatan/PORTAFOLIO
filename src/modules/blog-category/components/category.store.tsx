@@ -45,14 +45,14 @@ export default function CategoryStore({
 		storeMut.mutate(body, {
 			onSuccess({ category }) {
 				sweetModal({
-					title: "Category Created",
+					title: "Categoría Creada",
 					icon: "success",
 				});
 				refetch(category);
 				onClose();
 			},
 			onError(err) {
-				handlerError(form, err, "Action Failed");
+				handlerError(form, err, "Error al crear");
 			},
 		});
 	};
@@ -61,28 +61,28 @@ export default function CategoryStore({
 
 	return (
 		<div className="space-y-4">
-			<h2 className="text-xl font-bold mb-4 text-white">New Category</h2>
+			<h2 className="text-xl font-bold mb-4 text-white">Nueva Categoría</h2>
 			<WebForm {...form} onSubmit={onSubmit}>
 				<WebForm.control
 					name="name"
-					title="Category Name"
+					title="Nombre"
 					placeholder="DevOps"
 					ico={<Tag size={16} />}
 				/>
 				<WebForm.control
 					name="slug"
-					title="Category Slug"
+					title="Slug"
 					placeholder="devops"
 					ico={<Tag size={16} />}
 				/>
 				<WebForm.control.area
 					name="description"
-					title="Description"
-					placeholder="Articles related to infrastructure..."
+					title="Descripción"
+					placeholder="Artículos relacionados con infraestructura..."
 				/>
 				<WebForm.button.submit
-					title="Create"
-					loading_title="Creating..."
+					title="Crear"
+					loading_title="Creando..."
 					isLoading={storeMut.isLoading || false}
 					disabled={storeMut.isLoading || false}
 					className="w-full mt-4 bg-primary text-primary-foreground font-bold py-3 rounded-lg"

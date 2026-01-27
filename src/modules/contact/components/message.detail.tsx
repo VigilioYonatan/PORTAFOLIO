@@ -37,17 +37,17 @@ export default function MessageDetail({
 		<div class="space-y-6 py-2">
 			<div class="flex flex-col gap-1 border-b border-white/5 pb-4 mb-4">
 				<span class="text-[9px] font-black tracking-[0.5em] text-primary uppercase">
-					TRANSMISSION_DETAILS
+					DETALLES DE TRANSMISIÓN
 				</span>
 				<h2 class="text-xl font-black tracking-tight text-foreground uppercase">
-					View Message
+					Ver Mensaje
 				</h2>
 			</div>
 			<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 				<div class="bg-zinc-900/40 p-4 rounded-xl border border-white/5 space-y-4">
 					<div class="flex flex-col gap-1">
 						<span class="text-[9px] font-black text-muted-foreground/40 uppercase tracking-widest flex items-center gap-2">
-							<User size={10} /> Sender_Identity
+							<User size={10} /> Remitente
 						</span>
 						<span class="text-sm font-bold text-foreground">
 							{message.name}
@@ -56,7 +56,7 @@ export default function MessageDetail({
 
 					<div class="flex flex-col gap-1">
 						<span class="text-[9px] font-black text-muted-foreground/40 uppercase tracking-widest flex items-center gap-2">
-							<Mail size={10} /> Link_Address
+							<Mail size={10} /> Correo Electrónico
 						</span>
 						<a
 							href={`mailto:${message.email}`}
@@ -69,7 +69,7 @@ export default function MessageDetail({
 					{message.phone_number && (
 						<div class="flex flex-col gap-1">
 							<span class="text-[9px] font-black text-muted-foreground/40 uppercase tracking-widest flex items-center gap-2">
-								<Phone size={10} /> Vocal_Comlink
+								<Phone size={10} /> Teléfono
 							</span>
 							<span class="text-sm font-medium text-foreground">
 								{message.phone_number}
@@ -81,7 +81,7 @@ export default function MessageDetail({
 				<div class="bg-zinc-900/40 p-4 rounded-xl border border-white/5 space-y-4">
 					<div class="flex flex-col gap-1">
 						<span class="text-[9px] font-black text-muted-foreground/40 uppercase tracking-widest flex items-center gap-2">
-							<Calendar size={10} /> Signal_Timestamp
+							<Calendar size={10} /> Fecha y Hora
 						</span>
 						<span class="text-sm font-medium text-foreground">
 							{formatDateTz(message.created_at)}
@@ -90,7 +90,7 @@ export default function MessageDetail({
 
 					<div class="flex flex-col gap-1">
 						<span class="text-[9px] font-black text-muted-foreground/40 uppercase tracking-widest flex items-center gap-2">
-							<Info size={10} /> Source_IP
+							<Info size={10} /> Dirección IP
 						</span>
 						<span class="text-sm font-mono text-muted-foreground">
 							{message.ip_address || "ENCRYPTED"}
@@ -99,10 +99,10 @@ export default function MessageDetail({
 
 					<div class="flex flex-col gap-1">
 						<span class="text-[9px] font-black text-muted-foreground/40 uppercase tracking-widest flex items-center gap-2">
-							<MessageSquare size={10} /> Communication_Header
+							<MessageSquare size={10} /> Asunto
 						</span>
 						<span class="text-sm font-bold text-foreground">
-							{message.subject || "NO_HEADER"}
+							{message.subject || "SIN ASUNTO"}
 						</span>
 					</div>
 				</div>
@@ -114,7 +114,7 @@ export default function MessageDetail({
 				</div>
 				<div class="relative z-10">
 					<span class="text-[9px] font-black text-primary uppercase tracking-widest block mb-4">
-						ENCRYPTED_MESSAGE_BODY
+						MENSAJE
 					</span>
 					<div class="text-sm text-foreground leading-relaxed whitespace-pre-wrap font-medium">
 						{message.message}
@@ -124,7 +124,7 @@ export default function MessageDetail({
 
 			{updateMutation.isLoading && (
 				<div class="flex items-center gap-2 text-[10px] font-mono text-primary animate-pulse uppercase">
-					Logging_Read_Access...
+					Marcando como leído...
 				</div>
 			)}
 		</div>

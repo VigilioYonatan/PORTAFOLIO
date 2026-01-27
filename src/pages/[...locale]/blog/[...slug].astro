@@ -1,6 +1,11 @@
 ---
 import WebLayout from "../_components/layouts/web-layout/index.astro";
 import BlogReader from "@modules/blog/components/blog-reader";
+import { getLangFromUrl, useTranslations } from "../../../i18n";
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+
 
 const { slug } = Astro.params;
 // In real app, fetch content based on slug
@@ -22,7 +27,7 @@ const content = `
       href="/en/blog"
       class="text-[10px] font-mono text-muted-foreground hover:text-primary mb-12 flex items-center gap-2 group transition-all"
     >
-      <span class="group-hover:-translate-x-1 transition-transform inline-block">&lt;</span> BACK_TO_ARCHIVES
+      <span class="group-hover:-translate-x-1 transition-transform inline-block">&lt;</span> {t("slug.back_to_archives")}
     </a>
 
     <BlogReader
@@ -34,6 +39,7 @@ const content = `
       readingTime="5 MIN"
       likes={128}
       comments={12}
+      lang={lang}
     />
   </div>
 </WebLayout>

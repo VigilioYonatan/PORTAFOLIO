@@ -24,7 +24,7 @@ export default function MessageList() {
 		columns: [
 			{
 				key: "is_read",
-				header: "Status",
+				header: "Estado",
 				cell: (item) => (
 					<div class="flex items-center justify-center">
 						{item.is_read ? (
@@ -40,7 +40,7 @@ export default function MessageList() {
 			},
 			{
 				key: "name",
-				header: "Sender",
+				header: "Remitente",
 				cell: (item) => (
 					<div class="flex flex-col">
 						<span class="text-xs font-bold text-foreground">{item.name}</span>
@@ -52,16 +52,16 @@ export default function MessageList() {
 			},
 			{
 				key: "subject",
-				header: "Subject",
+				header: "Asunto",
 				cell: (item) => (
 					<span class="text-xs text-muted-foreground line-clamp-1 max-w-[200px]">
-						{item.subject || "(No Subject)"}
+						{item.subject || "(Sin Asunto)"}
 					</span>
 				),
 			},
 			{
 				key: "created_at",
-				header: "Received",
+				header: "Recibido",
 				cell: (item) => (
 					<span class="text-[10px] text-muted-foreground/60 font-mono">
 						{formatDateTz(item.created_at)}
@@ -70,7 +70,7 @@ export default function MessageList() {
 			},
 			{
 				key: "action",
-				header: "Action",
+				header: "Acción",
 				cell: (item) => (
 					<div class="flex items-center gap-2">
 						<button
@@ -107,11 +107,11 @@ export default function MessageList() {
 				<div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
 					<div class="flex flex-col">
 						<span class="text-[9px] font-black tracking-[0.3em] text-primary/40 uppercase">
-							Communication_Logs
+							Registros_Comunicación
 						</span>
 						<h3 class="text-xl font-black tracking-tight uppercase flex items-center gap-3">
 							<MessageSquare size={20} class="text-primary" />
-							Incoming Messages
+							Mensajes Recibidos
 						</h3>
 					</div>
 					<div class="relative group w-full lg:w-96">
@@ -121,7 +121,7 @@ export default function MessageList() {
 						/>
 						<input
 							type="text"
-							placeholder="FILTER_NEURAL_RECORDS..."
+							placeholder="FILTRAR MENSAJES..."
 							class="bg-black/60 border border-white/10 text-[10px] font-mono tracking-widest rounded-xl pl-10 pr-4 py-3 w-full focus:outline-none focus:ring-1 focus:ring-primary/40 focus:border-primary/30 transition-all placeholder:text-muted-foreground/20"
 							value={table.search.value}
 							onInput={(e) =>
@@ -139,7 +139,7 @@ export default function MessageList() {
 					</VigilioTable.thead.row>
 				</VigilioTable.thead>
 				<VigilioTable.tbody>
-					<VigilioTable.tbody.row title="No records in buffer">
+					<VigilioTable.tbody.row title="No hay mensajes">
 						{(data) => <VigilioTable.tbody.td data={data} />}
 					</VigilioTable.tbody.row>
 				</VigilioTable.tbody>

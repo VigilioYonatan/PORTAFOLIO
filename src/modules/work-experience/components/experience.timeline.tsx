@@ -58,7 +58,7 @@ export default function ExperienceTimeline() {
 			<div class="flex flex-col items-center justify-center p-20 gap-4">
 				<Loader />
 				<span class="text-[10px] font-black tracking-[0.3em] text-primary/40">
-					FETCHING_TIMELINE_NODES...
+					CARGANDO EXPERIENCIA...
 				</span>
 			</div>
 		);
@@ -68,11 +68,11 @@ export default function ExperienceTimeline() {
 		return (
 			<div class="p-10 border border-destructive/20 bg-destructive/5 text-destructive rounded-xl text-center font-mono">
 				<p class="text-sm font-bold uppercase tracking-widest">
-					ERROR_LOADING_DATA_NODES
+					ERROR AL CARGAR DATOS
 				</p>
 				<p class="text-[10px] mt-2 opacity-60">
 					{(indexQuery.error)?.message ||
-						"Unknown communication failure."}
+						"Error de comunicación desconocido."}
 				</p>
 			</div>
 		);
@@ -85,10 +85,10 @@ export default function ExperienceTimeline() {
 			<div class="flex justify-between items-center bg-zinc-900/40 p-4 border border-white/5 rounded-xl backdrop-blur-md">
 				<div class="flex flex-col">
 					<span class="text-[9px] font-black tracking-[0.3em] text-muted-foreground/40 uppercase">
-						Career_Sequence
+						Secuencia_Carrera
 					</span>
 					<h3 class="text-lg font-black tracking-tight uppercase">
-						Work Experience
+						Experiencia Laboral
 					</h3>
 				</div>
 				<button
@@ -96,11 +96,11 @@ export default function ExperienceTimeline() {
 					onClick={() => {
 						isStoreModalOpen.value = true;
 					}}
-					aria-label="Add new work experience"
+					aria-label="Añadir nueva experiencia laboral"
 					class="flex items-center gap-2 bg-primary dark:text-primary-foreground px-4 py-2 text-xs font-black uppercase tracking-widest rounded-lg hover:brightness-110 transition-all shadow-(0_0_20px_rgba(6,182,212,0.3))"
 				>
 					<Plus size={14} strokeWidth={3} />
-					Inject Node
+					Agregar
 				</button>
 			</div>
 
@@ -108,7 +108,7 @@ export default function ExperienceTimeline() {
 				{experiences.length === 0 ? (
 					<div class="p-10 text-center border border-dashed border-white/10 rounded-xl">
 						<p class="text-[10px] font-bold text-muted-foreground/40 uppercase tracking-[0.3em]">
-							EMPTY_SEQUENCE: NO_WORK_EXPERIENCE_FOUND
+							SECUENCIA VACÍA: NO HAY EXPERIENCIA LABORAL
 						</p>
 					</div>
 				) : (
@@ -138,7 +138,7 @@ export default function ExperienceTimeline() {
 											</h4>
 											{exp.is_current && (
 												<Badge variant="matrix" className="text-[9px] h-4">
-													CURRENT
+													ACTUAL
 												</Badge>
 											)}
 										</div>
@@ -150,7 +150,7 @@ export default function ExperienceTimeline() {
 											<div class="flex items-center gap-1.5 text-[10px] font-bold text-muted-foreground/60 uppercase">
 												<Calendar size={12} class="text-primary/50" />
 												{formatDate(exp.start_date)} —{" "}
-												{exp.is_current ? "PRESENT" : formatDate(exp.end_date)}
+												{exp.is_current ? "PRESENTE" : formatDate(exp.end_date)}
 											</div>
 											{exp.location && (
 												<div class="flex items-center gap-1.5 text-[10px] font-bold text-muted-foreground/60 uppercase">
@@ -175,7 +175,7 @@ export default function ExperienceTimeline() {
 												experienceEdit.value = exp;
 											}}
 											class="p-2 text-muted-foreground hover:text-amber-400 hover:bg-amber-400/10 rounded-xl transition-all"
-											title="Edit Node"
+											title="Editar"
 											aria-label={`Edit ${exp.position} at ${exp.company}`}
 										>
 											<Edit size={16} />
@@ -184,7 +184,7 @@ export default function ExperienceTimeline() {
 											type="button"
 											onClick={() => onDelete(exp.id)}
 											class="p-2 text-muted-foreground hover:text-red-500 hover:bg-red-500/10 rounded-xl transition-all"
-											title="Terminate Event"
+											title="Eliminar"
 											aria-label={`Delete ${exp.position} experience at ${exp.company}`}
 										>
 											<Trash2 size={16} />

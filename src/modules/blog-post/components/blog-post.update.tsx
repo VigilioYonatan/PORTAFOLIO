@@ -85,10 +85,10 @@ export default function BlogPostUpdate({
 		<div class="px-1 space-y-4">
 			<div class="flex flex-col gap-1 border-b border-white/5 pb-4 mb-4">
 				<span class="text-[9px] font-black tracking-[0.5em] text-primary uppercase animate-pulse">
-					REVISING_STORED_CONTENT
+					REVISANDO CONTENIDO GUARDADO
 				</span>
 				<h2 class="text-xl font-black tracking-tight text-foreground uppercase">
-					Update Blog Post
+					Actualizar Artículo
 				</h2>
 			</div>
 
@@ -96,45 +96,45 @@ export default function BlogPostUpdate({
 				<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 					<Form.control<BlogPostUpdateDto>
 						name="title"
-						title="POST_TITLE"
+						title="TÍTULO DEL ARTÍCULO"
 						ico={<FileText size={18} />}
-						placeholder="The Future of Web Dev"
+						placeholder="Ej: El Futuro del Desarrollo Web"
 					/>
 					<Form.control<BlogPostUpdateDto>
 						name="slug"
-						title="URL_SLUG"
+						title="SLUG URL"
 						ico={<Link size={18} />}
-						placeholder="the-future-of-web-dev"
+						placeholder="el-futuro-del-desarrollo-web"
 					/>
 				</div>
 
 				<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 					<Form.control.select<BlogPostUpdateDto>
 						name="category_id"
-						title="CONTENT_CATEGORY"
+						title="CATEGORÍA"
 						ico={<Tag size={18} />}
 						array={categoryOptions}
-						placeholder="Select category"
+						placeholder="Seleccionar categoría"
 						options={{ setValueAs: formSelectNumber }}
 						isLoading={categoriesQuery.isLoading ?? false}
 					/>
 					<Form.control.toggle<BlogPostUpdateDto>
 						name="is_published"
-						title="PUBLISH_STATUS"
-						placeholder="Visible to public"
+						title="ESTADO DE PUBLICACIÓN"
+						placeholder="Visible al público"
 					/>
 				</div>
 
 				<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 					<Form.control.area<BlogPostUpdateDto>
 						name="extract"
-						title="CONTENT_EXTRACT"
-						placeholder="Brief summary for indexing..."
+						title="EXTRACTO"
+						placeholder="Breve resumen para indexación..."
 						rows={2}
 					/>
 					<Form.control<BlogPostUpdateDto>
 						name="reading_time_minutes"
-						title="ESTIMATED_TIME (MINUTES)"
+						title="TIEMPO ESTIMADO (MIN)"
 						type="number"
 						placeholder="5"
 						options={{ setValueAs: formSelectNumber }}
@@ -143,25 +143,25 @@ export default function BlogPostUpdate({
 
 				<Form.control.area<BlogPostUpdateDto>
 					name="content"
-					title="MARKDOWN_CONTENT"
-					placeholder="# Your story begins here..."
+					title="CONTENIDO MARKDOWN"
+					placeholder="# Tu historia comienza aquí..."
 					rows={8}
 				/>
 
 				<div class="space-y-4 pt-4 border-t border-white/5">
 					<h3 class="text-sm font-semibold text-muted-foreground uppercase tracking-widest flex items-center gap-2">
-						<Tag size={14} class="text-primary" /> Meta Optimization (SEO)
+						<Tag size={14} class="text-primary" /> Optimización SEO
 					</h3>
 					<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 						<Form.control<BlogPostUpdateDto>
 							name="seo.title"
-							title="SEO_TITLE"
-							placeholder="Post title for search engines"
+							title="TÍTULO SEO"
+							placeholder="Título para buscadores"
 						/>
 						<Form.control.area<BlogPostUpdateDto>
 							name="seo.description"
-							title="SEO_DESCRIPTION"
-							placeholder="Meta description (150-160 chars recommended)"
+							title="DESCRIPCIÓN SEO"
+							placeholder="Meta descripción (150-160 caracteres)"
 							rows={2}
 						/>
 					</div>
@@ -169,7 +169,7 @@ export default function BlogPostUpdate({
 
 				<Form.control.file<BlogPostUpdateDto>
 					name="cover"
-					title="COVER_IMAGE"
+					title="IMAGEN DE PORTADA"
 					ico={<ImageIcon size={18} />}
 					entity="blog_post"
 					property="cover"
@@ -181,8 +181,8 @@ export default function BlogPostUpdate({
 				/>
 
 				<Form.button.submit
-					title="COMMIT_CONTENT_CHANGE"
-					loading_title="SYNCING..."
+					title="GUARDAR CAMBIOS"
+					loading_title="GUARDANDO..."
 					isLoading={blogPostUpdateMutation.isLoading || false}
 					disabled={blogPostUpdateMutation.isLoading || false}
 					className="w-full mt-6 bg-primary text-primary-foreground font-black py-4 uppercase tracking-widest rounded-xl hover:brightness-110 transition-all border-none"

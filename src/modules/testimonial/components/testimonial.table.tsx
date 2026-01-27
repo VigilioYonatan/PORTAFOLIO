@@ -36,7 +36,7 @@ export default function TestimonialTable() {
 			},
 			{
 				key: "author_name",
-				header: "AUTHOR_IDENTITY",
+				header: "AUTOR",
 				isSort: true,
 				cell: (row) => (
 					<div class="flex items-center gap-3">
@@ -72,7 +72,7 @@ export default function TestimonialTable() {
 			},
 			{
 				key: "content",
-				header: "TRANSMISSION_DATA",
+				header: "CONTENIDO",
 				cell: (row) => (
 					<span class="text-[11px] text-muted-foreground/80 italic line-clamp-2 leading-relaxed">
 						"{row.content}"
@@ -81,7 +81,7 @@ export default function TestimonialTable() {
 			},
 			{
 				key: "is_visible",
-				header: "UPLINK_STATUS",
+				header: "ESTADO",
 				cell: (row) => (
 					<Badge
 						variant={row.is_visible ? "matrix" : "secondary"}
@@ -90,13 +90,13 @@ export default function TestimonialTable() {
 							!row.is_visible && "bg-zinc-800 text-zinc-500 border-white/5",
 						)}
 					>
-						{row.is_visible ? "ONLINE" : "OFFLINE"}
+						{row.is_visible ? "VISIBLE" : "OCULTO"}
 					</Badge>
 				),
 			},
 			{
 				key: "action",
-				header: "OPS",
+				header: "ACCIONES",
 				cell: (row) => (
 					<div class="flex items-center gap-1">
 						<button
@@ -105,7 +105,7 @@ export default function TestimonialTable() {
 								testimonialEdit.value = row;
 							}}
 							class="p-2 text-muted-foreground hover:text-amber-400 rounded-lg hover:bg-amber-400/10 transition-all"
-							title="Modify Node"
+							title="Modificar"
 						>
 							<Edit size={14} />
 						</button>
@@ -113,11 +113,11 @@ export default function TestimonialTable() {
 							type="button"
 							onClick={() => {
 								sweetModal({
-									title: "TERMINATE_TESTIMONIAL?",
-									text: `Execute terminal command to remove testimonial from "${row.author_name}"?`,
+									title: "¿ELIMINAR TESTIMONIO?",
+									text: `¿Eliminar testimonio de "${row.author_name}"?`,
 									icon: "danger",
 									showCancelButton: true,
-									confirmButtonText: "TERMINATE",
+									confirmButtonText: "ELIMINAR",
 								}).then(({ isConfirmed }) => {
 									if (isConfirmed) {
 										destroyMutation.mutate(row.id, {
@@ -126,14 +126,14 @@ export default function TestimonialTable() {
 													result: results.filter((item) => item.id !== row.id),
 													count: count - 1,
 												}));
-												sweetModal({ icon: "success", title: "Record Purged" });
+												sweetModal({ icon: "success", title: "Testimonio Eliminado" });
 											},
 										});
 									}
 								});
 							}}
 							class="p-2 text-muted-foreground hover:text-red-500 rounded-lg hover:bg-red-500/10 transition-all"
-							title="Deactivate Sequence"
+							title="Eliminar"
 						>
 							<Trash2 size={14} />
 						</button>
@@ -167,7 +167,7 @@ export default function TestimonialTable() {
 						</div>
 						<input
 							type="text"
-							placeholder="FILTER_BY_AUTHOR..."
+							placeholder="FILTRAR POR AUTOR..."
 							class="bg-black/40 border border-white/5 text-[11px] font-mono tracking-widest rounded-lg pl-10 pr-3 py-2.5 w-full focus:outline-none focus:ring-1 focus:ring-primary/40 focus:border-primary/40 transition-all"
 							value={table.search.value}
 							onInput={(e) =>
@@ -179,7 +179,7 @@ export default function TestimonialTable() {
 					<div class="flex items-center gap-4 w-full md:w-auto">
 						<div class="hidden md:flex flex-col items-end">
 							<span class="text-[9px] font-bold text-muted-foreground/30 uppercase tracking-[0.2em]">
-								Signal_Count
+								Total
 							</span>
 							<span class="text-sm font-black text-primary">
 								{query.data?.count ?? 0}
@@ -193,7 +193,7 @@ export default function TestimonialTable() {
 							class="flex-1 md:flex-none flex items-center justify-center gap-2 bg-primary text-primary-foreground px-6 py-2.5 text-xs font-black uppercase tracking-widest rounded-lg hover:brightness-110 transition-all shadow-[0_0_20px_rgba(var(--primary-rgb),0.3)]"
 						>
 							<Plus size={14} strokeWidth={3} />
-							New Testimonial
+							Nuevo Testimonio
 						</button>
 					</div>
 				</div>
@@ -204,7 +204,7 @@ export default function TestimonialTable() {
 						<VigilioTable.thead.th />
 					</VigilioTable.thead>
 					<VigilioTable.tbody>
-						<VigilioTable.tbody.row title="No testimonial nodes detected">
+						<VigilioTable.tbody.row title="No se encontraron testimonios">
 							{(data) => <VigilioTable.tbody.td data={data} />}
 						</VigilioTable.tbody.row>
 					</VigilioTable.tbody>

@@ -8,8 +8,10 @@ import {
 	ShieldCheckIcon,
 } from "lucide-preact";
 import { useEffect, useRef } from "preact/hooks";
+import { useTranslations } from "@src/i18n";
 
-export default function SystemStats() {
+export default function SystemStats({ lang = "es" }: { lang?: string }) {
+    const t = useTranslations(lang as any);
 	const { bassIntensity, midIntensity } = audioStore.state;
 	const cpuLoad = useSignal(0);
 	const memLoad = useSignal(0);
@@ -94,7 +96,7 @@ export default function SystemStats() {
 				<div class="flex items-center gap-2">
 					<ActivityIcon size={12} class="text-primary animate-pulse" />
 					<span class="tracking-[0.4em] uppercase font-black text-white">
-						CORE_TELEMETRY
+						{t("stats.core_telemetry")}
 					</span>
 				</div>
 				<span class="text-primary/60 font-bold border border-primary/20 px-1.5 py-0.5 rounded-[2px] bg-primary/5">
@@ -110,7 +112,7 @@ export default function SystemStats() {
 								size={10}
 								class="text-primary/40 group-hover/item:text-primary transition-colors"
 							/>
-							Processor
+							{t("stats.processor")}
 						</span>
 						<span
 							class="text-white font-bold block bg-white/5 p-1 rounded-sm border border-white/5 text-[9px] truncate"
@@ -125,7 +127,7 @@ export default function SystemStats() {
 								size={10}
 								class="text-primary/40 group-hover/item:text-primary transition-colors"
 							/>
-							Storage
+							{t("stats.storage")}
 						</span>
 						<span class="text-white font-bold block bg-white/5 p-1 rounded-sm border border-white/5">
 							NVME_GEN4_R6500_W5000
@@ -137,7 +139,7 @@ export default function SystemStats() {
 					<div class="space-y-2">
 						<div class="flex justify-between items-end uppercase tracking-widest">
 							<span class="text-[8px] font-black text-zinc-400">
-								Memory_Allocation
+								{t("stats.memory")}
 							</span>
 							<span class="text-primary font-black text-[11px]">
 								{memLoad.value.toFixed(1)}%
@@ -154,7 +156,7 @@ export default function SystemStats() {
 					<div class="space-y-2">
 						<div class="flex justify-between items-end uppercase tracking-widest">
 							<span class="text-[8px] font-black text-zinc-400">
-								Compute_Intensity
+								{t("stats.compute")}
 							</span>
 							<span class="text-white font-black text-[11px]">
 								{cpuLoad.value.toFixed(1)}%
@@ -178,10 +180,10 @@ export default function SystemStats() {
 					<ShieldCheckIcon size={14} class="text-primary animate-pulse" />
 					<div class="flex flex-col">
 						<span class="text-[10px] tracking-[0.2em] text-primary font-black uppercase">
-							NEURAL_SYNC: ACTIVE
+							{t("stats.neural_sync")}
 						</span>
 						<span class="text-[8px] text-primary/40 font-bold uppercase tracking-widest">
-							Latency: {latency.value.toFixed(3)}ms
+							{t("stats.latency")}: {latency.value.toFixed(3)}ms
 						</span>
 					</div>
 				</div>
@@ -203,7 +205,7 @@ export default function SystemStats() {
 
 			<div class="flex items-center justify-between pt-2 border-t border-white/5 opacity-40 selection:bg-primary">
 				<span class="text-[8px] tracking-[0.2em] uppercase font-bold">
-					Uptime: {uptime.value}
+					{t("stats.uptime")}: {uptime.value}
 				</span>
 				<NetworkIcon size={10} />
 			</div>

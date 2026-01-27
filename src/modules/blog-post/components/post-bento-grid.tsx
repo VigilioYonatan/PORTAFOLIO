@@ -59,7 +59,7 @@ export default function PostBentoGrid() {
 						</div>
 						<input
 							type="text"
-							placeholder="SEARCH_LOGS..."
+							placeholder="BUSCAR..."
 							class="bg-black/40 border border-white/5 text-[10px] font-mono tracking-widest rounded-lg pl-9 pr-3 py-2.5 w-full focus:outline-none focus:ring-1 focus:ring-primary/40 focus:border-primary/40 transition-all placeholder:text-muted-foreground/30"
 							value={paginator.search.value}
 							onInput={(e) =>
@@ -76,7 +76,7 @@ export default function PostBentoGrid() {
 					class="flex items-center gap-2 bg-primary text-primary-foreground px-6 py-2.5 text-xs font-black uppercase tracking-widest rounded-lg hover:brightness-110 transition-all shadow-[0_0_20px_rgba(var(--primary-rgb),0.3)] z-10"
 				>
 					<Plus size={14} strokeWidth={3} />
-					New Post
+					Nuevo Artículo
 				</button>
 			</div>
 
@@ -85,7 +85,7 @@ export default function PostBentoGrid() {
 					<div class="flex flex-col items-center gap-4">
 						<div class="w-10 h-10 border-2 border-primary/20 border-t-primary rounded-full animate-spin" />
 						<span class="text-[10px] font-mono tracking-widest text-muted-foreground animate-pulse">
-							LOADING_NEURAL_ARCHIVES...
+							CARGANDO ARTÍCULOS...
 						</span>
 					</div>
 				</div>
@@ -93,7 +93,7 @@ export default function PostBentoGrid() {
 				<div class="w-full h-64 flex items-center justify-center border border-dashed border-border rounded-xl">
 					<div class="text-center text-muted-foreground">
 						<FileText size={32} class="mx-auto mb-2 opacity-50" />
-						<p className="font-mono text-xs">NO_DATA_FOUND</p>
+						<p className="font-mono text-xs">NO SE ENCONTRARON DATOS</p>
 					</div>
 				</div>
 			) : (
@@ -170,7 +170,7 @@ export default function PostBentoGrid() {
 										<button
 											type="button"
 											className="p-2 hover:bg-white/5 rounded-lg transition-colors text-muted-foreground hover:text-amber-400"
-											title="Edit Article"
+											title="Editar Artículo"
 											onClick={() => {
 												editingPost.value = post;
 											}}
@@ -180,14 +180,14 @@ export default function PostBentoGrid() {
 										<button
 											type="button"
 											className="p-2 hover:bg-white/5 rounded-lg transition-colors text-muted-foreground hover:text-red-500"
-											title="Purge Article"
+											title="Eliminar Artículo"
 											onClick={() => {
 												sweetModal({
-													title: "TERMINATE_POST?",
-													text: `Remove neural record for "${post.title}"?`,
+													title: "¿ELIMINAR ARTÍCULO?",
+													text: `¿Eliminar registro de "${post.title}"?`,
 													icon: "danger",
 													showCancelButton: true,
-													confirmButtonText: "TERMINATE",
+													confirmButtonText: "ELIMINAR",
 												}).then(({ isConfirmed }) => {
 													if (isConfirmed) {
 														destroyMutation.mutate(post.id, {
@@ -197,7 +197,7 @@ export default function PostBentoGrid() {
 																);
 																sweetModal({
 																	icon: "success",
-																	title: "Record Purged",
+																	title: "Artículo Eliminado",
 																});
 															},
 														});
@@ -232,7 +232,7 @@ export default function PostBentoGrid() {
 						onClick={() => paginator.pagination.onBackPage()}
 						class="px-3 py-1.5 text-[10px] font-black uppercase tracking-widest bg-white/5 hover:bg-white/10 border border-white/5 rounded-lg disabled:opacity-50 disabled:pointer-events-none transition-colors"
 					>
-						Previous
+						Anterior
 					</button>
 					<div className="flex items-center gap-1">
 						{paginator.pagination.paginator.pages.map((page: number) => (
@@ -258,11 +258,11 @@ export default function PostBentoGrid() {
 						onClick={() => paginator.pagination.onNextPage()}
 						class="px-3 py-1.5 text-[10px] font-black uppercase tracking-widest bg-white/5 hover:bg-white/10 border border-white/5 rounded-lg disabled:opacity-50 disabled:pointer-events-none transition-colors"
 					>
-						Next
+						Siguiente
 					</button>
 				</div>
 				<div className="text-[10px] font-mono text-muted-foreground/60 uppercase tracking-widest">
-					TOTAL_LOGS: {query.data?.count ?? 0}
+					TOTAL ARTÍCULOS: {query.data?.count ?? 0}
 				</div>
 			</div>
 

@@ -1,16 +1,20 @@
 ---
 import WebLayout from "../_components/layouts/web-layout/index.astro";
+import { getLangFromUrl, useTranslations } from "../../../i18n";
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
 ---
 
-<WebLayout title="Blog">
+<WebLayout title={t("metadata.blog.title")}>
   <div class="container mx-auto py-20 px-4">
     <h1 class="text-4xl font-black mb-8 text-primary">
-      NEURAL_ARCHIVES (BLOG)
+      {t("blog.title")}
     </h1>
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {/* Mock Posts */}
       <a
-        href="/en/blog/cyberpunk-design"
+        href={`/${lang}/blog/cyberpunk-design`}
         class="group block border border-border bg-card p-6 rounded-xl hover:border-primary/50 transition-colors"
       >
         <div
@@ -21,18 +25,17 @@ import WebLayout from "../_components/layouts/web-layout/index.astro";
           >
             <span
               class="font-mono text-black bg-primary px-2 py-1 rounded"
-              >READ_FILE</span
+              >{t("blog.read_more")}</span
             >
           </div>
         </div>
         <h2
           class="text-xl font-bold mb-2 group-hover:text-primary transition-colors"
         >
-          Designing Cyberpunk UI
+          {t("mock.blog.title")}
         </h2>
         <p class="text-muted-foreground text-sm line-clamp-2">
-          How to create glitch effects and neon glows using Tailwind and CSS
-          animations.
+          {t("mock.blog.desc")}
         </p>
         <div
           class="mt-4 flex items-center justify-between text-xs text-muted-foreground font-mono"

@@ -3,10 +3,10 @@ import time
 import subprocess
 import os
 import sys
-import mss
 import argparse
 import numpy as np
 from PIL import Image
+import mss
 
 # --- DIRECTORIO DEL SCRIPT ---
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -356,47 +356,13 @@ def run_automation_pass(comandos, prompt_base, prompt_context, desc_prefix):
 
         # 1. Copiar y Pegar (compatible con Windows y Linux)
         try:
-            if os.name == 'nt':  # Windows
-                import ctypes
-                CF_TEXT = 1
-                GMEM_MOVEABLE = 0x0002
-
-                # Convertir texto a bytes
-                text_bytes = texto_a_pegar.encode('utf-8')
-
-                # Asignar memoria global
-                h_mem = ctypes.windll.kernel32.GlobalAlloc(GMEM_MOVEABLE, len(text_bytes) + 1)
-                if not h_mem:
-                    raise Exception("No se pudo asignar memoria para el clipboard")
-
-                # Bloquear memoria y copiar texto
-                ptr = ctypes.windll.kernel32.GlobalLock(h_mem)
-                ctypes.memmove(ptr, text_bytes, len(text_bytes))
-                ctypes.windll.kernel32.GlobalUnlock(h_mem)
-
-                # Abrir clipboard y establecer datos
-                ctypes.windll.user32.OpenClipboard(0)
-                ctypes.windll.user32.EmptyClipboard()
-                ctypes.windll.user32.SetClipboardData(CF_TEXT, h_mem)
-                ctypes.windll.user32.CloseClipboard()
-
-                print("   [OK] Texto copiado al clipboard (Windows)")
-
-            else:  # Linux/Unix
-                try:
-                    process = subprocess.Popen(['xclip', '-selection', 'clipboard'], stdin=subprocess.PIPE, close_fds=True)
-                    process.communicate(input=texto_a_pegar.encode('utf-8'))
-                    print("   [OK] Texto copiado al clipboard (xclip)")
-                except Exception as e:
-                    print(f"   [ERROR] Falló xclip: {e}")
-                    try:
-                        process = subprocess.Popen(['xsel', '-b', '-i'], stdin=subprocess.PIPE, close_fds=True)
-                        process.communicate(input=texto_a_pegar.encode('utf-8'))
-                        print("   [OK] Texto copiado al clipboard (xsel)")
-                    except Exception as e2:
-                        print(f"   [ERROR] Falló xsel también: {e2}")
-                        raise
-
+            import pyperclip
+            pyperclip.copy(texto_a_pegar)
+            print("   [OK] Texto copiado al clipboard (pyperclip)")
+        except ImportError:
+            print("   [ERROR] Falta librería pyperclip. Instálala con: pip install pyperclip")
+            # Fallback a implementación manual simple si falla pyperclip?
+            # Por ahora confiamos en pyperclip ya que el usuario demostró tenerla.
         except Exception as e:
             print(f"   [ERROR] No se pudo copiar al clipboard: {e}")
 
@@ -661,9 +627,19 @@ pages/
  
     # print("\n--- PASO 2: VERIFICACIÓN ---")
     # run_automation_pass(comandos,"",PROMPT_CONTEXT_VERIFIED, "Verificamos si esta al 100% fiel ")
-    run_automation_pass([""],"","", "sigue arreglando check astro check , si ya acabaste presion && pnpm test:e2e:db && y sigue arreglando  pnpm test , recuerda seguir con las practicas de prompt-frontend.md y prompt-backend.md , rules-pages.md")
-    run_automation_pass([""],"","", "sigue arreglando check astro check, si ya acabaste presion && pnpm test:e2e:db && y sigue arreglando  pnpm test , recuerda seguir con las practicas de prompt-frontend.md y prompt-backend.md , rules-pages.md")
-    run_automation_pass([""],"","", "sigue arreglando check astro check, si ya acabaste presion && pnpm test:e2e:db && y sigue arreglando  pnpm test , recuerda seguir con las practicas de prompt-frontend.md y prompt-backend.md , rules-pages.md")
+    run_automation_pass([""],"","", "cambia el idioma de la web principal home, contacto,projectos ,blog, etc. osea toda la pagina normales en los 3 idiomas, claro la pagina dashboard normal en español, ojo las paginas de dashboard que estan en wouter ese si en español, fijate en los formularios, cards, deben estar en español ARREGLALO, fijate tomate tu tiempo, mira los archivos, que no se te escape ninguno, sigue las practicas de rules-class.md, rules-pages.md,prompt-frontend.md")
+    run_automation_pass([""],"","", "cambia el idioma de la web principal home, contacto,projectos ,blog, etc. osea toda la pagina normales en los 3 idiomas, claro la pagina dashboard normal en español, ojo las paginas de dashboard que estan en wouter ese si en español, fijate en los formularios, cards, deben estar en español ARREGLALO, fijate tomate tu tiempo, mira los archivos, que no se te escape ninguno, sigue las practicas de rules-class.md, rules-pages.md,prompt-frontend.md")
+    run_automation_pass([""],"","", "cambia el idioma de la web principal home, contacto,projectos ,blog, etc. osea toda la pagina normales en los 3 idiomas, claro la pagina dashboard normal en español, ojo las paginas de dashboard que estan en wouter ese si en español, fijate en los formularios, cards, deben estar en español ARREGLALO, fijate tomate tu tiempo, mira los archivos, que no se te escape ninguno, sigue las practicas de rules-class.md, rules-pages.md,prompt-frontend.md")
+    run_automation_pass([""],"","", "cambia el idioma de la web principal home, contacto,projectos ,blog, etc. osea toda la pagina normales en los 3 idiomas, claro la pagina dashboard normal en español, ojo las paginas de dashboard que estan en wouter ese si en español, fijate en los formularios, cards, deben estar en español ARREGLALO, fijate tomate tu tiempo, mira los archivos, que no se te escape ninguno, sigue las practicas de rules-class.md, rules-pages.md,prompt-frontend.md")
+    run_automation_pass([""],"","", "cambia el idioma de la web principal home, contacto,projectos ,blog, etc. osea toda la pagina normales en los 3 idiomas, claro la pagina dashboard normal en español, ojo las paginas de dashboard que estan en wouter ese si en español, fijate en los formularios, cards, deben estar en español ARREGLALO, fijate tomate tu tiempo, mira los archivos, que no se te escape ninguno, sigue las practicas de rules-class.md, rules-pages.md,prompt-frontend.md")
+    run_automation_pass([""],"","", "asegura que esten responsive mobile,table,escritorio , responsive los layouts,componentes,etc y que sea vean bien web principal home, contacto,projectos ,blog, etc. osea toda la pagina normales en los 3 idiomas, claro la pagina dashboard tambien, ojo las paginas de dashboard que estan en wouter , fijate en los formularios, cards, deben estar bien responive ARREGLALO, fijate tomate tu tiempo, mira los archivos, que no se te escape ninguno, sigue las practicas de rules-class.md, rules-pages.md,prompt-frontend.md")
+    run_automation_pass([""],"","", "asegura que esten responsive mobile,table,escritorio , responsive los layouts,componentes,etc y que sea vean bien web principal home, contacto,projectos ,blog, etc. osea toda la pagina normales en los 3 idiomas, claro la pagina dashboard tambien, ojo las paginas de dashboard que estan en wouter , fijate en los formularios, cards, deben estar bien responive ARREGLALO, fijate tomate tu tiempo, mira los archivos, que no se te escape ninguno, sigue las practicas de rules-class.md, rules-pages.md,prompt-frontend.md")
+    run_automation_pass([""],"","", "asegura que esten responsive mobile,table,escritorio , responsive los layouts,componentes,etc y que sea vean bien web principal home, contacto,projectos ,blog, etc. osea toda la pagina normales en los 3 idiomas, claro la pagina dashboard tambien, ojo las paginas de dashboard que estan en wouter , fijate en los formularios, cards, deben estar bien responive ARREGLALO, fijate tomate tu tiempo, mira los archivos, que no se te escape ninguno, sigue las practicas de rules-class.md, rules-pages.md,prompt-frontend.md")
+    run_automation_pass([""],"","", "asegura que esten responsive mobile,table,escritorio , responsive los layouts,componentes,etc y que sea vean bien web principal home, contacto,projectos ,blog, etc. osea toda la pagina normales en los 3 idiomas, claro la pagina dashboard tambien, ojo las paginas de dashboard que estan en wouter , fijate en los formularios, cards, deben estar bien responive ARREGLALO, fijate tomate tu tiempo, mira los archivos, que no se te escape ninguno, sigue las practicas de rules-class.md, rules-pages.md,prompt-frontend.md")
+    run_automation_pass([""],"","", "asegura que esten responsive mobile,table,escritorio , responsive los layouts,componentes,etc y que sea vean bien web principal home, contacto,projectos ,blog, etc. osea toda la pagina normales en los 3 idiomas, claro la pagina dashboard tambien, ojo las paginas de dashboard que estan en wouter , fijate en los formularios, cards, deben estar bien responive ARREGLALO, fijate tomate tu tiempo, mira los archivos, que no se te escape ninguno, sigue las practicas de rules-class.md, rules-pages.md,prompt-frontend.md")
+    run_automation_pass([""],"","", "asegura que esten responsive mobile,table,escritorio , responsive los layouts,componentes,etc y que sea vean bien web principal home, contacto,projectos ,blog, etc. osea toda la pagina normales en los 3 idiomas, claro la pagina dashboard tambien, ojo las paginas de dashboard que estan en wouter , fijate en los formularios, cards, deben estar bien responive ARREGLALO, fijate tomate tu tiempo, mira los archivos, que no se te escape ninguno, sigue las practicas de rules-class.md, rules-pages.md,prompt-frontend.md")
+    run_automation_pass([""],"","", "asegura que esten responsive mobile,table,escritorio , responsive los layouts,componentes,etc y que sea vean bien web principal home, contacto,projectos ,blog, etc. osea toda la pagina normales en los 3 idiomas, claro la pagina dashboard tambien, ojo las paginas de dashboard que estan en wouter , fijate en los formularios, cards, deben estar bien responive ARREGLALO, fijate tomate tu tiempo, mira los archivos, que no se te escape ninguno, sigue las practicas de rules-class.md, rules-pages.md,prompt-frontend.md")
+
     run_automation_pass([""],"","", "sigue arreglando check astro check, si ya acabaste presion && pnpm test:e2e:db && y sigue arreglando  pnpm test , recuerda seguir con las practicas de prompt-frontend.md y prompt-backend.md , rules-pages.md")
     run_automation_pass([""],"","", "sigue arreglando check astro check, si ya acabaste presion && pnpm test:e2e:db && y sigue arreglando  pnpm test , recuerda seguir con las practicas de prompt-frontend.md y prompt-backend.md , rules-pages.md")
     run_automation_pass([""],"","", "sigue arreglando check astro check, si ya acabaste presion && pnpm test:e2e:db && y sigue arreglando  pnpm test , recuerda seguir con las practicas de prompt-frontend.md y prompt-backend.md , rules-pages.md")

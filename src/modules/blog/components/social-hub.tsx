@@ -2,12 +2,16 @@ import { cn } from "@infrastructure/utils/client";
 import { useSignal } from "@preact/signals";
 import { HeartIcon, MessageSquareIcon, Share2Icon } from "lucide-preact";
 
+import { useTranslations } from "@src/i18n";
+
 interface SocialHubProps {
 	likes?: number;
 	comments?: number;
+    lang?: string;
 }
 
-export default function SocialHub({ likes = 0, comments = 0 }: SocialHubProps) {
+export default function SocialHub({ likes = 0, comments = 0, lang = "es" }: SocialHubProps) {
+    const t = useTranslations(lang as any);
 	const isLiked = useSignal(false);
 	const likeCount = useSignal(likes);
 
@@ -75,7 +79,7 @@ export default function SocialHub({ likes = 0, comments = 0 }: SocialHubProps) {
 						size={16}
 						class="group-hover/share:rotate-12 transition-transform"
 					/>
-					<span class="hidden sm:inline">PROPAGATE_NODE</span>
+					<span class="hidden sm:inline">{t("slug.propagate")}</span>
 				</button>
 			</div>
 		</div>

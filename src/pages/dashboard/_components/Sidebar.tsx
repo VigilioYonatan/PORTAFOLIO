@@ -18,29 +18,29 @@ import { Link, useLocation } from "wouter-preact";
 
 const MENU_ITEMS = [
 	{
-		category: "Main",
+		category: "Principal",
 		items: [
-			{ label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-			{ label: "Documents", href: "/dashboard/documents", icon: FileText },
-			{ label: "AI Training", href: "/dashboard/ai", icon: Bot },
+			{ label: "Panel", href: "/dashboard", icon: LayoutDashboard },
+			{ label: "Documentos", href: "/dashboard/documents", icon: FileText },
+			{ label: "Entrenamiento IA", href: "/dashboard/ai", icon: Bot },
 		],
 	},
 	{
-		category: "Content",
+		category: "Contenido",
 		items: [
-			{ label: "Projects", href: "/dashboard/projects", icon: FolderKanban },
+			{ label: "Proyectos", href: "/dashboard/projects", icon: FolderKanban },
 			{ label: "Blog", href: "/dashboard/blog", icon: PenTool },
-			{ label: "Experience", href: "/dashboard/hr", icon: GraduationCap },
-			{ label: "Music", href: "/dashboard/shared", icon: Music },
-			{ label: "Technologies", href: "/dashboard/tech", icon: Cpu },
-			{ label: "Inbox", href: "/dashboard/inbox", icon: MessageSquare },
+			{ label: "Experiencia", href: "/dashboard/hr", icon: GraduationCap },
+			{ label: "Música", href: "/dashboard/shared", icon: Music },
+			{ label: "Tecnologías", href: "/dashboard/tech", icon: Cpu },
+			{ label: "Bandeja", href: "/dashboard/inbox", icon: MessageSquare },
 		],
 	},
 	{
-		category: "System",
+		category: "Sistema",
 		items: [
-			{ label: "Settings", href: "/dashboard/settings", icon: Settings },
-			{ label: "Admin Profile", href: "/dashboard/profile", icon: User },
+			{ label: "Configuración", href: "/dashboard/settings", icon: Settings },
+			{ label: "Perfil Admin", href: "/dashboard/profile", icon: User },
 		],
 	},
 ];
@@ -58,10 +58,10 @@ export default function Sidebar() {
 				<TerminalLogo className="w-8 h-8 text-primary animate-glitch-sm" />
 				<div class="flex flex-col">
 					<span class="font-black text-sm tracking-[0.3em] text-white">
-						ADMIN_PULSE
+						PULSO_ADMIN
 					</span>
 					<span class="text-[8px] text-primary font-bold tracking-widest opacity-60 uppercase">
-						System Core v4.0
+						Núcleo Sistema v4.0
 					</span>
 				</div>
 			</div>
@@ -124,18 +124,18 @@ export default function Sidebar() {
 						<ShieldCheckIcon size={24} class="text-primary" />
 					</div>
 
-					<div class="w-10 h-10 rounded-sm bg-gradient-to-br from-primary/30 to-black/60 flex items-center justify-center border border-primary/20 group-hover:border-primary/60 transition-colors relative overflow-hidden">
+					<div class="w-10 h-10 rounded-sm bg-linear-to-br from-primary/30 to-black/60 flex items-center justify-center border border-primary/20 group-hover:border-primary/60 transition-colors relative overflow-hidden">
 						<div class="absolute inset-0 bg-scanline opacity-20" />
 						<User size={18} class="text-primary relative z-10" />
 					</div>
 					<div class="flex flex-col overflow-hidden relative z-10">
 						<span class="text-[10px] font-black truncate tracking-[0.2em] text-white uppercase group-hover:text-primary transition-colors">
-							ROOT_ADMIN
+							ADMIN_RAÍZ
 						</span>
 						<div class="flex items-center gap-1.5 mt-0.5">
 							<span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
 							<span class="text-[8px] text-primary/60 font-bold tracking-widest uppercase">
-								LEVEL_04_AUTH
+								NIVEL_04_AUTH
 							</span>
 						</div>
 					</div>

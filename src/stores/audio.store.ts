@@ -116,8 +116,14 @@ function setVolume(val: number) {
 }
 
 function seek(time: number) {
+	if (!audioElement) initAudio();
 	if (audioElement) {
 		audioElement.currentTime = time;
+		if (audioElement.currentTime !== time) {
+			// Some browsers/servers might not support precise seeking or if media not loaded
+			// biome-ignore lint/suspicious/noConsole: Expected warning for development
+			console.warn("Seek might be clamped by buffered range");
+		}
 		currentTime.value = time;
 	}
 }

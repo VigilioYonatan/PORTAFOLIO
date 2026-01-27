@@ -21,20 +21,20 @@ export default function DashboardHome() {
 	const { data, isLoading } = analyticsDashboardApi();
 
 	const weeklyVisits = data?.metrics?.weeklyVisits ?? [
-		{ name: "Mon", visits: 0 },
-		{ name: "Tue", visits: 0 },
-		{ name: "Wed", visits: 0 },
-		{ name: "Thu", visits: 0 },
-		{ name: "Fri", visits: 0 },
-		{ name: "Sat", visits: 0 },
-		{ name: "Sun", visits: 0 },
+		{ name: "Lun", visits: 0 },
+		{ name: "Mar", visits: 0 },
+		{ name: "Mié", visits: 0 },
+		{ name: "Jue", visits: 0 },
+		{ name: "Vie", visits: 0 },
+		{ name: "Sáb", visits: 0 },
+		{ name: "Dom", visits: 0 },
 	];
 
 	return (
 		<div class="flex-1 space-y-4">
 			<div class="flex items-center justify-between space-y-2">
 				<h2 class="text-3xl font-black tracking-tighter uppercase italic">
-					{">"} SYSTEM_DASHBOARD
+					{">"} PANEL_DEL_SISTEMA
 				</h2>
 			</div>
 
@@ -47,7 +47,7 @@ export default function DashboardHome() {
 				<Card class="col-span-4 bg-zinc-900/50 border-white/5 overflow-hidden backdrop-blur-sm h-[400px]">
 					<CardHeader>
 						<CardTitle class="text-sm font-black tracking-widest uppercase">
-							Traffic_Uplink_Signal
+							SEÑAL_ENLACE_TRÁFICO
 						</CardTitle>
 					</CardHeader>
 					<CardContent class="h-[300px] p-0 pr-6 pt-4">

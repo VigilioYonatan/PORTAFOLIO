@@ -15,7 +15,7 @@ export default defineConfig({
 	integrations: [preact({ compat: true })],
 	i18n: {
 		defaultLocale: "es",
-		locales: ["es", "en"],
+		locales: ["es", "en", "pt"],
 		routing: {
 			prefixDefaultLocale: false, // "es" está en "/", "en" está en "/en"
 		},

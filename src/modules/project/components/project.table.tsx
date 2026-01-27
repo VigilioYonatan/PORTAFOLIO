@@ -56,7 +56,7 @@ export default function ProjectTable() {
 			},
 			{
 				key: "title",
-				header: "PROJECT_NODE",
+				header: "PROYECTO",
 				isSort: true,
 				cell: (row) => (
 					<div class="flex flex-col gap-0.5 min-w-[200px]">
@@ -83,7 +83,7 @@ export default function ProjectTable() {
 			},
 			{
 				key: "techeables",
-				header: "CORE_STACK",
+				header: "STACK PRINCIPAL",
 				cell: (row) => (
 					<TechStackIcons
 						technologyIds={row.techeables?.map((t) => t.technology_id) || []}
@@ -92,7 +92,7 @@ export default function ProjectTable() {
 			},
 			{
 				key: "status",
-				header: "UPLINK_STATUS",
+				header: "ESTADO",
 				isSort: true,
 				cell: (row) => (
 					<Badge
@@ -112,28 +112,28 @@ export default function ProjectTable() {
 			},
 			{
 				key: "github_stars",
-				header: "REPUTATION",
+				header: "REPUTACIÓN",
 				isSort: true,
 				cell: (row) => (
 					<div class="flex items-center gap-1.5 text-[10px] font-bold text-primary/80">
-						<span class="opacity-40 whitespace-nowrap">GITHUB_STARS:</span>{" "}
+						<span class="opacity-40 whitespace-nowrap">ESTRELLAS GITHUB:</span>{" "}
 						{row.github_stars ?? 0}
 					</div>
 				),
 			},
 			{
 				key: "updated_at",
-				header: "LAST_SYNC",
+				header: "ÚLTIMA SYNC",
 				isSort: true,
 				cell: (row) => (
 					<span class="text-[10px] font-mono text-muted-foreground/50 uppercase">
-						{row.updated_at ? format(row.updated_at, "short") : "NEVER"}
+						{row.updated_at ? format(row.updated_at, "short") : "NUNCA"}
 					</span>
 				),
 			},
 			{
 				key: "action",
-				header: "OPS",
+				header: "ACCIONES",
 				cell: (row) => {
 					return (
 						<div class="flex items-center gap-1">
@@ -157,7 +157,7 @@ export default function ProjectTable() {
 
 								}}
 								class="p-2 text-muted-foreground hover:text-primary rounded-lg hover:bg-primary/10 transition-all"
-								title={row.is_visible ? "Set Offline" : "Set Online"}
+								title={row.is_visible ? "Ocultar" : "Mostrar"}
 							>
 								{row.is_visible ? <Eye size={14} /> : <EyeOff size={14} />}
 							</button>
@@ -169,7 +169,7 @@ export default function ProjectTable() {
 										onSuccess() {
 											sweetModal({
 												icon: "success",
-												title: "GitHub Sync Executed",
+												title: "Sincronización GitHub Ejecutada",
 											});
 											query.refetch(false);
 										},
@@ -179,7 +179,7 @@ export default function ProjectTable() {
 									"p-2 text-muted-foreground hover:text-blue-400 rounded-lg hover:bg-blue-400/10 transition-all",
 									projectSyncMutation.isLoading && "animate-spin text-blue-400",
 								)}
-								title="Sync GitHub"
+								title="Sincronizar GitHub"
 							>
 								<RefreshCw size={14} />
 							</button>
@@ -187,7 +187,7 @@ export default function ProjectTable() {
 							<button
 								type="button"
 								class="p-2 text-muted-foreground hover:text-amber-400 rounded-lg hover:bg-amber-400/10 transition-all"
-								title="Edit Node"
+								title="Editar Proyecto"
 								onClick={() => {
 									editingProject.value = row;
 								}}
@@ -198,14 +198,14 @@ export default function ProjectTable() {
 							<button
 								type="button"
 								class="p-2 text-muted-foreground hover:text-red-500 rounded-lg hover:bg-red-500/10 transition-all"
-								title="Terminate record"
+								title="Eliminar registro"
 								onClick={() => {
 									sweetModal({
-										title: "TERMINATE_PROJECT?",
-										text: `Execute terminal command to remove "${row.title}"?`,
+										title: "¿ELIMINAR PROYECTO?",
+										text: `¿Ejecutar comando para eliminar "${row.title}"?`,
 										icon: "danger",
 										showCancelButton: true,
-										confirmButtonText: "TERMINATE",
+										confirmButtonText: "ELIMINAR",
 									}).then(({ isConfirmed }) => {
 										if (isConfirmed) {
 											projectDestroyMutation.mutate(row.id, {
@@ -218,7 +218,7 @@ export default function ProjectTable() {
 													}));
 													sweetModal({
 														icon: "success",
-														title: "Record Purged",
+														title: "Proyecto Eliminado",
 													});
 												},
 											});
@@ -263,7 +263,7 @@ export default function ProjectTable() {
 							</div>
 							<div>
 								<span class="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40 block">
-									TOTAL_PROJECTS
+									TOTAL PROYECTOS
 								</span>
 								<span class="text-xl font-black  text-foreground">
 									{query.data?.count ?? 0}
@@ -281,12 +281,12 @@ export default function ProjectTable() {
 					<div class="relative group w-full lg:w-96 z-10">
 						<div class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/40 group-focus-within:text-primary transition-colors flex items-center gap-2">
 							<span class="text-[9px] font-black tracking-widest uppercase text-white">
-								NODE_SEARCH:
+								BUSCAR PROYECTO:
 							</span>
 						</div>
 						<input
 							type="text"
-							placeholder="QUERYING_INTERFACE..."
+							placeholder="Buscar..."
 							class="bg-black/60 border border-white/10 text-[10px] font-mono tracking-widest rounded-xl pl-24 pr-4 py-3 w-full focus:outline-none focus:ring-1 focus:ring-primary/40 focus:border-primary/30 transition-all placeholder:text-muted-foreground/20 text-white"
 							value={table.search.value}
 							onInput={(e) =>
@@ -298,10 +298,10 @@ export default function ProjectTable() {
 					{/* Status Filters */}
 					<div class="flex items-center gap-2 z-10 overflow-x-auto pb-1 lg:pb-0">
 						{[
-							{ key: null, label: "ALL_NODES" },
-							{ key: "live", label: "LIVE_SYSTEMS" },
-							{ key: "in_dev", label: "CONSTRUCTION" },
-							{ key: "archived", label: "LEGACY" },
+							{ key: null, label: "TODOS" },
+							{ key: "live", label: "EN VIVO" },
+							{ key: "in_dev", label: "EN DESARROLLO" },
+							{ key: "archived", label: "ARCHIVADOS" },
 						].map((f) => (
 							<button
 								key={f.key}
@@ -327,7 +327,7 @@ export default function ProjectTable() {
 						class="flex items-center gap-2 bg-primary text-primary-foreground px-6 py-3 text-[10px] font-black uppercase tracking-widest rounded-xl hover:brightness-110 transition-all shadow-[0_0_20px_rgba(var(--primary-rgb),0.3)] z-10"
 					>
 						<Plus size={14} />
-						INITIALIZE_NODE
+						CREAR PROYECTO
 					</button>
 				</div>
 
@@ -336,7 +336,7 @@ export default function ProjectTable() {
 						<VigilioTable.thead.th />
 					</VigilioTable.thead>
 					<VigilioTable.tbody>
-						<VigilioTable.tbody.row title="No project nodes found">
+						<VigilioTable.tbody.row title="No se encontraron proyectos">
 							{(data) => <VigilioTable.tbody.td data={data} />}
 						</VigilioTable.tbody.row>
 					</VigilioTable.tbody>

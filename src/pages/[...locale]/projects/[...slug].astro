@@ -5,6 +5,10 @@ import SocialHub from "@modules/blog/components/social-hub";
 import { GlobeIcon } from "lucide-preact";
 import { BrandIcon } from "@components/extras/brand-icon";
 import { siGithub } from "simple-icons/icons";
+import { getLangFromUrl, useTranslations } from "../../../i18n";
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
 
 const { slug } = Astro.params;
 const content = `
@@ -32,13 +36,13 @@ const content = `
             href="#"
             class="flex items-center gap-2 px-4 py-2 bg-white text-black font-bold text-sm hover:bg-white/90"
           >
-            <GlobeIcon size={16} /> LIVE_DEMO
+            <GlobeIcon size={16} /> {t("slug.live_demo")}
           </a>
           <a
             href="#"
             class="flex items-center gap-2 px-4 py-2 border border-white text-white font-bold text-sm hover:bg-white/10"
           >
-            <BrandIcon icon={siGithub} size={16} /> SOURCE_CODE
+            <BrandIcon icon={siGithub} size={16} /> {t("slug.source_code")}
           </a>
         </div>
       </div>
@@ -49,7 +53,7 @@ const content = `
     >
       <div class="md:col-span-2">
         <div class="mb-8">
-          <h3 class="font-mono text-primary mb-2">IMPACT_SUMMARY</h3>
+          <h3 class="font-mono text-primary mb-2">{t("slug.impact_summary")}</h3>
           <p class="text-xl">
             Increased user engagement by 40% through sound-reactive UI
             components.
@@ -57,12 +61,12 @@ const content = `
         </div>
 
         <FuturisticMDX client:load content={content} />
-        <SocialHub client:load likes={128} comments={12} />
+        <SocialHub lang={lang} client:load likes={128} comments={12} />
       </div>
 
       <div class="md:col-span-1 space-y-8">
         <div class="p-6 border border-border rounded-xl bg-card">
-          <h4 class="font-bold mb-4 font-mono">TECH_STACK</h4>
+          <h4 class="font-bold mb-4 font-mono">{t("slug.tech_stack")}</h4>
           <ul class="space-y-2 text-sm text-muted-foreground">
             <li class="flex items-center gap-2">
               <span class="w-1 h-1 bg-primary rounded-full"></span> Astro 4.0

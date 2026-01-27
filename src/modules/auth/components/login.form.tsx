@@ -88,13 +88,12 @@ export function LoginForm({ lang = "es" }: LoginFormProps) {
 					<div className="flex items-center gap-3 mb-6">
 						<Terminal className="text-cyan-500 w-6 h-6 animate-pulse" />
 						<h1 className="text-2xl font-bold text-white tracking-wider flex items-center gap-2">
-							{">"} AUTH_USER
+							{">"} {t("auth.terminal.user")}
 						</h1>
 					</div>
 
 					<p className="text-cyan-500/60 text-xs leading-relaxed border-l-2 border-cyan-500/20 pl-3">
-						Restricted Area. Please enter valid administrative credentials to
-						decrypt portfolio data.
+						{t("auth.terminal.restricted")}
 					</p>
 				</div>
 
@@ -107,7 +106,7 @@ export function LoginForm({ lang = "es" }: LoginFormProps) {
 					>
 						<WebForm.control<AuthLoginDto>
 							name="email"
-							title="UID / EMAIL"
+							title={t("auth.terminal.uid")}
 							ico={<Mail className="w-4 h-4" />}
 							placeholder="user@system.dev"
 							disabled={lockoutInfo.value.isLocked}
@@ -117,7 +116,7 @@ export function LoginForm({ lang = "es" }: LoginFormProps) {
 						<WebForm.control<AuthLoginDto>
 							name="password"
 							type="password"
-							title="PASSPHRASE"
+							title={t("auth.terminal.passphrase")}
 							ico={<Lock className="w-4 h-4" />}
 							placeholder="•"
 							disabled={lockoutInfo.value.isLocked}
@@ -162,11 +161,11 @@ export function LoginForm({ lang = "es" }: LoginFormProps) {
 							<span className="relative z-10 flex items-center gap-2">
 								{authLoginMutation.isLoading ? (
 									<>
-										<span className="animate-pulse">PROCESSING...</span>
+										<span className="animate-pulse">{t("auth.terminal.processing")}</span>
 									</>
 								) : (
 									<>
-										[ EXECUTE LOGIN ] <ArrowRight className="w-4 h-4" />
+										[ {t("auth.terminal.execute")} ] <ArrowRight className="w-4 h-4" />
 									</>
 								)}
 							</span>
@@ -183,7 +182,7 @@ export function LoginForm({ lang = "es" }: LoginFormProps) {
 							data-testid="forgot-password-link"
 							className="hover:text-cyan-400 transition-colors"
 						>
-							{"<"} RESET_CREDENTIALS /{">"}
+							{"<"} {t("auth.terminal.reset")} /{">"}
 						</a>
 					</div>
 				</div>
@@ -197,7 +196,7 @@ export function LoginForm({ lang = "es" }: LoginFormProps) {
 					</div>
 					<div className="relative flex justify-center text-[8px] uppercase font-bold tracking-[0.3em]">
 						<span className="bg-background px-4 text-cyan-500/40">
-							EXTERNAL_AUTH_GATEWAY
+							{t("auth.terminal.gateway")}
 						</span>
 					</div>
 				</div>
@@ -227,13 +226,13 @@ export function LoginForm({ lang = "es" }: LoginFormProps) {
 							fill="currentColor"
 						/>
 					</svg>
-					[ AUTH_VIA_GOOGLE ]
+					[ {t("auth.terminal.google")} ]
 				</a>
 			</div>
 
 			<div className="text-center mt-4">
 				<p className="text-[10px] text-cyan-900/40 font-mono tracking-[0.2em]">
-					UNAUTHORIZED ACCESS IS PROHIBITED BY LAW
+					{t("auth.terminal.unauthorized")}
 				</p>
 			</div>
 		</div>

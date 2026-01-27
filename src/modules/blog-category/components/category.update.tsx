@@ -49,14 +49,14 @@ export default function CategoryUpdate({
 		updateMut.mutate(body, {
 			onSuccess({ category: updated }) {
 				sweetModal({
-					title: "Category Updated",
+					title: "Categoría Actualizada",
 					icon: "success",
 				});
 				refetch(updated);
 				onClose();
 			},
 			onError(err) {
-				handlerError(form, err, "Action Failed");
+				handlerError(form, err, "Error al actualizar");
 			},
 		});
 	};
@@ -64,28 +64,28 @@ export default function CategoryUpdate({
 
 	return (
 		<div className="space-y-4">
-			<h2 className="text-xl font-bold mb-4 text-white">Edit Category</h2>
+			<h2 className="text-xl font-bold mb-4 text-white">Editar Categoría</h2>
 			<WebForm {...form} onSubmit={onSubmit}>
 				<WebForm.control
 					name="name"
-					title="Category Name"
+					title="Nombre"
 					placeholder="DevOps"
 					ico={<Tag size={16} />}
 				/>
 				<WebForm.control
 					name="slug"
-					title="Category Slug"
+					title="Slug"
 					placeholder="devops"
 					ico={<Tag size={16} />}
 				/>
 				<WebForm.control.area
 					name="description"
-					title="Description"
-					placeholder="Articles related to infrastructure..."
+					title="Descripción"
+					placeholder="Artículos relacionados con infraestructura..."
 				/>
 				<WebForm.button.submit
-					title="Update"
-					loading_title="Updating..."
+					title="Actualizar"
+					loading_title="Actualizando..."
 					isLoading={updateMut.isLoading || false}
 					disabled={updateMut.isLoading || false}
 					className="w-full mt-4 bg-primary text-primary-foreground font-bold py-3 rounded-lg"

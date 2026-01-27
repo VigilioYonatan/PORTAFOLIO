@@ -30,7 +30,7 @@ export default function CategoryManager() {
 			{ key: "id", header: "ID", isSort: true },
 			{
 				key: "name",
-				header: "Name",
+				header: "Nombre",
 				cell: (item) => (
 					<span class="font-bold text-white uppercase text-xs tracking-tighter italic">
 						{item.name}
@@ -40,7 +40,7 @@ export default function CategoryManager() {
 			},
 			{
 				key: "created_at",
-				header: "Created",
+				header: "Creado",
 				cell: (item) => (
 					<span class="text-[10px] text-muted-foreground font-mono">
 						{formatDateTz(item.created_at)}
@@ -50,7 +50,7 @@ export default function CategoryManager() {
 			},
 			{
 				key: "action",
-				header: "Actions",
+				header: "Acciones",
 				cell: (item) => (
 					<div class="flex gap-2">
 						<button
@@ -67,8 +67,8 @@ export default function CategoryManager() {
 							type="button"
 							onClick={() => {
 								sweetModal({
-									title: "Delete category?",
-									text: "This action cannot be undone.",
+									title: "¿Eliminar categoría?",
+									text: "Esta acción no se puede deshacer.",
 									icon: "danger",
 									showCancelButton: true,
 								}).then((res) => {
@@ -107,7 +107,7 @@ export default function CategoryManager() {
 		<div className="space-y-4">
 			<div className="flex justify-between items-center">
 				<h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">
-					Categories
+					Categorías
 				</h3>
 				<button
 					onClick={() => {
@@ -117,7 +117,7 @@ export default function CategoryManager() {
 					className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg font-bold text-xs uppercase tracking-wider hover:opacity-90"
 				>
 					<Plus size={16} />
-					New
+					Nuevo
 				</button>
 			</div>
 
@@ -127,7 +127,7 @@ export default function CategoryManager() {
 						<VigilioTable.thead.th />
 					</VigilioTable.thead>
 					<VigilioTable.tbody>
-						<VigilioTable.tbody.row title="No categories found">
+						<VigilioTable.tbody.row title="No se encontraron categorías">
 							{(data) => <VigilioTable.tbody.td data={data} />}
 						</VigilioTable.tbody.row>
 					</VigilioTable.tbody>

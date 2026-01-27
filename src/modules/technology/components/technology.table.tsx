@@ -30,7 +30,7 @@ export default function TechnologyTable() {
 		columns: [
 			{
 				key: "icon",
-				header: "Visual",
+				header: "Icono",
 				cell: (row) => (
 					<div class="w-10 h-10 rounded-lg bg-zinc-900 border border-white/5 overflow-hidden flex items-center justify-center p-1.5">
 						{row.icon && row.icon.length > 0 ? (
@@ -50,7 +50,7 @@ export default function TechnologyTable() {
 			},
 			{
 				key: "name",
-				header: "Component_ID",
+				header: "Nombre",
 				cell: (row) => (
 					<div class="flex flex-col">
 						<span class="text-xs font-black uppercase text-foreground">
@@ -64,7 +64,7 @@ export default function TechnologyTable() {
 			},
 			{
 				key: "category",
-				header: "Module_Class",
+				header: "Categoría",
 				cell: (row) => (
 					<span
 						class={cn(
@@ -82,7 +82,7 @@ export default function TechnologyTable() {
 			},
 			{
 				key: "action",
-				header: "Ops",
+				header: "Acciones",
 				cell: (row) => (
 					<div class="flex items-center gap-1">
 						<button
@@ -98,11 +98,11 @@ export default function TechnologyTable() {
 							type="button"
 							onClick={() => {
 								sweetModal({
-									title: "PURGE_COMPONENT?",
-									text: `Remove neural record for "${row.name}"?`,
+									title: "¿ELIMINAR COMPONENTE?",
+									text: `¿Eliminar registro de "${row.name}"?`,
 									icon: "danger",
 									showCancelButton: true,
-									confirmButtonText: "TERMINATE",
+									confirmButtonText: "ELIMINAR",
 								}).then(({ isConfirmed }) => {
 									if (isConfirmed) {
 										destroyMutation.mutate(row.id, {
@@ -113,7 +113,7 @@ export default function TechnologyTable() {
 												}));
 												sweetModal({
 													icon: "success",
-													title: "Record Deleted",
+													title: "Componente Eliminado",
 												});
 											},
 										});
@@ -149,10 +149,10 @@ export default function TechnologyTable() {
 				<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
 					<div class="flex flex-col">
 						<span class="text-[9px] font-black tracking-[0.3em] text-primary/40 uppercase">
-							Tech_Inventory
+							Inventario_Tech
 						</span>
 						<h3 class="text-xl font-black tracking-tight uppercase">
-							Neural Core Stack
+							Stack Tecnológico
 						</h3>
 					</div>
 					<button
@@ -163,7 +163,7 @@ export default function TechnologyTable() {
 						class="flex items-center gap-2 bg-primary text-primary-foreground px-6 py-3 text-[10px] font-black uppercase tracking-widest rounded-xl hover:brightness-110 transition-all shadow-[0_0_20px_rgba(var(--primary-rgb),0.3)]"
 					>
 						<Plus size={14} />
-						Initialise Node
+						Agregar Tecnología
 					</button>
 				</div>
 			</div>
@@ -175,7 +175,7 @@ export default function TechnologyTable() {
 					</VigilioTable.thead.row>
 				</VigilioTable.thead>
 				<VigilioTable.tbody>
-					<VigilioTable.tbody.row title="No tech nodes found">
+					<VigilioTable.tbody.row title="No se encontraron tecnologías">
 						{(data) => <VigilioTable.tbody.td data={data} />}
 					</VigilioTable.tbody.row>
 				</VigilioTable.tbody>

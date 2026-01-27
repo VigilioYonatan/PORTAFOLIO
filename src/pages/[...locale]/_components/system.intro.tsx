@@ -2,15 +2,20 @@ import { cn } from "@infrastructure/utils/client";
 import { useSignal } from "@preact/signals";
 import { useEffect, useMemo } from "preact/hooks";
 
-const BOOT_LOGS = [
-	{ id: "0x00A1", text: "LOADING KERNEL DRIVERS...", status: "OK" },
-	{ id: "0x00B4", text: "MOUNTING FILE SYSTEM...", status: "OK" },
-	{ id: "0x00C7", text: "CONNECTING TO PGVECTOR CLUSTER...", status: "OK" },
-	{ id: "0x00D9", text: "TRAINING NEURAL WEIGHTS...", status: "OK" },
-	{ id: "0x00E2", text: "RETRIEVING EMBEDDINGS...", status: "WARN" },
-	{ id: "0x00F5", text: "OPTIMIZING LLM CONTEXT WINDOW...", status: "OK" },
-	{ id: "0x010A", text: "ESTABLISHING NEURO-LINK...", status: "PENDING" },
-];
+import { useTranslations } from "@src/i18n";
+
+export default function SystemIntro({ lang = "es" }: { lang?: string }) {
+    const t = useTranslations(lang as any);
+	
+	const BOOT_LOGS = [
+		{ id: "0x00A1", text: t("intro.boot.kernel"), status: "OK" },
+		{ id: "0x00B4", text: t("intro.boot.filesystem"), status: "OK" },
+		{ id: "0x00C7", text: t("intro.boot.cluster"), status: "OK" },
+		{ id: "0x00D9", text: t("intro.boot.neural"), status: "OK" },
+		{ id: "0x00E2", text: t("intro.boot.embeddings"), status: "WARN" },
+		{ id: "0x00F5", text: t("intro.boot.llm"), status: "OK" },
+		{ id: "0x010A", text: t("intro.boot.uplink"), status: "PENDING" },
+	];
 
 // Helper to generate random starts
 const generateStars = (count: number) => {
@@ -23,7 +28,7 @@ const generateStars = (count: number) => {
 	return value.slice(0, -2);
 };
 
-export default function SystemIntro() {
+	/* Moved BOOT_LOGS inside component to access t() */
 	const isVisible = useSignal(true);
 	const bootProgress = useSignal(0);
 	const currentLogIndex = useSignal(0);
@@ -137,10 +142,10 @@ export default function SystemIntro() {
 				{/* Header */}
 				<div class="space-y-2 text-center">
 					<h2 class="text-3xl md:text-4xl font-black text-white tracking-widest animate-pulse">
-						SYSTEM BOOT
+						{t("intro.system_boot")}
 					</h2>
 					<p class="text-[10px] text-primary/60 tracking-[0.5em] font-bold uppercase">
-						Initializing Senior Environment
+						{t("intro.initializing")}
 					</p>
 				</div>
 
@@ -174,7 +179,7 @@ export default function SystemIntro() {
 				{/* Progress Bar */}
 				<div class="space-y-4">
 					<div class="flex justify-between items-center text-[10px] tracking-widest uppercase font-bold">
-						<span class="text-zinc-500">LOADING MODULES</span>
+						<span class="text-zinc-500">{t("intro.loading_modules")}</span>
 						<span class="text-primary">{Math.round(bootProgress.value)}%</span>
 					</div>
 					<div class="w-full h-1 bg-zinc-900 rounded-full overflow-hidden">
@@ -188,7 +193,7 @@ export default function SystemIntro() {
 
 			{/* Bottom Info */}
 			<div class="absolute bottom-8 text-[9px] text-zinc-600 tracking-[0.3em] uppercase">
-				{"Secure Connection Established // TLS 1.3"}
+				{t("intro.secure_connection")}
 			</div>
 		</div>
 	);
