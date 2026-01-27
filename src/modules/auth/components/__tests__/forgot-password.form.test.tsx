@@ -56,10 +56,10 @@ describe("ForgotPasswordForm", () => {
 			name: /SEND INSTRUCTIONS/i,
 		});
 
-		await fireEvent.change(emailInput, {
+		fireEvent.change(emailInput, {
 			target: { value: "test@example.com" },
 		});
-		await fireEvent.click(submitButton);
+		fireEvent.click(submitButton);
 
 		await waitFor(() => {
 			expect(mutateMock).toHaveBeenCalledWith({ email: "test@example.com" });

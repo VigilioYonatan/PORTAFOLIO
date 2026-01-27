@@ -45,7 +45,7 @@ describe("SkillBentoGrid Component", () => {
 	it("renders grid headers", () => {
 		render(<SkillBentoGrid />);
 		expect(screen.getByText("CAPABILITIES_INVENTORY")).toBeInTheDocument();
-		expect(screen.getByText("SKILL_SET.json")).toBeInTheDocument();
+		expect(screen.getByText("SKILL_SET.manifest")).toBeInTheDocument();
 	});
 
 	it("shows empty state when no technologies found", () => {
@@ -57,6 +57,6 @@ describe("SkillBentoGrid Component", () => {
 		} as any);
 
 		render(<SkillBentoGrid />);
-		expect(screen.getByText("NO_CAPABILITIES_FOUND")).toBeInTheDocument();
+		expect(screen.getByText("[ EMPTY_RECOGNITION_POOL ]")).toBeInTheDocument();
 	});
 });

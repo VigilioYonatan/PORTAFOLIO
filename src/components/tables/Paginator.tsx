@@ -1,4 +1,4 @@
-import Loader from "@components/extras/loader";
+import Loader from "@components/extras/Loader";
 import { useContext } from "preact/hooks";
 import { VigilioTableContext } from "./vigilio-table";
 

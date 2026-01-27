@@ -68,6 +68,7 @@ export class ChatRepository {
 			sortBy,
 			sortDir,
 			search,
+			grouped,
 		} = query;
 
 		const baseWhere: SQL[] = [eq(conversationEntity.tenant_id, tenant_id)];
@@ -80,6 +81,49 @@ export class ChatRepository {
 		if (search) baseWhere.push(ilike(conversationEntity.title, `%${search}%`));
 
 		const baseWhereClause = and(...baseWhere);
+
+		// If grouped by IP, we only want the latest conversation for each IP
+		if (grouped) {
+			// Subquery to get the latest updated_at for each ip_address
+			const latestConversations = this.db
+				.select({
+					latest_ip: conversationEntity.ip_address,
+					max_updated: sql<string>`MAX(${conversationEntity.updated_at})`.as(
+						"max_updated",
+					),
+				})
+				.from(conversationEntity)
+				.where(baseWhereClause)
+				.groupBy(conversationEntity.ip_address)
+				.as("latest_convs");
+
+			const itemsQuery = this.db
+				.select()
+				.from(conversationEntity)
+				.innerJoin(
+					latestConversations,
+					and(
+						eq(conversationEntity.ip_address, latestConversations.latest_ip),
+						eq(conversationEntity.updated_at, latestConversations.max_updated),
+					),
+				)
+				.orderBy(desc(conversationEntity.updated_at))
+				.limit(limit || 20)
+				.offset(offset || 0);
+
+			const countQuery = this.db
+				.select({ count: sql<number>`COUNT(DISTINCT ${conversationEntity.ip_address})` })
+				.from(conversationEntity)
+				.where(baseWhereClause);
+
+			const [items, countResult] = await Promise.all([
+				itemsQuery,
+				countQuery,
+			]);
+
+			// Format items to remove join structure
+			return [items.map(i => i.conversations), Number(countResult[0].count)];
+		}
 
 		let orderBy: SQL<unknown>[] = [desc(conversationEntity.updated_at)];
 
@@ -127,4 +171,53 @@ export class ChatRepository {
 		});
 		return toNull(result);
 	}
+
+	async countByTenant(tenant_id: number): Promise<number> {
+		const result = await this.db
+			.select({ count: sql<number>`count(*)` })
+			.from(conversationEntity)
+			.where(eq(conversationEntity.tenant_id, tenant_id));
+		return Number(result[0].count);
+	}
+
+	async countWeeklyByTenant(
+		tenant_id: number,
+	): Promise<{ day: string; count: number }[]> {
+		const sevenDaysAgo = new Date();
+		sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+		const result = await this.db
+			.select({
+				day: sql<string>`DATE(${conversationEntity.created_at})`,
+				count: sql<number>`count(*)`,
+			})
+			.from(conversationEntity)
+			.where(
+				and(
+					eq(conversationEntity.tenant_id, tenant_id),
+					sql`${conversationEntity.created_at} >= ${sevenDaysAgo}`,
+				),
+			)
+			.groupBy(sql`DATE(${conversationEntity.created_at})`)
+			.orderBy(sql`DATE(${conversationEntity.created_at})`);
+
+		return result.map((r) => ({ day: r.day, count: Number(r.count) }));
+	}
+
+	async updateConversationMode(
+		tenant_id: number,
+		conversation_id: number,
+		mode: ConversationSchema["mode"],
+	): Promise<void> {
+		await this.db
+			.update(conversationEntity)
+			.set({ mode })
+			.where(
+				and(
+					eq(conversationEntity.id, conversation_id),
+					eq(conversationEntity.tenant_id, tenant_id),
+				),
+			);
+	}
 }
+

@@ -1,12 +1,9 @@
-import "@infrastructure/config/opentelemetry"; // 1. OpenTelemetry setup (Must be first)
-import path from "node:path";
 import { validateEnvironments } from "@infrastructure/config/server";
 import { configureApp } from "@infrastructure/config/server/app.config";
 import { astroProxy } from "@infrastructure/utils/server";
 import { SessionConfigService } from "@modules/auth/config/session.config";
 import { ConfigService } from "@nestjs/config";
 import { NestFactory } from "@nestjs/core";
-import express, { json, urlencoded } from "express";
 import { Logger } from "nestjs-pino";
 import { AppModule } from "./app.module";
 
@@ -24,12 +21,6 @@ async function bootstrap() {
 
 	// Logger
 	app.useLogger(app.get(Logger));
-
-	app.use(json({ limit: "100mb" }));
-	app.use(urlencoded({ extended: true, limit: "100mb" }));
-
-	// Static file serving for LOCAL storage provider
-	app.use("/public", express.static(path.resolve(process.cwd(), "public")));
 
 	// Security Headers
 	// app.use(helmet(helmetConfig(configService)));

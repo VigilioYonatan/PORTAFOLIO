@@ -93,19 +93,17 @@ describe("AuthService", () => {
 		}).compile();
 
 		// Default mock for TOTP
-		vi.mocked(TOTP).mockImplementation(
-			(() =>
-				({
-					generateSecret: vi.fn().mockReturnValue("mock_secret"),
-					generate: vi.fn().mockResolvedValue("123456"),
-					verify: vi.fn().mockReturnValue(true),
-					toURI: vi.fn().mockReturnValue("mock_uri"),
-					options: {},
-					checkDelta: vi.fn(),
-					check: vi.fn(),
-					defaultOptions: {},
-				}) as unknown as TOTP) as unknown as any,
-		);
+		vi.mocked(TOTP).mockImplementation(function (this: any) {
+			this.generateSecret = vi.fn().mockReturnValue("mock_secret");
+			this.generate = vi.fn().mockResolvedValue("123456");
+			this.verify = vi.fn().mockReturnValue(true);
+			this.toURI = vi.fn().mockReturnValue("mock_uri");
+			this.options = {};
+			this.checkDelta = vi.fn();
+			this.check = vi.fn();
+			this.defaultOptions = {};
+			return this;
+		} as any);
 
 		service = module.get<AuthService>(AuthService);
 		userService = module.get<UserService>(UserService);
@@ -347,14 +345,14 @@ describe("AuthService", () => {
 
 			vi.mocked(userService.showByIdForAuth).mockResolvedValue(user);
 
-			vi.mocked(TOTP).mockImplementation(
-				(() =>
-					({
-						verify: vi.fn().mockReturnValue(false),
-						generateSecret: vi.fn(),
-						toURI: vi.fn(),
-					}) as unknown as TOTP) as unknown as any,
-			);
+			vi.mocked(TOTP).mockImplementation(function (this: any) {
+				this.verify = vi.fn().mockReturnValue(false);
+				this.generateSecret = vi.fn();
+				this.toURI = vi.fn();
+				this.checkDelta = vi.fn();
+				this.check = vi.fn();
+				return this;
+			} as any);
 
 			await expect(
 				service.verifyMfaSetup(tenantId, userId, { token }),
@@ -420,14 +418,14 @@ describe("AuthService", () => {
 			vi.mocked(userService.showByIdForAuth).mockResolvedValue(user);
 			vi.mocked(bcrypt.compare).mockResolvedValue(true as never);
 
-			vi.mocked(TOTP).mockImplementation(
-				(() =>
-					({
-						verify: vi.fn().mockReturnValue(false),
-						generateSecret: vi.fn(),
-						toURI: vi.fn(),
-					}) as unknown as TOTP) as unknown as any,
-			);
+			vi.mocked(TOTP).mockImplementation(function (this: any) {
+				this.verify = vi.fn().mockReturnValue(false);
+				this.generateSecret = vi.fn();
+				this.toURI = vi.fn();
+				this.checkDelta = vi.fn();
+				this.check = vi.fn();
+				return this;
+			} as any);
 
 			await expect(service.disableMfa(1, 1, mfaDisableDto)).rejects.toThrow(
 				BadRequestException,

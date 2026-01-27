@@ -1,8 +1,8 @@
 ---
-import { getLangFromUrl, useTranslations } from "@src/i18n";
+import { getLangFromUrl } from "@src/i18n";
 import ActiveUsersStat from "@components/extras/active-users.stat";
 import {
-  Home,
+  House,
   FolderGit2,
   BookOpen,
   GitBranch,
@@ -13,7 +13,7 @@ import {
 const lang = getLangFromUrl(Astro.url);
 
 const navItems = [
-  { label: "/HOME", href: "/", icon: Home },
+  { label: "/HOME", href: "/", icon: House },
   { label: "/PROJECTS", href: "/projects", icon: FolderGit2 },
   { label: "/BLOG_LOG", href: "/blog", icon: BookOpen },
   { label: "/EXP_TREE", href: "/experience", icon: GitBranch },

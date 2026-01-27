@@ -33,6 +33,12 @@ export function blogCategoryIndexApi(table: BlogCategoryIndexTable | null) {
 				if (table.search.debounceTerm) {
 					data.append("search", table.search.debounceTerm);
 				}
+				if (
+					table.pagination.value.cursor &&
+					table.pagination.value.offset > 0
+				) {
+					data.append("cursor", String(table.pagination.value.cursor));
+				}
 			}
 			const response = await fetch(`/api/v1${url}?${data}`);
 			const result = await response.json();
@@ -41,6 +47,8 @@ export function blogCategoryIndexApi(table: BlogCategoryIndexTable | null) {
 		},
 		{
 			onSuccess(data) {
+				const lastItem = data.results[data.results.length - 1];
+				const nextCursor = lastItem ? lastItem.id : null;
 				if (table) {
 					table.updateData({
 						result: data.results,
@@ -48,6 +56,7 @@ export function blogCategoryIndexApi(table: BlogCategoryIndexTable | null) {
 						methods: {
 							refetch: query.refetch,
 						},
+						cursor: nextCursor,
 					});
 				}
 			},

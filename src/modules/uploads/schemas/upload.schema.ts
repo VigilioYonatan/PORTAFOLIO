@@ -1,4 +1,5 @@
 import { z } from "@infrastructure/config/zod-i18n.config";
+import { customDateSchema } from "@infrastructure/schemas/time_stamp.schema";
 export function filesSchema(dimensions?: number[]) {
 	return z.object({
 		dimension: z
@@ -12,7 +13,7 @@ export function filesSchema(dimensions?: number[]) {
 		original_name: z.string(),
 		size: z.number(),
 		mimetype: z.string(),
-		created_at: z.date().optional(),
+		created_at: customDateSchema.optional(),
 	});
 }
 

@@ -17,18 +17,13 @@ import { DocumentModule } from "@modules/documents/document.module";
 import { MusicModule } from "@modules/music/music.module";
 import { NotificationModule } from "@modules/notification/notification.module";
 import { PortfolioConfigModule } from "@modules/portfolio-config/portfolio-config.module";
-// import { TestimonialModule } from "@modules/testimonial/modules/testimonial.module";
+import { TestimonialModule } from "@modules/testimonial/modules/testimonial.module";
 import { ProjectModule } from "@modules/project/project.module";
 import { TecheableModule } from "@modules/techeable/techeable.module";
-// import { WorkExperienceModule } from "@modules/work-experience/work-experience.module";
-// import { BlogCategoryModule } from "@modules/blog-category/blog-category.module";
-// import { BlogPostModule } from "@modules/blog-post/blog-post.module";
+import { BlogPostModule } from "@modules/blog-post/blog-post.module";
 import { TechnologyModule } from "@modules/technology/technology.module";
-// import { RecruitmentModule } from "@modules/recruitment/modules/recruitment.module";
-// import { RoleModule } from "@modules/role/modules/role.module";
 import { TenantModule } from "@modules/tenant/modules/tenant.module";
 import { UploadModule } from "@modules/uploads/modules/upload.module";
-// import { UsageModule } from "@modules/usage/modules/usage.module";
 import { UserModule } from "@modules/user/user.module";
 import { WebModule } from "@modules/web/modules/web.module";
 import { WorkMilestoneModule } from "@modules/work-milestone/work-milestone.module";
@@ -39,6 +34,8 @@ import { EventEmitterModule } from "@nestjs/event-emitter";
 import { ThrottlerModule } from "@nestjs/throttler";
 import { ChatModule } from "./modules/chat/chat.module";
 import { SocialModule } from "./modules/social/social.module";
+import { BlogCategoryModule } from "@modules/blog-category/blog-category.module";
+import { WorkExperienceModule } from "@modules/work-experience/work-experience.module";
 
 @Module({
 	imports: [
@@ -64,11 +61,15 @@ import { SocialModule } from "./modules/social/social.module";
 		SocialModule,
 		PortfolioConfigModule,
 		ProjectModule,
+		BlogCategoryModule,
+		BlogPostModule,
+		WorkExperienceModule,
 		TecheableModule,
 		TechnologyModule,
 		MusicModule,
 		NotificationModule,
 		AnalyticsModule,
+		TestimonialModule,
 		WorkMilestoneModule,
 		WebModule,
 	],

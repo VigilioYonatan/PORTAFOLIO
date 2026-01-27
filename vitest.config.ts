@@ -37,7 +37,7 @@ export default defineConfig({
 				inline: ["react-hook-form"],
 			},
 		},
-		environment: "node",
+		environment: "happy-dom",
 		globals: true,
 		pool: "forks",
 		testTimeout: 30000,

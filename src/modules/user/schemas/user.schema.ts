@@ -9,7 +9,7 @@ import { filesSchema } from "@modules/uploads/schemas/upload.schema";
 export const userSchema = z.object({
 	id: z.number().int().positive(),
 	username: z.string().max(50),
-	email: z.string().email().max(100),
+	email: z.email().max(100),
 	password: z
 		.string()
 		.min(8)
@@ -22,7 +22,7 @@ export const userSchema = z.object({
 	google_id: z.string().max(100).nullable(),
 	qr_code_token: z.string().max(100).nullable(),
 	status: z.enum(["ACTIVE", "BANNED", "PENDING"]),
-	security_stamp: z.string().uuid(),
+	security_stamp: z.uuid(),
 	failed_login_attempts: z.number().int().min(0),
 	is_mfa_enabled: z.boolean(),
 	is_superuser: z.boolean(),

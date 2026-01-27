@@ -1,7 +1,7 @@
 import type { Environments } from "@infrastructure/config/server/environments.config";
 import { Injectable, Logger } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import { OpenRouter } from "@openrouter/sdk";
+import OpenAI from "openai";
 import type { ChatCompletionMessageParam } from "openai/resources/chat/completions";
 import { type Observable, Subject } from "rxjs";
 import { AiCache } from "../caches/ai.cache";
@@ -12,7 +12,7 @@ import type {
 } from "../dtos/ai.response.dto";
 import type { AiConfigUpdateDto } from "../dtos/ai-config.update.dto";
 import { AiConfigRepository } from "../repositories/ai-config.repository";
-import type { Message } from "@openrouter/sdk/models";
+
 
 @Injectable()
 export class AiService {
@@ -82,7 +82,8 @@ export class AiService {
 			infer: true,
 		})!;
 
-		const openRouter = new OpenRouter({
+		const openai = new OpenAI({
+			baseURL: "https://openrouter.ai/api/v1",
 			apiKey,
 		});
 
@@ -90,21 +91,17 @@ export class AiService {
 
 		(async () => {
 			try {
-				const result = await openRouter.chat.send({
+				const stream = await openai.chat.completions.create({
 					model: props.model,
 					temperature: props.temperature,
 					messages: [
 						{ role: "system", content: props.system },
-						...props.messages as Message[],
-					] , // Cast to avoid minor type mismatches between OpenAI and OpenRouter definitions
-					provider: {
-						sort: "price",
-					},
+						...props.messages,
+					],
 					stream: true,
 				});
 
-				for await (const chunk of result) {
-					// OpenRouter SDK chunk structure might vary, adapting based on OpenAI compatibility or direct access
+				for await (const chunk of stream) {
 					const content = chunk.choices[0]?.delta?.content || "";
 					if (content) {
 						subject.next({ data: { content } });
@@ -122,62 +119,39 @@ export class AiService {
 	}
 
 	async getEmbeddings(text: string): Promise<number[]> {
-		this.logger.debug({ textLength: text.length }, "Generating embeddings");
+		this.logger.debug({ textLength: text.length }, "Generating embeddings via API");
 
-		// =========================================================================
-		// SIMPLE WORD-BASED EMBEDDINGS (No external dependencies)
-		// =========================================================================
-		// Uses word hashing to create a fixed-size vector (384 dimensions)
-		// Not as accurate as neural embeddings but works without API or sharp
-		// =========================================================================
+		const apiKey = this.configService.get("OPENROUTER_API_KEY", {
+			infer: true,
+		})!;
 
-		const DIMENSIONS = 384;
-		const embedding = new Array(DIMENSIONS).fill(0);
+		const openai = new OpenAI({
+			baseURL: "https://openrouter.ai/api/v1",
+			apiKey,
+		});
 
-		// Normalize and tokenize text
-		const words = text
-			.toLowerCase()
-			.replace(/[^\w\s]/g, " ")
-			.split(/\s+/)
-			.filter((word) => word.length > 2);
+		try {
+			const response = await openai.embeddings.create({
+				model: "text-embedding-3-small",
+				input: text,
+				dimensions: 1536,
+			});
 
-		if (words.length === 0) {
+			const embedding = response.data[0]?.embedding;
+
+			if (!embedding || embedding.length !== 1536) {
+				this.logger.error(
+					"Invalid embedding dimensions or empty response",
+					response,
+				);
+				throw new Error("Failed to generate valid embeddings");
+			}
+
 			return embedding;
+		} catch (error) {
+			this.logger.error("Embedding Generation Error", error);
+			// Fallback or rethrow? For now rethrow as this is critical for RAG
+			throw error;
 		}
-
-		// Simple hash function
-		const hashWord = (word: string): number => {
-			let hash = 0;
-			for (let i = 0; i < word.length; i++) {
-				const char = word.charCodeAt(i);
-				hash = (hash << 5) - hash + char;
-				hash = hash & hash; // Convert to 32bit integer
-			}
-			return Math.abs(hash);
-		};
-
-		// Create embedding by distributing word hashes across dimensions
-		for (const word of words) {
-			const hash = hashWord(word);
-			const primaryIndex = hash % DIMENSIONS;
-			const secondaryIndex = (hash * 31) % DIMENSIONS;
-			const value = ((hash % 1000) / 1000) * 2 - 1; // Value between -1 and 1
-
-			embedding[primaryIndex] += value;
-			embedding[secondaryIndex] += value * 0.5;
-		}
-
-		// Normalize the embedding (L2 normalization)
-		const magnitude = Math.sqrt(
-			embedding.reduce((sum, val) => sum + val * val, 0),
-		);
-
-		if (magnitude > 0) {
-			for (let i = 0; i < DIMENSIONS; i++) {
-				embedding[i] = embedding[i] / magnitude;
-			}
-		}
-
-		return embedding;
 	}
 }

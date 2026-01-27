@@ -11,11 +11,11 @@ const ProjectManager = lazy(
 const BlogManager = lazy(() => import("./_components/blog/blog.manager"));
 
 const HRDashboard = lazy(() => import("./_components/hr/hr.dashboard"));
-const Inbox = lazy(() => import("./_components/inbox/inbox"));
+const Inbox = lazy(() => import("./_components/inbox/Inbox"));
 const SharedWorkspace = lazy(
 	() => import("./_components/shared/shared.workspace"),
 );
-const Settings = lazy(() => import("./_components/settings/settings"));
+const Settings = lazy(() => import("./_components/settings/Settings"));
 
 export function DashboardRouter() {
 	return (

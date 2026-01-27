@@ -1550,7 +1550,7 @@ useEffect(() => {
   console.log(name);
   if (name) {
     // puedes hacer mucho con los watch
-    userStoreForm.setValue("slug", slug(name));
+    userStoreForm.setValue("slug", slugify(name));
   }
 }, [name]);
 ```
@@ -1566,6 +1566,7 @@ function UserUpdate({ user, refetch }: UserUpdateProps) {
   const userUpdateForm = useForm<UserUpdateDto>({
     resolver: valibotResolver(userUpdateDto),
     // Trata de poner todo el objeto que viene (spread), si se modifica usa spread {...user, prop: mod}, NO pasar uno por uno.
+    // SI tiene fecha {fecha: formatDate(project.start_date,"YYYY-MM-DD") as unknown as Date}
     defaultValues: user, // esto es solo para updat
     mode: "all",
   });

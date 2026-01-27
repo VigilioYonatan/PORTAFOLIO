@@ -17,33 +17,38 @@ export class UserSeeder {
 		const saltRounds = 10;
 		const defaultPassword = await bcrypt.hash("Dokixd123@", saltRounds);
 
-		const usersSeed: InferInsertModel<typeof userEntity>[] = Array.from(
-			{ length: 10 },
-			(_, i) => ({
-				username: `admin_${i}`,
-				email: `admin${i}@gmail.com`,
-				password: defaultPassword,
+		const usersSeed: InferInsertModel<typeof userEntity>[] = [
+			{
+				username: "admin",
+				email: "admin@localhost.com",
+				password: await bcrypt.hash("Password123!", saltRounds),
 				status: "ACTIVE",
 				is_superuser: true,
+				is_mfa_enabled: false,
+				phone_number: "+1234567890",
+				failed_login_attempts: 0,
+				security_stamp: faker.string.uuid(),
+				role_id: 1,
+				tenant_id: 1, // Assumes tenant 1 is created by TenantSeeder
+				created_at: new Date(),
+				updated_at: new Date(),
+			},
+			...Array.from({ length: 9 }, (_, i) => ({
+				username: `user_${i}`,
+				email: `user${i}@example.com`,
+				password: defaultPassword,
+				status: "ACTIVE" as const,
+				is_superuser: false,
 				is_mfa_enabled: false,
 				phone_number: faker.phone.number(),
 				failed_login_attempts: 0,
 				security_stamp: faker.string.uuid(),
-				avatar: null,
-				google_id: null,
-				qr_code_token: null,
-				email_verified_at: new Date(),
-				lockout_end_at: null,
-				role_id: 1,
+				role_id: 2,
 				tenant_id: 1,
-				mfa_secret: null,
-				last_ip_address: null,
-				last_login_at: null,
 				created_at: new Date(),
 				updated_at: new Date(),
-				deleted_at: null,
-			}),
-		);
+			})),
+		];
 
 		return await this.db.insert(userEntity).values(usersSeed).returning();
 	}

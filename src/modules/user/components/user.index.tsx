@@ -1,7 +1,7 @@
-import Badge from "@components/extras/badge";
+import Badge from "@components/extras/Badge";
 import { Card } from "@components/extras/card";
 import EllipsisMenu from "@components/extras/ellipsis-menu";
-import Modal from "@components/extras/modal";
+import Modal from "@components/extras/Modal";
 import VigilioTable from "@components/tables";
 import { cn, sizeIcon } from "@infrastructure/utils/client";
 import dayjs from "@infrastructure/utils/hybrid/date.utils";

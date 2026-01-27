@@ -3,13 +3,13 @@ import { Test, TestingModule } from "@nestjs/testing";
 import { MusicTrackCache } from "../cache/music.cache";
 import { MusicTrackRepository } from "../repositories/music.repository";
 import type { MusicTrackSchema } from "../schemas/music.schema";
-import { MusicTrackService } from "../services/music.service";
+import { MusicService } from "../services/music.service";
 import { MusicFactory } from "./music.factory";
 
 const TENANT_ID = 1;
 
-describe("MusicTrackService", () => {
-	let service: MusicTrackService;
+describe("MusicService", () => {
+	let service: MusicService;
 	let repository: {
 		index: ReturnType<typeof vi.fn>;
 		store: ReturnType<typeof vi.fn>;
@@ -40,13 +40,13 @@ describe("MusicTrackService", () => {
 
 		const module: TestingModule = await Test.createTestingModule({
 			providers: [
-				MusicTrackService,
+				MusicService,
 				{ provide: MusicTrackRepository, useValue: repository },
 				{ provide: MusicTrackCache, useValue: cache },
 			],
 		}).compile();
 
-		service = module.get<MusicTrackService>(MusicTrackService);
+		service = module.get<MusicService>(MusicService);
 		vi.clearAllMocks();
 	});
 

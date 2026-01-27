@@ -1,4 +1,4 @@
-import Loader from "@components/extras/loader";
+import Loader from "@components/extras/Loader";
 import { cn } from "@infrastructure/utils/client";
 import { type JSX } from "preact";
 

@@ -90,7 +90,7 @@ export function CardFooter({
 	);
 }
 
-Card.header = CardHeader;
-Card.title = CardTitle;
-Card.content = CardContent;
-Card.footer = CardFooter;
+Card.Header = CardHeader;
+Card.Title = CardTitle;
+Card.Content = CardContent;
+Card.Footer = CardFooter;

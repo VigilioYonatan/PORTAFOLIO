@@ -1,7 +1,7 @@
 import { paginator } from "@infrastructure/utils/server";
 import type { AiConfigSchema } from "@modules/ai/schemas/ai-config.schema";
 import { AiService } from "@modules/ai/services/ai.service";
-import { ConversationService } from "@modules/chat/services/conversation.service";
+import { ChatService } from "@modules/chat/services/chat.service";
 import { Injectable, Logger } from "@nestjs/common";
 import { lastValueFrom } from "rxjs";
 import { last, scan } from "rxjs/operators";
@@ -20,7 +20,7 @@ export class AiInsightService {
 
 	constructor(
 		private readonly repository: AiInsightRepository,
-		private readonly conversationService: ConversationService,
+		private readonly chatService: ChatService,
 		private readonly aiService: AiService,
 		private readonly cache: AiInsightCache,
 	) {}
@@ -57,7 +57,7 @@ export class AiInsightService {
 		this.logger.log({ tenant_id }, "Generating AI insights");
 
 		// 1. Fetch recent conversations
-		const conversations = await this.conversationService.getRecentForAnalysis(
+		const conversations = await this.chatService.getRecentForAnalysis(
 			tenant_id,
 			50,
 		);

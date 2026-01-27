@@ -1,4 +1,4 @@
-import Loader from "@components/extras/loader";
+import Loader from "@components/extras/Loader";
 import { sizeIcon } from "@infrastructure/utils/client";
 import { ChevronLeft, ChevronRight } from "lucide-preact";
 import { Fragment } from "preact/jsx-runtime";

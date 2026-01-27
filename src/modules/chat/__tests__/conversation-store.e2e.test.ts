@@ -9,11 +9,10 @@ import { AppModule } from "../../../app.module";
 
 describe("Conversation - POST /conversation (E2E)", () => {
 	let app: INestApplication;
-	let tenantId: number;
 
 	beforeAll(async () => {
 		const db = await setupTestDb();
-		tenantId = await seedLocalhostTenant(db);
+		await seedLocalhostTenant(db);
 
 		const moduleRef = await Test.createTestingModule({
 			imports: [AppModule],

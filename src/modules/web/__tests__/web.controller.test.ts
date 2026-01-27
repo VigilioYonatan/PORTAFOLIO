@@ -6,7 +6,7 @@ import { WebService } from "../services/web.service";
 
 // Mock astroRender
 vi.mock("@infrastructure/utils/server", () => ({
-	astroRender: (props: any) => (req: any, res: any, next: any) => {
+	astroRender: (props: any) => (_req: any, res: any, _next: any) => {
 		res.locals = { ...res.locals, props };
 		return "rendered";
 	},

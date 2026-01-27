@@ -18,7 +18,7 @@ export function testimonialStoreApi() {
 		TestimonialStoreResponseDto,
 		TestimonialStoreDto,
 		TestimonialStoreApiError
-	>("/testimonials", async (url, body) => {
+	>("/testimonial", async (url, body) => {
 		const response = await fetch(`/api/v1${url}`, {
 			method: "POST",
 			body: JSON.stringify(body),

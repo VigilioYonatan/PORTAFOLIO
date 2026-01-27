@@ -27,6 +27,7 @@ export interface ConversationIndexApiError {
 export function conversationIndexApi(
 	table: ConversationIndexTable | null = null,
 	paginator: UsePaginator | null = null,
+	extraParams: Record<string, string | boolean | number> = {},
 ) {
 	const query = useQuery<ConversationIndexResponseClassDto, ConversationIndexApiError>(
 		"/chat/conversations",
@@ -50,6 +51,12 @@ export function conversationIndexApi(
 			if (paginator) {
 				data.append("offset", String(paginator.pagination.value.offset));
 				data.append("limit", String(paginator.pagination.value.limit));
+			}
+
+			for (const [key, value] of Object.entries(extraParams)) {
+				if (value !== undefined && value !== null) {
+					data.append(key, String(value));
+				}
 			}
 
 			const response = await fetch(`/api/v1${url}?${data}`);

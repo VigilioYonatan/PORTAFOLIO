@@ -18,7 +18,7 @@ export function testimonialUpdateApi(id: number) {
 		TestimonialUpdateResponseDto,
 		TestimonialUpdateDto,
 		TestimonialUpdateApiError
-	>(`/testimonials/${id}`, async (url, body) => {
+	>(`/testimonial/${id}`, async (url, body) => {
 		const response = await fetch(`/api/v1${url}`, {
 			method: "PATCH",
 			body: JSON.stringify(body),

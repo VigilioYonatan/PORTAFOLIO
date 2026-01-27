@@ -10,7 +10,7 @@ import {
 	XIcon,
 } from "lucide-preact";
 import type { JSX } from "preact/jsx-runtime";
-import Button from "../../button";
+import Button from "../../Button";
 import { Card } from "../../card";
 import {
 	type ImageEditorProps,
@@ -53,7 +53,7 @@ function ImageEditor(
 
 	return (
 		<Card class="w-full max-w-6xl max-h-[90vh] overflow-hidden">
-			<Card.content class="p-0">
+			<Card.Content class="p-0">
 				{props.title && (
 					<div class="flex items-center gap-2 text-xl font-bold p-4 border-b border-border">
 						{props.title}
@@ -369,7 +369,7 @@ function ImageEditor(
 						Guardar Cambios
 					</Button>
 				</div>
-			</Card.content>
+				</Card.Content>
 		</Card>
 	);
 }

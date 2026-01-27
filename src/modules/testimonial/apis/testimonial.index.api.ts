@@ -36,7 +36,7 @@ export function testimonialIndexApi(
 	},
 ) {
 	const query = useQuery<TestimonialIndexResponseDto, TestimonialIndexApiError>(
-		"/testimonials",
+		"/testimonial",
 		async (url) => {
 			const data = new URLSearchParams();
 			if (table) {
@@ -65,6 +65,12 @@ export function testimonialIndexApi(
 			if (paginator) {
 				data.append("offset", String(paginator.pagination.value.offset));
 				data.append("limit", String(paginator.pagination.value.limit));
+				if (
+					paginator.pagination.value.cursor &&
+					paginator.pagination.value.offset > 0
+				) {
+					data.append("cursor", String(paginator.pagination.value.cursor));
+				}
 			}
 
 			if (filters?.limit) {
@@ -90,6 +96,7 @@ export function testimonialIndexApi(
 				if (paginator) {
 					paginator.updateData({
 						total: data.count,
+						cursor: nextCursor,
 					});
 				}
 			},

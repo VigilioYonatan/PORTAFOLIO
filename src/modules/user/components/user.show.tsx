@@ -1,4 +1,4 @@
-import Badge from "@components/extras/badge";
+import Badge from "@components/extras/Badge";
 import { cn } from "@infrastructure/utils/client";
 
 import { formatDateTz } from "@infrastructure/utils/hybrid";

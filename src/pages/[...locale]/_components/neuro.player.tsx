@@ -1,4 +1,3 @@
-import Modal from "@components/extras/modal";
 import { cn } from "@infrastructure/utils/client";
 import { DIMENSION_IMAGE } from "@modules/uploads/const/upload.const";
 import { useSignal } from "@preact/signals";
@@ -25,6 +24,7 @@ import MonstercatVisualizer from "./monstercat.visualizer";
 import NatureButton from "./special/nature.button";
 import PlanetButton from "./special/planet.button";
 import ProtostarButton from "./special/protostar.button";
+import Modal from "@components/extras/Modal";
 
 export default function NeuroPlayer() {
 	const {

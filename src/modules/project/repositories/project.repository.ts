@@ -125,6 +125,7 @@ export class ProjectRepository {
 			sortDir,
 			search,
 			cursor,
+			status,
 		} = query;
 
 		const baseWhere: SQL[] = [eq(projectEntity.tenant_id, tenant_id)];
@@ -137,6 +138,9 @@ export class ProjectRepository {
 		}
 		if (search) {
 			baseWhere.push(ilike(projectEntity.title, `%${search}%`));
+		}
+		if (status) {
+			baseWhere.push(eq(projectEntity.status, status));
 		}
 
 		const baseWhereClause = and(...baseWhere);

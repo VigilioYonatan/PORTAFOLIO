@@ -1,6 +1,6 @@
 import type { PropsWithChildren } from "preact/compat";
 import DashboardHeader from "./dashboard.header";
-import Sidebar from "./sidebar";
+import Sidebar from "./Sidebar";
 
 interface DashboardLayoutProps extends PropsWithChildren {
 	title?: string;

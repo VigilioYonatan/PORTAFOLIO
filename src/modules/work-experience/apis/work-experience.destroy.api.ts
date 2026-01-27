@@ -7,7 +7,7 @@ export interface WorkExperienceDestroyApiError {
 }
 
 /**
- * workExperienceDestroy - /api/v1/work-experiences/:id
+ * workExperienceDestroy - /api/v1/work-experience/:id
  * @method DELETE
  */
 export function workExperienceDestroyApi() {
@@ -15,7 +15,7 @@ export function workExperienceDestroyApi() {
 		WorkExperienceDestroyResponseDto,
 		number,
 		WorkExperienceDestroyApiError
-	>("/work-experiences", async (url, id) => {
+	>("/work-experience", async (url, id) => {
 		const response = await fetch(`/api/v1${url}/${id}`, {
 			method: "DELETE",
 		});

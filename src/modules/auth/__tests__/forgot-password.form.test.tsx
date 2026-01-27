@@ -84,6 +84,35 @@ vi.mock("@components/web_form", () => {
 		</form>
 	);
 
+	MockWebForm.control = ({
+		name,
+		title,
+		ico,
+		placeholder,
+		"data-testid": testId,
+	}: any) => (
+		<div class="form-control">
+			{title ? <label htmlFor={name}>{title}</label> : null}
+			<div class="relative">
+				{ico}
+				<input
+					id={name}
+					name={name}
+					placeholder={placeholder}
+					data-testid={testId || `input-${name}`}
+				/>
+			</div>
+		</div>
+	);
+
+	MockWebForm.button = {
+		submit: ({ title, disabled, isLoading, "data-testid": testId }: any) => (
+			<button type="submit" disabled={disabled} data-testid={testId}>
+				{isLoading ? "Loading..." : title}
+			</button>
+		),
+	};
+
 	return { default: MockWebForm };
 });
 
@@ -115,6 +144,7 @@ describe("ForgotPasswordForm Component", () => {
 			);
 			render(<ForgotPasswordForm />);
 			expect(screen.getByTestId("submit-button")).toBeInTheDocument();
+			expect(screen.getByText("SEND INSTRUCTIONS")).toBeInTheDocument();
 		});
 
 		it("renders back to login link", async () => {
@@ -123,6 +153,7 @@ describe("ForgotPasswordForm Component", () => {
 			);
 			render(<ForgotPasswordForm />);
 			expect(screen.getByTestId("back-to-login")).toBeInTheDocument();
+			expect(screen.getByText("< Return to Access Point")).toBeInTheDocument();
 		});
 	});
 

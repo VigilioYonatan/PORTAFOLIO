@@ -1,4 +1,4 @@
-import Modal from "@components/extras/modal";
+import Modal from "@components/extras/Modal";
 import { useEntranceAnimation } from "@hooks/use-motion";
 import { cn } from "@infrastructure/utils/client";
 import { formatDateTz } from "@infrastructure/utils/hybrid/date.utils";
@@ -44,6 +44,9 @@ export default function PostBentoGrid() {
 		}
 	}, [query.data]);
 
+	useEffect(() => {
+		query.refetch(false)
+	}, [paginator.search.debounceTerm,paginator.pagination.page]);
 	return (
 		<div class="space-y-6">
 			{/* Header Action */}

@@ -1,25 +1,27 @@
 import { AiModule } from "@modules/ai/modules/ai.module";
 import { Module } from "@nestjs/common";
-import { ChatController } from "./chat.controller";
-import { ConversationController } from "./controllers/conversation.controller";
 import { ChatRepository } from "./repositories/chat.repository";
 import { ConversationRepository } from "./repositories/conversation.repository";
 import { ConversationSeeder } from "./seeders/conversation.seeder";
 import { ChatService } from "./services/chat.service";
-import { ConversationService } from "./services/conversation.service";
 import { ChatCache } from "./caches/chat.cache";
+import { ChatController } from "./controllers/chat.controller";
+import { ChatGateway } from "./gateways/chat.gateway";
+
+import { DocumentModule } from "@modules/documents/document.module";
 
 @Module({
-	imports: [AiModule],
-	controllers: [ChatController, ConversationController],
+	imports: [AiModule, DocumentModule],
+	controllers: [ChatController],
 	providers: [
 		ChatService,
 		ChatRepository,
-		ConversationService,
 		ConversationRepository,
 		ConversationSeeder,
 		ChatCache,
+		ChatGateway,
 	],
-	exports: [ChatService, ConversationService, ConversationSeeder, ChatCache],
+	exports: [ChatService, ConversationSeeder, ChatCache, ChatRepository],
 })
 export class ChatModule {}
+

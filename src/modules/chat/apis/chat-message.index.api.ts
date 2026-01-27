@@ -33,7 +33,7 @@ export interface ChatMessageIndexApiError {
  */
 export function chatMessageIndexApi(conversationId: number) {
 	return useQuery<ChatMessageIndexResponse, ChatMessageIndexApiError>(
-		`/chat/contact/${conversationId}`,
+		`/chat/conversations/${conversationId}/messages`,
 		async (url) => {
 			const response = await fetch(`/api/v1${url}`);
 			const result = await response.json();

@@ -1,4 +1,4 @@
-import { type FileState, useSmartUpload } from "@hooks/useSmartUpload";
+import { type FileState, useSmartUpload } from "@hooks/use-smart-upload";
 import { UPLOAD_CONFIG } from "@modules/uploads/const/upload.const";
 import { useSignal } from "@preact/signals";
 import { useContext, useRef } from "preact/hooks";
@@ -8,7 +8,7 @@ import type {
 	PathValue,
 	UseFormReturn,
 } from "react-hook-form";
-import { FormControlContext } from "../../form";
+import { FormControlContext } from "../..";
 import type { FormFileProps } from "../types";
 
 export function useFormFile<T extends object>({
@@ -100,7 +100,7 @@ export function useFormFile<T extends object>({
 		const filesToProcess = multiple ? incomingFiles : [incomingFiles[0]];
 
 		// 1. DISPARAMOS LA SUBIDA (Hook)
-		uploadFiles(filesToProcess, (uploadedFilesSchemas) => {
+		uploadFiles(filesToProcess, (uploadedFilesSchemas: any[]) => {
 			// 2. CALLBACK DE ÉXITO: Actualizamos el Formulario con FilesSchema[]
 			// Esto ocurre solo cuando la subida termina exitosamente.
 
@@ -161,7 +161,7 @@ export function useFormFile<T extends object>({
 			let keysToRemove: string[] = [];
 
 			if (fileState.result && fileState.result.length > 0) {
-				keysToRemove = fileState.result.map((f) => f.key);
+				keysToRemove = fileState.result.map((f: any) => f.key);
 			} else if (fileState.key) {
 				keysToRemove = [fileState.key];
 			}
@@ -183,7 +183,7 @@ export function useFormFile<T extends object>({
 			// Caso único (no array) - si coincide la key, ponemos null
 			// Verificamos si la key actual coincide con alguna de las que vamos a borrar
 			let shouldRemove = false;
-			if (fileState.result?.some((res) => res.key === currentVal.key)) {
+			if (fileState.result?.some((res: any) => res.key === currentVal.key)) {
 				shouldRemove = true;
 			} else if (fileState.key === currentVal.key) {
 				shouldRemove = true;

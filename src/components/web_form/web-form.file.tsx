@@ -13,7 +13,7 @@ import {
 	Video,
 	XIcon,
 } from "lucide-preact";
-import type { DragEvent } from "preact/compat";
+
 import { useCallback, useContext, useEffect, useRef } from "preact/hooks";
 import type { JSX } from "preact/jsx-runtime";
 import type {
@@ -23,12 +23,13 @@ import type {
 	RegisterOptions,
 	UseFormReturn,
 } from "react-hook-form";
-import Badge from "../extras/badge";
-import Button from "../extras/button";
+import Badge from "../extras/Badge";
+import Button from "../extras/Button";
 import { Card } from "../extras/card";
 import Hr from "../extras/hr";
 import ImageEditor from "../extras/image-editor";
-import Modal from "../extras/modal";
+
+import Modal from "../extras/Modal";
 import { anidarPropiedades } from "./utils";
 import { FormControlContext } from "./web-form";
 
@@ -97,7 +98,7 @@ function WebFormFile<T extends object>({
 		);
 	};
 
-	const onDrop = (e: DragEvent<HTMLDivElement>) => {
+	const onDrop = (e: globalThis.DragEvent) => {
 		e.preventDefault();
 		const droppedFiles = e.dataTransfer?.files;
 		if (droppedFiles) {
@@ -106,7 +107,7 @@ function WebFormFile<T extends object>({
 		isDrag.value = false;
 	};
 
-	const onDragOver = (e: DragEvent<HTMLDivElement>) => {
+	const onDragOver = (e: globalThis.DragEvent) => {
 		e.preventDefault();
 		isDrag.value = true;
 	};
@@ -362,7 +363,7 @@ function WebFormFile<T extends object>({
 				onDragOver={onDragOver}
 				onDragLeave={onDragLeave}
 			>
-				<Card.content className="flex flex-col items-center justify-center space-y-4 p-8">
+				<Card.Content className="flex flex-col items-center justify-center space-y-4 p-8">
 					{files.length ? (
 						<div
 							class={` ${
@@ -377,7 +378,7 @@ function WebFormFile<T extends object>({
 									onClick={(e) => e.stopPropagation()}
 									className="relative group "
 								>
-									<Card.content className="p-4 ">
+									<Card.Content className="p-4 ">
 										<div
 											class="aspect-square relative mb-3 bg-gray-100 rounded-lg overflow-hidden  w-full "
 											style={{
@@ -471,7 +472,7 @@ function WebFormFile<T extends object>({
 												</span>
 											</div>
 										</div>
-									</Card.content>
+									</Card.Content>
 								</Card>
 							))}
 						</div>
@@ -501,7 +502,7 @@ function WebFormFile<T extends object>({
 							<p class="text-sm text-gray-400 text-center!">{typesText}</p>
 						</div>
 					)}
-				</Card.content>
+				</Card.Content>
 			</Card>
 
 			{Object.keys(err).length ? (
@@ -635,7 +636,7 @@ function FileInfo({ file }: FileInfoProps) {
 
 	return (
 		<Card className="w-full">
-			<Card.content className="space-y-6">
+			<Card.Content className="space-y-6">
 				{/* File Preview */}
 				<div class="flex items-center gap-4">
 					<div class="min-w-20 h-20 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center">
@@ -768,7 +769,7 @@ function FileInfo({ file }: FileInfoProps) {
 						</div>
 					</div>
 				</div>
-			</Card.content>
+			</Card.Content>
 		</Card>
 	);
 }

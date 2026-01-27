@@ -62,13 +62,21 @@ describe("ProjectModule (e2e)", () => {
 		it("should create a new project (Admin)", async () => {
 			const payload = {
 				title: "E2E Test Project",
+				slug: "e2e-test-project",
 				description: "A project created by E2E tests",
 				content: "# Project Content\n\nThis is a markdown content.",
 				impact_summary: "High Impact",
+				website_url: "https://example.com",
+				repo_url: "https://github.com/example/repo",
 				start_date: new Date().toISOString(),
+				end_date: null,
 				status: "in_dev",
 				is_visible: true,
 				is_featured: false,
+				sort_order: 1,
+				images: null,
+				seo: null,
+				techeables: [],
 			};
 
 			const response = await request(app.getHttpServer())
@@ -110,7 +118,21 @@ describe("ProjectModule (e2e)", () => {
 		it("should update a project (Admin)", async () => {
 			const payload = {
 				title: "Updated Project Title",
+				slug: "e2e-test-project", // Keeping same or changing?
 				description: "Updated Description",
+				content: "# Updated Content",
+				impact_summary: "Updated Impact",
+				website_url: "https://example.com/updated",
+				repo_url: "https://github.com/example/repo-updated",
+				start_date: new Date().toISOString(),
+				end_date: null,
+				status: "live",
+				is_visible: true,
+				is_featured: true,
+				sort_order: 2,
+				images: null,
+				seo: null,
+				techeables: [],
 			};
 
 			const response = await request(app.getHttpServer())

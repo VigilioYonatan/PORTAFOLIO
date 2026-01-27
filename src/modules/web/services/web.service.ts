@@ -1,5 +1,4 @@
 import { BlogPostService } from "@modules/blog-post/services/blog-post.service";
-import { ContactService } from "@modules/contact/services/contact.service";
 import { MusicService } from "@modules/music/services/music.service";
 import { ProjectService } from "@modules/project/services/project.service";
 import { WorkExperienceService } from "@modules/work-experience/services/work-experience.service";
@@ -10,7 +9,6 @@ import type { WebBlogResponseDto, WebBlogSlugResponseDto, WebContactResponseDto,
 export class WebService {
 	constructor(
 		private readonly musicService: MusicService,
-		private readonly contactService: ContactService,
 		private readonly blogPostService: BlogPostService,
 		private readonly projectService: ProjectService,
 		private readonly workExperienceService: WorkExperienceService,

@@ -13,7 +13,7 @@ export const documentSchema = z
 		chunk_count: z.number().int().nonnegative(), // cantidad de fragmentos generados
 		is_indexed: z.boolean(), // indica si el documento ha sido indexado para RAG
 		status: z.enum(["PENDING", "PROCESSING", "READY", "FAILED"]), // estado del procesamiento
-		file: filesSchema(), // archivo PDF subido (FileUpload)
+		file: z.array(filesSchema()), // archivo PDF subido (FileUpload)
 		metadata: z.record(z.string(), z.string()).nullable(), // metadatos adicionales (author, pages, language)
 		processed_at: z.date().nullable(), // fecha de procesamiento
 		user_id: z.number().int().positive(), // FK al usuario que subió el documento

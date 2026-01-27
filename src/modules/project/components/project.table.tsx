@@ -1,5 +1,5 @@
-import Badge from "@components/extras/badge";
-import Modal from "@components/extras/modal";
+import Badge from "@components/extras/Badge";
+import Modal from "@components/extras/Modal";
 import VigilioTable from "@components/tables";
 import { format } from "@formkit/tempo";
 import { cn } from "@infrastructure/utils/client/cn";
@@ -14,7 +14,7 @@ import { projectUpdateApi } from "@modules/project/apis/project.update.api";
 import ProjectStore from "@modules/project/components/project.store";
 import ProjectUpdate from "@modules/project/components/project.update";
 import TechStackIcons from "@modules/project/components/tech-stack-icons";
-import { type ProjectSchema } from "@modules/project/schemas/project.schema";
+import type { ProjectWithRelations } from "@modules/project/schemas/project.schema";
 import { useSignal } from "@preact/signals";
 import { useTable } from "@vigilio/preact-table";
 import { sweetModal } from "@vigilio/sweet";
@@ -35,7 +35,7 @@ import type { ProjectIndexResponseDto } from "../dtos/project.response.dto";
 export default function ProjectTable() {
 	const projectDestroyMutation = projectDestroyApi();
 	const projectSyncMutation = projectSyncApi();
-	const editingProject = useSignal<ProjectSchema | null>(null);
+	const editingProject = useSignal<ProjectWithRelations | null>(null);
 	const isStoreModalOpen = useSignal<boolean>(false);
 
 	const table = useTable<
@@ -248,7 +248,7 @@ export default function ProjectTable() {
 		table.filters.value,
 	]);
 
-	const activeFilter = table.filters.value.status;
+	const activeFilter = table.filters.value.status ?? null;
 
 	return (
 		<VigilioTable table={table} query={query}>
@@ -333,9 +333,7 @@ export default function ProjectTable() {
 
 				<VigilioTable.table>
 					<VigilioTable.thead>
-						<VigilioTable.thead.row>
-							<VigilioTable.thead.th />
-						</VigilioTable.thead.row>
+						<VigilioTable.thead.th />
 					</VigilioTable.thead>
 					<VigilioTable.tbody>
 						<VigilioTable.tbody.row title="No project nodes found">
@@ -358,9 +356,8 @@ export default function ProjectTable() {
 					}}
 					contentClassName="max-w-4xl bg-zinc-950 border border-white/10 shadow-3xl rounded-3xl"
 				>
-					{editingProject.value && (
 						<ProjectUpdate
-							project={editingProject.value}
+							project={editingProject.value!}
 							refetch={(data) => {
 								table.updateData((old, count) => ({
 									result: old.map((item) =>
@@ -374,7 +371,6 @@ export default function ProjectTable() {
 								editingProject.value = null;
 							}}
 						/>
-					)}
 				</Modal>
 
 				<Modal

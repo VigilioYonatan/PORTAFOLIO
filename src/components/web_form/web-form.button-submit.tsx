@@ -1,4 +1,4 @@
-import Loader from "@components/extras/loader";
+import Loader from "@components/extras/Loader";
 import { type JSX } from "preact";
 
 type FormButtonSubmitProps = JSX.IntrinsicElements["button"] & {

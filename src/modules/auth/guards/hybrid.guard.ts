@@ -1,4 +1,4 @@
-import type { UserAuth } from "@modules/user/schemas/user.schema";
+
 import {
 	type ExecutionContext,
 	Injectable,
@@ -21,12 +21,12 @@ export class HybridAuthGuard extends AuthGuard("jwt") {
 			context.getClass(),
 		]);
 
+		const request = context.switchToHttp().getRequest<Request>();
+		const response = context.switchToHttp().getResponse<Response>();
+
 		if (isPublic) {
 			return true;
 		}
-
-		const request = context.switchToHttp().getRequest<Request>();
-		const response = context.switchToHttp().getResponse<Response>();
 
 		// Ensure req.locals exists
 		// if (!request.locals) {
@@ -42,13 +42,12 @@ export class HybridAuthGuard extends AuthGuard("jwt") {
 		try {
 			const result = (await super.canActivate(context)) as boolean;
 			if (result) {
-				// const request = context.switchToHttp().getRequest<Request>();
-				// if (!request.locals) request.locals = {} ;
-				// request.locals.user = request.user as UserAuth;
+				const req = context.switchToHttp().getRequest<Request>();
+				if (!req.locals) req.locals = {} as any;
+				req.locals.user = req.user as any;
 			}
 			return result;
 		} catch (_e) {
-			// If JWT fails or throws Unauthorized, we handle strict response protocol
 			return this.handleCustomResponse(request, response);
 		}
 	}

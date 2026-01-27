@@ -23,6 +23,10 @@ vi.mock("@stores/audio.store", async () => {
 				]),
 				favorites: signal(new Set()),
 				frequencyData: signal(new Uint8Array(64)),
+				bassIntensity: signal(0),
+				midIntensity: signal(0),
+				currentTime: signal(0),
+				duration: signal(100),
 				currentTrackIndex: signal(0),
 			},
 			methods: {
@@ -31,13 +35,15 @@ vi.mock("@stores/audio.store", async () => {
 				prevTrack: vi.fn(),
 				setVolume: vi.fn(),
 				toggleFavorite: vi.fn(),
+				initStore: vi.fn(),
+				seek: vi.fn(),
 			},
 		},
 	};
 });
 
 // Mock Modal to avoid complex portal/rendering issues in simple tests
-vi.mock("@components/extras/modal", () => ({
+vi.mock("@components/extras/Modal", () => ({
 	default: ({ children, isOpen }: any) =>
 		isOpen ? <div data-testid="modal">{children}</div> : null,
 }));
@@ -48,6 +54,14 @@ describe("NeuroPlayer Component", () => {
 		HTMLCanvasElement.prototype.getContext = vi.fn().mockReturnValue({
 			fillRect: vi.fn(),
 			clearRect: vi.fn(),
+			beginPath: vi.fn(),
+			ellipse: vi.fn(),
+			stroke: vi.fn(),
+			fill: vi.fn(),
+			moveTo: vi.fn(),
+			lineTo: vi.fn(),
+			arc: vi.fn(),
+			closePath: vi.fn(),
 		});
 	});
 
@@ -70,7 +84,7 @@ describe("NeuroPlayer Component", () => {
 		const playlistButton = screen.getByLabelText("Open Playlist");
 		fireEvent.click(playlistButton);
 		expect(screen.getByTestId("modal")).toBeInTheDocument();
-		expect(screen.getByText("TRACK_DATABASE.lib")).toBeInTheDocument();
+		expect(screen.getByText("REACTIVE_ARCHIVE")).toBeInTheDocument();
 	});
 
 	it("calls setVolume when volume button is clicked (mute logic)", async () => {

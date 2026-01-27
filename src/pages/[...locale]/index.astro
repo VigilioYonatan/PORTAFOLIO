@@ -3,12 +3,12 @@ import WebLayout from "./_components/layouts/web-layout/index.astro";
 import HeroTerminal from "./_components/hero.terminal";
 import TechOrbit from "./_components/tech.orbit";
 import WaveTimeline from "./_components/wave.timeline";
-import Button from "@components/extras/button";
 import { ArrowRight, Download } from "lucide-preact";
 import { sizeIcon } from "@infrastructure/utils/client";
 import type { WorkExperienceSchema } from "@modules/work-experience/schemas/work-experience.schema";
 import SectionTitle from "@components/extras/section-title.astro";
 import SystemIntro from "./_components/system.intro";
+import Button from "@components/extras/Button";
 const { experiences } = Astro.locals.props as {
   experiences: WorkExperienceSchema[];
 };

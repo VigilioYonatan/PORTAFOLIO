@@ -34,7 +34,7 @@ export const documentEntity = pgTable(
 		chunk_count: integer().notNull().default(0),
 		is_indexed: boolean().notNull().default(false),
 		status: documentStatusEnum().notNull().default("PENDING"),
-		file: jsonb().$type<FilesSchema>().notNull(), // Single FileUpload object
+		file: jsonb().$type<FilesSchema[]>().notNull(), // Single FileUpload object
 		metadata: jsonb().$type<Record<string, string>>(), // Optional metadata
 		processed_at: timestamp({ withTimezone: true, mode: "date" }),
 		// FKs

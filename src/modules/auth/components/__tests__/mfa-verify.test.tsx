@@ -15,6 +15,22 @@ vi.mock("../../apis/auth.mfa-login.api", () => ({
 	authMfaLoginApi: vi.fn(),
 }));
 
+
+// Mock i18n
+vi.mock("@src/i18n", () => ({
+	useTranslations: () => (key: string) => {
+		const translations: Record<string, string> = {
+			"auth.mfa.verify.title": "Verificación 2FA",
+			"auth.mfa.verify.code": "Código",
+			"auth.mfa.verify.verifying": "Verificando...",
+			"auth.mfa.verify.submit": "Verificar y Continuar",
+			"auth.mfa.verify.back": "Volver a Login",
+            "auth.mfa.verify.subtitle": "Ingresa el código de 6 dígitos",
+		};
+		return translations[key] || key;
+	},
+}));
+
 describe("MfaVerify", () => {
 	afterEach(() => {
 		cleanup();
@@ -43,12 +59,12 @@ describe("MfaVerify", () => {
 		render(<MfaVerify temp_token="temp-123" />);
 
 		const tokenInput = screen.getByPlaceholderText("000000");
-		await fireEvent.input(tokenInput, { target: { value: "654321" } });
+		fireEvent.input(tokenInput, { target: { value: "654321" } });
 
 		const submitButton = screen.getByRole("button", {
-			name: /verificar y continuar/i,
+			name: /Verificar y Continuar/i,
 		});
-		await fireEvent.click(submitButton);
+		fireEvent.click(submitButton);
 
 		await waitFor(() => {
 			expect(mutateMock).toHaveBeenCalledWith(
@@ -68,7 +84,7 @@ describe("MfaVerify", () => {
 		render(<MfaVerify temp_token="temp-123" />);
 
 		expect(
-			screen.getByRole("button", { name: /verificando.../i }),
+			screen.getByRole("button", { name: /Verificando.../i }),
 		).toBeInTheDocument();
 	});
 });

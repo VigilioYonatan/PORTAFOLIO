@@ -9,7 +9,7 @@ export interface WorkExperienceUpdateApiError {
 }
 
 /**
- * workExperienceUpdate - /api/v1/work-experiences/:id
+ * workExperienceUpdate - /api/v1/work-experience/:id
  * @method PATCH
  * @body WorkExperienceUpdateDto
  */
@@ -18,7 +18,7 @@ export function workExperienceUpdateApi(id: number) {
 		WorkExperienceUpdateResponseDto,
 		WorkExperienceUpdateDto,
 		WorkExperienceUpdateApiError
-	>(`/work-experiences/${id}`, async (url, body) => {
+	>(`/work-experience/${id}`, async (url, body) => {
 		const response = await fetch(`/api/v1${url}`, {
 			method: "PATCH",
 			body: JSON.stringify(body),

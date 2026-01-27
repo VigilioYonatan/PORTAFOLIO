@@ -29,8 +29,8 @@ import {
 } from "@mdxeditor/editor";
 import { useThemeStore } from "@stores/theme.store";
 import "@mdxeditor/editor/style.css";
-import Button from "@components/extras/button";
-import Modal from "@components/extras/modal";
+import Button from "@components/extras/Button";
+import Modal from "@components/extras/Modal";
 import { CircleHelp } from "lucide-preact"; // Added Help Icon
 import { useContext, useRef, useState } from "preact/hooks"; // Added useState
 import type {
@@ -40,7 +40,7 @@ import type {
 	UseFormReturn,
 } from "react-hook-form";
 import { anidarPropiedades } from ".";
-import { FormControlContext } from "./form";
+import { FormControlContext } from "./Form";
 
 interface FormMKDEditorProps<T extends object> {
 	title: string;

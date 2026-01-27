@@ -25,7 +25,7 @@ export default function MilestoneStore({
 	const workMilestoneStoreMutation = workMilestoneStoreApi();
 
 	const workMilestoneStoreForm = useForm<WorkMilestoneStoreDto>({
-		resolver: zodResolver(workMilestoneStoreDto),
+		resolver: zodResolver(workMilestoneStoreDto) as any,
 		mode: "all",
 	});
 

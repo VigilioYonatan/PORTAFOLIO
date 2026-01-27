@@ -8,6 +8,7 @@ import {
 	desc,
 	eq,
 	getTableColumns,
+	gt,
 	ilike,
 	type SQL,
 	sql,
@@ -45,7 +46,7 @@ export class DocumentRepository {
 				tenant_id,
 			})
 			.returning();
-		return result as DocumentSchema;
+		return result;
 	}
 
 	/**
@@ -66,7 +67,7 @@ export class DocumentRepository {
 				and(eq(documentEntity.id, id), eq(documentEntity.tenant_id, tenant_id)),
 			)
 			.returning();
-		return result as DocumentSchema;
+		return result;
 	}
 
 	/**
@@ -84,7 +85,7 @@ export class DocumentRepository {
 				eq(documentEntity.id, id),
 			),
 		});
-		return toNull(result) as DocumentSchema | null;
+		return toNull(result)
 	}
 
 	/**
@@ -139,7 +140,7 @@ export class DocumentRepository {
 				.then((result) => Number(result[0].count)),
 		]);
 
-		return result as [DocumentSchema[], number];
+		return result;
 	}
 
 	/**
@@ -154,7 +155,7 @@ export class DocumentRepository {
 				and(eq(documentEntity.id, id), eq(documentEntity.tenant_id, tenant_id)),
 			)
 			.returning();
-		return result as DocumentSchema;
+		return result ;
 	}
 
 	/**
@@ -199,15 +200,58 @@ export class DocumentRepository {
 		return chunks.length;
 	}
 
-	/**
-	 * Get all chunks for a document
-	 * @param document_id - Document ID
-	 */
 	async showChunks(document_id: number): Promise<DocumentChunkSchema[]> {
 		const result = await this.db.query.documentChunkEntity.findMany({
 			where: eq(documentChunkEntity.document_id, document_id),
 			orderBy: [asc(documentChunkEntity.chunk_index)],
 		});
-		return result as DocumentChunkSchema[];
+		return result
+	}
+
+	/**
+	 * Find similar chunks using vector similarity search
+	 * @param tenant_id - Tenant ID
+	 * @param embedding - Vector embedding to search for
+	 * @param limit - Max number of chunks to return
+	 */
+	async findSimilarChunks(
+		tenant_id: number,
+		embedding: number[],
+		limit = 5,
+	): Promise<(DocumentChunkSchema & { similarity: number })[]> {
+		// Calculate cosine similarity: 1 - cosine_distance
+		// operator <=> is cosine distance in pgvector
+		const similarity = sql<number>`1 - (${documentChunkEntity.embedding} <=> ${JSON.stringify(embedding)}::vector)`;
+
+		const result = await this.db
+			.select({
+				...getTableColumns(documentChunkEntity),
+				similarity,
+			})
+			.from(documentChunkEntity)
+			.innerJoin(
+				documentEntity,
+				eq(documentChunkEntity.document_id, documentEntity.id),
+			)
+			.where(
+				and(
+					eq(documentEntity.tenant_id, tenant_id),
+					// Filter by similarity threshold to avoid irrelevant noise
+					gt(similarity, 0.4),
+				),
+			)
+			.orderBy(desc(similarity))
+			.limit(limit);
+
+		return result
+	}
+
+	async countByTenant(tenant_id: number): Promise<number> {
+		const result = await this.db
+			.select({ count: sql<number>`count(*)` })
+			.from(documentEntity)
+			.where(eq(documentEntity.tenant_id, tenant_id));
+		return Number(result[0].count);
 	}
 }
+

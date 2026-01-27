@@ -9,7 +9,7 @@ import {
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { projectUpdateApi } from "../apis/project.update.api";
 import ProjectUpdate from "../components/project.update";
-import type { ProjectSchema } from "../schemas/project.schema";
+import type { ProjectWithRelations } from "../schemas/project.schema";
 
 // Mock the API
 vi.mock("../apis/project.update.api", () => ({
@@ -35,7 +35,7 @@ vi.mock("@components/form/form.mkd-editor", () => ({
 }));
 
 
-const mockProject: ProjectSchema = {
+const mockProject: ProjectWithRelations = {
 	id: 1,
 	title: "Test Project",
 	slug: "test-project",
@@ -58,6 +58,7 @@ const mockProject: ProjectSchema = {
 	tenant_id: 1,
 	created_at: new Date(),
 	updated_at: new Date(),
+	techeables: [],
 };
 
 describe("ProjectUpdate", () => {
@@ -111,7 +112,7 @@ describe("ProjectUpdate", () => {
 
 		const titleInput = screen.getByDisplayValue("Test Project");
 
-		await fireEvent.change(titleInput, {
+		fireEvent.change(titleInput, {
 			target: { value: "Updated Project Title" },
 		});
 
@@ -162,7 +163,7 @@ describe("ProjectUpdate", () => {
 
 		const titleInput = screen.getByDisplayValue("Test Project");
 
-		await fireEvent.change(titleInput, {
+		fireEvent.change(titleInput, {
 			target: { value: "My New Project Title" },
 		});
 

@@ -13,10 +13,10 @@ import { AppModule } from "../../../app.module";
 
 describe("Conversation Stream - GET /conversation/:id/stream (E2E)", () => {
 	let app: INestApplication;
-	let tenantId: number;
 
 	const mockAiService = {
 		generateStream: () => of({ data: { content: "AI Response Chunk" } }),
+		getEmbeddings: async () => new Array(1536).fill(0.1),
 	};
 
 	const mockAiConfigService = {
@@ -31,7 +31,7 @@ describe("Conversation Stream - GET /conversation/:id/stream (E2E)", () => {
 
 	beforeAll(async () => {
 		const db = await setupTestDb();
-		tenantId = await seedLocalhostTenant(db);
+		await seedLocalhostTenant(db);
 
 		const moduleRef = await Test.createTestingModule({
 			imports: [AppModule],
@@ -66,7 +66,7 @@ describe("Conversation Stream - GET /conversation/:id/stream (E2E)", () => {
 	it("should stream AI response for a conversation", async () => {
 		// 1. Create Conversation
 		const convRes = await request(app.getHttpServer())
-			.post("/api/v1/conversation")
+			.post("/api/v1/chat/conversations")
 			.set("Host", "localhost")
 			.send({
 				title: "Stream Test",
@@ -77,13 +77,13 @@ describe("Conversation Stream - GET /conversation/:id/stream (E2E)", () => {
 
 		// 2. Add Message
 		await request(app.getHttpServer())
-			.post(`/api/v1/conversation/${conversationId}/contact`)
+			.post(`/api/v1/chat/conversations/${conversationId}/messages`)
 			.set("Host", "localhost")
 			.send({ content: "Hello AI" });
 
 		// 3. Request Stream
 		const response = await request(app.getHttpServer())
-			.get(`/api/v1/conversation/${conversationId}/stream`)
+			.get(`/api/v1/chat/conversations/${conversationId}/stream`)
 			.set("Host", "localhost")
 			.expect(200);
 

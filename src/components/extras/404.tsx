@@ -1,4 +1,4 @@
-import Button from "@components/extras/button";
+import Button from "@components/extras/Button";
 
 function View404() {
 	return (

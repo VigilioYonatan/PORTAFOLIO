@@ -18,6 +18,47 @@ vi.mock("@vigilio/sweet", () => ({
 	sweetModal: vi.fn(() => Promise.resolve({ isConfirmed: true })),
 }));
 
+vi.mock("@src/i18n", () => ({
+	useTranslations: () => (key: string) => {
+		const translations: Record<string, string> = {
+			"auth.username.label": "Nombre de Usuario",
+			"auth.email.label": "Correo Electrónico",
+			"auth.password.label": "Contraseña",
+			"auth.password.confirm": "Confirmar Contraseña",
+			"auth.submit.register": "Crear Cuenta",
+			"auth.phone.label": "Teléfono",
+			"auth.tenantName.label": "Nombre de la Empresa",
+			"auth.tenantName.placeholder": "My Company",
+			"auth.email.placeholder": "admin@ejemplo.com",
+			"auth.password.placeholder": "••••••••",
+			"auth.terms.agree": "Acepto los",
+			"auth.terms.link": "Términos y Condiciones",
+			"auth.privacy.link": "Política de Privacidad",
+			"auth.terms.and": "y",
+			"auth.createAccount": "Crear Cuenta",
+			"auth.enterDetails": "Ingresa tus detalles",
+            "auth.password.req.8char": "8 caracteres",
+            "auth.password.req.upper": "Mayúscula",
+            "auth.password.req.lower": "Minúscula",
+            "auth.password.req.number": "Número",
+            "auth.password.req.special": "Carácter especial",
+            "auth.password.strength.0": "Débil", 
+            "auth.password.strength.1": "Regular",
+            "auth.password.strength.2": "Bien",
+            "auth.password.strength.3": "Fuerte",
+            "auth.password.strength.4": "Muy Fuerte",
+            "auth.password.match": "Coinciden",
+            "auth.password.mismatch": "No coinciden",
+            "auth.orRegister": "O registrate con",
+            "auth.alreadyHaveAccount": "¿Ya tienes cuenta?",
+            "auth.login": "Iniciar Sesión",
+            "auth.password.strength.label": "Fortaleza",
+		};
+		return translations[key] || key;
+	},
+	getTranslatedPath: (path: string) => path,
+}));
+
 describe("RegisterForm", () => {
 	afterEach(() => {
 		cleanup();
@@ -53,15 +94,16 @@ describe("RegisterForm", () => {
 
 		render(<RegisterForm />);
 
+
 		const userInput = screen.getAllByPlaceholderText("juan_perez")[0];
 		const emailInput = screen.getByPlaceholderText("admin@ejemplo.com");
 		const passwordInput = screen.getAllByPlaceholderText("••••••••")[0];
 
-		await fireEvent.input(userInput, { target: { value: "testuser" } });
-		await fireEvent.input(emailInput, {
+		fireEvent.input(userInput, { target: { value: "testuser" } });
+		fireEvent.input(emailInput, {
 			target: { value: "test@example.com" },
 		});
-		await fireEvent.input(passwordInput, { target: { value: "password123" } });
+		fireEvent.input(passwordInput, { target: { value: "password123" } });
 
 		expect(userInput).toHaveValue("testuser");
 		expect(emailInput).toHaveValue("test@example.com");
@@ -78,35 +120,35 @@ describe("RegisterForm", () => {
 
 		render(<RegisterForm />);
 
-		await fireEvent.input(screen.getAllByPlaceholderText("juan_perez")[0], {
+		fireEvent.input(screen.getAllByPlaceholderText("juan_perez")[0], {
 			target: { value: "testuser" },
 		});
 
-		await fireEvent.input(screen.getByPlaceholderText("admin@ejemplo.com"), {
+		fireEvent.input(screen.getByPlaceholderText("admin@ejemplo.com"), {
 			target: { value: "test@example.com" },
 		});
 
 		// Tenant Name
-		await fireEvent.input(screen.getByTestId("tenant-name-input"), {
+		fireEvent.input(screen.getByTestId("tenant-name-input"), {
 			target: { value: "My Company" },
 		});
 
-		await fireEvent.input(screen.getByPlaceholderText("+51 999 999 999"), {
+		fireEvent.input(screen.getByPlaceholderText("+51 999 999 999"), {
 			target: { value: "999999999" },
 		});
-		await fireEvent.input(screen.getAllByPlaceholderText("••••••••")[0], {
+		fireEvent.input(screen.getAllByPlaceholderText("••••••••")[0], {
 			target: { value: "Password123!" },
 		});
-		await fireEvent.input(screen.getAllByPlaceholderText("••••••••")[1], {
+		fireEvent.input(screen.getAllByPlaceholderText("••••••••")[1], {
 			target: { value: "Password123!" },
 		});
 
 		// Check terms
 		const termsCheckbox = screen.getByTestId("terms-checkbox");
-		await fireEvent.click(termsCheckbox);
+		fireEvent.click(termsCheckbox);
 
 		const submitButton = screen.getByRole("button", { name: /crear cuenta/i });
-		await fireEvent.click(submitButton);
+		fireEvent.click(submitButton);
 
 		await waitFor(() => {
 			expect(mutateMock).toHaveBeenCalled();

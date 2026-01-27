@@ -7,8 +7,8 @@ const refetchMock = vi.fn();
 const mutateUpdateMock = vi.fn();
 const mutateDestroyMock = vi.fn();
 
-vi.mock("@modules/notification/apis/notification.api", () => ({
-	notificationIndexApi: () => ({
+vi.mock("../apis/notification.index.api", () => ({
+	notificationIndexApi: vi.fn(() => ({
 		data: {
 			results: [
 				{
@@ -28,18 +28,27 @@ vi.mock("@modules/notification/apis/notification.api", () => ({
 					created_at: new Date().toISOString(),
 				},
 			],
+			count: 2,
 		},
 		isLoading: false,
+		isError: false,
 		refetch: refetchMock,
-	}),
-	notificationUpdateApi: () => ({
+		transformData: vi.fn(),
+	})),
+}));
+
+vi.mock("../apis/notification.update.api", () => ({
+	notificationUpdateApi: vi.fn(() => ({
 		mutate: mutateUpdateMock,
 		isLoading: false,
-	}),
-	notificationDestroyAllApi: () => ({
+	})),
+}));
+
+vi.mock("../apis/notification.destroy-all.api", () => ({
+	notificationDestroyAllApi: vi.fn(() => ({
 		mutate: mutateDestroyMock,
 		isLoading: false,
-	}),
+	})),
 }));
 
 // Mock SweetModal
@@ -50,14 +59,14 @@ vi.mock("@vigilio/sweet", () => ({
 describe("NotificationCenter", () => {
 	it("renders notifications correctly", () => {
 		render(<NotificationCenter />);
-		expect(screen.getByText("Neural_Feed")).toBeInTheDocument();
+		expect(screen.getByText("System_Notifications")).toBeInTheDocument();
 		expect(screen.getByText("New Message")).toBeInTheDocument();
 		expect(screen.getByText("System Alert")).toBeInTheDocument();
 	});
 
 	it("calls mark as read when check button is clicked", () => {
 		render(<NotificationCenter />);
-		const checkButton = screen.getByTitle("Mark as read");
+		const checkButton = screen.getByLabelText("Mark notification as read");
 		fireEvent.click(checkButton);
 		expect(mutateUpdateMock).toHaveBeenCalledWith(
 			{ id: 1, body: { is_read: true } },

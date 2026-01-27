@@ -41,9 +41,16 @@ export default function ProjectStore({ refetch, onClose }: ProjectStoreProps) {
 		mode: "all",
 		defaultValues: {
 			techeables: [],
+			seo: {
+				title: null,
+				description: null,
+				keywords: [],
+				og_image: [],
+			},
 		},
 	});
 	
+	console.log(projectStoreForm.formState.errors);
 	function onProjectStore(body: ProjectStoreDto) {
 		
 		projectStoreMutation.mutate(body, {
@@ -54,7 +61,7 @@ export default function ProjectStore({ refetch, onClose }: ProjectStoreProps) {
 					text: "New project entry created.",
 				});
 				projectStoreForm.reset();
-				refetch({...response.project,techeables: body.techeables});
+				refetch({...response.project,techeables: body.techeables as any});
 				onClose();
 			},
 			onError(error) {
@@ -99,6 +106,13 @@ export default function ProjectStore({ refetch, onClose }: ProjectStoreProps) {
 						placeholder="neural-link-interface"
 					/>
 				</div>
+
+				<Form.control.area<ProjectStoreDto>
+					name="description"
+					title="SHORT_DESCRIPTION"
+					placeholder="Brief overview of the project..."
+					rows={2}
+				/>
 
 				<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 					<Form.control.area<ProjectStoreDto>

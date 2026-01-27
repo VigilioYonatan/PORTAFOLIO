@@ -1,4 +1,4 @@
-import Badge from "@components/extras/badge";
+import Badge from "@components/extras/Badge";
 import { Card } from "@components/extras/card";
 import { formatDateTz } from "@infrastructure/utils/hybrid";
 import { sweetModal } from "@vigilio/sweet";
@@ -42,7 +42,7 @@ const MOCK_SESSIONS = [
 ];
 
 export function SessionManager() {
-	const handleRevoke = (sessionId: string) => {
+	const handleRevoke = (_sessionId: string) => {
 		sweetModal({
 			title: "Revoke Session?",
 			text: "The user will be logged out from that device immediately.",

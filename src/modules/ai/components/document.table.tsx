@@ -1,4 +1,4 @@
-import Badge from "@components/extras/badge";
+import Badge from "@components/extras/Badge";
 import { Card } from "@components/extras/card";
 import VigilioTable from "@components/tables";
 import { cn } from "@infrastructure/utils/client";

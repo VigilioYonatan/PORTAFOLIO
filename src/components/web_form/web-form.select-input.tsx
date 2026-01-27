@@ -1,4 +1,4 @@
-import useDropdown from "@hooks/useDropdown";
+import useDropdown from "@hooks/use-dropdown";
 import { cn } from "@infrastructure/utils/client";
 import { useSignal } from "@preact/signals";
 import { type JSX } from "preact";

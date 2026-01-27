@@ -4,15 +4,15 @@ import {
 	ChatViewer,
 	ConversationList,
 } from "@modules/chat/components/chat.components";
-import DocumentDropzone, {
-	IndexStatus,
-} from "@modules/documents/components/document.dropzone";
+
 import {
 	BrainCircuitIcon,
 	CpuIcon,
 	DatabaseIcon,
 	NetworkIcon,
 } from "lucide-preact";
+import IndexStatus from "./index-status";
+import DocumentStore from "@modules/documents/components/document.store";
 
 export default function AIWorkspace() {
 	return (
@@ -52,7 +52,7 @@ export default function AIWorkspace() {
 
 			<div class="grid grid-cols-1 lg:grid-cols-4 gap-6 relative z-10">
 				<div class="lg:col-span-3">
-					<DocumentDropzone />
+					<DocumentStore  />
 				</div>
 				<div class="lg:col-span-1">
 					<div class="bg-zinc-950/60 border border-white/5 p-6 rounded-sm h-full flex flex-col justify-between group hover:border-primary/20 transition-all">

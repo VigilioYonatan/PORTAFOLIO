@@ -1,4 +1,4 @@
-import Modal from "@components/extras/modal";
+import Modal from "@components/extras/Modal";
 import VigilioTable from "@components/tables";
 import { cn } from "@infrastructure/utils/client";
 import { printFileWithDimension } from "@infrastructure/utils/hybrid/file.utils";

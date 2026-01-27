@@ -1,6 +1,6 @@
 import { Eye, EyeOff } from "lucide-preact";
 import { useEffect, useRef } from "preact/hooks";
-import Button from "./button";
+import Button from "./Button";
 
 interface EditorPreviewProps {
 	content: string;

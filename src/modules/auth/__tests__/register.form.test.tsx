@@ -79,7 +79,7 @@ vi.mock("@components/web_form", () => {
 		</form>
 	);
 
-	MockWebForm.control = <T extends object>({
+	MockWebForm.control = ({
 		name,
 		title,
 		type,
@@ -87,6 +87,7 @@ vi.mock("@components/web_form", () => {
 		disabled,
 		required,
 		className,
+		"data-testid": testId,
 	}: {
 		name: string;
 		title: string;
@@ -95,6 +96,7 @@ vi.mock("@components/web_form", () => {
 		disabled?: boolean;
 		required?: boolean;
 		className?: string;
+		"data-testid"?: string;
 	}) => (
 		<div class="form-control">
 			{title ? <label htmlFor={name}>{title}</label> : null}
@@ -105,7 +107,7 @@ vi.mock("@components/web_form", () => {
 				placeholder={placeholder}
 				disabled={disabled}
 				required={required}
-				data-testid={`input-${name}`}
+				data-testid={testId || `input-${name}`}
 				class={className}
 			/>
 		</div>

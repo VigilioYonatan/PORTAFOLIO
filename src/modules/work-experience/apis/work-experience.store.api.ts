@@ -9,7 +9,7 @@ export interface WorkExperienceStoreApiError {
 }
 
 /**
- * workExperienceStore - /api/v1/work-experiences
+ * workExperienceStore - /api/v1/work-experience
  * @method POST
  * @body WorkExperienceStoreDto
  */
@@ -18,7 +18,7 @@ export function workExperienceStoreApi() {
 		WorkExperienceStoreResponseDto,
 		WorkExperienceStoreDto,
 		WorkExperienceStoreApiError
-	>("/work-experiences", async (url, body) => {
+	>("/work-experience", async (url, body) => {
 		const response = await fetch(`/api/v1${url}`, {
 			method: "POST",
 			body: JSON.stringify(body),

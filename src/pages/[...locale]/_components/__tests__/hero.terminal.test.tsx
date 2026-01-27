@@ -28,10 +28,10 @@ vi.mock("@components/extras/terminal-logo", () => ({
 }));
 
 describe("HeroTerminal Component", () => {
-	it("renders basics and system architect title", () => {
+	it("renders basics and engineer title", () => {
 		render(<HeroTerminal />);
-		expect(screen.getByText("SYSTEM")).toBeInTheDocument();
-		expect(screen.getByText("ARCHITECT")).toBeInTheDocument();
+		expect(screen.getByText("SOFTWARE")).toBeInTheDocument();
+		expect(screen.getByText("ENGINEER_AI")).toBeInTheDocument();
 	});
 
 	it("renders CTA buttons with correct text", () => {
@@ -42,14 +42,18 @@ describe("HeroTerminal Component", () => {
 
 	it("renders system subtitles", () => {
 		render(<HeroTerminal />);
-		expect(
-			screen.getByText(/Initializing high-performance neural architecture/),
-		).toBeInTheDocument();
-		expect(screen.getByText(/Senior Full-Stack Engineer/)).toBeInTheDocument();
+		// Use more flexible search for text split across spans
+		expect(screen.getByText(/Architecting intelligent/i)).toBeInTheDocument();
+		expect(screen.getByText(/AI & Automatization/i)).toBeInTheDocument();
+		expect(screen.getByText(/solutions\.\.\./i)).toBeInTheDocument();
+
+		expect(screen.getByText(/Crafting immersive/i)).toBeInTheDocument();
+		expect(screen.getByText(/Web & Mobile/i)).toBeInTheDocument();
+		expect(screen.getByText(/experiences\./i)).toBeInTheDocument();
 	});
 
-	it("renders the RAG protocol badge", () => {
+	it("renders the online badge", () => {
 		render(<HeroTerminal />);
-		expect(screen.getByText("RAG AI PROTOCOL : ACTIVE")).toBeInTheDocument();
+		expect(screen.getByText("MULTI_PLATFORM : ONLINE")).toBeInTheDocument();
 	});
 });

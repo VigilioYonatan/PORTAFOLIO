@@ -56,13 +56,21 @@ export function projectIndexApi(
 					data.append("sortDir", sort[key]);
 				}
 				Object.entries(table.filters.value).forEach(([key, value]) => {
-					data.append(key, String(value));
+					if (value !== null && value !== undefined) {
+						data.append(key, String(value));
+					}
 				});
 			}
 
 			if (paginator) {
 				data.append("offset", String(paginator.pagination.value.offset));
 				data.append("limit", String(paginator.pagination.value.limit));
+				if (
+					paginator.pagination.value.cursor &&
+					paginator.pagination.value.offset > 0
+				) {
+					data.append("cursor", String(paginator.pagination.value.cursor));
+				}
 			}
 
 			if (filters?.limit) {
@@ -94,6 +102,7 @@ export function projectIndexApi(
 				if (paginator) {
 					paginator.updateData({
 						total: data.count,
+						cursor: nextCursor,
 					});
 				}
 			},

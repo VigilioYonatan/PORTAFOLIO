@@ -1,4 +1,4 @@
-import Button from "@components/extras/button";
+import Button from "@components/extras/Button";
 import { analyticsInsightGenerateApi } from "@modules/analytics/apis/analytics.insight.generate.api";
 import { analyticsInsightIndexApi } from "@modules/analytics/apis/analytics.insight.index.api";
 import { sweetModal } from "@vigilio/sweet";

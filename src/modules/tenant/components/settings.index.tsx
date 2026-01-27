@@ -1,4 +1,4 @@
-import Badge from "@components/extras/badge";
+import Badge from "@components/extras/Badge";
 import { Card } from "@components/extras/card";
 import Form, { formSelectNumber } from "@components/form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -117,7 +117,7 @@ function SettingsContent({
 
 	// General Form (only name for this endpoint)
 	const generalForm = useForm<TenantUpdateDto>({
-		resolver: zodResolver(tenantUpdateDto),
+		resolver: zodResolver(tenantUpdateDto) as any,
 		mode: "all",
 		defaultValues: tenant,
 	});

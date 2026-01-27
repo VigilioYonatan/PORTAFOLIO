@@ -1,5 +1,5 @@
 import { useMutation } from "@vigilio/preact-fetching";
-import type { ContactUpdateResponseDto } from "../dtos/contact-message.response.dto";
+import type { ContactUpdateResponseDto } from "../dtos/contact.response.dto";
 
 export interface ContactMarkAsReadApiError {
 	success: false;

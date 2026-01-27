@@ -1,7 +1,7 @@
 import { cn } from "@infrastructure/utils/client/cn";
-import type { JSX } from "preact/jsx-runtime";
+import type { ComponentProps } from "preact";
 
-interface BadgeProps extends JSX.HTMLAttributes<HTMLDivElement> {
+interface BadgeProps extends ComponentProps<"div"> {
 	variant?:
 		| "default"
 		| "secondary"
@@ -9,7 +9,8 @@ interface BadgeProps extends JSX.HTMLAttributes<HTMLDivElement> {
 		| "outline"
 		| "matrix"
 		| "success"
-		| "warning";
+		| "warning"
+		| "primary";
 }
 
 export default function Badge({
@@ -30,6 +31,8 @@ export default function Badge({
 		success:
 			"border-transparent bg-emerald-500 text-white hover:bg-emerald-500/80",
 		warning: "border-transparent bg-amber-500 text-white hover:bg-amber-500/80",
+		primary:
+			"border-transparent bg-primary text-primary-foreground hover:bg-primary/80",
 	};
 
 	return (

@@ -1,3 +1,4 @@
+import { analyticsDashboardApi } from "@modules/analytics/apis/analytics.dashboard.api";
 import { NotificationCenter } from "@modules/notification/components/notification.center";
 import {
 	CartesianGrid,
@@ -16,17 +17,19 @@ import {
 } from "../../../components/extras/card";
 import AnalyticsGrid from "./analytics.grid";
 
-const VISIT_DATA = [
-	{ name: "Mon", visits: 400 },
-	{ name: "Tue", visits: 300 },
-	{ name: "Wed", visits: 600 },
-	{ name: "Thu", visits: 800 },
-	{ name: "Fri", visits: 500 },
-	{ name: "Sat", visits: 900 },
-	{ name: "Sun", visits: 1100 },
-];
-
 export default function DashboardHome() {
+	const { data, isLoading } = analyticsDashboardApi();
+
+	const weeklyVisits = data?.metrics?.weeklyVisits ?? [
+		{ name: "Mon", visits: 0 },
+		{ name: "Tue", visits: 0 },
+		{ name: "Wed", visits: 0 },
+		{ name: "Thu", visits: 0 },
+		{ name: "Fri", visits: 0 },
+		{ name: "Sat", visits: 0 },
+		{ name: "Sun", visits: 0 },
+	];
+
 	return (
 		<div class="flex-1 space-y-4">
 			<div class="flex items-center justify-between space-y-2">
@@ -35,7 +38,7 @@ export default function DashboardHome() {
 				</h2>
 			</div>
 
-			<AnalyticsGrid />
+			<AnalyticsGrid metrics={data?.metrics} isLoading={isLoading} />
 
 			<div class="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
 				<div class="col-span-3 h-[400px]">
@@ -49,7 +52,7 @@ export default function DashboardHome() {
 					</CardHeader>
 					<CardContent class="h-[300px] p-0 pr-6 pt-4">
 						<ResponsiveContainer width="100%" height="100%">
-							<LineChart data={VISIT_DATA}>
+							<LineChart data={weeklyVisits}>
 								<CartesianGrid strokeDasharray="3 3" stroke="#27272a" />
 								<XAxis
 									dataKey="name"
@@ -91,3 +94,4 @@ export default function DashboardHome() {
 		</div>
 	);
 }
+

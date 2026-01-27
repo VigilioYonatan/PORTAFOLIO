@@ -4,12 +4,56 @@ import { vi } from "vitest";
 vi.mock("react", () => import("preact/compat"));
 vi.mock("react-dom", () => import("preact/compat"));
 
-import { Window } from "happy-dom";
+// RAF Polyfill
+if (typeof window !== "undefined" && !window.requestAnimationFrame) {
+	window.requestAnimationFrame = (callback) => setTimeout(callback, 0);
+	window.cancelAnimationFrame = (id) => clearTimeout(id);
+}
 
-if (typeof window === "undefined") {
-	const happyWindow = new Window();
-	global.window = happyWindow as any;
-	global.document = happyWindow.document as any;
+if (typeof global !== "undefined" && !global.requestAnimationFrame) {
+	(global as any).requestAnimationFrame = (callback: any) =>
+		setTimeout(callback, 0);
+	(global as any).cancelAnimationFrame = (id: any) => clearTimeout(id);
+}
+
+// Canvas Ellipse Polyfill (for tech.orbit)
+if (typeof window !== "undefined") {
+	if (
+		typeof HTMLCanvasElement !== "undefined" &&
+		typeof CanvasRenderingContext2D !== "undefined" &&
+		!CanvasRenderingContext2D.prototype.ellipse
+	) {
+		CanvasRenderingContext2D.prototype.ellipse = function (
+			_x: number,
+			_y: number,
+			_radiusX: number,
+			_radiusY: number,
+			_rotation: number,
+			_startAngle: number,
+			_endAngle: number,
+			_anticlockwise?: boolean,
+		) {
+			// No-op for testing
+		};
+	}
+	if (
+		typeof CanvasRenderingContext2D !== "undefined" &&
+		!CanvasRenderingContext2D.prototype.setLineDash
+	) {
+		CanvasRenderingContext2D.prototype.setLineDash = function () {
+			// No-op for testing
+		};
+	}
+	if (
+		typeof CanvasRenderingContext2D !== "undefined" &&
+		!CanvasRenderingContext2D.prototype.createRadialGradient
+	) {
+		CanvasRenderingContext2D.prototype.createRadialGradient = function () {
+			return {
+				addColorStop: vi.fn(),
+			};
+		};
+	}
 }
 
 // Mock window.locals for tests
@@ -70,3 +114,9 @@ process.env.MAIL_USER = "mail_user";
 process.env.MAIL_PASS = "mail_pass";
 process.env.NODE_ENV = "TEST";
 process.env.LOG_LEVEL = "ERROR";
+
+// Global i18n mock for components
+vi.mock("@src/i18n", () => ({
+	useTranslations: vi.fn(() => (key: string) => key),
+	getTranslatedPath: vi.fn((path: string) => path),
+}));

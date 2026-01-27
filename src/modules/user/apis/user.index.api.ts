@@ -59,6 +59,12 @@ export function userIndexApi(
 				if (paginator.search.debounceTerm) {
 					data.append("search", paginator.search.debounceTerm);
 				}
+				if (
+					paginator.pagination.value.cursor &&
+					paginator.pagination.value.offset > 0
+				) {
+					data.append("cursor", String(paginator.pagination.value.cursor));
+				}
 			}
 
 			const response = await fetch(`/api/v1${url}?${data}`);
@@ -77,11 +83,13 @@ export function userIndexApi(
 						methods: {
 							refetch: (clean?: boolean) => query.refetch(clean),
 						},
+						cursor: data.results[data.results.length - 1]?.id,
 					});
 				}
 				if (paginator) {
 					paginator.updateData({
 						total: data.count,
+						cursor: table ? undefined : data.results[data.results.length - 1]?.id,
 					});
 				}
 			},

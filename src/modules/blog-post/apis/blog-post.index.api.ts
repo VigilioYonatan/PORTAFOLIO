@@ -62,6 +62,16 @@ export function blogPostIndexApi(
 			if (paginator) {
 				data.append("offset", String(paginator.pagination.value.offset));
 				data.append("limit", String(paginator.pagination.value.limit));
+
+				if (paginator.search.debounceTerm) {
+					data.append("search", paginator.search.debounceTerm);
+				}
+				if (
+					paginator.pagination.value.cursor &&
+					paginator.pagination.value.offset > 0
+				) {
+					data.append("cursor", String(paginator.pagination.value.cursor));
+				}
 			}
 
 			if (filters?.limit) {
@@ -93,6 +103,7 @@ export function blogPostIndexApi(
 				if (paginator) {
 					paginator.updateData({
 						total: data.count,
+						cursor: nextCursor,
 					});
 				}
 			},

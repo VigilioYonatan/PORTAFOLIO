@@ -1,4 +1,4 @@
-import Badge from "@components/extras/badge";
+import Badge from "@components/extras/Badge";
 import { technologyIndexApi } from "@modules/technology/apis/technology.index.api";
 import {
 	Activity,

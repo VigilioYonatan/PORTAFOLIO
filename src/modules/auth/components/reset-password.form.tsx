@@ -25,6 +25,9 @@ export function ResetPasswordForm({
 
 	const resetForm = useForm<AuthResetPasswordDto>({
 		resolver: zodResolver(authResetPasswordDto),
+		defaultValues: {
+			token,
+		},
 	});
 
 	function onSubmit(data: AuthResetPasswordDto) {

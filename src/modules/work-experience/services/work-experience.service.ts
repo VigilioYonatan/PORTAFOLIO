@@ -30,7 +30,7 @@ export class WorkExperienceService {
 		this.logger.log({ tenant_id }, "Listing work experiences");
 
 		return await paginator<WorkExperienceQueryDto, WorkExperienceSchema>(
-			"/experiences",
+			"/work-experience",
 			{
 				filters: query,
 				cb: async (filters, isClean) => {

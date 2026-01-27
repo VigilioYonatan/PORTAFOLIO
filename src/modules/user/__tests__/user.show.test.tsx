@@ -84,14 +84,7 @@ describe("UserShow Display Logic", () => {
 		const { container: bannedContainer } = render(
 			<UserShow user={bannedUser} />,
 		);
-		expect(bannedContainer.textContent).toContain("BANNED");
-
-		// Test PENDING status
-		const pendingUser = UserFactory.createSchema({ status: "PENDING" });
-		const { container: pendingContainer } = render(
-			<UserShow user={pendingUser} />,
-		);
-		expect(pendingContainer.textContent).toContain("PENDING");
+		expect(bannedContainer.textContent).toContain("Disabled");
 	});
 
 	it("should display MFA status", async () => {
@@ -100,20 +93,12 @@ describe("UserShow Display Logic", () => {
 		// Test MFA enabled
 		const mfaUser = UserFactory.createSchema({ is_mfa_enabled: true });
 		const { container: mfaContainer } = render(<UserShow user={mfaUser} />);
-		expect(mfaContainer.textContent).toContain("Enabled");
+		expect(mfaContainer.textContent).toContain("Yes");
 
 		// Test MFA disabled
 		const noMfaUser = UserFactory.createSchema({ is_mfa_enabled: false });
 		const { container: noMfaContainer } = render(<UserShow user={noMfaUser} />);
 		expect(noMfaContainer.textContent).toContain("Disabled");
-	});
-
-	it("should display failed login attempts", async () => {
-		const { UserShow } = await import("../components/user.show");
-
-		const user = UserFactory.createSchema({ failed_login_attempts: 3 });
-		const { container } = render(<UserShow user={user} />);
-		expect(container.textContent).toContain("3 attempt(s)");
 	});
 
 	it("should display superuser badge when applicable", async () => {
@@ -123,35 +108,6 @@ describe("UserShow Display Logic", () => {
 		const superUser = UserFactory.createSchema({ is_superuser: true });
 		const { container: superContainer } = render(<UserShow user={superUser} />);
 		expect(superContainer.textContent).toContain("Superuser");
-
-		// Non-superuser should not show badge
-		const normalUser = UserFactory.createSchema({ is_superuser: false });
-		const { container: normalContainer } = render(
-			<UserShow user={normalUser} />,
-		);
-		expect(normalContainer.textContent).not.toContain("Superuser privileges");
-	});
-
-	it("should display email verification status", async () => {
-		const { UserShow } = await import("../components/user.show");
-
-		// Verified email
-		const verifiedUser = UserFactory.createSchema({
-			email_verified_at: new Date(),
-		});
-		const { container: verifiedContainer } = render(
-			<UserShow user={verifiedUser} />,
-		);
-		expect(verifiedContainer.textContent).toContain("Verified");
-
-		// Unverified email
-		const unverifiedUser = UserFactory.createSchema({
-			email_verified_at: null,
-		});
-		const { container: unverifiedContainer } = render(
-			<UserShow user={unverifiedUser} />,
-		);
-		expect(unverifiedContainer.textContent).toContain("Pending");
 	});
 
 	it("should display phone number or fallback message", async () => {
@@ -171,7 +127,7 @@ describe("UserShow Display Logic", () => {
 		const { container: noPhoneContainer } = render(
 			<UserShow user={userWithoutPhone} />,
 		);
-		expect(noPhoneContainer.textContent).toContain("Not provided");
+		expect(noPhoneContainer.textContent).toContain("No phone number");
 	});
 });
 

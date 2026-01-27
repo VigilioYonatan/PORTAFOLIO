@@ -1,4 +1,4 @@
-import Modal from "@components/extras/modal";
+import Modal from "@components/extras/Modal";
 import VigilioTable from "@components/tables";
 import { formatDateTz } from "@infrastructure/utils/hybrid/date.utils";
 import {

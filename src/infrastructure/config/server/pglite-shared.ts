@@ -19,7 +19,7 @@ export async function getSharedPGlite(pathName?: string) {
 
 		// Wait for the instance to be ready
 		if (instance.ready) {
-			await instance.ready;
+			instance.ready;
 		}
 
 		try {

@@ -1,4 +1,4 @@
-import Modal from "@components/extras/modal";
+import Modal from "@components/extras/Modal";
 import ProjectStore from "@modules/project/components/project.store";
 import { useSignal } from "@preact/signals";
 import { Plus } from "lucide-preact";

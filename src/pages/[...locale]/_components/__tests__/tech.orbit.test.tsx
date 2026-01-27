@@ -15,6 +15,7 @@ vi.mock("@stores/audio.store", async () => {
 		audioStore: {
 			state: {
 				bassIntensity: signal(0),
+				beatDetected: signal(false),
 				frequencyData: signal(new Uint8Array(64)),
 			},
 		},
@@ -28,11 +29,17 @@ describe("TechOrbit Component", () => {
 			fillRect: vi.fn(),
 			beginPath: vi.fn(),
 			arc: vi.fn(),
+			ellipse: vi.fn(),
 			fill: vi.fn(),
 			stroke: vi.fn(),
 			clearRect: vi.fn(),
 			moveTo: vi.fn(),
 			lineTo: vi.fn(),
+			closePath: vi.fn(),
+			setLineDash: vi.fn(),
+			createRadialGradient: vi.fn().mockReturnValue({
+				addColorStop: vi.fn(),
+			}),
 		});
 	});
 

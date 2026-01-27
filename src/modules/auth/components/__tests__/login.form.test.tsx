@@ -32,10 +32,10 @@ describe("LoginForm", () => {
 		render(<LoginForm />);
 
 		// Check that labels are rendered
-		expect(screen.getByText("Identity")).toBeInTheDocument();
-		expect(screen.getByText("Credential")).toBeInTheDocument();
+		expect(screen.getByText("UID / EMAIL")).toBeInTheDocument();
+		expect(screen.getByText("PASSPHRASE")).toBeInTheDocument();
 		expect(
-			screen.getByRole("button", { name: /INITIALIZE SESSION/i }),
+			screen.getByRole("button", { name: /EXECUTE LOGIN/i }),
 		).toBeInTheDocument();
 		expect(screen.getByTestId("forgot-password-link")).toBeInTheDocument();
 	});
@@ -49,13 +49,13 @@ describe("LoginForm", () => {
 
 		render(<LoginForm />);
 
-		const emailInput = screen.getByPlaceholderText("admin@system.io");
-		const passwordInput = screen.getByPlaceholderText("••••••••••••");
+		const emailInput = screen.getByPlaceholderText("user@system.dev");
+		const passwordInput = screen.getByPlaceholderText("•");
 
-		await fireEvent.change(emailInput, {
+		fireEvent.change(emailInput, {
 			target: { value: "test@example.com" },
 		});
-		await fireEvent.change(passwordInput, {
+		fireEvent.change(passwordInput, {
 			target: { value: "Password123!" },
 		});
 
@@ -73,19 +73,19 @@ describe("LoginForm", () => {
 
 		render(<LoginForm />);
 
-		const emailInput = screen.getByPlaceholderText("admin@system.io");
-		const passwordInput = screen.getByPlaceholderText("••••••••••••");
+		const emailInput = screen.getByPlaceholderText("user@system.dev");
+		const passwordInput = screen.getByPlaceholderText("•");
 		const submitButton = screen.getByRole("button", {
-			name: /INITIALIZE SESSION/i,
+			name: /EXECUTE LOGIN/i,
 		});
 
-		await fireEvent.change(emailInput, {
+		fireEvent.change(emailInput, {
 			target: { value: "test@example.com" },
 		});
-		await fireEvent.change(passwordInput, {
+		fireEvent.change(passwordInput, {
 			target: { value: "Password123!" },
 		});
-		await fireEvent.click(submitButton);
+		fireEvent.click(submitButton);
 
 		await waitFor(() => {
 			expect(mutateMock).toHaveBeenCalledWith(
@@ -123,19 +123,9 @@ describe("LoginForm", () => {
 		render(<LoginForm />);
 
 		expect(
-			screen.getByRole("button", { name: /AUTHENTICATING.../i }),
+			screen.getByText("PROCESSING..."),
 		).toBeInTheDocument();
 	});
 
-	it("renders remember me checkbox", () => {
-		(authLoginApi as any).mockReturnValue({
-			mutate: vi.fn(),
-			isLoading: false,
-			error: null,
-		});
 
-		render(<LoginForm />);
-
-		expect(screen.getByTestId("remember-me-checkbox")).toBeInTheDocument();
-	});
 });

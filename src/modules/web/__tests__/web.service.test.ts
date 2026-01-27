@@ -1,22 +1,19 @@
 import { BlogPostService } from "@modules/blog-post/services/blog-post.service";
-import { ContactService } from "@modules/contact/services/contact.service";
-import { MusicTrackService } from "@modules/music/services/music.service";
+import { MusicService } from "@modules/music/services/music.service";
 import { Test, type TestingModule } from "@nestjs/testing";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { WebService } from "../services/web.service";
 
+import { ProjectService } from "@modules/project/services/project.service";
+import { WorkExperienceService } from "@modules/work-experience/services/work-experience.service";
+
 describe("WebService", () => {
 	let service: WebService;
-	let musicService: MusicTrackService;
-	let contactService: ContactService;
+	let musicService: MusicService;
 	let blogPostService: BlogPostService;
 
 	const mockMusicService = {
 		index: vi.fn(),
-	};
-
-	const mockContactService = {
-		// Add methods if ContactService is actually called
 	};
 
 	const mockBlogPostService = {
@@ -24,19 +21,27 @@ describe("WebService", () => {
 		showBySlug: vi.fn(),
 	};
 
+	const mockProjectService = {
+		showBySlug: vi.fn(),
+	};
+
+	const mockWorkExperienceService = {
+		index: vi.fn(),
+	};
+
 	beforeEach(async () => {
 		const module: TestingModule = await Test.createTestingModule({
 			providers: [
 				WebService,
-				{ provide: MusicTrackService, useValue: mockMusicService },
-				{ provide: ContactService, useValue: mockContactService },
+				{ provide: MusicService, useValue: mockMusicService },
 				{ provide: BlogPostService, useValue: mockBlogPostService },
+				{ provide: ProjectService, useValue: mockProjectService },
+				{ provide: WorkExperienceService, useValue: mockWorkExperienceService },
 			],
 		}).compile();
 
 		service = module.get<WebService>(WebService);
-		musicService = module.get<MusicTrackService>(MusicTrackService);
-		contactService = module.get<ContactService>(ContactService);
+		musicService = module.get<MusicService>(MusicService);
 		blogPostService = module.get<BlogPostService>(BlogPostService);
 	});
 
@@ -47,13 +52,19 @@ describe("WebService", () => {
 	describe("index", () => {
 		it("should return home props with music tracks", async () => {
 			const mockTracks = [{ id: 1, title: "Track 1" }];
-			vi.spyOn(musicService, "index").mockResolvedValue({
+			(musicService.index as any).mockReturnValue(Promise.resolve({
 				success: true,
 				count: 1,
 				next: null,
 				previous: null,
-				results: mockTracks as any,
-			});
+				results: mockTracks,
+			}));
+
+			(mockWorkExperienceService.index as any).mockReturnValue(Promise.resolve({
+				success: true,
+				count: 0,
+				results: [],
+			}));
 
 			const result = await service.index();
 
@@ -61,6 +72,7 @@ describe("WebService", () => {
 				title: "Portfolio",
 				description: "Portfolio",
 				musicTracks: mockTracks,
+				experiences: [],
 			});
 			expect(musicService.index).toHaveBeenCalledWith(1, {
 				limit: 10,
@@ -72,13 +84,13 @@ describe("WebService", () => {
 	describe("blog", () => {
 		it("should return blog props with paginated posts", async () => {
 			const mockPosts = [{ id: 1, title: "Post 1" }];
-			vi.spyOn(blogPostService, "index").mockResolvedValue({
+			(blogPostService.index as any).mockReturnValue(Promise.resolve({
 				success: true,
-				results: mockPosts as any,
+				results: mockPosts,
 				count: 1,
 				next: null,
 				previous: null,
-			} as any);
+			}));
 
 			const result = await service.blog(1, 9);
 
@@ -97,11 +109,11 @@ describe("WebService", () => {
 
 	describe("blogSlug", () => {
 		it("should return blog post props by slug", async () => {
-			const mockPost = { id: 1, title: "Post 1", summary: "Summary" };
-			vi.spyOn(blogPostService, "showBySlug").mockResolvedValue({
+			const mockPost = { id: 1, title: "Post 1", extract: "Summary" };
+			(blogPostService.showBySlug as any).mockReturnValue(Promise.resolve({
 				success: true,
-				post: mockPost as any,
-			});
+				post: mockPost,
+			}));
 
 			const result = await service.blogSlug("post-1");
 

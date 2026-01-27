@@ -164,8 +164,7 @@ describe("TenantService", () => {
 				setting: mockSettings,
 			};
 
-			mockTenantRepository.store.mockResolvedValue(createdTenant);
-			mockTenantRepository.showById.mockResolvedValue(createdTenantShow);
+			mockTenantRepository.store.mockResolvedValue(createdTenantShow);
 			mockTenantCache.set.mockResolvedValue(undefined);
 			mockTenantCache.invalidateLists.mockResolvedValue(undefined);
 

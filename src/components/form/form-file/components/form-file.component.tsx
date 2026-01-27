@@ -1,8 +1,8 @@
-import Badge from "@components/extras/badge";
-import Button from "@components/extras/button";
+import Badge from "@components/extras/Badge";
+import Button from "@components/extras/Button";
 import { Card, CardContent } from "@components/extras/card";
 import ImageEditor from "@components/extras/image-editor";
-import Modal from "@components/extras/modal";
+import Modal from "@components/extras/Modal";
 import { cn, sizeIcon } from "@infrastructure/utils/client";
 import {
 	typeTextExtensions,
@@ -299,7 +299,7 @@ export function FormFile<T extends object>(props: FormFileProps<T>) {
 												variant="ghost"
 												size="sm"
 												className="absolute top-1 right-1 h-7 w-7 rounded-full text-muted-foreground hover:text-destructive hover:bg-destructive/10 z-20 flex items-center justify-center p-0"
-												onClick={(e) => {
+												onClick={(e: any) => {
 													e.preventDefault();
 													e.stopPropagation();
 													handleRemove(fileState);
@@ -344,7 +344,7 @@ export function FormFile<T extends object>(props: FormFileProps<T>) {
 															size="sm"
 															variant="ghost"
 															className="h-6 w-6 text-white hover:text-primary hover:bg-white/20"
-															onClick={(e) => {
+															onClick={(e: any) => {
 																e.stopPropagation();
 																editingImage.value = fileState.file;
 															}}
@@ -357,7 +357,7 @@ export function FormFile<T extends object>(props: FormFileProps<T>) {
 														size="sm"
 														variant="ghost"
 														className="h-6 w-6 text-white hover:text-primary hover:bg-white/20"
-														onClick={(e) => {
+														onClick={(e: any) => {
 															e.stopPropagation();
 															showFileInfo.value = fileState.file;
 														}}

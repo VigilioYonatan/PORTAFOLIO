@@ -64,7 +64,7 @@ describe("TenantController (E2E Real DB)", () => {
 		app = moduleFixture.createNestApplication();
 
 		// Mock Auth Middleware
-		app.use((req: any, res: any, next: any) => {
+		app.use((req: any, _res: any, next: any) => {
 			req.isAuthenticated = () => true;
 			req.user = { id: 1, role_id: 1, tenant_id: 1 };
 			next();

@@ -210,4 +210,13 @@ export class UserRepository {
 			.returning();
 		return result;
 	}
+
+	async countByTenant(tenant_id: number): Promise<number> {
+		const result = await this.db
+			.select({ count: sql<number>`count(*)` })
+			.from(userEntity)
+			.where(eq(userEntity.tenant_id, tenant_id));
+		return Number(result[0].count);
+	}
 }
+

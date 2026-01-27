@@ -35,6 +35,12 @@ export function technologyIndexApi(
 				if (table.search.debounceTerm) {
 					data.append("search", table.search.debounceTerm);
 				}
+				if (
+					table.pagination.value.cursor &&
+					table.pagination.value.offset > 0
+				) {
+					data.append("cursor", String(table.pagination.value.cursor));
+				}
 				// Sort
 				const sort = table.sort.value;
 				const key = Object.keys(sort)[0];
@@ -51,6 +57,12 @@ export function technologyIndexApi(
 			if (paginator) {
 				data.append("offset", String(paginator.pagination.value.offset));
 				data.append("limit", String(paginator.pagination.value.limit));
+				if (
+					paginator.pagination.value.cursor &&
+					paginator.pagination.value.offset > 0
+				) {
+					data.append("cursor", String(paginator.pagination.value.cursor));
+				}
 			}
 
 			if (filters?.limit) {
@@ -64,6 +76,8 @@ export function technologyIndexApi(
 		},
 		{
 			onSuccess(data) {
+				const lastItem = data.results[data.results.length - 1];
+				const nextCursor = lastItem ? lastItem.id : null;
 				if (table) {
 					table.updateData({
 						result: data.results,
@@ -71,11 +85,13 @@ export function technologyIndexApi(
 						methods: {
 							refetch: query.refetch,
 						},
+						cursor: nextCursor,
 					});
 				}
 				if (paginator) {
 					paginator.updateData({
 						total: data.count,
+						cursor: nextCursor,
 					});
 				}
 			},

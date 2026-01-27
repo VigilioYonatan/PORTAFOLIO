@@ -15,8 +15,9 @@ import {
 import { sweetModal } from "@vigilio/sweet";
 import { FileText, Image as ImageIcon, Link, Tag } from "lucide-preact";
 import { useEffect, useMemo } from "preact/hooks";
-import { useForm } from "react-hook-form";
+import { useForm, type Resolver } from "react-hook-form";
 import type { BlogPostIndexResponseDto } from "../dtos/blog-post.response.dto";
+import { slugify } from "@infrastructure/utils/hybrid";
 
 interface BlogPostStoreProps {
 	refetch: (data: Refetch<BlogPostIndexResponseDto["results"]>) => void;
@@ -31,19 +32,21 @@ export default function BlogPostStore({
 	const categoriesQuery = blogCategoryIndexApi(null);
 
 	const blogPostStoreForm = useForm<BlogPostStoreDto>({
-		resolver: zodResolver(blogPostStoreDto),
-		mode: "all",
+		resolver: zodResolver(blogPostStoreDto) as Resolver<BlogPostStoreDto>,
+		mode: "all",defaultValues:{
+			seo:{
+				title:"",
+				description:"",keywords:null,og_image:null
+			}
+		}
 	});
 
 	const title = blogPostStoreForm.watch("title");
+		console.log(blogPostStoreForm.formState.errors);
 
 	useEffect(() => {
 		if (title) {
-			const slug = title
-				.toLowerCase()
-				.replace(/ /g, "-")
-				.replace(/[^\w-]+/g, "");
-			blogPostStoreForm.setValue("slug", slug);
+			blogPostStoreForm.setValue("slug", slugify(title));
 		}
 	}, [title]);
 
@@ -130,6 +133,12 @@ export default function BlogPostStore({
 						type="number"
 						placeholder="5"
 						options={{ setValueAs: formSelectNumber }}
+					/>
+					<Form.control<BlogPostStoreDto>
+						name="published_at"
+						title="PUBLISH_DATE"
+						type="date"
+						placeholder="Select date"
 					/>
 				</div>
 

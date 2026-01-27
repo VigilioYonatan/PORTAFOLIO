@@ -1,4 +1,4 @@
-import { Form as VigilioForm } from "./form";
+import { Form as VigilioForm, FormControlContext } from "./Form";
 import { FormArea as FormControlArea } from "./form.area";
 import { FormButton } from "./form.button";
 import { FormButtonSubmit } from "./form.button-submit";
@@ -14,6 +14,7 @@ import { FormFile } from "./form-file";
 import { FormSelectInput } from "./form-select-input";
 
 export { formSelectNumber } from "./form.select";
+export { FormControlContext };
 
 export * from "./libs";
 

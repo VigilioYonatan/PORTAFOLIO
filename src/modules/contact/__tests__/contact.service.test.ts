@@ -2,11 +2,11 @@ import { paginator } from "@infrastructure/utils/server/helpers";
 import { NotFoundException } from "@nestjs/common";
 import { Test, TestingModule } from "@nestjs/testing";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { ContactCache } from "../cache/contact-message.cache";
-import type { ContactStoreDto } from "../dtos/contact-message.store.dto";
-import { ContactRepository } from "../repositories/contact-message.repository";
-import type { ContactMessageSchema } from "../schemas/contact-message-message.schema";
-import { ContactService } from "../services/contact-message.service";
+import { ContactCache } from "../cache/contact.cache";
+import type { ContactStoreDto } from "../dtos/contact.store.dto";
+import { ContactRepository } from "../repositories/contact.repository";
+import type { ContactMessageSchema } from "../schemas/contact-message.schema";
+import { ContactService } from "../services/contact.service";
 
 vi.mock("@infrastructure/utils/server/helpers", () => ({
 	paginator: vi.fn(),

@@ -73,7 +73,7 @@ describe("UserUpdate Form Validation", () => {
 		};
 
 		const result = userUpdateDto.safeParse(invalidData);
-		expect(result.success).toBe(true);
+		expect(result.success).toBe(false);
 	});
 
 	it("should accept valid update data with all required fields", async () => {

@@ -6,7 +6,7 @@ import type {
 	RegisterOptions,
 	UseFormReturn,
 } from "react-hook-form";
-import { FormControlContext } from "./form";
+import { FormControlContext } from "./Form";
 
 export interface FormCheckProps<T extends object> {
 	title: string;

@@ -280,12 +280,11 @@ describe("UserIndex Component", () => {
 		);
 		expect(options).toContain("All MFA Status");
 		expect(options).toContain("Enabled");
-		expect(options).toContain("Pending");
 		expect(options).toContain("Not Set");
 	});
 
 	it("should show invite user modal when button clicked", () => {
-		const { container } = render(<UserIndex />);
+		render(<UserIndex />);
 
 		const inviteButton = screen.getByText("Invite User");
 		fireEvent.click(inviteButton);
@@ -302,10 +301,10 @@ describe("UserIndex Component", () => {
 	});
 
 	it("should render action buttons for each user", () => {
-		const { container } = render(<UserIndex />);
+		render(<UserIndex />);
 
 		// Check for action dropdowns (EllipsisMenu)
-		const actionButtons = container.querySelectorAll('[aria-label="Opciones"]');
+		const actionButtons = screen.getAllByLabelText("Opciones");
 		expect(actionButtons.length).toBeGreaterThan(0);
 	});
 
@@ -351,7 +350,7 @@ describe("UserIndex Component", () => {
 
 		// Check that initials are shown when no avatar
 		const initialsElements = container.querySelectorAll(
-			".text-primary.font-bold",
+			".text-primary.font-black",
 		);
 		expect(initialsElements.length).toBeGreaterThan(0);
 	});

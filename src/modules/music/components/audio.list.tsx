@@ -1,5 +1,5 @@
-import Badge from "@components/extras/badge";
-import Modal from "@components/extras/modal";
+import Badge from "@components/extras/Badge";
+import Modal from "@components/extras/Modal";
 import VigilioTable from "@components/tables";
 import { cn } from "@infrastructure/utils/client/cn";
 import { useSignal } from "@preact/signals";

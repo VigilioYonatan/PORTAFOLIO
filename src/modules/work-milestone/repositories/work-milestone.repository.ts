@@ -49,8 +49,6 @@ export class WorkMilestoneRepository {
 		if (cursor) {
 			cursorWhere.push(lt(workMilestoneEntity.id, Number(cursor)));
 		}
-		const cursorWhereClause =
-			cursorWhere.length > 0 ? and(...cursorWhere) : baseWhereClause;
 
 		// Default sort: milestone_date DESC
 		const orderBy: SQL<unknown>[] = [desc(workMilestoneEntity.milestone_date)];

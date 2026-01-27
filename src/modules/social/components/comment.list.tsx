@@ -1,4 +1,4 @@
-import Badge from "@components/extras/badge";
+import Badge from "@components/extras/Badge";
 import { formatTimeAgo } from "@infrastructure/utils/hybrid/date.utils";
 import {
 	socialCommentIndexApi,

@@ -12,6 +12,7 @@ import {
 import type { NextFunction, Request, Response } from "express";
 import { WebPath } from "../routers/web.routers";
 import { WebService } from "../services/web.service";
+import * as os from "node:os";
 
 @Controller({ path: "/", version: VERSION_NEUTRAL })
 export class WebController {
@@ -27,7 +28,28 @@ export class WebController {
 		const props = await this.webService.index();
 		return await astroRender(props)(req, res, next);
 	}
+@Public()
+	@Get("/stats")
+	getStats() {
+		const cpus = os.cpus();
+		const freeMem = os.freemem();
+		const totalMem = os.totalmem();
+		const uptime = os.uptime();
+		const loadAvg = os.loadavg(); // Returns [1, 5, 15] min averages
 
+		return {
+			cpuModel: cpus[0]?.model || "Unknown",
+			cpuCount: cpus.length,
+			// Calculate rough CPU usage from load avg relative to core count (very rough estimate for Node)
+			cpuLoad: (loadAvg[0] / cpus.length) * 100,
+			freeMem,
+			totalMem,
+			memUsagePercent: ((totalMem - freeMem) / totalMem) * 100,
+			uptime,
+			platform: os.platform(),
+			arch: os.arch(),
+		};
+	}
 	@Public()
 	@Get([
 		WebPath.CONTACT,

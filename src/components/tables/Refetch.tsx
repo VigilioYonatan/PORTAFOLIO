@@ -1,7 +1,7 @@
 import { sizeIcon } from "@infrastructure/utils/client";
 import { RefreshCw } from "lucide-preact";
 import { useContext } from "preact/hooks";
-import Button from "../extras/button";
+import Button from "../extras/Button";
 import { VigilioTableContext } from "./vigilio-table";
 
 function Refetch() {

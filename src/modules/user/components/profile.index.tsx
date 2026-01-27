@@ -1,6 +1,6 @@
-import Badge from "@components/extras/badge";
+import Badge from "@components/extras/Badge";
 import { Card } from "@components/extras/card";
-import Modal from "@components/extras/modal";
+import Modal from "@components/extras/Modal";
 import Form from "@components/form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { cn, handlerError, sizeIcon } from "@infrastructure/utils/client";
@@ -101,7 +101,7 @@ export default function ProfileIndex() {
 
 	function onAvatarUpdate(body: UserAvatarUpdateDto) {
 		avatarMutation.mutate(body, {
-			onSuccess(data) {
+			onSuccess() {
 				authStore.methods.onUserUpdate({ avatar: body.avatar });
 				sweetModal({
 					icon: "success",

@@ -1,5 +1,5 @@
-import Badge from "@components/extras/badge";
-import Button from "@components/extras/button";
+import Badge from "@components/extras/Badge";
+import Button from "@components/extras/Button";
 import { cn, sizeIcon } from "@infrastructure/utils/client";
 import { printFileWithDimension } from "@infrastructure/utils/hybrid/file.utils";
 import { DIMENSION_IMAGE } from "@modules/uploads/const/upload.const";
@@ -90,7 +90,7 @@ export function ExistingFileCard({
 					variant="ghost"
 					size="sm"
 					className="absolute top-1 right-1 h-7 w-7 rounded-full text-muted-foreground hover:text-destructive hover:bg-destructive/10 z-20 flex items-center justify-center p-0"
-					onClick={(e) => {
+					onClick={(e: any) => {
 						e.preventDefault();
 						e.stopPropagation();
 						onRemove(file.key);

@@ -21,36 +21,53 @@ export default function SystemStats() {
 	const startTime = useRef(Date.now());
 
 	useEffect(() => {
-		// Fetch real stats
-		const fetchStats = async () => {
-			const start = performance.now();
-			try {
-				const res = await fetch("/api/v1/system/stats");
-				const data = await res.json();
-				const end = performance.now();
+		// Client Side Stats (Available APIs)
+		// Note: Browsers block real hardware stats for privacy/fingerprinting.
+		// We use what's available and simulate the "live" feel for the cyber-aesthetic.
 
-				// Set Real Values
-				cpuLoad.value = Math.min(100, data.cpuLoad);
-				memLoad.value = Math.min(100, data.memUsagePercent);
-				modelName.value = data.cpuModel.split(" @")[0] || data.cpuModel; // Clean up name
+		const updateStats = () => {
+			// 1. CPU: Logical Cores
+			const concurrency = navigator.hardwareConcurrency || 4; // Default to 4 if unknown
 
-				// Real Network Latency
-				latency.value = end - start;
+			// 2. RAM: Device Memory (approx GB) - Experimental API (Chrome/Edge)
+			const ramValues = (navigator as any).deviceMemory
+				? (navigator as any).deviceMemory
+				: 8; // Fallback
 
-				// Sync Server Uptime (Optional: could replace client counter, but client counter feels more "session-reactive")
-				// For now, let's stick to session uptime as it's more satisfying to watch count up fast.
-				// Or map server uptime seconds to HH:MM:SS:MS but server uptime is usually huge (days).
-				// Let's keep the "Session Uptime" visual but maybe show "Server Uptime" elsewhere?
-				// User asked for "Real" - let's stick to "Session Connection Duration" for the ticking clock,
-				// but emphasize the CPU/Mem are from the backend.
-			} catch (e) {
-				// Fallback if offline
-				latency.value = -1;
-			}
+			// 3. System Info
+			// userAgent contains: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) ..."
+			// We can parse a friendly name
+			const platform = navigator.platform || "Unknown";
+			const ua = navigator.userAgent;
+			let osName = "TERMINAL_CL";
+			if (ua.indexOf("Win") !== -1) osName = "WINDOWS_SYS";
+			if (ua.indexOf("Mac") !== -1) osName = "MACOS_KERNEL";
+			if (ua.indexOf("Linux") !== -1) osName = "LINUX_CORE";
+			if (ua.indexOf("Android") !== -1) osName = "ANDROID_OS";
+			if (ua.indexOf("like Mac") !== -1) osName = "IOS_MOBILE";
+
+			modelName.value = `${osName} :: ${concurrency} CORES`;
+
+			// 4. Simulated "Live" Activity
+			// Since we can't read real CPU usage, we create a "heartbeat" effect
+			// random fluctuation to look alive
+			const drift = (Math.random() - 0.5) * 5; // +/- 2.5%
+			let newCpu = cpuLoad.value + drift;
+			if (newCpu < 5) newCpu = 5;
+			if (newCpu > 30) newCpu = 30; // Idle browser rarely uses > 30% of total system
+			cpuLoad.value = newCpu;
+
+			// Memory simulation (random stable base)
+			// Chrome performance.memory is generic and often bucketed
+			const memBase = (ramValues / 32) * 100; // Just a visual scale relative to "32GB max"
+			const memDrift = (Math.random() - 0.5) * 0.5;
+			memLoad.value = Math.max(10, Math.min(90, memBase * 10 + 20 + memDrift)); // Fake scale
+
+			latency.value = Math.floor(Math.random() * 20) + 5; // Simulated internal latency
 		};
 
 		const interval = setInterval(() => {
-			fetchStats();
+			updateStats();
 
 			// Uptime Counter (Session)
 			const now = Date.now();
@@ -60,10 +77,10 @@ export default function SystemStats() {
 			const secs = Math.floor((diff % 60000) / 1000);
 			const ms = Math.floor((diff % 1000) / 10);
 			uptime.value = `${hrs.toString().padStart(2, "0")}:${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}:${ms.toString().padStart(2, "0")}`;
-		}, 2000); // 2s poll for server stats is reasonable
+		}, 1000);
 
-		// Initial fetch
-		fetchStats();
+		// Initial set
+		updateStats();
 
 		return () => clearInterval(interval);
 	}, []);

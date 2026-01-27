@@ -5,7 +5,6 @@ function GoogleCallback() {
 	useEffect(() => {
 		const params = new URLSearchParams(window.location.search);
 		const error = params.get("error");
-		const token = params.get("token");
 		const mfa = params.get("mfa_required");
 		const temp_token = params.get("temp_token");
 

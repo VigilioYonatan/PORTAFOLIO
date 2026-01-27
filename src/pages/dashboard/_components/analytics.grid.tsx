@@ -1,3 +1,4 @@
+import type { DashboardMetricsSchema } from "@modules/analytics/dtos/dashboard.response.dto";
 import InsightsRadar from "@modules/analytics/components/insights.radar";
 import { Activity, Brain, Eye, ShieldAlertIcon, Users } from "lucide-preact";
 import {
@@ -5,40 +6,53 @@ import {
 	CardContent,
 	CardHeader,
 	CardTitle,
-} from "../../../components/extras/card";
+} from "@components/extras/card";
 
-export function AnalyticsGrid() {
+interface AnalyticsGridProps {
+	metrics?: DashboardMetricsSchema;
+	isLoading?: boolean | null;
+}
+
+export function AnalyticsGrid({ metrics, isLoading }: AnalyticsGridProps) {
+	const formatNumber = (num: number) => {
+		if (num >= 1000) {
+			return `${(num / 1000).toFixed(1)}K`;
+		}
+		return num.toString();
+	};
+
+	const metricsData = [
+		{
+			title: "Total_Signal_Views",
+			value: formatNumber(metrics?.totalViews ?? 0),
+			sub: "+20.1% GAIN",
+			icon: Eye,
+		},
+		{
+			title: "Recruiter_Uplink",
+			value: `+${formatNumber(metrics?.totalUsers ?? 0)}`,
+			sub: "+180.1% ACTIVE",
+			icon: Users,
+		},
+		{
+			title: "Live_Threads",
+			value: formatNumber(metrics?.totalChats ?? 0),
+			sub: "+19.2% BURST",
+			icon: Activity,
+		},
+		{
+			title: "Core_Integrity",
+			value: "99.9%",
+			sub: "STABLE",
+			icon: ShieldAlertIcon,
+			isSuccess: true,
+		},
+	];
 	return (
 		<div class="space-y-6">
 			{/* Metrics Row */}
 			<div class="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-				{[
-					{
-						title: "Total_Signal_Views",
-						value: "45.2K",
-						sub: "+20.1% GAIN",
-						icon: Eye,
-					},
-					{
-						title: "Recruiter_Uplink",
-						value: "+2,350",
-						sub: "+180.1% ACTIVE",
-						icon: Users,
-					},
-					{
-						title: "Live_Threads",
-						value: "12,234",
-						sub: "+19.2% BURST",
-						icon: Activity,
-					},
-					{
-						title: "Core_Integrity",
-						value: "99.9%",
-						sub: "STABLE",
-						icon: ShieldAlertIcon,
-						isSuccess: true,
-					},
-				].map((item) => (
+				{metricsData.map((item) => (
 					<Card
 						key={item.title}
 						className={`border-white/5 relative overflow-hidden group transition-all duration-300 hover:border-primary/30 ${

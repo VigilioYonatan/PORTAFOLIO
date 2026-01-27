@@ -1,4 +1,4 @@
-import Modal from "@components/extras/modal";
+import Modal from "@components/extras/Modal";
 import VigilioTable from "@components/tables";
 import { formatDateTz } from "@infrastructure/utils/hybrid/date.utils";
 import { blogCategoryDestroyApi } from "@modules/blog-category/apis/blog-category.destroy.api";
@@ -124,9 +124,7 @@ export default function CategoryManager() {
 			<VigilioTable query={query} table={table}>
 				<VigilioTable.table>
 					<VigilioTable.thead>
-						<VigilioTable.thead.row>
-							<VigilioTable.thead.th />
-						</VigilioTable.thead.row>
+						<VigilioTable.thead.th />
 					</VigilioTable.thead>
 					<VigilioTable.tbody>
 						<VigilioTable.tbody.row title="No categories found">
@@ -170,9 +168,9 @@ export default function CategoryManager() {
 				}}
 				contentClassName="max-w-md w-full p-6 bg-zinc-950 border border-white/10"
 			>
-				{categoryEdit.value && (
+				
 					<CategoryUpdate
-						category={categoryEdit.value}
+						category={categoryEdit.value!}
 						refetch={(data) => {
 							table.updateData((old, count) => ({
 								result: old.map((item) =>
@@ -188,7 +186,7 @@ export default function CategoryManager() {
 							categoryEdit.value = null;
 						}}
 					/>
-				)}
+				
 			</Modal>
 
 		</div>

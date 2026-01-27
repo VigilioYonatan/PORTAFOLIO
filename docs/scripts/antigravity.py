@@ -657,10 +657,25 @@ pages/
 ```
 """
     # print("\n--- PASO 1: GENERACIÓN ---")
-    run_automation_pass(comandos, PROMPT_BASE,PROMPT_CONTEXT + BEFORE, "Empezamos con ")
+   # run_automation_pass(comandos, PROMPT_BASE,PROMPT_CONTEXT + BEFORE, "Empezamos con ")
  
     # print("\n--- PASO 2: VERIFICACIÓN ---")
-    run_automation_pass(comandos,"",PROMPT_CONTEXT_VERIFIED, "Verificamos si esta al 100% fiel ")
+    # run_automation_pass(comandos,"",PROMPT_CONTEXT_VERIFIED, "Verificamos si esta al 100% fiel ")
+    run_automation_pass([""],"","", "sigue arreglando check astro check , si ya acabaste presion && pnpm test:e2e:db && y sigue arreglando  pnpm test , recuerda seguir con las practicas de prompt-frontend.md y prompt-backend.md , rules-pages.md")
+    run_automation_pass([""],"","", "sigue arreglando check astro check, si ya acabaste presion && pnpm test:e2e:db && y sigue arreglando  pnpm test , recuerda seguir con las practicas de prompt-frontend.md y prompt-backend.md , rules-pages.md")
+    run_automation_pass([""],"","", "sigue arreglando check astro check, si ya acabaste presion && pnpm test:e2e:db && y sigue arreglando  pnpm test , recuerda seguir con las practicas de prompt-frontend.md y prompt-backend.md , rules-pages.md")
+    run_automation_pass([""],"","", "sigue arreglando check astro check, si ya acabaste presion && pnpm test:e2e:db && y sigue arreglando  pnpm test , recuerda seguir con las practicas de prompt-frontend.md y prompt-backend.md , rules-pages.md")
+    run_automation_pass([""],"","", "sigue arreglando check astro check, si ya acabaste presion && pnpm test:e2e:db && y sigue arreglando  pnpm test , recuerda seguir con las practicas de prompt-frontend.md y prompt-backend.md , rules-pages.md")
+    run_automation_pass([""],"","", "sigue arreglando check astro check, si ya acabaste presion && pnpm test:e2e:db && y sigue arreglando  pnpm test , recuerda seguir con las practicas de prompt-frontend.md y prompt-backend.md , rules-pages.md")
+    run_automation_pass([""],"","", "sigue arreglando check astro check, si ya acabaste presion && pnpm test:e2e:db && y sigue arreglando  pnpm test , recuerda seguir con las practicas de prompt-frontend.md y prompt-backend.md , rules-pages.md")
+    run_automation_pass([""],"","", "sigue arreglando check astro check, si ya acabaste presion && pnpm test:e2e:db && y sigue arreglando  pnpm test , recuerda seguir con las practicas de prompt-frontend.md y prompt-backend.md , rules-pages.md")
+    run_automation_pass([""],"","", "sigue arreglando check astro check, si ya acabaste presion && pnpm test:e2e:db && y sigue arreglando  pnpm test , recuerda seguir con las practicas de prompt-frontend.md y prompt-backend.md , rules-pages.md")
+    run_automation_pass([""],"","", "sigue arreglando check astro check, si ya acabaste presion && pnpm test:e2e:db && y sigue arreglando  pnpm test , recuerda seguir con las practicas de prompt-frontend.md y prompt-backend.md , rules-pages.md")
+    run_automation_pass([""],"","", "sigue arreglando check astro check, si ya acabaste presion && pnpm test:e2e:db && y sigue arreglando  pnpm test , recuerda seguir con las practicas de prompt-frontend.md y prompt-backend.md , rules-pages.md")
+    run_automation_pass([""],"","", "sigue arreglando check astro check, si ya acabaste presion && pnpm test:e2e:db && y sigue arreglando  pnpm test , recuerda seguir con las practicas de prompt-frontend.md y prompt-backend.md , rules-pages.md")
+    run_automation_pass([""],"","", "sigue arreglando check astro check, si ya acabaste presion && pnpm test:e2e:db && y sigue arreglando  pnpm test , recuerda seguir con las practicas de prompt-frontend.md y prompt-backend.md , rules-pages.md")
+    run_automation_pass([""],"","", "sigue arreglando check astro check, si ya acabaste presion && pnpm test:e2e:db && y sigue arreglando  pnpm test , recuerda seguir con las practicas de prompt-frontend.md y prompt-backend.md , rules-pages.md")
+
 except KeyboardInterrupt:
     print("\nScript detenido por el usuario.")
 except Exception as e:

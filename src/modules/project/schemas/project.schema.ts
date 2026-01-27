@@ -16,8 +16,8 @@ export const projectSchema = z
 		description: z.string().min(1).max(500),
 		content: z.string().min(1), // Markdown content
 		impact_summary: z.string().min(1), // Senior Results
-		website_url: z.string().url().max(500).nullable(),
-		repo_url: z.string().url().max(500).nullable(),
+		website_url: z.url().max(500).nullable(),
+		repo_url: z.url().max(500).nullable(),
 		github_stars: z.number().int().nonnegative().nullable(), // Read-only from GitHub
 		github_forks: z.number().int().nonnegative().nullable(), // Read-only from GitHub
 		languages_stats: z

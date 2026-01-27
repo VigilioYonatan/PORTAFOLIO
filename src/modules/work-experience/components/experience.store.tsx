@@ -23,7 +23,7 @@ export default function ExperienceStore({
 	const workExperienceStoreMutation = workExperienceStoreApi();
 
 	const workExperienceStoreForm = useForm<WorkExperienceStoreDto>({
-		resolver: zodResolver(workExperienceStoreDto),
+		resolver: zodResolver(workExperienceStoreDto) as any,
 		mode: "all",
 	});
 

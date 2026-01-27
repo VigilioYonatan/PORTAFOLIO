@@ -1,7 +1,17 @@
-import { useEntranceAnimation } from "@hooks/use-motion";
 import { cn } from "@infrastructure/utils/client";
 import { chatMessagePublicStoreApi } from "@modules/chat/apis/chat-message.public-store.api";
 import { conversationStoreApi } from "@modules/chat/apis/conversation.store.api";
+import {
+	connectChatSocket,
+	disconnectChatSocket,
+	getChatSocket,
+	joinConversation,
+	onModeChanged,
+	onNewMessage,
+	removeAllChatListeners,
+	sendChatMessage,
+	type ChatMode,
+} from "@modules/chat/utils/client/chat.socket";
 import { useSignal } from "@preact/signals";
 import {
 	BotIcon,
@@ -10,65 +20,142 @@ import {
 	UserIcon,
 	WifiIcon,
 	WifiOffIcon,
-	XIcon,
 } from "lucide-preact";
 import { useEffect, useRef } from "preact/hooks";
+import { isChatOpen } from "@stores/chat.store";
 
 interface ChatMessage {
-	role: "USER" | "ASSISTANT";
+	role: "USER" | "ASSISTANT" | "ADMIN";
 	content: string;
 	isStreaming?: boolean;
 }
 
-import { isChatOpen } from "@stores/chat.store";
+const TENANT_ID = 1; // Default tenant
 
 export default function FloatingActionChat() {
-	const isOpen = isChatOpen;
+	// Direct signal usage for better reactivity
+	const modeSelected = useSignal<boolean>(false);
 	const conversationId = useSignal<number | null>(null);
-	const messages = useSignal<ChatMessage[]>([
-		{
-			role: "ASSISTANT",
-			content:
-				"SYSTEM_READY: I am the AI Nexus. How can I assist your architectural inquiry today?",
-		},
-	]);
+	const chatMode = useSignal<ChatMode>("AI");
+	const messages = useSignal<ChatMessage[]>([]);
 	const inputValue = useSignal<string>("");
 	const isTyping = useSignal<boolean>(false);
+	const isAdminTyping = useSignal<boolean>(false);
 	const scrollRef = useRef<HTMLDivElement>(null);
-	const entranceRef = useEntranceAnimation(0.2);
+
+	// Auto-select mode if already in a conversation
+	useEffect(() => {
+		if (conversationId.value && !modeSelected.value) {
+			modeSelected.value = true;
+			if (messages.value.length === 0) {
+				messages.value = [{ 
+					role: "ASSISTANT", 
+					content: chatMode.value === "AI" ? "AI_LINK_REESTABLISHED: Protocol active." : "HUMAN_LINK_REESTABLISHED: Connection restored." 
+				}];
+			}
+		}
+	}, [conversationId.value]);
 
 	const startConversationMutation = conversationStoreApi();
-	const sendMessageMutation = chatMessagePublicStoreApi(
-		conversationId.value || 0,
-	);
+	const sendMessageMutation = chatMessagePublicStoreApi(conversationId);
 
+	// Socket connection for LIVE mode
 	useEffect(() => {
-		const handleToggle = () => {
-			isOpen.value = !isOpen.value;
-		};
-		window.addEventListener("toggle-chat", handleToggle);
-		return () => window.removeEventListener("toggle-chat", handleToggle);
-	}, []);
+		if (chatMode.value === "LIVE" && conversationId.value) {
+			connectChatSocket();
+			const visitorId =
+				localStorage.getItem("chat_visitor_id") || crypto.randomUUID();
+			joinConversation(conversationId.value, visitorId, TENANT_ID, "LIVE");
+
+			onNewMessage((msg: ChatMessage) => {
+				messages.value = [
+					...messages.value,
+					{
+						role: msg.role === "ADMIN" ? "ADMIN" : "ASSISTANT",
+						content: msg.content,
+					},
+				];
+			});
+
+			onModeChanged((data: { mode: ChatMode }) => {
+				if (data.mode === "LIVE") {
+					messages.value = [
+						...messages.value,
+						{
+							role: "ASSISTANT",
+							content:
+								"SENIOR_MODE_ACTIVATED: A human architect has joined the conversation.",
+						},
+					];
+				}
+			});
+
+			const socket = getChatSocket();
+			socket.on("typing_status", (data: { is_typing: boolean }) => {
+				isAdminTyping.value = data.is_typing;
+			});
+
+			return () => {
+				removeAllChatListeners();
+				disconnectChatSocket();
+			};
+		}
+	}, [chatMode.value, conversationId.value]);
 
 	useEffect(() => {
 		if (scrollRef.current) {
 			scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
 		}
-	}, [messages.value.length, isOpen.value, isTyping.value]);
+	}, [messages.value, isChatOpen.value, isTyping.value]);
+
+	function handleModeSwitch(mode: ChatMode) {
+		if (chatMode.value === mode) return;
+		chatMode.value = mode;
+
+		if (mode === "LIVE") {
+			messages.value = [
+				...messages.value,
+				{
+					role: "ASSISTANT",
+					content:
+						"SWITCHING_TO_SENIOR_MODE: Connecting to human architect... Please wait.",
+				},
+			];
+		} else {
+			messages.value = [
+				...messages.value,
+				{
+					role: "ASSISTANT",
+					content: "SWITCHING_TO_AI_MODE: AI Nexus re-engaged. How can I help?",
+				},
+			];
+		}
+	}
 
 	async function handleSend() {
 		if (!inputValue.value.trim() || isTyping.value) return;
+
+		// 30 Message limit
+		if (messages.value.filter(m => m.role === "USER").length >= 30) {
+			messages.value = [
+				...messages.value,
+				{ role: "ASSISTANT", content: "ERROR: MESSAGE_LIMIT_REACHED. Connection terminated." }
+			];
+			return;
+		}
 
 		const userText = inputValue.value;
 		inputValue.value = "";
 
 		// Ensure conversation is started
-		if (!conversationId.value) {
+		const wasNewConversation = !conversationId.value;
+		let validConversationId = conversationId.value;
+
+		if (!validConversationId) {
 			try {
 				// Generate simple visitor ID if not exists
 				const visitorId =
-					localStorage.getItem("chat_visitor_id") ||
-					Math.random().toString(36).substring(2, 15);
+					localStorage.getItem("chat_visitor_id") || crypto.randomUUID();
 				localStorage.setItem("chat_visitor_id", visitorId);
 
 				const session = await startConversationMutation.mutateAsync({
@@ -77,7 +164,8 @@ export default function FloatingActionChat() {
 				});
 
 				if (session?.conversation?.id) {
-					conversationId.value = session.conversation.id;
+					validConversationId = session.conversation.id;
+					conversationId.value = validConversationId;
 				} else {
 					throw new Error("Invalid session response");
 				}
@@ -97,13 +185,32 @@ export default function FloatingActionChat() {
 		messages.value = [...messages.value, { role: "USER", content: userText }];
 		isTyping.value = true;
 
-		// Send message
+		// LIVE mode: send via WebSocket
+		if (chatMode.value === "LIVE") {
+			sendChatMessage(validConversationId, userText, "USER", TENANT_ID);
+			isTyping.value = false;
+			return;
+		}
+
+		// AI mode: send via HTTP + SSE
 		try {
-			await sendMessageMutation.mutateAsync({ content: userText });
+			if (wasNewConversation) {
+				const res = await fetch(
+					`/api/v1/chat/conversations/${validConversationId}/messages`,
+					{
+						method: "POST",
+						headers: { "Content-Type": "application/json" },
+						body: JSON.stringify({ content: userText }),
+					},
+				);
+				if (!res.ok) throw await res.json();
+			} else {
+				await sendMessageMutation.mutateAsync({ content: userText });
+			}
 
 			// Start SSE for real-time AI response
 			const eventSource = new EventSource(
-				`/api/v1/chat/conversations/${conversationId.value}/stream`,
+				`/api/v1/chat/conversations/${validConversationId}/stream`,
 			);
 
 			// Initial placeholder for streaming response
@@ -116,19 +223,20 @@ export default function FloatingActionChat() {
 			eventSource.onmessage = (event) => {
 				const data = JSON.parse(event.data);
 
-				if (data.type === "chunk") {
-					// Append chunk to the last message
+				if (data.content || data.type === "chunk") {
 					const currentMessages = [...messages.value];
 					if (currentMessages[streamingMsgIndex]) {
 						currentMessages[streamingMsgIndex] = {
 							...currentMessages[streamingMsgIndex],
 							content:
-								currentMessages[streamingMsgIndex].content + data.content,
+								currentMessages[streamingMsgIndex].content +
+								(data.content || ""),
 						};
 						messages.value = currentMessages;
 					}
-				} else if (data.type === "done" || data.type === "error") {
-					// Stream finished
+				}
+
+				if (data.type === "done" || data.type === "error") {
 					const currentMessages = [...messages.value];
 					if (currentMessages[streamingMsgIndex]) {
 						currentMessages[streamingMsgIndex] = {
@@ -144,7 +252,6 @@ export default function FloatingActionChat() {
 
 			eventSource.onerror = (_err) => {
 				const currentMessages = [...messages.value];
-				// If we have some content, just mark done. If empty, show error.
 				if (
 					currentMessages[streamingMsgIndex] &&
 					!currentMessages[streamingMsgIndex].content
@@ -175,44 +282,13 @@ export default function FloatingActionChat() {
 
 	return (
 		<>
-			{/* The Cyberpunk FAB */}
-			<button
-				type="button"
-				onClick={() => {
-					isOpen.value = !isOpen.value;
-				}}
-				aria-label={isOpen.value ? "Close Interface" : "Open AI Nexus"}
-				class={cn(
-					"fixed bottom-24 right-6 z-50 w-16 h-16 rounded-sm shadow-2xl flex items-center justify-center transition-all duration-500 hover:scale-105 active:scale-95 group overflow-hidden border border-primary/20 bg-black/40 backdrop-blur-md",
-					isOpen.value
-						? "rotate-180 border-primary/60"
-						: "hover:border-primary/40",
-				)}
-			>
-				{/* Glow Background */}
-				<div class="absolute inset-0 bg-primary/10 opacity-0 group-hover:opacity-100 transition-opacity" />
-				<div class="absolute inset-0 bg-scanline opacity-10" />
-
-				{isOpen.value ? (
-					<XIcon size={24} class="text-primary" />
-				) : (
-					<BotIcon size={24} class="text-primary animate-glitch-sm" />
-				)}
-
-				{/* Pulsing Status */}
-				{!isOpen.value && (
-					<span class="absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-primary animate-pulse shadow-glow" />
-				)}
-			</button>
-
 			{/* The Terminal Window */}
 			<div
-				ref={entranceRef}
 				class={cn(
-					"fixed bottom-40 right-6 z-50 w-[380px] md:w-[420px] h-[550px] bg-zinc-950/90 border border-primary/20 rounded-sm shadow-[0_0_50px_rgba(0,0,0,0.8)] flex flex-col transition-all duration-300 origin-bottom-right overflow-hidden backdrop-blur-xl",
-					isOpen.value
-						? "opacity-100 scale-100 translate-y-0"
-						: "opacity-0 scale-95 translate-y-10 pointer-events-none",
+					"fixed bottom-40 right-6 z-50 w-[380px] md:w-[420px] h-[550px] bg-zinc-950/90 border border-primary/20 rounded-sm shadow-[0_0_50px_rgba(0,0,0,0.8)] flex flex-col transition-all duration-500 cubic-bezier(0.23, 1, 0.32, 1) origin-bottom-right overflow-hidden backdrop-blur-xl",
+					isChatOpen.value
+						? "opacity-100 scale-100 translate-y-0 translate-x-0"
+						: "opacity-0 scale-90 translate-y-4 translate-x-full pointer-events-none",
 				)}
 			>
 				{/* Visual Artifacts */}
@@ -227,7 +303,7 @@ export default function FloatingActionChat() {
 						</div>
 						<div class="flex flex-col">
 							<h4 class="font-black text-[10px] tracking-[0.3em] uppercase text-white">
-								AI_NEXUS_v2.0.4
+								{chatMode.value === "AI" ? "AI_NEXUS_v2.0.4" : "SENIOR_MODE"}
 							</h4>
 							<span class="text-[8px] text-primary/80 flex items-center gap-1 font-bold tracking-widest uppercase">
 								{conversationId.value ? (
@@ -236,63 +312,171 @@ export default function FloatingActionChat() {
 									<WifiOffIcon size={8} class="text-yellow-500" />
 								)}
 								{conversationId.value
-									? "ENCRYPTED_LINK_ACTIVE"
+									? chatMode.value === "AI"
+										? "AI_LINK_ACTIVE"
+										: "HUMAN_LINK_ACTIVE"
 									: "LINK_WAITING_INIT"}
 							</span>
 						</div>
 					</div>
-					<div class="flex gap-1.5">
-						<div class="w-2 h-2 rounded-full border border-white/10" />
-						<div class="w-2 h-2 rounded-full border border-white/10" />
-						<div class="w-2 h-2 rounded-full bg-primary/40 border border-primary/60" />
+					{/* Mode Toggle Buttons */}
+					<div class="flex gap-1">
+						<button
+							type="button"
+							onClick={() => handleModeSwitch("AI")}
+							class={cn(
+								"px-2 py-1 text-[8px] font-bold tracking-widest rounded-sm transition-all",
+								chatMode.value === "AI"
+									? "bg-primary text-black"
+									: "bg-zinc-800 text-white/50 hover:text-white",
+							)}
+						>
+							AI
+						</button>
+						<button
+							type="button"
+							onClick={() => handleModeSwitch("LIVE")}
+							class={cn(
+								"px-2 py-1 text-[8px] font-bold tracking-widest rounded-sm transition-all",
+								chatMode.value === "LIVE"
+									? "bg-green-500 text-black"
+									: "bg-zinc-800 text-white/50 hover:text-white",
+							)}
+						>
+							SENIOR
+						</button>
 					</div>
 				</div>
 
 				{/* Terminal Messages */}
 				<div
-					class="flex-1 overflow-y-auto p-6 flex flex-col gap-6 custom-scrollbar relative"
+					class="flex-1 overflow-y-auto p-6 flex flex-col gap-6 custom-scrollbar relative [scrollbar-gutter:stable]"
 					ref={scrollRef}
 				>
-					{messages.value.map((msg, i) => (
-						<div
-							key={i}
-							class={cn(
-								"flex flex-col gap-2 max-w-[90%] font-mono",
-								msg.role === "USER"
-									? "self-end items-end"
-									: "self-start items-start",
-							)}
-						>
-							<div class="flex items-center gap-2 opacity-40">
-								{msg.role === "ASSISTANT" ? (
-									<BotIcon size={10} />
-								) : (
-									<UserIcon size={10} />
-								)}
-								<span class="text-[8px] font-bold tracking-[0.2em]">
-									{msg.role === "ASSISTANT" ? "SYSTEM.AI" : "USER.ARCHITECT"}
-								</span>
-							</div>
-							<div
-								class={cn(
-									"p-3 text-[11px] leading-relaxed tracking-wide transition-all",
-									msg.role === "ASSISTANT"
-										? "bg-primary/5 text-primary border-l border-primary/40"
-										: "bg-zinc-900/60 text-white border-r border-white/20 text-right",
-								)}
-							>
-								{msg.content}
+					{!modeSelected.value && (
+						<div class="absolute inset-0 z-10 bg-zinc-950/80 backdrop-blur-md flex flex-col items-center justify-center p-8 text-center animate-in fade-in duration-500">
+							<TerminalIcon size={40} class="text-primary mb-6 animate-pulse" />
+							<h3 class="text-lg font-black tracking-tighter text-white mb-2 uppercase">
+								Link Establishment
+							</h3>
+							<p class="text-[10px] text-muted-foreground font-mono mb-8 tracking-widest leading-relaxed">
+								INITIALIZE_CONNECTION: SELECT_COMMUNICATION_PROTOCOL_TO_BEGIN.
+							</p>
+							<div class="grid grid-cols-1 gap-4 w-full max-w-[200px]">
+								<button
+									type="button"
+									onClick={() => {
+										chatMode.value = "AI";
+										modeSelected.value = true;
+										messages.value = [{ role: "ASSISTANT", content: "AI_LINK_STABLE: I am the AI Nexus. Protocol engaged." }];
+									}}
+									class="group relative px-6 py-3 bg-primary text-black font-black text-xs uppercase tracking-widest rounded-sm hover:scale-105 active:scale-95 transition-all overflow-hidden"
+								>
+									<span class="relative z-10 flex items-center justify-center gap-2">
+										<BotIcon size={14} /> Hablar con IA
+									</span>
+									<div class="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500" />
+								</button>
+								<button
+									type="button"
+									onClick={() => {
+										chatMode.value = "LIVE";
+										modeSelected.value = true;
+										messages.value = [{ role: "ASSISTANT", content: "HUMAN_LINK_INITIALIZING: Awaiting Yonatan Vigilio's connection..." }];
+									}}
+									class="group relative px-6 py-3 bg-zinc-800 text-white font-black text-xs uppercase tracking-widest rounded-sm hover:bg-zinc-700 hover:scale-105 active:scale-95 transition-all border border-white/5"
+								>
+									<span class="relative z-10 flex items-center justify-center gap-2">
+										<UserIcon size={14} /> Yonatan Vigilio
+									</span>
+									<div class="absolute inset-0 bg-white/5 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500" />
+								</button>
 							</div>
 						</div>
-					))}
-					{isTyping.value && (
-						<div class="flex gap-2 items-center self-start text-primary/60 animate-pulse font-mono text-[10px] tracking-widest px-1">
-							<div class="flex gap-1">
-								<span class="animate-[bounce_1s_infinite]">.</span>
-								<span class="animate-[bounce_1s_infinite_0.2s]">.</span>
-								<span class="animate-[bounce_1s_infinite_0.4s]">.</span>
+					)}
+					{messages.value.map((msg, i) => {
+						if (
+							msg.role === "ASSISTANT" &&
+							!msg.content &&
+							msg.isStreaming
+						)
+							return null;
+						return (
+							<div
+								key={i}
+								class={cn(
+									"flex flex-col gap-2 max-w-[90%] font-mono",
+									msg.role === "USER"
+										? "self-end items-end"
+										: "self-start items-start",
+								)}
+							>
+								<div class="flex items-center gap-2 opacity-40">
+									{msg.role === "USER" ? (
+										<UserIcon size={10} />
+									) : (
+										<BotIcon size={10} />
+									)}
+									<span class="text-[8px] font-bold tracking-[0.2em]">
+										{msg.role === "USER"
+											? "USER.ARCHITECT"
+											: msg.role === "ADMIN"
+												? "SENIOR.HUMAN"
+												: "SYSTEM.AI"}
+									</span>
+								</div>
+								<div
+									class={cn(
+										"p-3 text-[11px] leading-relaxed tracking-wide transition-all",
+										msg.role === "USER"
+											? "bg-zinc-900/60 text-white border-r border-white/20 text-right"
+											: msg.role === "ADMIN"
+												? "bg-green-500/10 text-green-400 border-l border-green-500/40"
+												: "bg-primary/5 text-primary border-l border-primary/40",
+									)}
+								>
+									{msg.content}
+								</div>
 							</div>
-							ANALYZING_INPUT
+						);
+					})}
+					{isTyping.value &&
+						!messages.value[messages.value.length - 1]?.content && (
+							<div class="flex flex-col gap-2 self-start items-start opacity-80">
+								<div class="flex items-center gap-2 opacity-40">
+									<BotIcon size={10} />
+									<span class="text-[8px] font-bold tracking-[0.2em]">
+										SYSTEM.PROCESS
+									</span>
+								</div>
+								<div class="p-3 bg-primary/5 border border-primary/20 text-primary flex items-center gap-2">
+									<span class="relative flex h-2 w-2">
+										<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+										<span class="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+									</span>
+									<span class="font-mono text-[10px] tracking-[0.2em] animate-pulse">
+										CALCULATING_RESPONSE...
+									</span>
+								</div>
+							</div>
+						)}
+					{isAdminTyping.value && chatMode.value === "LIVE" && (
+						<div class="flex flex-col gap-2 self-start items-start opacity-80">
+							<div class="flex items-center gap-2 opacity-40">
+								<UserIcon size={10} />
+								<span class="text-[8px] font-bold tracking-[0.2em]">
+									SENIOR.TYPING
+								</span>
+							</div>
+							<div class="p-3 bg-green-500/5 border border-green-500/20 text-green-400 flex items-center gap-2">
+								<span class="relative flex h-2 w-2">
+									<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-500 opacity-75"></span>
+									<span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+								</span>
+								<span class="font-mono text-[10px] tracking-[0.2em] animate-pulse">
+									HUMAN_TYPING...
+								</span>
+							</div>
 						</div>
 					)}
 				</div>
@@ -304,20 +488,20 @@ export default function FloatingActionChat() {
 							type="text"
 							aria-label="Nexus Input"
 							class="flex-1 bg-transparent px-4 py-2 text-[11px] font-mono text-white focus:outline-none placeholder:text-white/20"
-							placeholder="INITIALIZE_COMMAND..."
+							placeholder={messages.value.filter(m => m.role === "USER").length >= 30 ? "LIMIT_REACHED" : "INITIALIZE_COMMAND..."}
 							value={inputValue.value}
 							onInput={(e) => {
 								inputValue.value = e.currentTarget.value;
 							}}
 							onKeyDown={(e) => e.key === "Enter" && handleSend()}
-							disabled={isTyping.value}
+							disabled={isTyping.value || messages.value.filter(m => m.role === "USER").length >= 30}
 						/>
 						<button
 							aria-label="Transmit"
 							class="w-8 h-8 flex items-center justify-center bg-primary text-black rounded-sm hover:scale-105 active:scale-95 transition-all shadow-glow disabled:opacity-50 disabled:cursor-not-allowed group/send"
 							onClick={handleSend}
 							type="button"
-							disabled={!inputValue.value.trim() || isTyping.value}
+							disabled={!inputValue.value.trim() || isTyping.value || messages.value.filter(m => m.role === "USER").length >= 30}
 						>
 							<SendIcon
 								size={14}
@@ -327,10 +511,10 @@ export default function FloatingActionChat() {
 					</div>
 					<div class="mt-2 flex justify-between items-center opacity-20 px-1">
 						<span class="text-[7px] font-bold tracking-[0.2em]">
-							SECURE_TUNNEL: TLS_1.3
+							{messages.value.filter(m => m.role === "USER").length}/30 MESSAGES
 						</span>
 						<span class="text-[7px] font-bold tracking-[0.2em]">
-							AES_256_GCM
+							{chatMode.value === "AI" ? "SSE_STREAM" : "WEBSOCKET_LIVE"}
 						</span>
 					</div>
 				</div>

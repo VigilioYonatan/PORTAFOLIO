@@ -15,7 +15,7 @@ import {
 import { sweetModal } from "@vigilio/sweet";
 import { FileText, Image as ImageIcon, Link, Tag } from "lucide-preact";
 import { useEffect, useMemo } from "preact/hooks";
-import { useForm } from "react-hook-form";
+import { useForm, type Resolver } from "react-hook-form";
 import type { BlogPostIndexResponseDto } from "../dtos/blog-post.response.dto";
 import type { BlogPostSchema } from "../schemas/blog-post.schema";
 
@@ -34,7 +34,7 @@ export default function BlogPostUpdate({
 	const categoriesQuery = blogCategoryIndexApi(null);
 
 	const blogPostUpdateForm = useForm<BlogPostUpdateDto>({
-		resolver: zodResolver(blogPostUpdateDto),
+		resolver: zodResolver(blogPostUpdateDto) as Resolver<BlogPostUpdateDto>,
 		mode: "all",
 		defaultValues: { ...post },
 	});

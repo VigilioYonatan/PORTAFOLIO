@@ -1,5 +1,5 @@
-import Badge from "@components/extras/badge";
-import Loader from "@components/extras/loader";
+import Badge from "@components/extras/Badge";
+import Loader from "@components/extras/Loader";
 import {
 	type PaginatorResult,
 	type PaginatorResultError,

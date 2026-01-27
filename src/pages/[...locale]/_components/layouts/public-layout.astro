@@ -2,13 +2,15 @@
 import { ClientRouter } from "astro:transitions";
 import "@pages/_main.ts";
 import "@assets/css/global.css";
-import { getLangFromUrl, useTranslations } from "@src/i18n";
+import { getLangFromUrl } from "@src/i18n";
 
 import TerminalLogo from "../terminal.logo";
 import NavLinks from "../nav.links";
 import NeuroPlayer from "../neuro.player";
 import FloatingActionChat from "../floating-action.chat";
-import { Moon, Sun, Github, Activity } from "lucide-preact";
+import { Moon } from "lucide-preact";
+import { BrandIcon } from "@components/extras/brand-icon";
+import { siGithub } from "simple-icons/icons";
 
 const lang = getLangFromUrl(Astro.url);
 
@@ -75,7 +77,7 @@ const {
           target="_blank"
           class="text-muted-foreground hover:text-white transition-colors"
         >
-          <Github size={20} />
+          <BrandIcon icon={siGithub} size={20} />
         </a>
 
         {

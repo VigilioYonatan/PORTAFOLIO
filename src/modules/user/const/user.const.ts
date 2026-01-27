@@ -38,7 +38,7 @@ export const USER_ROLE_OPTIONS: {
  */
 export const ROLE_BADGE_STYLES: Record<
 	number,
-	{ label: string; className: string; variant: string }
+	{ label: string; className: string; variant: "outline" | "primary" | "secondary" | "success" | "default" | "warning" | "destructive" | "matrix" }
 > = {
 	1: {
 		label: "ADMIN",
@@ -63,7 +63,7 @@ export const ROLE_BADGE_STYLES: Record<
 export function getRoleBadgeInfo(roleId: number): {
 	label: string;
 	className: string;
-	variant: string;
+	variant: "outline" | "primary" | "secondary" | "success" | "default" | "warning" | "destructive" | "matrix";
 } {
 	return (
 		ROLE_BADGE_STYLES[roleId] || {
@@ -81,11 +81,11 @@ export function getUserStatusInfo(status: UserSchema["status"]): {
 	label: string;
 	className: string;
 	dotColor: string;
-	variant: string;
+	variant: "outline" | "primary" | "secondary" | "success" | "default" | "warning" | "destructive" | "matrix";
 } {
 	const statusMap: Record<
 		string,
-		{ label: string; className: string; dotColor: string; variant: string }
+		{ label: string; className: string; dotColor: string; variant: "outline" | "primary" | "secondary" | "success" | "default" | "warning" | "destructive" | "matrix" }
 	> = {
 		ACTIVE: {
 			label: "ACTIVE",
@@ -97,7 +97,7 @@ export function getUserStatusInfo(status: UserSchema["status"]): {
 			label: "BANNED",
 			className: "text-red-600",
 			dotColor: "bg-red-500",
-			variant: "danger",
+			variant: "destructive",
 		},
 		PENDING: {
 			label: "PENDING",

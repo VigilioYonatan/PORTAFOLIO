@@ -6,7 +6,7 @@ public/video/
 # Generated
 .astro/
 *.tsbuildinfo
-
+.agent/
 # Dependencies
 node_modules/
 .pnpm-store/

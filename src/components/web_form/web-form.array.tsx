@@ -7,7 +7,8 @@ import { useComputed, useSignal } from "@preact/signals";
 import type { UseQuery } from "@vigilio/preact-fetching";
 import type { UsePaginator } from "@vigilio/preact-paginator";
 import { Search } from "lucide-preact";
-import { type JSX } from "preact";
+import type { JSX } from "preact";
+
 import { useContext, useEffect } from "preact/hooks";
 import type {
 	FieldValues,
@@ -15,7 +16,7 @@ import type {
 	PathValue,
 	UseFormReturn,
 } from "react-hook-form";
-import Loader from "../extras/loader";
+import Loader from "../extras/Loader";
 import { anidarPropiedades } from "./utils";
 import { FormControlContext } from "./web-form";
 
@@ -73,7 +74,7 @@ function WebFormArray<X extends object, T extends object = {}>({
 	const err = anidarPropiedades(errors, (name as string).split("."));
 	const value = watch(name as unknown as Path<T>);
 
-	const handleSearchChange = (e: JSX.TargetedEvent<HTMLInputElement>) => {
+	const handleSearchChange = (e: Event) => {
 		const value = (e.target as HTMLInputElement).value;
 		paginator.search.onSearchByName(value);
 		showSuggestions.value = true;

@@ -59,7 +59,7 @@ function WebFormControl<T extends object>({
 
 			<div class="relative flex gap-1 items-center">
 				{ico && (
-					<div class="absolute left-4 z-10 text-zinc-500 transition-colors group-focus-within:text-primary">
+					<div class="absolute left-4 z-10 text-zinc-500 transition-colors group-focus-within:text-primary pointer-events-none">
 						{ico}
 					</div>
 				)}

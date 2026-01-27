@@ -1,8 +1,8 @@
 import { useQuery } from "@vigilio/preact-fetching";
 import type { UsePaginator } from "@vigilio/preact-paginator";
 import type { UseTable } from "@vigilio/preact-table";
-import type { ContactIndexResponseDto } from "../dtos/contact-message.response.dto";
-import type { ContactMessageSchema } from "../schemas/contact-message-message.schema";
+import type { ContactIndexResponseDto } from "../dtos/contact.response.dto";
+import type { ContactMessageSchema } from "../schemas/contact-message.schema";
 
 export type ContactIndexSecondaryPaginator = "action";
 export type ContactIndexMethods = {
@@ -61,6 +61,12 @@ export function contactIndexApi(
 			if (paginator) {
 				data.append("offset", String(paginator.pagination.value.offset));
 				data.append("limit", String(paginator.pagination.value.limit));
+				if (
+					paginator.pagination.value.cursor &&
+					paginator.pagination.value.offset > 0
+				) {
+					data.append("cursor", String(paginator.pagination.value.cursor));
+				}
 			}
 
 			if (filters?.limit) {
@@ -92,6 +98,7 @@ export function contactIndexApi(
 				if (paginator) {
 					paginator.updateData({
 						total: data.count,
+						cursor: nextCursor,
 					});
 				}
 			},

@@ -1,4 +1,4 @@
-import Modal from "@components/extras/modal";
+import Modal from "@components/extras/Modal";
 import { formatDateTz } from "@infrastructure/utils/hybrid/date.utils";
 import { workMilestoneDestroyApi } from "@modules/work-milestone/apis/work-milestone.destroy.api";
 import { workMilestoneIndexApi } from "@modules/work-milestone/apis/work-milestone.index.api";

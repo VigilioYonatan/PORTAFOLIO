@@ -1,4 +1,4 @@
-import useDropdown from "@hooks/useDropdown";
+import useDropdown from "@hooks/use-dropdown";
 import { useSignal } from "@preact/signals";
 import { useContext, useEffect } from "preact/hooks";
 import {
@@ -8,7 +8,7 @@ import {
 	type UseFormReturn,
 } from "react-hook-form";
 import { anidarPropiedades } from "../..";
-import { FormControlContext } from "../../form";
+import { FormControlContext } from "../..";
 
 export interface UseFormSelectInputProps<T extends object> {
 	name: Path<T>;

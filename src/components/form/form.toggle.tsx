@@ -11,7 +11,7 @@ import type {
 	UseFormReturn,
 } from "react-hook-form";
 import { anidarPropiedades } from ".";
-import { FormControlContext } from "./form";
+import { FormControlContext } from "./Form";
 
 export interface FormToggleProps<T extends object>
 	extends Omit<JSX.IntrinsicElements["input"], "type" | "name"> {

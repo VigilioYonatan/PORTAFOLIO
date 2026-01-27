@@ -15,7 +15,7 @@ export function testimonialDestroyApi() {
 		TestimonialDestroyResponseDto,
 		number,
 		TestimonialDestroyApiError
-	>("/testimonials", async (url, id) => {
+	>("/testimonial", async (url, id) => {
 		const response = await fetch(`/api/v1${url}/${id}`, {
 			method: "DELETE",
 		});

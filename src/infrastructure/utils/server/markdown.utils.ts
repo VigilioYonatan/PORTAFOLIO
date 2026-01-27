@@ -37,11 +37,9 @@ export async function renderMarkdown(content: string): Promise<string> {
 	renderer.code = ({
 		text,
 		lang,
-		escaped,
 	}: {
 		text: string;
 		lang?: string;
-		escaped?: boolean;
 	}) => {
 		const language = lang || "text";
 		try {

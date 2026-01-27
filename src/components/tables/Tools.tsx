@@ -1,4 +1,4 @@
-import Button from "@components/extras/button";
+import Button from "@components/extras/Button";
 import { sizeIcon } from "@infrastructure/utils/client";
 import { sweetAlert } from "@vigilio/sweet";
 import { Search, Trash2 } from "lucide-preact";

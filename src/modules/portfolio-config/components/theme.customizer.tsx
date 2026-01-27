@@ -4,18 +4,21 @@ import { handlerError } from "@infrastructure/utils/client/handler-error";
 import { sweetModal } from "@vigilio/sweet";
 import {
 	Fingerprint,
-	Github,
 	Globe,
-	Linkedin,
 	Mail,
 	MapPin,
 	Palette,
 	Phone,
-	Twitter,
 	Type,
 	User,
-	Youtube,
 } from "lucide-preact";
+import { BrandIcon } from "@components/extras/brand-icon";
+import {
+	siGithub,
+	siYoutube,
+} from "simple-icons/icons";
+import { siX } from "simple-icons";
+import { siLinkedin } from "@components/extras/custom-simple-icons";
 import { useEffect } from "preact/hooks";
 import type { JSX } from "preact/jsx-runtime";
 import { useForm } from "react-hook-form";
@@ -210,22 +213,22 @@ export default function ThemeCustomizer() {
 								<Form.control<PortfolioConfigSchema>
 									name="social_links.linkedin"
 									title="LINKEDIN_PROFESSIONAL"
-									ico={<Linkedin size={16} />}
+									ico={<BrandIcon icon={siLinkedin} size={16} />}
 								/>
 								<Form.control<PortfolioConfigSchema>
 									name="social_links.github"
 									title="GITHUB_CORE"
-									ico={<Github size={16} />}
+									ico={<BrandIcon icon={siGithub} size={16} />}
 								/>
 								<Form.control<PortfolioConfigSchema>
 									name="social_links.twitter"
 									title="TWITTER_SIGNAL"
-									ico={<Twitter size={16} />}
+									ico={<BrandIcon icon={siX} size={16} />}
 								/>
 								<Form.control<PortfolioConfigSchema>
 									name="social_links.youtube"
 									title="YOUTUBE_STREAM"
-									ico={<Youtube size={16} />}
+									ico={<BrandIcon icon={siYoutube} size={16} />}
 								/>
 								<Form.control<PortfolioConfigSchema>
 									name="social_links.portfolio"

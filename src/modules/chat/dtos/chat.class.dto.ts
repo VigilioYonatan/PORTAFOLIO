@@ -29,7 +29,10 @@ export const conversationQueryDto = conversationSchema
 		visitor_id: true,
 	})
 	.partial()
-	.extend(querySchema.shape);
+	.extend({
+		...querySchema.shape,
+		grouped: z.boolean().optional(),
+	});
 
 export type ConversationQueryDto = z.infer<typeof conversationQueryDto>;
 

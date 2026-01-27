@@ -1,7 +1,7 @@
 // @vitest-environment happy-dom
 import { fireEvent, render, screen } from "@testing-library/preact";
 import { describe, expect, it, vi } from "vitest";
-import Button from "../button";
+import Button from "../Button";
 
 describe("Button Component", () => {
 	it("renders children correctly", () => {

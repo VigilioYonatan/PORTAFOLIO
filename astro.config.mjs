@@ -6,7 +6,7 @@ import tailwindcss from "@tailwindcss/vite";
 import { defineConfig, envField } from "astro/config";
 import { loadEnv } from "vite";
 
-const { PUBLIC_PORT } = loadEnv(process.env.NODE_ENV, process.cwd(), "");
+const { PUBLIC_PORT, PORT } = loadEnv(process.env.NODE_ENV, process.cwd(), "");
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -54,6 +54,14 @@ export default defineConfig({
 	},
 	adapter: node({ mode: "middleware" }),
 	vite: {
+		server: {
+			proxy: {
+				"/api": {
+					target: `http://localhost:${PORT || 3004}`,
+					changeOrigin: true,
+				},
+			},
+		},
 		ssr: {
 			noExternal: [
 				"react-hook-form",

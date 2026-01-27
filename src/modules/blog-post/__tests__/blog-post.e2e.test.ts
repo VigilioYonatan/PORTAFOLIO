@@ -67,9 +67,13 @@ describe("BlogPostModule (e2e)", () => {
 				title: "E2E Blog Post",
 				slug: "e2e-blog-post",
 				content: "# Blog Content",
+				extract: "E2E Extract",
 				is_published: true,
+				reading_time_minutes: 5,
+				cover: null,
+				seo: null,
+				published_at: null,
 				category_id: null,
-				reading_time_minutes: 5, // Required field
 			};
 
 			const response = await request(app.getHttpServer())
@@ -111,7 +115,15 @@ describe("BlogPostModule (e2e)", () => {
 		it("should update a blog post (Admin)", async () => {
 			const payload = {
 				title: "Updated Blog Post Title",
+				slug: "updated-blog-post",
 				content: "Updated content",
+				extract: "Updated Extract",
+				is_published: true,
+				reading_time_minutes: 10,
+				cover: null,
+				seo: null,
+				published_at: null,
+				category_id: null,
 			};
 
 			const response = await request(app.getHttpServer())

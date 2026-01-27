@@ -2,7 +2,9 @@
 import WebLayout from "../_components/layouts/web-layout/index.astro";
 import FuturisticMDX from "@modules/blog/components/futuristic-mdx";
 import SocialHub from "@modules/blog/components/social-hub";
-import { GithubIcon, GlobeIcon } from "lucide-preact";
+import { GlobeIcon } from "lucide-preact";
+import { BrandIcon } from "@components/extras/brand-icon";
+import { siGithub } from "simple-icons/icons";
 
 const { slug } = Astro.params;
 const content = `
@@ -36,7 +38,7 @@ const content = `
             href="#"
             class="flex items-center gap-2 px-4 py-2 border border-white text-white font-bold text-sm hover:bg-white/10"
           >
-            <GithubIcon size={16} /> SOURCE_CODE
+            <BrandIcon icon={siGithub} size={16} /> SOURCE_CODE
           </a>
         </div>
       </div>

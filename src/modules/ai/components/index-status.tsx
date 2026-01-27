@@ -1,4 +1,4 @@
-import Badge from "@components/extras/badge";
+import Badge from "@components/extras/Badge";
 import { AlertTriangle, CheckCircle, Loader2 } from "lucide-preact";
 
 export default function IndexStatus({

@@ -139,6 +139,7 @@ export function useSmartUpload(
 			size: file.size,
 			mimetype: file.type,
 			original_name: file.name,
+			created_at: new Date(),
 		};
 	};
 
@@ -257,6 +258,7 @@ export function useSmartUpload(
 			size: file.size,
 			mimetype: file.type,
 			original_name: file.name,
+			created_at: new Date(),
 		};
 	};
 

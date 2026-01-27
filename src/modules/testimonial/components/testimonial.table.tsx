@@ -1,5 +1,5 @@
-import Badge from "@components/extras/badge";
-import Modal from "@components/extras/modal";
+import Badge from "@components/extras/Badge";
+import Modal from "@components/extras/Modal";
 import VigilioTable from "@components/tables";
 import { cn } from "@infrastructure/utils/client";
 import { printFileWithDimension } from "@infrastructure/utils/hybrid/file.utils";
@@ -201,9 +201,7 @@ export default function TestimonialTable() {
 				{/* Standard Table View */}
 				<VigilioTable.table>
 					<VigilioTable.thead>
-						<VigilioTable.thead.row>
-							<VigilioTable.thead.th />
-						</VigilioTable.thead.row>
+						<VigilioTable.thead.th />
 					</VigilioTable.thead>
 					<VigilioTable.tbody>
 						<VigilioTable.tbody.row title="No testimonial nodes detected">

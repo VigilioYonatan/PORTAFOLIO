@@ -2,8 +2,6 @@ import { ZodQueryPipe } from "@infrastructure/pipes/zod-query.pipe";
 import { ZodPipe } from "@infrastructure/pipes/zod.pipe";
 import { Public } from "@modules/auth/decorators/public.decorator";
 import { Roles } from "@modules/auth/decorators/roles.decorator";
-import { AuthenticatedGuard } from "@modules/auth/guards/authenticated.guard";
-import { RolesGuard } from "@modules/auth/guards/roles.guard";
 import {
 	Body,
 	Controller,
@@ -15,7 +13,6 @@ import {
 	Put,
 	Query,
 	Req,
-	UseGuards,
 } from "@nestjs/common";
 import {
 	ApiBearerAuth,
@@ -47,12 +44,11 @@ import { BlogPostService } from "../services/blog-post.service";
 
 @ApiTags("Blog Post")
 @Controller("blog-post")
-@UseGuards(AuthenticatedGuard, RolesGuard)
 export class BlogPostController {
 	constructor(private readonly service: BlogPostService) {}
 
 	@Public()
-	@Get()
+	@Get("/")
 	@ApiOperation({ summary: "List blog posts (Public)" })
 	async index(
 		@Req() req: Request,

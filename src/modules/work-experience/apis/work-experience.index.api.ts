@@ -20,7 +20,7 @@ export interface WorkExperienceIndexApiError {
 }
 
 /**
- * workExperienceIndex - /api/v1/experiences
+ * workExperienceIndex - /api/v1/work-experience
  * @method GET
  */
 export function workExperienceIndexApi(
@@ -31,7 +31,7 @@ export function workExperienceIndexApi(
 		WorkExperienceIndexResponseDto,
 		WorkExperienceIndexApiError
 	>(
-		"/experiences",
+		"/work-experience",
 		async (url) => {
 			const data = new URLSearchParams();
 			if (table) {
@@ -60,6 +60,12 @@ export function workExperienceIndexApi(
 			if (paginator) {
 				data.append("offset", String(paginator.pagination.value.offset));
 				data.append("limit", String(paginator.pagination.value.limit));
+				if (
+					paginator.pagination.value.cursor &&
+					paginator.pagination.value.offset > 0
+				) {
+					data.append("cursor", String(paginator.pagination.value.cursor));
+				}
 			}
 
 			const response = await fetch(`/api/v1${url}?${data}`);
@@ -84,6 +90,7 @@ export function workExperienceIndexApi(
 				if (paginator) {
 					paginator.updateData({
 						total: data.count,
+						cursor: nextCursor,
 					});
 				}
 			},

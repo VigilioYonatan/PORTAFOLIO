@@ -1,5 +1,5 @@
 import { useMutation } from "@vigilio/preact-fetching";
-import type { ContactDestroyResponseDto } from "../dtos/contact-message.response.dto";
+import type { ContactDestroyResponseDto } from "../dtos/contact.response.dto";
 
 export interface ContactDestroyApiError {
 	success: false;

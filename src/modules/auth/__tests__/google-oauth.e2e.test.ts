@@ -151,7 +151,7 @@ describe("Google OAuth (E2E)", () => {
 			lockout_end_at: null,
 			last_login_at: null,
 			deleted_at: null,
-			tenant_id: 1,
+
 			qr_code_token: null,
 			mfa_secret: null,
 			last_ip_address: null,

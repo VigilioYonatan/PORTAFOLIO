@@ -3,7 +3,7 @@ import { FormMKDEditor } from "@components/form/form.mkd-editor";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { Refetch } from "@infrastructure/types/client";
 import { handlerError } from "@infrastructure/utils/client/handler-error";
-import { now } from "@infrastructure/utils/hybrid/date.utils";
+import dayjs, { formatDate, formatInput, now } from "@infrastructure/utils/hybrid/date.utils";
 import { slugify } from "@infrastructure/utils/hybrid";
 import { PROJECT_STATUS_OPTIONS } from "@modules/project/const/project.const";
 import type { ProjectIndexResponseDto } from "@modules/project/dtos/project.response.dto";
@@ -25,10 +25,10 @@ import {
 	type ProjectUpdateDto,
 	projectUpdateDto,
 } from "../dtos/project.update.dto";
-import type { ProjectSchema } from "../schemas/project.schema";
+import type { ProjectWithRelations } from "../schemas/project.schema";
 
 interface ProjectUpdateProps {
-	project: ProjectSchema;
+	project: ProjectWithRelations;
 	refetch: (data: Refetch<ProjectIndexResponseDto["results"]>) => void;
 	onClose: () => void;
 }
@@ -47,10 +47,18 @@ export default function ProjectUpdate({
 		defaultValues: {
 			...project,
 			start_date: project.start_date
-				? new Date(project.start_date)
-				: new Date(),
-			end_date: project.end_date ? new Date(project.end_date) : null,
-			techeables: project.techeables
+				? formatDate(project.start_date,"YYYY-MM-DD") as Date
+				: undefined,
+			end_date: project.end_date
+				? formatDate(project.end_date,"YYYY-MM-DD") as Date
+				: undefined,
+			techeables: project.techeables.map((t: any) => t.technology_id) as any,
+			seo: {
+				title: project.seo?.title || null,
+				description: project.seo?.description || null,
+				keywords: project.seo?.keywords || [],
+				og_image: project.seo?.og_image || [],
+			},
 		},
 	});
 

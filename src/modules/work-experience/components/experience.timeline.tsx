@@ -1,6 +1,6 @@
-import Badge from "@components/extras/badge";
-import Loader from "@components/extras/loader";
-import Modal from "@components/extras/modal";
+import Badge from "@components/extras/Badge";
+import Loader from "@components/extras/Loader";
+import Modal from "@components/extras/Modal";
 import { cn } from "@infrastructure/utils/client";
 import { formatDate } from "@infrastructure/utils/hybrid/date.utils";
 import { workExperienceDestroyApi } from "@modules/work-experience/apis/work-experience.destroy.api";

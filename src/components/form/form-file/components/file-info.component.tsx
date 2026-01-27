@@ -1,4 +1,4 @@
-import Badge from "@components/extras/badge";
+import Badge from "@components/extras/Badge";
 import { Card } from "@components/extras/card";
 import Hr from "@components/extras/hr";
 import { sizeIcon } from "@infrastructure/utils/client";
@@ -43,7 +43,7 @@ export function FileInfo({ file, title }: FileInfoProps) {
 				</div>
 			)}
 			<Card class="w-full">
-				<Card.content class="space-y-6">
+				<Card.Content class="space-y-6">
 					{/* File Preview */}
 					<div class="flex items-center gap-4">
 						<div class="min-w-20 h-20 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center">
@@ -172,7 +172,7 @@ export function FileInfo({ file, title }: FileInfoProps) {
 							</div>
 						</div>
 					</div>
-				</Card.content>
+				</Card.Content>
 			</Card>
 		</div>
 	);

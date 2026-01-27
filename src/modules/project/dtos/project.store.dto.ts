@@ -3,6 +3,7 @@ import { projectSchema } from "../schemas/project.schema";
 
 export const projectStoreDto = projectSchema.omit({
 	id: true,
+	tenant_id: true,
 	created_at: true,
 	updated_at: true,
 	github_stars: true,

@@ -50,7 +50,7 @@ export function formatDateTwo(
 	return dayjs(date).format(format);
 }
 
-export function formatDate(date: Date | string | null, format = "DD/MM/YYYY") {
+export function formatDate(date: Date | string | null, format = "DD/MM/YYYY"):Date | string {
 	if (!date) return "-";
 	return dayjs(date).format(format);
 }
@@ -72,12 +72,8 @@ export function formatDateTzUTC(
 }
 
 // 21-10-1998
-export function formatInput(date: Date) {
-	const year = date.getUTCFullYear();
-	const month = String(date.getUTCMonth() + 1).padStart(2, "0");
-	const day = String(date.getUTCDate()).padStart(2, "0");
-
-	return `${year}-${month}-${day}`;
+export function formatInput(date: Date | string) {
+	return dayjs(date).utc().format("YYYY-MM-DD");
 }
 
 export function now() {
