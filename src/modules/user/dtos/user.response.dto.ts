@@ -32,7 +32,6 @@ export const userMeResponseDto = z
 			updated_at: true,
 		}),
 	})
-	.strict();
 export type UserMeResponseDto = z.infer<typeof userMeResponseDto>;
 
 // --- Store ---

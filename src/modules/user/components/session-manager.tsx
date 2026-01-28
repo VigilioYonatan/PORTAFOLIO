@@ -1,4 +1,4 @@
-import Badge from "@components/extras/Badge";
+import Badge from "@components/extras/badge";
 import { Card } from "@components/extras/card";
 import { formatDateTz } from "@infrastructure/utils/hybrid";
 import { sweetModal } from "@vigilio/sweet";

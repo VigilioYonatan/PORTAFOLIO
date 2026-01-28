@@ -46,15 +46,16 @@ import { SocialService } from "./services/social.service";
 export class SocialCommentController {
 	constructor(private readonly socialService: SocialService) {}
 
-	@Get("/:post_id")
+	@Get("/")
 	@Public()
 	@ApiOperation({ summary: "Get comments for a blog post" })
 	@ApiResponse({ status: 200, type: SocialCommentIndexResponseClassDto })
 	async index(
-		@Param("post_id", ParseIntPipe) post_id: number,
+		@Req() req: Request,
 		@Query(new ZodQueryPipe(socialCommentQueryDto)) query: SocialCommentQueryClassDto,
 	): Promise<SocialCommentIndexResponseDto> {
-		return this.socialService.index(post_id, query);
+		const tenant_id = req.locals.tenant?.id ?? 1;
+		return this.socialService.index(tenant_id, query);
 	}
 
 	@Public()

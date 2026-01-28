@@ -15,34 +15,27 @@ export class PortfolioConfigSeeder {
 	 */
 	private readonly data: Omit<PortfolioConfigSchema, "id" | "tenant_id">[] = [
 		{
-			name: "John Doe",
-			profile_title: "Senior Full-Stack Engineer",
-			biography: `# About Me
+			name: "Yonatan Vigilio Lavado",
+			profile_title: "Ingeniero de Software con Inteligencia Artificial",
+			biography: `Soy un ingeniero de software con Inteligencia Artificial especializado en el desarrollo de aplicaciones web y móviles, con más de 6 años de experiencia. A lo largo de mi carrera, he trabajado en diversos proyectos, desde sitios web interactivos hasta aplicaciones móviles complejas implementando inteligencia Artifical.
 
-I'm a passionate **Senior Full-Stack Engineer** with 10+ years of experience building scalable web applications.
+Tengo un dominio sólido de frameworks modernos como React y Vue.js para el frontend, y en el backend he utilizado Express.js, Nest.js y Laravel para construir aplicaciones escalables, seguras y eficientes. Además, cuento con experiencia en integración y entrega continua (CI/CD) utilizando Docker, optimizando así los flujos de desarrollo y despliegue.
 
-## Expertise
-- Frontend: React, Vue, Angular, TypeScript
-- Backend: Node.js, NestJS, Python, Go
-- Database: PostgreSQL, MongoDB, Redis
-- DevOps: Docker, Kubernetes, AWS
-
-## Philosophy
-I believe in writing clean, maintainable code that solves real problems. Every line of code should have a purpose.`,
-			email: "john.doe@portfolio.dev",
-			phone: "+1 555 123 4567",
-			address: "San Francisco, CA, USA",
+Aporto mi conocimiento, creatividad y compromiso a cada proyecto, con el objetivo de desarrollar y automatizar soluciones tecnológicas innovadoras que realmente marquen la diferencia.`,
+			email: "yonatanvigiliolavado09@gmail.com",
+			phone: "+51 959 884 398",
+			address: "Lima, Peru",
 			social_links: {
-				linkedin: "https://linkedin.com/in/johndoe",
-				github: "https://github.com/johndoe",
-				twitter: "https://twitter.com/johndoe",
+				linkedin: "https://linkedin.com/in/yonatanvigilio",
+				github: "https://github.com/yonatanvigilio",
+				twitter: null,
 				youtube: null,
-				portfolio: null,
+				portfolio: "https://yonatanvigilio.com",
 			},
 			logo: null,
 			color_primary: "#3B82F6",
 			color_secondary: "#10B981",
-			default_language: "EN",
+			default_language: "ES",
 			time_zone: "America/Lima",
 			created_at: now().toDate(),
 			updated_at: now().toDate(),

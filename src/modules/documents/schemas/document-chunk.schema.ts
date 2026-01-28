@@ -20,6 +20,5 @@ export const documentChunkSchema = z
 		document_id: z.number().int().positive(), // FK al documento padre
 		...timeStampSchema.shape, // created_at, updated_at
 	})
-	.strict();
 
 export type DocumentChunkSchema = z.infer<typeof documentChunkSchema>;

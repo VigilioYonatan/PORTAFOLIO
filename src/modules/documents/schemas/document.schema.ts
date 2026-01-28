@@ -20,7 +20,6 @@ export const documentSchema = z
 		tenant_id: z.number().int().positive(), // FK al tenant (multi-tenancy)
 		...timeStampSchema.shape, // created_at, updated_at
 	})
-	.strict();
 
 export type DocumentSchema = z.infer<typeof documentSchema>;
 

@@ -12,6 +12,5 @@ export const chatMessageSchema = z
 		conversation_id: z.number().int().positive(), // FK a la conversación
 		...timeStampSchema.shape,
 	})
-	.strict();
 
 export type ChatMessageSchema = z.infer<typeof chatMessageSchema>;

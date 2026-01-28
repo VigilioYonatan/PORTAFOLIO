@@ -29,6 +29,5 @@ export const aiConfigSchema = z
 
 		...timeStampSchema.shape,
 	})
-	.strict();
 
 export type AiConfigSchema = z.infer<typeof aiConfigSchema>;

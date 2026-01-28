@@ -14,10 +14,12 @@ export function astroRender(props: Record<string, unknown> = {}) {
 	return async (req: Request, res: Response, next: NextFunction) => {
 		if (req.originalUrl.startsWith("/api")) return next();
 		try {
-			req.headers["x-astro-locals"] = JSON.stringify({
-				...req.locals,
-				props,
-			});
+			req.headers["x-astro-locals"] = Buffer.from(
+				JSON.stringify({
+					...req.locals,
+					props,
+				}),
+			).toString("base64");
 			return astroProxy(req, res, next);
 		} catch (_error) {
 			const entryPath = path.join(process.cwd(), "dist/server/entry.mjs");

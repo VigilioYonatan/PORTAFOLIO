@@ -14,6 +14,5 @@ export const aiInsightSchema = z
 		generated_at: z.date().nullable(), // fecha de generación
 		...timeStampSchema.shape,
 	})
-	.strict();
 
 export type AiInsightSchema = z.infer<typeof aiInsightSchema>;

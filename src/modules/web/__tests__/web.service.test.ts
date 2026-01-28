@@ -22,6 +22,7 @@ describe("WebService", () => {
 	};
 
 	const mockProjectService = {
+		index: vi.fn(),
 		showBySlug: vi.fn(),
 	};
 
@@ -66,11 +67,11 @@ describe("WebService", () => {
 				results: [],
 			}));
 
-			const result = await service.index();
+			const result = await service.index("es");
 
 			expect(result).toEqual({
-				title: "Portfolio",
-				description: "Portfolio",
+				title: "Portafolio",
+				description: "Mi Portafolio Profesional",
 				musicTracks: mockTracks,
 				experiences: [],
 			});
@@ -92,17 +93,18 @@ describe("WebService", () => {
 				previous: null,
 			}));
 
-			const result = await service.blog(1, 9);
+			const result = await service.blog("es", 1, 9);
 
 			expect(result).toEqual({
-				title: "Blog | Pylot ",
-				description: "Read our latest news and articles.",
+				title: "Blog | Pylot",
+				description: "Lee nuestras últimas noticias y artículos.",
 				posts: mockPosts,
 				total: 1,
 			});
 			expect(blogPostService.index).toHaveBeenCalledWith(1, {
 				limit: 9,
 				offset: 0,
+				language: "es",
 			});
 		});
 	});
@@ -115,7 +117,7 @@ describe("WebService", () => {
 				post: mockPost,
 			}));
 
-			const result = await service.blogSlug("post-1");
+			const result = await service.blogSlug("es", "post-1");
 
 			expect(result).toEqual({
 				title: "Post 1",
@@ -123,6 +125,31 @@ describe("WebService", () => {
 				post: mockPost,
 			});
 			expect(blogPostService.showBySlug).toHaveBeenCalledWith(1, "post-1");
+		});
+	});
+
+	describe("projects", () => {
+		it("should return projects props with paginated projects", async () => {
+			const mockProjects = [{ id: 1, title: "Project 1" }];
+			(mockProjectService.index as any).mockReturnValue(Promise.resolve({
+				success: true,
+				results: mockProjects,
+				count: 1,
+			}));
+
+			const result = await service.projects("es", 1, 9);
+
+			expect(result).toEqual({
+				title: "Proyectos | Pylot",
+				description: "Explora mi trabajo y proyectos.",
+				projects: mockProjects,
+				total: 1,
+			});
+			expect(mockProjectService.index).toHaveBeenCalledWith(1, {
+				limit: 9,
+				offset: 0,
+				language: "es",
+			});
 		});
 	});
 });

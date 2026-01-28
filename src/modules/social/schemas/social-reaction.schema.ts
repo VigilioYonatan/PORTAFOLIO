@@ -16,6 +16,5 @@ export const socialReactionSchema = z
 		tenant_id: z.number().int().positive(), // ID del tenant
 		...timeStampSchema.shape, // created_at, updated_at
 	})
-	.strict();
 
 export type SocialReactionSchema = z.infer<typeof socialReactionSchema>;

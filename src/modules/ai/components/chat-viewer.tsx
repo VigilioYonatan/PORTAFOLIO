@@ -59,7 +59,7 @@ export default function ChatViewer({ conversationId }: ChatViewerProps) {
 						DECRYPTING_LOGS...
 					</div>
 				) : (
-					query.data?.results.map((msg) => (
+					query.data?.messages.map((msg) => (
 						<div
 							key={msg.id}
 							class={cn(
@@ -138,7 +138,7 @@ export default function ChatViewer({ conversationId }: ChatViewerProps) {
 						</div>
 					))
 				)}
-				{query.data?.results.length === 0 && (
+				{query.data?.messages.length === 0 && (
 					<div class="text-center text-muted-foreground text-xs font-mono py-10 opacity-50">
 						EMPTY_TRANSMISSION
 					</div>

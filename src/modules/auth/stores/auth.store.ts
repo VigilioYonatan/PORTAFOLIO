@@ -1,12 +1,7 @@
 import { signal } from "@preact/signals";
+import type { UserAuth as UserAuthSchema } from "@modules/user/schemas/user.schema";
 
-interface UserAuth {
-	id: number;
-	username: string;
-	email: string;
-	avatar: string | null;
-	role_id: number;
-}
+type UserAuth = Pick<UserAuthSchema, "id" | "username" | "email" | "avatar" | "role_id">;
 
 interface AuthState {
 	user: UserAuth | null;

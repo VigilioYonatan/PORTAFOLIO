@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/preact";
 import { describe, expect, it, vi } from "vitest";
-import { NotificationCenter } from "../components/notification.center";
+import { NotificationCenter } from "../components/notification-center";
 
 // Mock the API hooks
 const refetchMock = vi.fn();
@@ -59,7 +59,7 @@ vi.mock("@vigilio/sweet", () => ({
 describe("NotificationCenter", () => {
 	it("renders notifications correctly", () => {
 		render(<NotificationCenter />);
-		expect(screen.getByText("System_Notifications")).toBeInTheDocument();
+		expect(screen.getByText("Notificaciones_Sistema")).toBeInTheDocument();
 		expect(screen.getByText("New Message")).toBeInTheDocument();
 		expect(screen.getByText("System Alert")).toBeInTheDocument();
 	});

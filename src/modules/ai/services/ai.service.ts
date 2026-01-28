@@ -118,6 +118,41 @@ export class AiService {
 		return subject.asObservable();
 	}
 
+	async generate(props: {
+		model: string;
+		temperature: number;
+		system: string;
+		messages: ChatCompletionMessageParam[];
+	}): Promise<string> {
+		this.logger.log({ model: props.model }, "Generating AI response");
+
+		const apiKey = this.configService.get("OPENROUTER_API_KEY", {
+			infer: true,
+		})!;
+
+		const openai = new OpenAI({
+			baseURL: "https://openrouter.ai/api/v1",
+			apiKey,
+		});
+
+		try {
+			const response = await openai.chat.completions.create({
+				model: props.model,
+				temperature: props.temperature,
+				messages: [
+					{ role: "system", content: props.system },
+					...props.messages,
+				],
+				stream: false,
+			});
+
+			return response.choices[0]?.message?.content || "";
+		} catch (error) {
+			this.logger.error("OpenRouter Generation Error", error);
+			throw error;
+		}
+	}
+
 	async getEmbeddings(text: string): Promise<number[]> {
 		this.logger.debug({ textLength: text.length }, "Generating embeddings via API");
 

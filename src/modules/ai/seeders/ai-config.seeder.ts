@@ -1,3 +1,4 @@
+import { AI_TECHNICAL_PROTECTION } from "../const/ai-prompts.const";
 import { schema } from "@infrastructure/providers/database/database.schema";
 import { DRIZZLE } from "@infrastructure/providers/database/database.service";
 import { now } from "@infrastructure/utils/hybrid";
@@ -31,7 +32,9 @@ export class AiConfigSeeder {
 			// Technical parameters
 			system_prompt: `Eres un asistente profesional para el portfolio de un Senior Developer. 
 Responde preguntas sobre su experiencia, proyectos y habilidades técnicas basándote en el contexto proporcionado. 
-Sé conciso, profesional y amigable.`,
+Sé conciso, profesional y amigable.
+
+${AI_TECHNICAL_PROTECTION}`,
 			temperature: 0.7, // Balance entre creatividad y precisión
 			max_tokens: 2000, // Límite de tokens por respuesta
 

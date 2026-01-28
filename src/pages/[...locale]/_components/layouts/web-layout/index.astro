@@ -3,17 +3,19 @@ import { ClientRouter } from "astro:transitions";
 import "@pages/_main.ts";
 import "@assets/css/global.css";
 import { getLangFromUrl, useTranslations } from "@src/i18n";
-import TerminalLogo from "../../terminal.logo";
-import NavLinks from "../../nav.links";
-import NeuroPlayer from "../../neuro.player";
-import SystemStats from "../../system.stats";
-import TechThemeSwitcher from "@components/extras/tech-theme.switcher";
+import TerminalLogo from "../../terminal-logo";
+import NavLinks from "../../nav-links";
+import NeuroPlayer from "../../neuro-player";
+import SystemStats from "../../system-stats";
+import TechThemeSwitcher from "@components/extras/tech-theme-switcher";
 import LanguageSwitcher from "@components/extras/language-switcher";
-import FloatingActionChat from "../../floating-action.chat";
-import ProtostarOverlay from "../../special/protostar.overlay";
-import NatureOverlay from "../../special/nature.overlay";
-import AI_AssistantButton from "../../ai-assistant.button";
-import PlanetOverlay from "../../special/planet.overlay";
+import FloatingActionChat from "../../floating-action-chat";
+import ProtostarOverlay from "../../special/protostar-overlay";
+import NatureOverlay from "../../special/nature-overlay";
+import AI_AssistantButton from "../../ai-assistant-button";
+import PlanetOverlay from "../../special/planet-overlay";
+import MobileHeader from "./mobile-header";
+import MobileToolsDock from "./mobile-tools-dock";
 
 const lang = getLangFromUrl(Astro.url);
 const t = useTranslations(lang);
@@ -49,14 +51,11 @@ const {
         height: 100%;
         overflow: hidden;
       }
-      body {
-        display: flex;
-        flex-direction: row; /* 3-column layout */
-      }
+      /* Removed fixed flex-direction: row; handled by tailwind classes */
     </style>
   </head>
   <body
-    class="bg-background text-foreground antialiased selection:bg-primary/30 selection:text-primary-foreground min-h-screen w-full flex overflow-hidden"
+    class="bg-background text-foreground antialiased selection:bg-primary/30 selection:text-primary-foreground h-[100dvh] w-full flex flex-col md:flex-row overflow-hidden fixed inset-0"
   >
     {/* Background Grid Accent */}
     <div
@@ -64,9 +63,13 @@ const {
     >
     </div>
 
-    {/* LEFT SIDEBAR */}
+    {/* MOBILE HEADER */}
+    <MobileHeader lang={lang} client:load />
+    <MobileToolsDock lang={lang} client:load />
+
+    {/* LEFT SIDEBAR (Desktop) */}
     <aside
-      class="w-64 border-r border-white/5 bg-black/40 backdrop-blur-xl flex flex-col shrink-0 z-40 relative group"
+      class="hidden md:flex w-64 border-r border-white/5 bg-black/40 backdrop-blur-xl flex-col shrink-0 z-40 relative group"
     >
       <div class="h-20 flex items-center px-6">
         <TerminalLogo className="text-xl" />
@@ -83,7 +86,7 @@ const {
       </div>
 
       <div
-        class="p-4 border-t border-white/5 bg-zinc-950/40 flex flex-col gap-4"
+        class="p-4 border-t border-white/5 bg-zinc-900/40 flex flex-col gap-4"
       >
         {/* Controls Area */}
         <div class="flex items-start justify-between gap-4">
@@ -98,7 +101,7 @@ const {
     </aside>
 
     {/* MAIN CONTENT AREA */}
-    <main class="flex-1 relative flex flex-col overflow-hidden">
+    <main class="flex-1 relative flex flex-col overflow-hidden w-full">
       {/* Dynamic Scanline Overlay */}
       <div
         class="absolute inset-0 bg-scanline opacity-[0.03] pointer-events-none z-10"
@@ -109,12 +112,19 @@ const {
         class="flex-1 overflow-y-auto relative scroll-smooth thin-scrollbar custom-scrollbar"
       >
         <slot />
+
+        {
+          /* Mobile Footer Spacing if needed, or Mobile Music Player placeholder */
+        }
+        <div class="h-40 md:hidden block"></div>
       </div>
+
+      <div class="md:hidden fixed bottom-0 left-0 right-0 z-[45] w-full"></div>
     </main>
 
-    {/* RIGHT SIDEBAR */}
+    {/* RIGHT SIDEBAR (Desktop) */}
     <aside
-      class="w-80 border-l border-white/5 bg-black/40 backdrop-blur-xl flex flex-col shrink-0 z-40"
+      class="hidden xl:flex w-80 border-l border-white/5 bg-black/40 backdrop-blur-xl flex-col shrink-0 z-40"
     >
       <div
         class="h-20 flex items-center justify-between px-6 border-b border-white/5"

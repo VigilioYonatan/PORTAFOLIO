@@ -3,6 +3,7 @@ import { Inject, Injectable } from "@nestjs/common";
 import {
 	desc,
 	eq,
+    getTableColumns,
 	type InferInsertModel,
 	type InferSelectModel,
 	isNull,
@@ -36,12 +37,16 @@ export class DatabaseService {
 		prefix = "",
 		tenantId,
 	}: GenerateCodeOptions) {
+        const columns = getTableColumns(Item);
+        const codeCol = columns[latestCodeColumn];
+        const tenantCol = columns.tenant_id;
+
 		const latestRow = await this.db
 			.select({
-				code: (Item as any)[latestCodeColumn],
+				code: codeCol,
 			})
 			.from(Item)
-			.where(tenantId ? eq((Item as any).tenant_id, tenantId) : undefined)
+			.where(tenantId && tenantCol ? eq(tenantCol, tenantId) : undefined)
 			.orderBy(desc(orderByColumn))
 			.limit(1);
 
@@ -65,7 +70,7 @@ export class DatabaseService {
 	>(
 		mainConfig: BulkCreateConfig<TTable, TInputData>,
 		relations: RelationConfig[] = [],
-		// biome-ignore lint/suspicious/noExplicitAny: Allow any for transaction compatibility
+		// biome-ignore lint/suspicious/noExplicitAny: Transaction type compatibility
 		tx?: NodePgDatabase<typeof schema> | any,
 	) {
 		const chunkSize = mainConfig.chunkSize || 4000;
@@ -86,8 +91,7 @@ export class DatabaseService {
 				// Drizzle insert con returning para obtener los IDs
 				const created = await db.insert(table).values(chunk).returning();
 
-				// biome-ignore lint/suspicious/noExplicitAny: Legacy support
-				results.push(...(created as any));
+				results.push(...(created as InferSelectModel<T>[]));
 			}
 			return results;
 		};
@@ -96,19 +100,18 @@ export class DatabaseService {
 
 		// Preparar datos raíz
 		const rootDataToInsert = mainConfig.data.map((item, index) => {
-			const itemData = { ...item };
+			const itemData = { ...item } as Record<string, unknown>;
 
 			// Limpiar campos excluidos
 			if (mainConfig.excludeFields) {
 				for (const field of mainConfig.excludeFields) {
-					// biome-ignore lint/suspicious/noExplicitAny: Legacy support
-					delete (itemData as any)[field];
+					delete itemData[field as string];
 				}
 			}
 
 			// Ejecutar hook beforeCreate si existe
 			if (mainConfig.beforeCreate) {
-				return mainConfig.beforeCreate(itemData, index, null);
+				return mainConfig.beforeCreate(item as TInputData, index, null);
 			}
 
 			return itemData as InferInsertModel<TTable>;
@@ -133,8 +136,7 @@ export class DatabaseService {
 		})[];
 
 		for (const relation of relations) {
-			// biome-ignore lint/suspicious/noExplicitAny: Generic array
-			const childrenToInsert: any[] = [];
+			const childrenToInsert: Record<string, unknown>[] = [];
 			// Necesitamos mapear qué hijo pertenece a qué padre para reconstruir la cadena luego
 			const nextParentsData: (Record<string, unknown> & {
 				id: number;
@@ -145,16 +147,17 @@ export class DatabaseService {
 			for (const [parentIndex, parentData] of currentParentsData.entries()) {
 				const parentResult = currentParentsResults[parentIndex];
 				const children =
-					// biome-ignore lint/suspicious/noExplicitAny: Legacy support
-					(parentData[relation.childrenField] as any[]) || [];
+					((parentData as Record<string, unknown>)[
+						relation.childrenField
+					] as Record<string, unknown>[]) || [];
 
-				for (const [childIndex, child] of children.entries()) {
-					let childData = { ...child };
+			for (const [childIndex, child] of children.entries()) {
+					let childData = { ...child } as Record<string, unknown>;
 
 					// 1. Limpieza de campos
 					if (relation.config.excludeFields) {
 						for (const field of relation.config.excludeFields) {
-							delete childData[field];
+							delete childData[field as string];
 						}
 					}
 
@@ -163,16 +166,18 @@ export class DatabaseService {
 					childData[relation.foreignKeyField] = parentResult.id;
 
 					// 3. Before Create Hook
+					// biome-ignore lint/suspicious/noExplicitAny: Generic hook
 					if (relation.config.beforeCreate) {
+                        // Cast to any because generic complexity is high here
 						childData = relation.config.beforeCreate(
-							childData,
+							childData as unknown,
 							childIndex,
 							parentResult,
-						);
+						) as Record<string, unknown>;
 					}
 
 					childrenToInsert.push(childData);
-					nextParentsData.push(child); // Guardamos la data original del hijo para el siguiente nivel
+					nextParentsData.push(child as Record<string, unknown> & { id: number }); // Guardamos la data original del hijo para el siguiente nivel
 				}
 			}
 
@@ -185,17 +190,16 @@ export class DatabaseService {
 
 				// Preparar variables para la siguiente iteración del bucle de relaciones
 				currentParentsData = nextParentsData;
-				currentParentsResults = childResults as Record<string, unknown> &
-					{
-						id: number;
-					}[];
+				currentParentsResults = childResults as (Record<string, unknown> & {
+					id: number;
+				})[];
 			} else {
 				// Si no hay hijos en este nivel, se rompe la cadena para los siguientes niveles
 				break;
 			}
 		}
 
-		return rootResults;
+		return rootResults as unknown as InferSelectModel<TTable>[];
 	}
 
 	// 2️⃣ Función adaptada para Drizzle (getByIdCache)

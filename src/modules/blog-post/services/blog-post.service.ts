@@ -1,3 +1,4 @@
+import { AI_TECHNICAL_PROTECTION } from "@modules/ai/const/ai-prompts.const";
 import { slugify } from "@infrastructure/utils/hybrid/slug.utils";
 import { paginator } from "@infrastructure/utils/server";
 import { Injectable, Logger, NotFoundException } from "@nestjs/common";
@@ -14,6 +15,7 @@ import { type BlogPostStoreDto } from "../dtos/blog-post.store.dto";
 import { type BlogPostUpdateDto } from "../dtos/blog-post.update.dto";
 import { BlogPostRepository } from "../repositories/blog-post.repository";
 import { type BlogPostSchema } from "../schemas/blog-post.schema";
+import { AiService } from "@modules/ai/services/ai.service";
 
 @Injectable()
 export class BlogPostService {
@@ -22,6 +24,7 @@ export class BlogPostService {
 	constructor(
 		private readonly repository: BlogPostRepository,
 		private readonly blogPostCache: BlogPostCache,
+		private readonly aiService: AiService,
 	) {}
 
 	async store(
@@ -36,11 +39,85 @@ export class BlogPostService {
 			...body,
 			slug,
 			author_id: userId,
+			language: "es",
+			parent_id: null,
 		});
+
+		// Auto-translate if original is Spanish
+		this.generateTranslations(tenant_id, userId, blogPost).catch((err) =>
+			this.logger.error("Error generating translations", err),
+		);
 
 		await this.blogPostCache.invalidateLists(tenant_id);
 
 		return { success: true, post: blogPost };
+	}
+
+	private async generateTranslations(
+		tenant_id: number,
+		userId: number,
+		originalPost: BlogPostSchema,
+	) {
+		const targetLanguages = ["en", "pt"];
+
+		const translations = await Promise.all(
+			targetLanguages.map(async (lang) => {
+				try {
+					const prompt = `
+					Translate the following blog post content to ${lang === "en" ? "English" : "Portuguese"}.
+					${AI_TECHNICAL_PROTECTION}
+					
+					Return a JSON object with the following structure:
+					{
+						"title": "Translated Title",
+						"content": "Translated Content (Markdown)",
+						"extract": "Translated Extract",
+						"slug": "translated-slug"
+					}
+					Original Data:
+					Title: ${originalPost.title}
+					Content: ${originalPost.content}
+					Extract: ${originalPost.extract || ""}
+				`;
+
+					const jsonResponse = await this.aiService.generate({
+						model: "openai/gpt-4o-mini",
+						temperature: 0.3,
+						system: "You are a professional translator. Return only valid JSON.",
+						messages: [{ role: "user", content: prompt }],
+					});
+
+					const cleanJson = jsonResponse.replace(/```json|```/g, "").trim();
+					const translated = JSON.parse(cleanJson);
+
+					const { id, created_at, updated_at, tenant_id: t_id, ...rest } = originalPost;
+
+					return {
+						...rest,
+						title: translated.title,
+						content: translated.content,
+						extract: translated.extract,
+						slug: translated.slug,
+						language: lang as "en" | "pt",
+						parent_id: originalPost.id,
+					};
+				} catch (error) {
+					this.logger.error(
+						`Failed to translate post #${originalPost.id} to ${lang}`,
+						error,
+					);
+					return null;
+				}
+			}),
+		);
+
+		const validTranslations = translations.filter((t) => t !== null);
+		if (validTranslations.length > 0) {
+			await this.repository.bulkStore(tenant_id, validTranslations);
+			this.logger.log(
+				`Created ${validTranslations.length} translations for post #${originalPost.id}`,
+			);
+		}
 	}
 
 	async update(

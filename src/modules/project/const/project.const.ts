@@ -1,7 +1,8 @@
-import type { ProjectSchema } from "../schemas/project.schema";
+
+export const PROJECT_STATUS_ENUM = ["live", "in_dev", "archived"] as const;
 
 export const PROJECT_STATUS_OPTIONS: {
-	key: ProjectSchema["status"];
+	key: (typeof PROJECT_STATUS_ENUM)[number];
 	value: string;
 }[] = [
 	{ key: "live", value: "LIVE" },

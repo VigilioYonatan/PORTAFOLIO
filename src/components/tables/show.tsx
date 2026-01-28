@@ -1,0 +1,36 @@
+import { useContext } from "preact/hooks";
+import { VigilioTableContext } from "./vigilio-table";
+
+function Show() {
+	const tableContext = useContext(VigilioTableContext);
+
+	if (!tableContext) {
+		return null;
+	}
+
+	const table = tableContext;
+
+	if (table.pagination.value.total === 0) return null;
+	return (
+		<span class="text-xs text-center lg:text-sm text-gray-500 ">
+			Mostrando{" "}
+			<span class="font-semibold text-gray-900 dark:text-white">
+				{table.table.TBody.Row().length}
+			</span>{" "}
+			de
+			<span class="font-semibold text-gray-900 dark:text-white">
+				{" "}
+				{table.pagination.totalPages}
+			</span>{" "}
+			páginas de
+			<span class="font-semibold text-gray-900 dark:text-white">
+				{" "}
+				{table.pagination.value.total}
+			</span>{" "}
+			en total
+		</span>
+	);
+}
+
+export default Show;
+

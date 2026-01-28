@@ -6,6 +6,7 @@ export const blogPostQueryDto = blogPostSchema
 	.pick({
 		category_id: true,
 		is_published: true,
+		language: true,
 	})
 	.partial()
 	.extend(querySchema.shape);

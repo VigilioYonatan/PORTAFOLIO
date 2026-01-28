@@ -3,7 +3,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { sizeIcon } from "@infrastructure/utils/client";
 import { type Lang, useTranslations } from "@src/i18n";
 import { ArrowLeft, ArrowRight, ShieldCheck } from "lucide-preact";
-import { useForm } from "react-hook-form";
+import { type Resolver, useForm } from "react-hook-form";
 import { authMfaLoginApi } from "../apis/auth.mfa-login.api";
 import { type AuthMfaLoginDto, authMfaLoginDto } from "../dtos/mfa-login.dto";
 
@@ -17,7 +17,7 @@ export function MfaVerify({ temp_token, lang = "es" }: MfaVerifyProps) {
 	const mfaMutation = authMfaLoginApi();
 
 	const mfaForm = useForm<AuthMfaLoginDto>({
-		resolver: zodResolver(authMfaLoginDto),
+		resolver: zodResolver(authMfaLoginDto) as Resolver<AuthMfaLoginDto>,
 		defaultValues: {
 			temp_token,
 		},

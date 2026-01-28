@@ -25,10 +25,11 @@ export class WebController {
 		@Res() res: Response,
 		@Next() next: NextFunction,
 	): Promise<void> {
-		const props = await this.webService.index();
+		const props = await this.webService.index(req.locals.language);
 		return await astroRender(props)(req, res, next);
 	}
-@Public()
+	
+	@Public()
 	@Get("/stats")
 	getStats() {
 		const cpus = os.cpus();
@@ -62,18 +63,36 @@ export class WebController {
 		@Res() res: Response,
 		@Next() next: NextFunction,
 	) {
-		const props = await this.webService.contact();
+		const props = await this.webService.contact(req.locals.language);
 		return await astroRender(props)(req, res, next);
 	}
 
 	@Public()
-	@Get(WebPath.PROJECTS)
+	@Get([WebPath.ABOUT, WebPath.ABOUT_ES, WebPath.ABOUT_EN, WebPath.ABOUT_PT])
+	async about(
+		@Req() req: Request,
+		@Res() res: Response,
+		@Next() next: NextFunction,
+	) {
+		const props = await this.webService.about(req.locals.language);
+		return await astroRender(props)(req, res, next);
+	}
+
+	@Public()
+	@Get([
+		WebPath.PROJECTS,
+		WebPath.PROJECTS_ES,
+		WebPath.PROJECTS_EN,
+		WebPath.PROJECTS_PT,
+	])
 	async projects(
 		@Req() req: Request,
 		@Res() res: Response,
 		@Next() next: NextFunction,
 	) {
-		return await astroRender({})(req, res, next);
+		const page = req.query.page ? Number(req.query.page) : 1;
+		const props = await this.webService.projects(req.locals.language, page);
+		return await astroRender(props)(req, res, next);
 	}
 
 	@Public()
@@ -89,7 +108,7 @@ export class WebController {
 		@Next() next: NextFunction,
 	) {
 		const { slug } = req.params;
-		const props = await this.webService.projectSlug(slug);
+		const props = await this.webService.projectSlug(req.locals.language, slug);
 		return await astroRender(props)(req, res, next);
 	}
 
@@ -101,7 +120,7 @@ export class WebController {
 		@Next() next: NextFunction,
 	) {
 		const page = req.query.page ? Number(req.query.page) : 1;
-		const props = await this.webService.blog(page);
+		const props = await this.webService.blog(req.locals.language, page);
 		return await astroRender(props)(req, res, next);
 	}
 
@@ -118,7 +137,7 @@ export class WebController {
 		@Next() next: NextFunction,
 	) {
 		const { slug } = req.params;
-		const props = await this.webService.blogSlug(slug);
+		const props = await this.webService.blogSlug(req.locals.language, slug);
 		return await astroRender(props)(req, res, next);
 	}
 
@@ -132,13 +151,19 @@ export class WebController {
 		return await astroRender()(req, res, next);
 	}
 
+	@Public()
 	@Get(WebPath.NOT_FOUND)
 	async notFound(
 		@Req() req: Request,
 		@Res() res: Response,
 		@Next() next: NextFunction,
 	) {
-		return await astroRender()(req, res, next);
+		const language = req.locals.language;
+		const props = {
+			title: language === "es" ? "Página no encontrada" : "Page Not Found",
+			description: language === "es" ? "La página que buscas no existe." : "The page you are looking for does not exist.",
+		};
+		return await astroRender(props)(req, res, next);
 	}
 
 	@All("*")

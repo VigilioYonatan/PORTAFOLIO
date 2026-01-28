@@ -202,7 +202,7 @@ export class UserService {
 				username: user.username,
 				email: user.email,
 				role_id: user.role_id,
-				status: user.status as "ACTIVE" | "BANNED" | "PENDING",
+				status: user.status as UserSchema["status"],
 				avatar: user.avatar,
 				created_at: user.created_at,
 				updated_at: user.updated_at,

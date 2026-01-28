@@ -26,7 +26,6 @@ export const portfolioConfigSchema = z
 				youtube: z.url().nullable(), // URL de YouTube
 				portfolio: z.url().nullable(), // URL de portfolio externo
 			})
-			.strict()
 			.nullable(), // JSONB: SocialLinks
 		logo: z
 			.array(filesSchema(UPLOAD_CONFIG.portfolio_config.logo!.dimensions))
@@ -37,7 +36,6 @@ export const portfolioConfigSchema = z
 		time_zone: z.enum(["UTC", "America/Lima", "America/Bogota"]).nullable(), // Zona horaria
 		...timeStampSchema.shape, // created_at, updated_at
 	})
-	.strict();
 
 export type PortfolioConfigSchema = z.infer<typeof portfolioConfigSchema>;
 

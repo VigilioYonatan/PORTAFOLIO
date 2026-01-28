@@ -1,68 +1,105 @@
 import { marked } from "marked";
 import { createHighlighter } from "shiki";
 
-// Singleton highlighter to avoid re-initialization cost
-let highlighter: any = null;
+// Singleton highlighter to avoid reloading themes on every request
+let highlighter: Awaited<ReturnType<typeof createHighlighter>> | null = null;
 
-async function getShikiHighlighter() {
+async function getHighlighter() {
 	if (!highlighter) {
 		highlighter = await createHighlighter({
-			themes: ["dracula", "github-light"], // "dracula" matches our cyberpunk/dark aesthetic well
+			themes: ["dracula", "min-light"], // Dark and light themes
 			langs: [
-				"typescript",
 				"javascript",
+				"typescript",
 				"tsx",
 				"jsx",
 				"css",
+				"json",
 				"html",
 				"bash",
-				"json",
-				"markdown",
-				"sql",
 				"python",
 				"go",
 				"rust",
+				"sql",
+				"yaml",
+				"markdown",
+				"docker",
 			],
 		});
 	}
 	return highlighter;
 }
 
+/**
+ * Processes markdown content into HTML with Shiki syntax highlighting.
+ * @param content Raw markdown string
+ * @returns HTML string
+ */
 export async function renderMarkdown(content: string): Promise<string> {
-	const shiki = await getShikiHighlighter();
+	const hl = await getHighlighter();
 
-	// Configure marked to use shiki for code blocks
+	// Create a new renderer to avoid type issues with object literal
 	const renderer = new marked.Renderer();
 
-	renderer.code = ({
-		text,
-		lang,
-	}: {
-		text: string;
-		lang?: string;
-	}) => {
-		const language = lang || "text";
-		try {
-			// Use dracula for dark mode compatibility (we default to dark)
-			const html = shiki.codeToHtml(text, {
-				lang: language,
-				theme: "dracula",
-			});
-			return html;
-		} catch (_e) {
-			// Fallback to simple code block
-			return `<pre><code class="language-${language}">${text}</code></pre>`;
-		}
+	renderer.code = ({ text, lang }: { text: string; lang?: string }) => {
+		const languageRaw = lang || "text";
+
+		// Safe fallback
+		const language = hl.getLoadedLanguages().includes(languageRaw)
+			? languageRaw
+			: "text";
+
+		const html = hl.codeToHtml(text, {
+			lang: language,
+			theme: "dracula",
+		});
+		return `<div class="code-block relative group my-6 overflow-hidden rounded-lg border border-white/5 bg-[#1e1e2e] shadow-2xl backdrop-blur-sm transition-all hover:border-primary/20">
+            <div class="absolute right-3 top-3 z-10 opacity-0 transition-opacity group-hover:opacity-100">
+                    <button class="copy-btn rounded bg-white/10 p-1.5 text-xs text-white backdrop-blur-md hover:bg-primary/20" data-code="${encodeURIComponent(
+											text,
+										)}">
+                    Copy
+                    </button>
+            </div>
+            ${html}
+        </div>`;
 	};
 
-	// Add custom classes or IDs if needed for "Futuristic" feel (e.g., glitch effects on specific headers)
-	// For now, standard specific semantic HTML.
+interface MarkedToken {
+	text?: string;
+	tokens?: { text: string }[];
+}
 
-	marked.setOptions({
-		renderer: renderer,
+	renderer.blockquote = (quote) => {
+        // Handle token format if Marked parses it as object
+        // Typings for renderer.blockquote suggest string but internal marked might pass token
+		const text =
+			typeof quote === "string"
+				? quote
+				: quote.text ||
+					(quote as unknown as MarkedToken).tokens?.map((t) => t.text).join("") ||
+					"";
+		return `<blockquote class="border-l-4 border-primary/50 bg-primary/5 pl-4 py-2 my-4 italic text-muted-foreground rounded-r-lg backdrop-blur-sm">
+            ${text}
+        </blockquote>`;
+	};
+
+	renderer.link = function ({ href, title, tokens }: { href: string; title?: string | null; tokens: any[] }) {
+		const linkHref = href;
+		const linkTitle = title;
+		const linkText = this.parser.parseInline(tokens);
+
+		const isExternal = linkHref?.startsWith("http");
+		const target = isExternal
+			? 'target="_blank" rel="noopener noreferrer"'
+			: "";
+		return `<a href="${linkHref}" title="${linkTitle || ""}" ${target} class="text-primary hover:text-primary/80 hover:underline underline-offset-4 transition-colors">${linkText}</a>`;
+	};
+
+	return await marked.parse(content, {
+		async: true,
 		gfm: true,
 		breaks: true,
+		renderer,
 	});
-
-	return marked(content);
 }

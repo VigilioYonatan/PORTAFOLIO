@@ -17,6 +17,7 @@ import {
 	Controller,
 	Get,
 	HttpCode,
+	Patch,
 	Put,
 	Req,
 	Res,
@@ -72,6 +73,7 @@ export class PortfolioConfigController {
 	@Roles(1) // ADMIN only
 	@HttpCode(200)
 	@Put("/")
+	@Patch("/")
 	@ApiOperation({
 		summary: "Actualizar configuración del portfolio",
 		description:

@@ -1,3 +1,4 @@
+import { type Language, LANGUAGES } from "@infrastructure/types/i18n";
 import { TenantRepository } from "@modules/tenant/repositories/tenant.repository";
 import type { TenantShowSchema } from "@modules/tenant/schemas/tenant.schema";
 import type { UserAuth } from "@modules/user/schemas/user.schema";
@@ -24,7 +25,10 @@ export class InitialCacheMiddleware implements NestMiddleware {
 			req.originalUrl.startsWith("/dashboard") ||
 			req.originalUrl.startsWith("/auth") ||
 			Object.values(WebPath).some((path) =>
-				new RegExp(`^${path.replace(/\*/g, ".*")}$`).test(req.originalUrl),
+				// Replace * with .* and :param with [^/]+
+				new RegExp(`^${path.replace(/\*/g, ".*").replace(/:\w+/g, "[^/]+")}$`).test(
+					req.originalUrl.split("?")[0], // Ignore query params
+				),
 			);
 
 		if (isFunctionalPath) {
@@ -33,10 +37,18 @@ export class InitialCacheMiddleware implements NestMiddleware {
 				`User resolved: ${JSON.stringify(tenant, null, 3) || "NOT FOUND"}`,
 			);
 
+			// Detect language from URL
+			const pathParts = req.path.split("/");
+			let language: Language = "es";
+			if (LANGUAGES.includes(pathParts[1] as Language)) {
+				language = pathParts[1] as Language;
+			}
+
 			// Ensure req.locals exists and match requested format
 			req.locals = {
 				tenant: tenant!,
 				user: (req.user || null) as UserAuth,
+				language,
 			};
 		}
 

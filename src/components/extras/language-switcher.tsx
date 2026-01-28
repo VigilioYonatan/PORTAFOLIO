@@ -1,3 +1,4 @@
+import { LANGUAGES } from "@infrastructure/types/i18n";
 import { cn } from "@infrastructure/utils/client/cn";
 import { Globe } from "lucide-preact";
 import { useEffect, useState } from "preact/hooks";
@@ -7,24 +8,22 @@ interface LanguageSwitcherProps {
 }
 
 export default function LanguageSwitcher({ className }: LanguageSwitcherProps) {
-	const languages = [
-		{ code: "en", label: "EN" },
-		{ code: "es", label: "ES" },
-		{ code: "pt", label: "PT" },
-	];
+	const languages = LANGUAGES.map((lang) => ({
+		code: lang,
+		label: lang.toUpperCase(),
+	}));
 
-	const [currentLang, setCurrentLang] = useState("en");
+	const [currentLang, setCurrentLang] = useState<string>("es");
 
 	useEffect(() => {
 		const path = window.location.pathname;
 		const segments = path.split("/").filter(Boolean);
 		const lang = segments[0];
-		if (lang && ["en", "es", "pt"].includes(lang)) {
+		if (lang && (LANGUAGES as readonly string[]).includes(lang)) {
 			setCurrentLang(lang);
 		} else {
-			// Fallback logic if root or unknown, usually 'en' or default
-			// For now we assume 'en' is default if not in url
-			setCurrentLang("en");
+			// Fallback logic if root or unknown
+			setCurrentLang("es");
 		}
 	}, []);
 
@@ -33,7 +32,7 @@ export default function LanguageSwitcher({ className }: LanguageSwitcherProps) {
 		const segments = currentPath.split("/").filter(Boolean);
 
 		let newPath = "";
-		if (segments.length > 0 && ["es", "en", "pt"].includes(segments[0])) {
+		if (segments.length > 0 && (LANGUAGES as readonly string[]).includes(segments[0])) {
 			segments[0] = langCode;
 			newPath = `/${segments.join("/")}`;
 		} else {

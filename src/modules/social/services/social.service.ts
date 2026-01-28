@@ -28,10 +28,10 @@ export class SocialService {
 	) {}
 
 	async index(
-		post_id: number,
+		tenant_id: number,
 		query: SocialCommentQueryDto,
 	): Promise<SocialCommentIndexResponseDto> {
-		this.logger.log({ post_id }, "Listing social comments");
+		this.logger.log({ tenant_id }, "Listing social comments");
 
 		return await paginator<SocialCommentQueryDto, SocialCommentSchema>(
 			"/social/comments",
@@ -39,7 +39,7 @@ export class SocialService {
 				filters: query,
 				cb: async (filters) => {
 					const result = await this.repository.indexComments(
-						post_id,
+						tenant_id,
 						filters,
 					);
 					return result;

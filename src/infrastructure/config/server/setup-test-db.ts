@@ -158,7 +158,7 @@ export async function seedLocalhostTenant(database: TestDb): Promise<number> {
 		sql`SELECT id FROM tenants WHERE slug = 'localhost' LIMIT 1`,
 	);
 	if (existing.rows.length > 0) {
-		return (existing.rows[0] as any).id;
+		return (existing.rows[0] as { id: number }).id;
 	}
 
 	const result = await database.execute(sql`

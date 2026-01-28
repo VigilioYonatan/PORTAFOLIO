@@ -15,9 +15,16 @@ describe("WebController", () => {
 
 	const mockWebService = {
 		index: vi.fn(),
+		blog: vi.fn(),
+		blogSlug: vi.fn(),
+		projectSlug: vi.fn(),
+		contact: vi.fn(),
 	};
 
-	const mockReq = { originalUrl: "/test" } as unknown as Request;
+	const mockReq = { 
+		originalUrl: "/test",
+		locals: { language: "es" }
+	} as unknown as Request;
 	const mockRes = {} as unknown as Response;
 	const mockNext = vi.fn();
 
@@ -48,7 +55,7 @@ describe("WebController", () => {
 
 			await controller.index(mockReq, mockRes, mockNext);
 
-			expect(webService.index).toHaveBeenCalled();
+			expect(webService.index).toHaveBeenCalledWith("es");
 			expect(astroRender).toHaveBeenCalledWith(props);
 		});
 	});

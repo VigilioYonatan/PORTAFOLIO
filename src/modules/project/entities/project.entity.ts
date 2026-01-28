@@ -18,8 +18,21 @@ import {
 	timestamp,
 	unique,
 	varchar,
+	pgEnum,
+	type AnyPgColumn,
 } from "drizzle-orm/pg-core";
 import type { ProjectSchema } from "../schemas/project.schema";
+
+export const projectStatusEnum = pgEnum("project_status_enum", [
+	"live",
+	"in_dev",
+	"archived",
+]);
+export const projectLanguageEnum = pgEnum("project_language_enum", [
+	"en",
+	"es",
+	"pt",
+]);
 
 export const projectEntity = pgTable(
 	"projects",
@@ -38,14 +51,15 @@ export const projectEntity = pgTable(
 		sort_order: integer().notNull().default(0),
 		is_featured: boolean().notNull().default(false),
 		is_visible: boolean().notNull().default(true),
-		status: text({ enum: ["live", "in_dev", "archived"] })
-			.notNull()
-			.default("in_dev"),
+		status: projectStatusEnum().notNull().default("in_dev"),
 		images: jsonb().$type<FilesSchema[]>(),
+		videos: jsonb().$type<FilesSchema[]>(),
 		seo: jsonb().$type<SeoMetadataSchema>(),
 		tenant_id: integer()
 			.notNull()
 			.references(() => tenantEntity.id),
+		language: projectLanguageEnum().notNull().default("es"),
+		parent_id: integer().references((): AnyPgColumn => projectEntity.id),
 		created_at: timestamp({ withTimezone: true, mode: "date" })
 			.notNull()
 			.defaultNow(),

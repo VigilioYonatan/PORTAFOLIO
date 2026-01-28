@@ -10,10 +10,18 @@ if (typeof window !== "undefined" && !window.requestAnimationFrame) {
 	window.cancelAnimationFrame = (id) => clearTimeout(id);
 }
 
+// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+type GlobalWithRAF = typeof global & {
+	requestAnimationFrame: (callback: FrameRequestCallback) => number;
+	cancelAnimationFrame: (handle: number) => void;
+};
+
 if (typeof global !== "undefined" && !global.requestAnimationFrame) {
-	(global as any).requestAnimationFrame = (callback: any) =>
-		setTimeout(callback, 0);
-	(global as any).cancelAnimationFrame = (id: any) => clearTimeout(id);
+	(global as unknown as GlobalWithRAF).requestAnimationFrame = (
+		callback: FrameRequestCallback,
+	) => setTimeout(callback, 0) as unknown as number;
+	(global as unknown as GlobalWithRAF).cancelAnimationFrame = (id: number) =>
+		clearTimeout(id);
 }
 
 // Canvas Ellipse Polyfill (for tech.orbit)
@@ -120,3 +128,20 @@ vi.mock("@src/i18n", () => ({
 	useTranslations: vi.fn(() => (key: string) => key),
 	getTranslatedPath: vi.fn((path: string) => path),
 }));
+
+// Mock global fetch
+global.fetch = vi.fn((input: RequestInfo | URL, _init?: RequestInit) => {
+	const url = typeof input === "string" ? input : input.toString();
+
+	if (url.includes("/api/v1/upload/provider")) {
+		return Promise.resolve({
+			ok: true,
+			json: () => Promise.resolve({ provider: "LOCAL" }),
+		} as Response);
+	}
+
+	return Promise.resolve({
+		ok: true,
+		json: () => Promise.resolve({}),
+	} as Response);
+});

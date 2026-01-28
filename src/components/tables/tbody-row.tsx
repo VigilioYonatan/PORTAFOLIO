@@ -14,7 +14,14 @@ function TbodyRow<T extends object>({
 	children,
 	title,
 }: TbodyRowProps<T>) {
-	const table = useContext(VigilioTableContext);
+	const tableContext = useContext(VigilioTableContext);
+
+	if (!tableContext) {
+		return null;
+	}
+
+	const table = tableContext;
+
 	function onClick(data: T) {
 		if (handleClick) {
 			handleClick(data);
@@ -25,8 +32,11 @@ function TbodyRow<T extends object>({
 		<>
 			{table.pagination.value.total === 0 ? (
 				<tr class="w-full h-[300px]">
-					<td colSpan={table.table.Thead().length} class="dark:text-white  ">
-						<div class="w-full h-full flex items-center justify-center">
+					<td
+						colspan={table.table.Thead()[0].length}
+						class="dark:text-white w-full text-center align-middle"
+					>
+						<div class="flex items-center justify-center">
 							{title}
 						</div>
 					</td>
@@ -47,3 +57,4 @@ function TbodyRow<T extends object>({
 }
 
 export default TbodyRow;
+

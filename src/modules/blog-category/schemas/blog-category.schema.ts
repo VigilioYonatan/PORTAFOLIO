@@ -10,6 +10,5 @@ export const blogCategorySchema = z
 		tenant_id: z.number().int().positive(),
 		...timeStampSchema.shape,
 	})
-	.strict();
 
 export type BlogCategorySchema = z.infer<typeof blogCategorySchema>;

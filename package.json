@@ -2,8 +2,8 @@
 	"name": "astro-test",
 	"version": "0.0.1",
 	"scripts": {
-		"dev": "cross-env NODE_OPTIONS=\"--max-http-header-size=45536\" astro dev",
-		"preview": "cross-env NODE_OPTIONS=\"--max-http-header-size=45536\" astro preview",
+		"dev": "cross-env NODE_OPTIONS=\"--max-http-header-size=65536\" astro dev",
+		"preview": "cross-env NODE_OPTIONS=\"--max-http-header-size=65536\" astro preview",
 		"astro": "rm -rf .pnpm-store && astro",
 		"serve": "nest start --watch --debug  --path tsconfig.server.json",
 		"build:serve": "nest build --path tsconfig.server.json",
@@ -143,6 +143,7 @@
 		"@preact/preset-vite": "^2.10.2",
 		"@swc/cli": "^0.7.9",
 		"@swc/core": "^1.15.7",
+		"@tailwindcss/typography": "^0.5.19",
 		"@tailwindcss/vite": "^4.1.18",
 		"@testing-library/dom": "^10.4.1",
 		"@testing-library/jest-dom": "^6.9.1",

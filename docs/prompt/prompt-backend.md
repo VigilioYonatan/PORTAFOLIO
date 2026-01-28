@@ -1,9 +1,9 @@
 # 🏗️ Backend del Proyecto
+
 > Este archivo no debe ser modificado por ti.
 > Lógica específica, convenciones y reglas propias del proyecto.
 > Recuerda que docs/rules/_\_.md son el corazón de todo el proyecto, de ahi sacaras toda la información para realizar todo estar 100% fiel a docs/rules/_\_.md
 > Recuerda que si sientes que al crear una funcion que se pueda reutilizar usa infrastructure/utils depende de la funcionalidad que quieras reutilizar, psdt si esa funcionalidad solo pertenece a un modulo no la pongas en infrastructure/utils solo en ese modulo, ah y recuerda client y server o hybrid. verifica si existe una funcion similar antes de crearla ejemplo slugify para slug.
-
 
 ## 🏆 REGLAS DE ORO (MANDATORIO)
 
@@ -18,10 +18,10 @@
 > Nunca en los parametros o retorna codigo duro.
 > Eliminar imports que no estes usando el archivo.
 > Importante al poner los nombres de las clases de servicios, controller,repositories.
-Si el archivo se llama example.service.ts , el nombre de la clase de ese servicio se debe llamar class ExampleService{},
-Si el archivo se llama example.controller.ts , el nombre de la clase de ese controlador se debe llamar class ExampleController{} y el @controller("examples") debes ponerlo, como dicen en rules-endpoints.md,
-Si el archivo se llama example.repository.ts , el nombre de la clase de ese repositorio se debe llamar class ExampleRepository{},
-Si el archivo se llama pepito-capo.repository.ts , el nombre de la clase de ese repositorio se debe llamar class PepitoCapoRepository{} u el @Controller("pepito-capo") debes ponerlo NO "pepito/capo" , como dicen en rules-endpoints.md,
+> Si el archivo se llama example.service.ts , el nombre de la clase de ese servicio se debe llamar class ExampleService{},
+> Si el archivo se llama example.controller.ts , el nombre de la clase de ese controlador se debe llamar class ExampleController{} y el @controller("examples") debes ponerlo, como dicen en rules-endpoints.md,
+> Si el archivo se llama example.repository.ts , el nombre de la clase de ese repositorio se debe llamar class ExampleRepository{},
+> Si el archivo se llama pepito-capo.repository.ts , el nombre de la clase de ese repositorio se debe llamar class PepitoCapoRepository{} u el @Controller("pepito-capo") debes ponerlo NO "pepito/capo" , como dicen en rules-endpoints.md,
 > Usar el schema siempre no hardcoear los tipos ,enums ,etc. EJEMPLO
 
 ```typescript
@@ -314,7 +314,8 @@ modules/
 
 1.  **Alta Cohesión:** Todo lo relacionado a una funcionalidad (ej: `Users`) va en su carpeta.
 2.  **Convención :** Controllers y Services usan métodos estándar: `index`, `show`, `store`, `update`, `destroy`. Evitar `findAll`, `getOne`, `create`.
-3. ExampleResponseDto (habrá response dtos) y ExampleResponseClassDto (habrá class dtos) diferentes archivos. OBLIGATORIO. NO ES necesario crear archivos por separado por ejemplo example.index.response.dto.ts y example.index.response.class.dto.ts, etc. NO es necesario suficiente example.response.dto.ts y example.response.class.dto.ts.
+3.  ExampleResponseDto (habrá response dtos) y ExampleResponseClassDto (habrá class dtos) diferentes archivos. OBLIGATORIO. NO ES necesario crear archivos por separado por ejemplo example.index.response.dto.ts y example.index.response.class.dto.ts, etc. NO es necesario suficiente example.response.dto.ts y example.response.class.dto.ts.
+
 ```typescript
 // ✅ Correcto -  convention
 @Injectable()
@@ -539,7 +540,7 @@ class OtherService {
     body: ExampleStoreDto,
   ): Promise<{ success: true; example: ExampleSchema }> {
     const example = await this.exampleRepository.store(tenant_id, body); // esto debe estar en exampleService, register por ejemplo
-   
+
     await this.exampleCache.invalidateLists(tenant_id);
 
     return { success: true, example };
@@ -571,7 +572,7 @@ export const exampleSchema = z
      documents: z.array(filesSchema()), // para archivos
      images:z.array(filesSchema(UPLOAD_CONFIG.student.images.dimensions)), // para imagenes, UPLOAD_CONFIG le importas de uploads/const/upload.const.ts, para archivos videos, audios, documentos, etc, psdt puede ir vacio si no tiene dimension
     ...timestamps.shape, // no usar merge esto son los timestamps created_at y updated_at
-  }).strict(); // agregar strict a los schemas
+  }); // agregar strict a los schemas
 
 
   export type ExampleSchema = z.infer<typeof exampleSchema>;
@@ -670,7 +671,6 @@ telephone: z.string()
 // No poner number() cosas que SON textos como ruc, dni, etc
 ```
 
-
 Recuerda que puedes crear schemas personalizados que heredan del schema principal para poder usarlo en todos lados, apis,microservicios,etc, claro el nombre de la schema es personalizado. No puedes crear schemas en otros archivos que no sean .schema.ts
 
 ```ts
@@ -726,15 +726,13 @@ export const example2Schema = z.object({
 export type example2Schema = z.infer<typeof example2Schema>;
 ```
 
-Tod
----
+## Tod
 
 ## 1.4 Controller Completo (Backend)
 
 - Tos los controllers deben tener un Promise, su propio dto, la cual las apis usaran SIGUIENDO el estandar, por ejemplo `ExampleStoreResponseDto`, ExampleIndexResponseDto, ExampleShowResponseDto,etc etc ya sabes,.
   `@Req() req` debe usarse para acceder a `req.locals` (tenant, usuario).
 - En exampleIndexResponseDto usar paginatorSchema const exampleIndexResponseDto = createPaginatorSchema(exampleSchema);
-
 
 ```typescript
 import { ZodPipe } from "@infrastructure/pipes/zod.pipe";
@@ -832,7 +830,7 @@ Los controladores deben terminar con un return result, no { success:true,...etc}
 
 ## 1.5 DTOs con Zod v4
 
-**Regla de Oro:** Cada DTO en su propio archivo. Nombre de clase DTO de Swagger en su propio archivo `*.class.dto.ts`. 
+**Regla de Oro:** Cada DTO en su propio archivo. Nombre de clase DTO de Swagger en su propio archivo `*.class.dto.ts`.
 
 ```typescript
 // ✅ example.store.dto.ts
@@ -930,7 +928,7 @@ export const authRegisterDto = userSchema
 **Response DTOs**
 
 - Los response dtos sirven para swagger tambien para retornar los datos, claro los responde dtos pueden ir en el controlador :Promise<> como tambien en los apis mutation<> y query<>.
-- response.dto y class.dto diferentes archivos. OBLIGATORIO. 
+- response.dto y class.dto diferentes archivos. OBLIGATORIO.
 
 EJemplo en el siguiente codigo
 
@@ -974,9 +972,10 @@ show(
 3.  **Retornos Estandarizados:** TODOS los métodos de escritura (`store`, `update`, `destroy`) deben retornar el objeto creado/actualizado directamente (`result`), NO un array.
 4.  **Orden de Parámetros MANDATORIO:** En TODOS los métodos (repositories, services, controllers), el orden SIEMPRE debe ser: `tenant_id` → `user_id` (si existe) → `entity_id` → `body`.
 5.  **IMPORTANTE SEGUIR CONVENCIÓN** No usar find,get,set,create,delete en los nombres de los metodos
-6. No meter logica en los repositories, ejemplo convertir en slugify(), etc, solo consultas de db
-7. En store repository body: Omit<ExampleSchema, "id" | "tenant_id"|"created_at" | "updated_at">,
+6.  No meter logica en los repositories, ejemplo convertir en slugify(), etc, solo consultas de db
+7.  En store repository body: Omit<ExampleSchema, "id" | "tenant_id"|"created_at" | "updated_at">,
     // Solo en el repositorio store puede ir Omit<ExampleSchema, "id" |"tenant_id"| "created_at" | "updated_at"> en el body ,ojo esto es solo exclusivo de store en repository, SOLO ESOS CAMPOS NO OTROS CAMPOS, SERVICES SE ENCARGARÁ
+
 ```typescript
 // ✅ CORRECTO
 index() // Mostrar todos, claro puedes usasr paginacion o normal, claro hay entidades con millones de datos, ahi si usar paginacion
@@ -1370,7 +1369,7 @@ export class ExampleRepository {
   }
 
   store(
-    body: Omit<ExampleSchema, "id" | "tenant_id"|"created_at" | "updated_at">,
+    body: Omit<ExampleSchema, "id" | "tenant_id" | "created_at" | "updated_at">,
     // Solo en el repositorio store puede ir Omit<ExampleSchema, "id" |"tenant_id"| "created_at" | "updated_at"> en el body ,ojo esto es solo exclusivo de store en repository, SOLO ESOS CAMPOS NO OTROS CAMPOS, SERVICES SE ENCARGARÁ
   ): Promise<ExampleSchema> {
     const slug = slugify(body.name);
@@ -2393,10 +2392,7 @@ export class UserService {
     private readonly userCache: UserCache,
   ) {}
 
-  async show(
-    id: number,
-    tenant_id: number,
-  ): Promise<UserShowResponseDto> {
+  async show(id: number, tenant_id: number): Promise<UserShowResponseDto> {
     this.logger.log({ id }, "Fetching user by ID");
 
     // 1. Try Cache

@@ -33,4 +33,8 @@ export const WebPath = {
 	CONTACT_ES: "/es/contact",
 	CONTACT_EN: "/en/contact",
 	CONTACT_PT: "/pt/contact",
+	ABOUT: "/about",
+	ABOUT_ES: "/es/about",
+	ABOUT_EN: "/en/about",
+	ABOUT_PT: "/pt/about",
 };

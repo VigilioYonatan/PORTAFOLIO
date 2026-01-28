@@ -1,1 +1,1 @@
-export * from "./components/form-array.component";
+export * from "./components/form-array-component";

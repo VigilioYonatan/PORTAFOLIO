@@ -22,6 +22,4 @@ export const technologySchema = z
 		tenant_id: z.number().int().positive(),
 		...timeStampSchema.shape,
 	})
-	.strict();
-
 export type TechnologySchema = z.infer<typeof technologySchema>;

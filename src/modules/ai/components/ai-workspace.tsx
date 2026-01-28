@@ -1,9 +1,9 @@
-import InsightsRadar from "@modules/analytics/components/insights.radar";
-import ModelConfigForm from "@modules/ai/components/model-config.form";
+import InsightsRadar from "@modules/analytics/components/insights-radar";
+import ModelConfigForm from "@modules/ai/components/model-config-form";
 import {
 	ChatViewer,
 	ConversationList,
-} from "@modules/chat/components/chat.components";
+} from "@modules/chat/components/chat-components";
 
 import {
 	BrainCircuitIcon,
@@ -12,7 +12,7 @@ import {
 	NetworkIcon,
 } from "lucide-preact";
 import IndexStatus from "./index-status";
-import DocumentStore from "@modules/documents/components/document.store";
+import DocumentStore from "@modules/documents/components/document-store";
 
 export default function AIWorkspace() {
 	return (
@@ -41,10 +41,10 @@ export default function AIWorkspace() {
 					<div class="h-10 w-px bg-white/5" />
 					<div class="flex flex-col">
 						<span class="text-[8px] font-mono text-zinc-500 uppercase tracking-widest ">
-							Sync_Protocol
+							Protocolo_Sinc
 						</span>
 						<span class="text-[10px] font-mono text-primary  tracking-widest">
-							AES_ENCRYPTED_STABLE
+							CIFRADO_AES_ESTABLE
 						</span>
 					</div>
 				</div>
@@ -58,7 +58,7 @@ export default function AIWorkspace() {
 					<div class="bg-zinc-950/60 border border-white/5 p-6 rounded-sm h-full flex flex-col justify-between group hover:border-primary/20 transition-all">
 						<div class="flex items-center justify-between mb-2">
 							<span class="text-[9px] font-black tracking-[0.3em] text-zinc-500">
-								NEURAL_DENSITY
+								DENSIDAD_NEURONAL
 							</span>
 							<NetworkIcon
 								size={12}
@@ -68,7 +68,7 @@ export default function AIWorkspace() {
 						<InsightsRadar />
 						<div class="mt-4 pt-4 border-t border-white/5 flex flex-col gap-1">
 							<div class="flex justify-between text-[8px] font-mono">
-								<span class="text-zinc-500">EPS_LOAD</span>
+								<span class="text-zinc-500">CARGA_EPS</span>
 								<span class="text-primary">840.2k</span>
 							</div>
 							<div class="h-1 w-full bg-white/5 rounded-full overflow-hidden">
@@ -84,7 +84,7 @@ export default function AIWorkspace() {
 					<div class="flex items-center gap-2 mb-6 px-1">
 						<CpuIcon size={14} class="text-primary" />
 						<span class="text-[10px] font-black tracking-[0.3em] text-white uppercase">
-							Model_Parameters
+							Parámetros_Modelo
 						</span>
 					</div>
 					<ModelConfigForm />
@@ -95,14 +95,14 @@ export default function AIWorkspace() {
 						<div class="w-[30%] border-r border-white/5 flex flex-col bg-black/20">
 							<div class="p-4 border-b border-white/5 bg-zinc-950/80 font-mono text-[9px]  tracking-[0.3em] text-zinc-400 uppercase flex items-center gap-2">
 								<DatabaseIcon size={10} class="text-primary/60" />
-								Neural_Streams
+								Flujos_Neuronales
 							</div>
 							<ConversationList />
 						</div>
 						<div class="flex-1 flex flex-col">
 							<div class="p-4 border-b border-white/5 bg-zinc-950/80 flex justify-between items-center px-6">
 								<span class="font-mono text-[10px] tracking-[0.4em] text-primary uppercase selection:bg-primary selection:text-black">
-									Active_Neural_Session
+									Sesión_Neuronal_Activa
 								</span>
 								<div class="flex gap-2">
 									<div class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />

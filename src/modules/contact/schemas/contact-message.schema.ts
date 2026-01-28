@@ -15,6 +15,5 @@ export const contactMessageSchema = z
 		deleted_at: z.date().nullable(), // Kept as it was present, likely soft delete
 		...timeStampSchema.shape,
 	})
-	.strict();
 
 export type ContactMessageSchema = z.infer<typeof contactMessageSchema>;

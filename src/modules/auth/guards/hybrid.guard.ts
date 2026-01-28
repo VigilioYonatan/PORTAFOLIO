@@ -28,11 +28,6 @@ export class HybridAuthGuard extends AuthGuard("jwt") {
 			return true;
 		}
 
-		// Ensure req.locals exists
-		// if (!request.locals) {
-		//   request.locals = {} as any;
-		// }
-
 		// 1. Check Session (Passport Session)
 		if (request.isAuthenticated?.()) {
 			return true;
@@ -43,8 +38,20 @@ export class HybridAuthGuard extends AuthGuard("jwt") {
 			const result = (await super.canActivate(context)) as boolean;
 			if (result) {
 				const req = context.switchToHttp().getRequest<Request>();
-				if (!req.locals) req.locals = {} as any;
-				req.locals.user = req.user as any;
+				// Ensure req.locals exists (Express definition handles this, but runtime check is safe)
+				// req.locals is defined in global types, no need to cast to any
+				if (!req.locals) {
+					// @ts-expect-error - Initialize if strictly necessary, but Express usually has it
+					req.locals = {};
+				}
+				
+				// Typescript should know req.user exists after successful guard execution if types are correct.
+				// However, req.user from passport might not align perfectly with our UserAuth type.
+				// We assume req.user matches UserAuth structure or strict subset required.
+				if (req.user) {
+					// @ts-expect-error - Assigning passport user to our typed local user
+					req.locals.user = req.user;
+				}
 			}
 			return result;
 		} catch (_e) {
@@ -68,8 +75,6 @@ export class HybridAuthGuard extends AuthGuard("jwt") {
 
 	private handleCustomResponse(request: Request, response: Response): boolean {
 		// Determine context: API vs Web
-		// If request path starts with /api (excluding web routes maybe?)
-		// The user snippet uses a boolean flag "isApi". We can infer it.
 		const isApi =
 			request.path.startsWith("/api") ||
 			request.headers.accept?.includes("application/json") ||
@@ -77,8 +82,6 @@ export class HybridAuthGuard extends AuthGuard("jwt") {
 
 		if (isApi) {
 			// NestJS convention: Throw exception, let Global Filter handle JSON response
-			// But user specifically asked for JSON response structure similar to snippet
-			// We can throw UnauthorizedException and let standard NestJS exception filter handle 401
 			throw new UnauthorizedException({
 				success: false,
 				message: "Unauthorized",
@@ -87,10 +90,7 @@ export class HybridAuthGuard extends AuthGuard("jwt") {
 
 		// For Web: Redirect
 		response.redirect("/auth/login");
-		// We return false to stop the guard chain, but since we redirected, execution technically ends/responses
-		// returning false in canActivate usually throws 403 Forbidden default if not handled.
-		// But since we manipulated response, we should return false?
-		// Actually, preventing further execution is key.
+		// Stop execution chain
 		return false;
 	}
 }

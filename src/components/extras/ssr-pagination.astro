@@ -1,0 +1,60 @@
+---
+import { cn } from "@infrastructure/utils/client/cn";
+import { ArrowLeft, ArrowRight } from "lucide-preact";
+
+interface Props {
+  page: number;
+  limit: number;
+  total: number;
+  baseUrl: string;
+}
+
+const { page, limit, total, baseUrl } = Astro.props;
+
+const totalPages = Math.ceil(total / limit);
+const hasPrev = page > 1;
+const hasNext = page < totalPages;
+
+const prevUrl = `${baseUrl}?page=${page - 1}`;
+const nextUrl = `${baseUrl}?page=${page + 1}`;
+---
+
+{
+  totalPages > 1 && (
+    <div class="flex items-center justify-center gap-4 mt-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
+      <a
+        href={hasPrev ? prevUrl : "#"}
+        aria-disabled={!hasPrev}
+        class={cn(
+          "flex items-center gap-2 px-6 py-3 rounded-full border border-white/10 font-mono text-xs uppercase tracking-widest transition-all",
+          hasPrev
+            ? "hover:bg-primary/10 hover:border-primary text-foreground hover:text-primary hover:scale-105"
+            : "opacity-30 cursor-not-allowed pointer-events-none text-muted-foreground",
+        )}
+      >
+        <ArrowLeft size={14} />
+        <span>Prev</span>
+      </a>
+
+      <div class="flex items-center gap-2 font-mono text-xs text-muted-foreground">
+        <span class="text-primary font-bold">{page}</span>
+        <span class="opacity-30">/</span>
+        <span>{totalPages}</span>
+      </div>
+
+      <a
+        href={hasNext ? nextUrl : "#"}
+        aria-disabled={!hasNext}
+        class={cn(
+          "flex items-center gap-2 px-6 py-3 rounded-full border border-white/10 font-mono text-xs uppercase tracking-widest transition-all",
+          hasNext
+            ? "hover:bg-primary/10 hover:border-primary text-foreground hover:text-primary hover:scale-105"
+            : "opacity-30 cursor-not-allowed pointer-events-none text-muted-foreground",
+        )}
+      >
+        <span>Next</span>
+        <ArrowRight size={14} />
+      </a>
+    </div>
+  )
+}

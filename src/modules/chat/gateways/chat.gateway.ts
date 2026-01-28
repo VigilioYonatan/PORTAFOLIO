@@ -8,21 +8,22 @@ import {
 import type { OnGatewayConnection, OnGatewayDisconnect } from "@nestjs/websockets";
 import { Logger } from "@nestjs/common";
 import type { Server, Socket } from "socket.io";
-import { ChatService } from "../services/chat.service";
 import { ChatRepository } from "../repositories/chat.repository";
 import type { ChatMessageStoreDto } from "../dtos/chat.class.dto";
+import type { ChatMessageSchema } from "../schemas/chat-message.schema";
+import type { ConversationSchema } from "../schemas/conversation.schema";
 
 interface JoinPayload {
 	conversation_id: number;
 	visitor_id: string;
 	tenant_id: number;
-	mode?: "AI" | "LIVE";
+	mode?: ConversationSchema["mode"];
 }
 
 interface MessagePayload {
 	conversation_id: number;
 	content: string;
-	role: "USER" | "ADMIN";
+	role: ChatMessageSchema["role"];
 	tenant_id: number;
 }
 
@@ -41,7 +42,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	private readonly connections = new Map<string, Socket>();
 
 	constructor(
-		private readonly chatService: ChatService,
 		private readonly chatRepository: ChatRepository,
 	) {}
 
@@ -99,7 +99,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 	@SubscribeMessage("send_message")
 	async handleSendMessage(
-		@ConnectedSocket() client: Socket,
 		@MessageBody() payload: MessagePayload,
 	) {
 		this.logger.log(

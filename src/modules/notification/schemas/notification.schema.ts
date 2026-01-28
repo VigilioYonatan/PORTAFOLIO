@@ -13,6 +13,5 @@ export const notificationSchema = z
 		is_read: z.boolean(), // Estado de lectura
 		...timeStampSchema.shape, // created_at, updated_at
 	})
-	.strict();
 
 export type NotificationSchema = z.infer<typeof notificationSchema>;

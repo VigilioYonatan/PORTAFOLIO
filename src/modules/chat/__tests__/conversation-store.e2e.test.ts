@@ -51,7 +51,7 @@ describe("Conversation - POST /conversation (E2E)", () => {
 			};
 
 			const response = await request(app.getHttpServer())
-				.post("/api/v1/conversation")
+				.post("/api/v1/chat/conversations")
 				.set("Host", "localhost")
 				.send(body);
 
@@ -76,7 +76,7 @@ describe("Conversation - POST /conversation (E2E)", () => {
 			};
 
 			const response = await request(app.getHttpServer())
-				.post("/api/v1/conversation")
+				.post("/api/v1/chat/conversations")
 				.set("Host", "localhost")
 				.send(body);
 
@@ -91,7 +91,7 @@ describe("Conversation - POST /conversation (E2E)", () => {
 			};
 
 			const response = await request(app.getHttpServer())
-				.post("/api/v1/conversation")
+				.post("/api/v1/chat/conversations")
 				.set("Host", "localhost")
 				.send(body);
 
@@ -102,7 +102,7 @@ describe("Conversation - POST /conversation (E2E)", () => {
 			const body = {};
 
 			const response = await request(app.getHttpServer())
-				.post("/api/v1/conversation")
+				.post("/api/v1/chat/conversations")
 				.set("Host", "localhost")
 				.send(body);
 
@@ -116,7 +116,7 @@ describe("Conversation - POST /conversation (E2E)", () => {
 			};
 
 			const response = await request(app.getHttpServer())
-				.post("/api/v1/conversation")
+				.post("/api/v1/chat/conversations")
 				.set("Host", "localhost")
 				.send(body);
 
@@ -130,7 +130,7 @@ describe("Conversation - POST /conversation (E2E)", () => {
 			};
 
 			const response = await request(app.getHttpServer())
-				.post("/api/v1/conversation")
+				.post("/api/v1/chat/conversations")
 				.set("Host", "localhost")
 				.send(body);
 

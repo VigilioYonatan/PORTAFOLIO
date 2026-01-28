@@ -24,6 +24,17 @@ export class BlogPostRepository {
 		return blogPost;
 	}
 
+	async bulkStore(
+		tenant_id: number,
+		bodies: Omit<BlogPostSchema, "id" | "tenant_id" | "created_at" | "updated_at">[],
+	): Promise<BlogPostSchema[]> {
+		if (bodies.length === 0) return [];
+		return await this.db
+			.insert(blogPostEntity)
+			.values(bodies.map((body) => ({ ...body, tenant_id })))
+			.returning();
+	}
+
 	async update(
 		tenant_id: number,
 		id: number,
@@ -83,6 +94,7 @@ export class BlogPostRepository {
 			search,
 			category_id,
 			is_published,
+			language,
 		} = query;
 
 		const whereClause = and(
@@ -92,6 +104,7 @@ export class BlogPostRepository {
 			is_published !== undefined
 				? eq(blogPostEntity.is_published, is_published)
 				: undefined,
+			language ? eq(blogPostEntity.language, language) : undefined,
 		);
 
 		const blogPosts = await this.db.query.blogPostEntity.findMany({
@@ -107,7 +120,7 @@ export class BlogPostRepository {
 				content: false,
 			},
 			extras: {
-				content: sql<string>`substring(${blogPostEntity.content} from 1 for 3000)`.as(
+				content: sql<string>`substring(${blogPostEntity.content} from 1 for 500)`.as(
 					"content",
 				),
 			},

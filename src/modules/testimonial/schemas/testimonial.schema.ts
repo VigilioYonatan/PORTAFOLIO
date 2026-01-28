@@ -18,6 +18,5 @@ export const testimonialSchema = z
 		tenant_id: z.number().int().positive(),
 		...timeStampSchema.shape,
 	})
-	.strict();
 
 export type TestimonialSchema = z.infer<typeof testimonialSchema>;

@@ -9,6 +9,8 @@ export const projectUpdateDto = projectSchema.omit({
 	github_stars: true,
 	github_forks: true,
 	languages_stats: true,
+	language: true,
+	parent_id: true,
 }).extend({
 	techeables: z.array(z.number()),
 });

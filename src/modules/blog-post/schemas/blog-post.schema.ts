@@ -1,3 +1,4 @@
+import { LANGUAGES } from "@infrastructure/types/i18n";
 import { z } from "@infrastructure/config/zod-i18n.config";
 import { seoMetadataSchema } from "@infrastructure/schemas/seo.schema";
 import {
@@ -24,8 +25,9 @@ export const blogPostSchema = z
 		published_at: customDateSchema.nullable(), // Fixed: Use customDateSchema
 		category_id: z.number().int().positive().nullable(),
 		author_id: z.number().int().positive(),
+		language: z.enum(LANGUAGES).default("es"),
+		parent_id: z.number().int().positive().nullable(),
 		...timeStampSchema.shape,
 	})
-	.strict();
 
 export type BlogPostSchema = z.infer<typeof blogPostSchema>;

@@ -1,3 +1,4 @@
+import { AI_TECHNICAL_PROTECTION } from "@modules/ai/const/ai-prompts.const";
 import { paginator } from "@infrastructure/utils/server";
 import {
 	BadRequestException,
@@ -19,6 +20,8 @@ import type { ProjectStoreDto } from "../dtos/project.store.dto";
 import type { ProjectUpdateDto } from "../dtos/project.update.dto";
 import { ProjectRepository } from "../repositories/project.repository";
 import type {  ProjectWithRelations } from "../schemas/project.schema";
+import { AiService } from "@modules/ai/services/ai.service";
+import { type ProjectSchema } from "../schemas/project.schema";
 
 @Injectable()
 export class ProjectService {
@@ -27,6 +30,7 @@ export class ProjectService {
 	constructor(
 		private readonly projectRepository: ProjectRepository,
 		private readonly projectCache: ProjectCache,
+		private readonly aiService: AiService,
 	) {}
 
 	async index(
@@ -70,6 +74,8 @@ export class ProjectService {
 			github_stars: 0,
 			github_forks: 0,
 			languages_stats: [],
+			language: "es",
+			parent_id: null,
 		});
 
 		// 2. Store Relations
@@ -81,9 +87,97 @@ export class ProjectService {
 			);
 		}
 
+		// Auto-translate (manual creation is always Spanish original)
+		this.generateTranslations(tenant_id, project, techeables).catch((err) =>
+			this.logger.error("Error generating translations", err),
+		);
+
 		await this.projectCache.invalidateLists(tenant_id);
 
 		return { success: true, project };
+	}
+
+	private async generateTranslations(
+		tenant_id: number,
+		originalProject: ProjectSchema,
+		techeables?: number[],
+	) {
+		const targetLanguages = ["en", "pt"];
+
+		const translations = await Promise.all(
+			targetLanguages.map(async (lang) => {
+				try {
+					const prompt = `
+					Translate the following project content to ${lang === "en" ? "English" : "Portuguese"}.
+					${AI_TECHNICAL_PROTECTION}
+					
+					Return a JSON object with the following structure:
+					{
+						"title": "Translated Title",
+						"description": "Translated Description",
+						"content": "Translated Content (Markdown)",
+						"impact_summary": "Translated Impact Summary",
+						"slug": "translated-slug"
+					}
+					Original Data:
+					Title: ${originalProject.title}
+					Description: ${originalProject.description}
+					Content: ${originalProject.content}
+					Impact Summary: ${originalProject.impact_summary}
+				`;
+
+					const jsonResponse = await this.aiService.generate({
+						model: "openai/gpt-4o-mini",
+						temperature: 0.3,
+						system: "You are a professional translator. Return only valid JSON.",
+						messages: [{ role: "user", content: prompt }],
+					});
+
+					const cleanJson = jsonResponse.replace(/```json|```/g, "").trim();
+					const translated = JSON.parse(cleanJson);
+
+					const { id, created_at, updated_at, tenant_id: t_id, ...rest } = originalProject;
+
+					return {
+						...rest,
+						title: translated.title,
+						description: translated.description,
+						content: translated.content,
+						impact_summary: translated.impact_summary,
+						slug: translated.slug,
+						language: lang as "en" | "pt",
+						parent_id: originalProject.id,
+					};
+				} catch (error) {
+					this.logger.error(
+						`Failed to translate project #${originalProject.id} to ${lang}`,
+						error,
+					);
+					return null;
+				}
+			}),
+		);
+
+		const validTranslations = translations.filter((t) => t !== null);
+		if (validTranslations.length > 0) {
+			const insertedProjects = await this.projectRepository.bulkStore(
+				tenant_id,
+				validTranslations,
+			);
+
+			// Copy relations (technologies) for all translated projects
+			if (techeables && techeables.length > 0) {
+				await Promise.all(
+					insertedProjects.map((p) =>
+						this.projectRepository.storeTecheables(tenant_id, p.id, techeables),
+					),
+				);
+			}
+
+			this.logger.log(
+				`Created ${validTranslations.length} translations for project #${originalProject.id}`,
+			);
+		}
 	}
 
 	async update(

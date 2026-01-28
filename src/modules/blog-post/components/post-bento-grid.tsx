@@ -1,12 +1,12 @@
-import Modal from "@components/extras/Modal";
+import Modal from "@components/extras/modal";
 import { useEntranceAnimation } from "@hooks/use-motion";
 import { cn } from "@infrastructure/utils/client";
 import { formatDateTz } from "@infrastructure/utils/hybrid/date.utils";
 import { printFileWithDimension } from "@infrastructure/utils/hybrid/file.utils";
 import { blogPostDestroyApi } from "@modules/blog-post/apis/blog-post.destroy.api";
 import { blogPostIndexApi } from "@modules/blog-post/apis/blog-post.index.api";
-import BlogPostStore from "@modules/blog-post/components/blog-post.store";
-import BlogPostUpdate from "@modules/blog-post/components/blog-post.update";
+import BlogPostStore from "@modules/blog-post/components/blog-post-store";
+import BlogPostUpdate from "@modules/blog-post/components/blog-post-update";
 import { DIMENSION_IMAGE } from "@modules/uploads/const/upload.const";
 import { useComputed, useSignal } from "@preact/signals";
 import { audioStore } from "@stores/audio.store";
@@ -22,8 +22,16 @@ import {
 } from "lucide-preact";
 import { useEffect } from "preact/hooks";
 import type { BlogPostSchema } from "../schemas/blog-post.schema";
+import { type Lang, useTranslations } from "@src/i18n";
+import { type Language, LANGUAGES } from "@infrastructure/types/i18n";
+import { Languages } from "lucide-preact";
 
-export default function PostBentoGrid() {
+interface PostBentoGridProps {
+    lang?: Lang;
+}
+
+export default function PostBentoGrid({ lang = "es" }: PostBentoGridProps) {
+    const t = useTranslations(lang);
 	const containerRef = useEntranceAnimation(0.2);
 	const bassIntensity = useComputed(() => audioStore.state.bassIntensity.value);
 	const isStoreModalOpen = useSignal(false);
@@ -33,7 +41,8 @@ export default function PostBentoGrid() {
 	const paginator = usePaginator({ limit: 12 });
 
 	// Fetch posts
-	const query = blogPostIndexApi(null, paginator);
+    const language = useSignal<Language>("es");
+	const query = blogPostIndexApi(null, paginator, { language: language.value });
 
 	// Results synced with query for manual updates
 	const results = useSignal<BlogPostSchema[]>([]);
@@ -46,20 +55,20 @@ export default function PostBentoGrid() {
 
 	useEffect(() => {
 		query.refetch(false)
-	}, [paginator.search.debounceTerm,paginator.pagination.page]);
+	}, [paginator.search.debounceTerm,paginator.pagination.page, language.value]);
 	return (
 		<div class="space-y-6">
 			{/* Header Action */}
 			<div class="flex justify-between items-center bg-zinc-950/40 border border-white/5 p-4 rounded-xl backdrop-blur-sm">
 				<div class="flex items-center gap-4 w-full md:w-auto">
 					{/* Search */}
-					<div class="relative group w-full md:w-64">
+						<div class="relative group w-full md:w-64">
 						<div class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/40 group-focus-within:text-primary transition-colors">
 							<Search size={14} />
 						</div>
 						<input
 							type="text"
-							placeholder="BUSCAR..."
+							placeholder={t("dashboard.blog.search")}
 							class="bg-black/40 border border-white/5 text-[10px] font-mono tracking-widest rounded-lg pl-9 pr-3 py-2.5 w-full focus:outline-none focus:ring-1 focus:ring-primary/40 focus:border-primary/40 transition-all placeholder:text-muted-foreground/30"
 							value={paginator.search.value}
 							onInput={(e) =>
@@ -67,6 +76,28 @@ export default function PostBentoGrid() {
 							}
 						/>
 					</div>
+                    {/* Language Filter */}
+                    <div class="relative group">
+                        <div class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/40 pointer-events-none">
+                            <Languages size={14} />
+                        </div>
+                        <select
+                            class="bg-black/40 border border-white/5 text-[10px] font-mono tracking-widest rounded-lg pl-9 pr-8 py-2.5 appearance-none focus:outline-none focus:ring-1 focus:ring-primary/40 focus:border-primary/40 transition-all cursor-pointer uppercase text-muted-foreground hover:text-white"
+                            value={language.value}
+                            onChange={(e) => {
+                                language.value = e.currentTarget.value as Language;
+                            }}
+                        >
+                            {LANGUAGES.map((lang) => (
+                                <option key={lang} value={lang} class="bg-zinc-950 text-white">
+                                    {lang.toUpperCase()}
+                                </option>
+                            ))}
+                        </select>
+                         <div class="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/40 pointer-events-none">
+                           <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down"><path d="m6 9 6 6 6-6"/></svg>
+                        </div>
+                    </div>
 				</div>
 				<button
 					type="button"
@@ -76,7 +107,7 @@ export default function PostBentoGrid() {
 					class="flex items-center gap-2 bg-primary text-primary-foreground px-6 py-2.5 text-xs font-black uppercase tracking-widest rounded-lg hover:brightness-110 transition-all shadow-[0_0_20px_rgba(var(--primary-rgb),0.3)] z-10"
 				>
 					<Plus size={14} strokeWidth={3} />
-					Nuevo Artículo
+					{t("dashboard.blog.create")}
 				</button>
 			</div>
 
@@ -85,7 +116,7 @@ export default function PostBentoGrid() {
 					<div class="flex flex-col items-center gap-4">
 						<div class="w-10 h-10 border-2 border-primary/20 border-t-primary rounded-full animate-spin" />
 						<span class="text-[10px] font-mono tracking-widest text-muted-foreground animate-pulse">
-							CARGANDO ARTÍCULOS...
+							{t("dashboard.blog.loading")}
 						</span>
 					</div>
 				</div>
@@ -93,7 +124,7 @@ export default function PostBentoGrid() {
 				<div class="w-full h-64 flex items-center justify-center border border-dashed border-border rounded-xl">
 					<div class="text-center text-muted-foreground">
 						<FileText size={32} class="mx-auto mb-2 opacity-50" />
-						<p className="font-mono text-xs">NO SE ENCONTRARON DATOS</p>
+						<p className="font-mono text-xs">{t("dashboard.blog.post.empty")}</p>
 					</div>
 				</div>
 			) : (
@@ -170,7 +201,7 @@ export default function PostBentoGrid() {
 										<button
 											type="button"
 											className="p-2 hover:bg-white/5 rounded-lg transition-colors text-muted-foreground hover:text-amber-400"
-											title="Editar Artículo"
+											title={t("dashboard.blog.post.edit")}
 											onClick={() => {
 												editingPost.value = post;
 											}}
@@ -180,14 +211,14 @@ export default function PostBentoGrid() {
 										<button
 											type="button"
 											className="p-2 hover:bg-white/5 rounded-lg transition-colors text-muted-foreground hover:text-red-500"
-											title="Eliminar Artículo"
+											title={t("dashboard.blog.post.delete")}
 											onClick={() => {
 												sweetModal({
-													title: "¿ELIMINAR ARTÍCULO?",
-													text: `¿Eliminar registro de "${post.title}"?`,
+													title: t("dashboard.blog.post.delete_title"),
+													text: `${t("dashboard.blog.post.delete_text")} "${post.title}"?`,
 													icon: "danger",
 													showCancelButton: true,
-													confirmButtonText: "ELIMINAR",
+													confirmButtonText: t("common.delete").toUpperCase(),
 												}).then(({ isConfirmed }) => {
 													if (isConfirmed) {
 														destroyMutation.mutate(post.id, {
@@ -197,7 +228,7 @@ export default function PostBentoGrid() {
 																);
 																sweetModal({
 																	icon: "success",
-																	title: "Artículo Eliminado",
+																	title: t("dashboard.blog.post.delete_success"),
 																});
 															},
 														});
@@ -232,7 +263,7 @@ export default function PostBentoGrid() {
 						onClick={() => paginator.pagination.onBackPage()}
 						class="px-3 py-1.5 text-[10px] font-black uppercase tracking-widest bg-white/5 hover:bg-white/10 border border-white/5 rounded-lg disabled:opacity-50 disabled:pointer-events-none transition-colors"
 					>
-						Anterior
+						{t("common.previous").toUpperCase()}
 					</button>
 					<div className="flex items-center gap-1">
 						{paginator.pagination.paginator.pages.map((page: number) => (
@@ -258,11 +289,11 @@ export default function PostBentoGrid() {
 						onClick={() => paginator.pagination.onNextPage()}
 						class="px-3 py-1.5 text-[10px] font-black uppercase tracking-widest bg-white/5 hover:bg-white/10 border border-white/5 rounded-lg disabled:opacity-50 disabled:pointer-events-none transition-colors"
 					>
-						Siguiente
+						{t("common.next").toUpperCase()}
 					</button>
 				</div>
 				<div className="text-[10px] font-mono text-muted-foreground/60 uppercase tracking-widest">
-					TOTAL ARTÍCULOS: {query.data?.count ?? 0}
+					{t("dashboard.blog.post.total")}: {query.data?.count ?? 0}
 				</div>
 			</div>
 

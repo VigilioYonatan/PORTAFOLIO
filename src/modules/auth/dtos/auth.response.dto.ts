@@ -120,3 +120,10 @@ export const authEndImpersonateResponseDto = z.object({
 export type AuthEndImpersonateResponseDto = z.infer<
 	typeof authEndImpersonateResponseDto
 >;
+
+// --- Session ---
+export const authSessionResponseDto = z.object({
+	success: z.literal(true),
+	user: userSchema.omit({ password: true }),
+});
+export type AuthSessionResponseDto = z.infer<typeof authSessionResponseDto>;

@@ -1,25 +1,18 @@
 import { useQuery } from "@vigilio/preact-fetching";
+import type { ChatMessageSchema } from "../schemas/chat-message.schema";
 
-export interface ChatSource {
-	title: string;
-	relevance: number;
-	chunk_content: string;
-}
-
-export interface ChatMessage {
-	id: number;
-	role: "USER" | "ASSISTANT" | "SYSTEM";
-	content: string;
-	sources?: ChatSource[];
-	created_at: string;
-	updated_at: string;
-	is_read: boolean;
-	conversation_id: number;
-	tenant_id: number;
-}
+// Re-export the type from schema for use in components
+export type ChatMessage = Omit<ChatMessageSchema, "sources"> & {
+	sources?: Array<{
+		title: string;
+		relevance: number;
+		chunk_content: string;
+	}>;
+};
 
 export interface ChatMessageIndexResponse {
-	results: ChatMessage[];
+	success: boolean;
+	messages: ChatMessage[];
 }
 
 export interface ChatMessageIndexApiError {

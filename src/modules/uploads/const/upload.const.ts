@@ -191,6 +191,7 @@ export type EntityFileProperty =
 	| "file"
 	| "cover"
 	| "images"
+	| "videos"
 	| "icon"
 	| "audio_file";
 
@@ -249,6 +250,11 @@ export const UPLOAD_CONFIG: Record<
 			dimensions: [DIMENSION_IMAGE.md, DIMENSION_IMAGE.lg],
 			folder: "projects/images",
 			max_files: 10,
+		},
+		videos: {
+			...UPLOAD_RULES.videoShort,
+			folder: "projects/videos",
+			max_files: 5,
 		},
 	},
 	testimonial: {

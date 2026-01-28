@@ -16,6 +16,18 @@ import {
 import { AppModule } from "@src/app.module";
 import type { Request } from "express";
 
+// Utility interface for mocked request
+interface MockRequest extends Request {
+	user?: {
+		id: number;
+		role_id: number;
+		tenant_id: number;
+		email: string;
+	};
+	// biome-ignore lint/suspicious/noExplicitAny: Mocking internal properties
+	locals: any;
+}
+
 /**
  * Shared utility for E2E testing to encapsulate boilerplate setup.
  */
@@ -87,22 +99,25 @@ export class E2EApp {
 				return next();
 			}
 
+            const mockReq = req as MockRequest;
+
 			// Identity can be provided per-test or use default admin/user from seed
-			(req as any).isAuthenticated = () => true;
+			// biome-ignore lint/suspicious/noExplicitAny: Mocking internal Express property
+			mockReq.isAuthenticated = (() => true) as any;
 
 			const roleMock = mockRole || "user";
 
 			if (options?.mockAuth?.user) {
-				(req as any).user = options.mockAuth.user;
+				mockReq.user = options.mockAuth.user;
 			} else if (roleMock === "admin") {
-				(req as any).user = {
+				mockReq.user = {
 					id: 1,
 					role_id: 1,
 					tenant_id: this.tenantId,
 					email: "admin@test.com",
 				};
 			} else {
-				(req as any).user = {
+				mockReq.user = {
 					id: 2,
 					role_id: 2,
 					tenant_id: this.tenantId,
@@ -111,9 +126,9 @@ export class E2EApp {
 			}
 
 			if (options?.mockAuth?.locals) {
-				(req as any).locals = options.mockAuth.locals;
+				mockReq.locals = options.mockAuth.locals;
 			} else {
-				(req as any).locals = { tenant: { id: this.tenantId } };
+				mockReq.locals = { tenant: { id: this.tenantId } };
 			}
 
 			next();
@@ -133,9 +148,10 @@ export class E2EApp {
 	/**
 	 * Type-safe access to application providers.
 	 */
-	get<TInput = any, TResult = TInput>(
+	get<TInput = unknown, TResult = TInput>(
 		typeOrToken: TInput | string | symbol,
 	): TResult {
+		// biome-ignore lint/suspicious/noExplicitAny: NestJS get requires any or specific type
 		return this.app.get(typeOrToken as any);
 	}
 

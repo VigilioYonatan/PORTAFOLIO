@@ -14,10 +14,14 @@ import {
 	sql,
 } from "drizzle-orm";
 import type { NodePgDatabase } from "drizzle-orm/node-postgres";
-import type { ProjectQueryDto } from "../dtos/project.query.dto";
 import { techeableEntity } from "@modules/techeable/entities/techeable.entity";
 import { projectEntity } from "../entities/project.entity";
-import type { ProjectSchema, ProjectWithRelations } from "../schemas/project.schema";
+import { TECHEABLE_TYPES } from "@modules/techeable/schemas/techeable.schema";
+import type { ProjectQueryDto } from "../dtos/project.query.dto";
+import type {
+ 	ProjectSchema,
+ 	ProjectWithRelations,
+} from "../schemas/project.schema";
 
 
 @Injectable()
@@ -42,6 +46,20 @@ export class ProjectRepository {
 		return result;
 	}
 
+	async bulkStore(
+		tenant_id: number,
+		bodies: Omit<
+			ProjectSchema,
+			"id" | "tenant_id" | "created_at" | "updated_at"
+		>[],
+	): Promise<ProjectSchema[]> {
+		if (bodies.length === 0) return [];
+		return await this.db
+			.insert(projectEntity)
+			.values(bodies.map((body) => ({ ...body, tenant_id })))
+			.returning();
+	}
+
 	async storeTecheables(
 		tenant_id: number,
 		project_id: number,
@@ -52,7 +70,7 @@ export class ProjectRepository {
 		await this.db.insert(techeableEntity).values(
 			technology_ids.map((techId) => ({
 				techeable_id: project_id,
-				techeable_type: "PORTFOLIO_PROJECT" as const,
+				techeable_type: TECHEABLE_TYPES[0], // PORTFOLIO_PROJECT
 				technology_id: techId,
 				tenant_id,
 			})),
@@ -82,7 +100,7 @@ export class ProjectRepository {
 			.where(
 				and(
 					eq(techeableEntity.techeable_id, project_id),
-					eq(techeableEntity.techeable_type, "PORTFOLIO_PROJECT" as const),
+					eq(techeableEntity.techeable_type, TECHEABLE_TYPES[0]),
 					eq(techeableEntity.tenant_id, tenant_id),
 				),
 			);
@@ -97,7 +115,7 @@ export class ProjectRepository {
 				eq(projectEntity.tenant_id, tenant_id),
 				eq(projectEntity.slug, slug),
 			),
-			with: {techeables:true},
+			with: { techeables: { with: { technology: true } } },
 		});
 		return toNull(result);
 	}
@@ -126,6 +144,7 @@ export class ProjectRepository {
 			search,
 			cursor,
 			status,
+			language,
 		} = query;
 
 		const baseWhere: SQL[] = [eq(projectEntity.tenant_id, tenant_id)];
@@ -141,6 +160,9 @@ export class ProjectRepository {
 		}
 		if (status) {
 			baseWhere.push(eq(projectEntity.status, status));
+		}
+		if (language) {
+			baseWhere.push(eq(projectEntity.language, language));
 		}
 
 		const baseWhereClause = and(...baseWhere);
@@ -174,7 +196,7 @@ export class ProjectRepository {
 				where: useCursor ? cursorWhereClause! : baseWhereClause!,
 				orderBy: orderBy,
 				with: {
-					techeables: true,
+					techeables: { with: { technology: true } },
 				},
 				columns: {
 					content: false,

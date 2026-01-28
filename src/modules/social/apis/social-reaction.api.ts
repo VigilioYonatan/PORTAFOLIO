@@ -25,11 +25,11 @@ export function socialReactionToggleApi() {
 }
 
 export function socialReactionsSummaryApi(
-	target_id = "global",
-	target_type = "system",
+	reactable_id = "global",
+	reactable_type = "system",
 ) {
 	return useQuery<SocialReactionCountResponseDto, unknown>(
-		`/social/reactions?target_id=${target_id}&target_type=${target_type}`,
+		`/social/reactions?reactable_id=${reactable_id}&reactable_type=${reactable_type}`,
 		async (url) => {
 			const response = await fetch(`/api/v1${url}`);
 			const result = await response.json();

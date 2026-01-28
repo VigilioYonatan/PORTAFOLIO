@@ -8,6 +8,5 @@ export const seoMetadataSchema = z
 		keywords: z.array(z.string()).nullable(),
 		og_image: z.array(filesSchema()).nullable(),
 	})
-	.strict();
 
 export type SeoMetadataSchema = z.infer<typeof seoMetadataSchema>;

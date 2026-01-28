@@ -9,7 +9,6 @@ export const aiConfigShowResponseDto = z
 		success: z.literal(true),
 		config: aiConfigSchema.nullable(),
 	})
-	.strict();
 export type AiConfigShowResponseDto = z.infer<typeof aiConfigShowResponseDto>;
 
 /**
@@ -20,7 +19,6 @@ export const aiConfigUpdateResponseDto = z
 		success: z.literal(true),
 		config: aiConfigSchema,
 	})
-	.strict();
 export type AiConfigUpdateResponseDto = z.infer<
 	typeof aiConfigUpdateResponseDto
 >;

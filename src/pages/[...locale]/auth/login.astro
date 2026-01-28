@@ -1,12 +1,14 @@
 ---
 import AuthLayout from "../_components/layouts/auth-layout.astro";
-import LoginForm from "@modules/auth/components/login.form";
+import LoginForm from "@modules/auth/components/login-form";
+import { getLangFromUrl, useTranslations } from "../../../i18n";
 
-// const lang = getLangFromUrl(Astro.url);
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
 ---
 
-<AuthLayout title="Login | System Access">
+<AuthLayout title={`${t("auth.terminal.execute")} | System Access`}>
   <div class="flex min-h-screen items-center justify-center p-4">
-    <LoginForm client:only="preact" />
+    <LoginForm lang={lang} client:only="preact" />
   </div>
 </AuthLayout>

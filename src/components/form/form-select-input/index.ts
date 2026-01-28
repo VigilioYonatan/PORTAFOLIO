@@ -1,1 +1,1 @@
-export * from "./components/form-select-input.component";
+export * from "./components/form-select-input-component";

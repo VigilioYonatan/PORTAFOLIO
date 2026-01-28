@@ -12,7 +12,7 @@
 > Procura usar useRef de preact en vez de document.querySelector, Importa useRef de preact.
 > Las paginas que estan en dentro de un [...all].astro no tendrán SSR, eso quiero decir que se usará full wouter, nada de .astro.
 > Imporante separa store.tsx y update.tsx al crear formularios no pueden ir juntos osea difrentes componentes.
-
+>  No usar <script>  en componentes de astro, usar componentes de preact .tsx.
 ## 🏆 REGLAS DE ORO (MANDATORIO)
 
 > **Client vs Server vs Hybrid:**
@@ -145,7 +145,7 @@ const passwordValue = useSignal("");
 
 // ✅ BIEN
 const exampleStoreForm = useForm({
-  resolver: zodResolver(exampleStoreDto),
+  resolver: zodResolver(exampleStoreDto) as Resolver<exampleStoreDto>,
 });
 function onExampleStore(body: exampleStoreDto) { ... }
 ```
@@ -598,7 +598,7 @@ import {
 
 export function JobStore() {
   const form = useForm<JobPositionStoreDto>({
-    resolver: zodResolver(jobPositionStoreDto),
+    resolver: zodResolver(jobPositionStoreDto) as Resolver<JobPositionStoreDto>,
     // ...
   });
 }
@@ -1158,9 +1158,7 @@ function CursoTypeIndex() {
                 </Card>
                 <Table.table>
                     <Table.thead>
-                        <Table.thead.row>
                             <Table.thead.th />
-                        </Table.thead.row>
                     </Table.thead>
                     <Table.tbody>
                         <Table.tbody.row title="No hay tipos de clase">
@@ -1490,7 +1488,7 @@ let component: null | JSX.Element = null;
 
     const  example = exampleShowQuery.data.example!;
     const exampleUpdateForm = useForm<TenantUpdateDto>({
-        resolver: zodResolver(exampleUpdateDto),
+        resolver: zodResolver(exampleUpdateDto) as Resolver<TenantUpdateDto>,
         mode: "all",
         defaultValues: {...example}, // pasa la informacion que viene de la api, no uno por uno,y si necesitar personalizar algo puedes hacerlo aqui {...example,slug:slugify(example.name)} es un ejemplo
     });
@@ -1646,7 +1644,7 @@ Nombre del archivo: example.store.tsx
 ```ts
 function ExampleStore() {
   const exampleStoreForm = useForm<ExampleStoreDto>({
-    resolver: zodResolver(exampleStoreDto),
+    resolver: zodResolver(exampleStoreDto) as Resolver<ExampleStoreDto>,
     mode: "all",
     // en Store debe estar defaultValues vacio
   });

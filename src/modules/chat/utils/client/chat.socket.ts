@@ -1,14 +1,11 @@
 import { io } from "socket.io-client";
 import type { Socket } from "socket.io-client";
+import type { ChatMessageSchema } from "../../schemas/chat-message.schema";
 
 export type ChatMode = "AI" | "LIVE";
 
-export interface ChatMessage {
-	id: number;
-	content: string;
-	role: "USER" | "ADMIN";
-	created_at: string;
-}
+// Use Pick from schema to inherit role type
+export type ChatMessage = Pick<ChatMessageSchema, "id" | "content" | "role" | "created_at">;
 
 export interface ChatSocketEvents {
 	new_message: (message: ChatMessage) => void;
@@ -88,7 +85,7 @@ export function leaveConversation(conversation_id: number): void {
 export function sendChatMessage(
 	conversation_id: number,
 	content: string,
-	role: "USER" | "ADMIN",
+	role: ChatMessageSchema["role"],
 	tenant_id: number,
 ): void {
 	const s = getChatSocket();

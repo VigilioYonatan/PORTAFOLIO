@@ -30,6 +30,7 @@ import {
 	AuthMfaVerifyResponseClassDto,
 	AuthRefreshTokenResponseClassDto,
 	AuthResetPasswordResponseClassDto,
+	AuthSessionResponseClassDto,
 	AuthVerifyEmailResponseClassDto,
 } from "../dtos/auth.response.class.dto";
 import {
@@ -124,6 +125,18 @@ export class AuthController {
 		@Body(new ZodPipe(authRefreshTokenDto)) body: AuthRefreshTokenDto,
 	): Promise<AuthRefreshTokenResponseClassDto> {
 		return this.authService.refreshToken(body);
+	}
+
+	@Get("/session")
+	@HttpCode(HttpStatus.OK)
+	@ApiOperation({ summary: "Get current session user" })
+	@ApiResponse({ status: 200, type: AuthSessionResponseClassDto })
+	async session(@Req() req: Request): Promise<AuthSessionResponseClassDto> {
+		const user = req.locals.user!;
+		return {
+			success: true,
+			user: user,
+		};
 	}
 
 	@UseGuards(JwtAuthGuard)

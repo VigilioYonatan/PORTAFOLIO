@@ -10,7 +10,6 @@ export const portfolioConfigShowResponseDto = z
 		success: z.literal(true),
 		config: portfolioConfigSchema,
 	})
-	.strict();
 
 export type PortfolioConfigShowResponseDto = z.infer<
 	typeof portfolioConfigShowResponseDto
@@ -25,7 +24,6 @@ export const portfolioConfigUpdateResponseDto = z
 		success: z.literal(true),
 		config: portfolioConfigSchema,
 	})
-	.strict();
 
 export type PortfolioConfigUpdateResponseDto = z.infer<
 	typeof portfolioConfigUpdateResponseDto
@@ -41,7 +39,7 @@ export const portfolioConfigCvResponseDto = z
 		contentType: z.enum(["application/pdf", "text/plain; charset=utf-8"]),
 		filename: z.string(),
 	})
-	.strict();
+;
 
 export type PortfolioConfigCvResponseDto = z.infer<
 	typeof portfolioConfigCvResponseDto

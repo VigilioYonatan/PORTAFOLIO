@@ -1,9 +1,14 @@
 import { schema } from "@infrastructure/providers/database/database.schema";
 import { DRIZZLE } from "@infrastructure/providers/database/database.service";
 import { Inject, Injectable } from "@nestjs/common";
-import { and, eq } from "drizzle-orm";
+import { type InferInsertModel, and, eq } from "drizzle-orm";
 import type { NodePgDatabase } from "drizzle-orm/node-postgres";
 import { musicTrackEntity } from "../entities/music.entity";
+
+type TrackData = Omit<
+	InferInsertModel<typeof musicTrackEntity>,
+	"id" | "tenant_id" | "created_at" | "updated_at"
+>;
 
 @Injectable()
 export class MusicTrackSeeder {
@@ -12,7 +17,7 @@ export class MusicTrackSeeder {
 	) {}
 
 	async run(tenant_id: number) {
-		const tracks = [
+		const tracksData = [
 			{
 				title: "Synthwave Breeze",
 				artist: "Digital Wanderer",
@@ -77,6 +82,8 @@ export class MusicTrackSeeder {
 			},
 		];
 
+		const tracks: TrackData[] = tracksData;
+
 		for (const track of tracks) {
 			const exists = await this.db.query.musicTrackEntity.findFirst({
 				where: and(
@@ -88,7 +95,7 @@ export class MusicTrackSeeder {
 			if (!exists) {
 				await this.db
 					.insert(musicTrackEntity)
-					.values({ ...track, tenant_id } as any);
+					.values({ ...track, tenant_id });
 			}
 		}
 	}

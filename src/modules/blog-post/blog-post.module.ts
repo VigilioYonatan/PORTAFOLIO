@@ -1,3 +1,4 @@
+import { AiModule } from "@modules/ai/modules/ai.module";
 import { Module } from "@nestjs/common";
 import { BlogPostCache } from "./cache/blog-post.cache";
 import { BlogPostController } from "./controllers/blog-post.controller";
@@ -5,6 +6,7 @@ import { BlogPostRepository } from "./repositories/blog-post.repository";
 import { BlogPostService } from "./services/blog-post.service";
 
 @Module({
+	imports: [AiModule],
 	controllers: [BlogPostController],
 	providers: [BlogPostService, BlogPostRepository, BlogPostCache],
 	exports: [BlogPostService, BlogPostRepository, BlogPostCache],

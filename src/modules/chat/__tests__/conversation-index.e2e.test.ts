@@ -57,7 +57,7 @@ describe("Conversation - GET /conversation (E2E)", () => {
 		it("should return paginated conversation", async () => {
 			// Create a conversation first
 			await request(app.getHttpServer())
-				.post("/api/v1/conversation")
+				.post("/api/v1/chat/conversations")
 				.set("Host", "localhost")
 				.send({
 					visitor_id: "f47ac10b-58cc-4372-a567-0e02b2c3d479",
@@ -66,7 +66,7 @@ describe("Conversation - GET /conversation (E2E)", () => {
 
 			// Create another one
 			await request(app.getHttpServer())
-				.post("/api/v1/conversation")
+				.post("/api/v1/chat/conversations")
 				.set("Host", "localhost")
 				.send({
 					visitor_id: "f47ac10b-58cc-4372-a567-0e02b2c3d488",

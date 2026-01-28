@@ -7,6 +7,7 @@ export const projectQueryDto = projectSchema
 		is_featured: true,
 		is_visible: true,
 		status: true,
+		language: true,
 	})
 	.partial()
 	.extend(querySchema.shape);

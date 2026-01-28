@@ -34,19 +34,20 @@ describe("Social Module (E2E)", () => {
 			expect(createRes.status).toBe(201);
 			commentId = createRes.body.comment.id;
 
-			// 2. List
+			// 2. List (with query parameters)
 			const indexRes = await request(e2e.app.getHttpServer())
-				.get("/api/v1/social-comment/1")
-				.set("Host", "localhost");
+				.get("/api/v1/social-comment")
+				.set("Host", "localhost")
+				.query({ commentable_id: 1, commentable_type: "BLOG_POST" });
 
 			expect(indexRes.status).toBe(200);
 			expect(Array.isArray(indexRes.body.results)).toBe(true);
 
-			// 3. Filter
+			// 3. Filter (same as list with different query)
 			const filterRes = await request(e2e.app.getHttpServer())
-				.get("/api/v1/social-comment/1")
+				.get("/api/v1/social-comment")
 				.set("Host", "localhost")
-				.query({ commentable_id: 1, commentable_type: "BLOG_POST" });
+				.query({ commentable_id: 1, commentable_type: "BLOG_POST", is_visible: true });
 
 			expect(filterRes.status).toBe(200);
 			expect(filterRes.body.results.length).toBeGreaterThanOrEqual(1);

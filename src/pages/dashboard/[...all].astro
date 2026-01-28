@@ -1,7 +1,7 @@
 ---
 import "@assets/css/global.css";
 import "../_main.ts";
-import { DashboardRouter } from "./_router";
+import { DashboardRouter } from "./_dashboard-router";
 ---
 
 <!doctype html>
@@ -15,6 +15,6 @@ import { DashboardRouter } from "./_router";
     <title>Dashboard | Admin</title>
   </head>
   <body class="dashboard">
-    <DashboardRouter client:only="preact" />
+    <DashboardRouter client:only="preact" lang="es" />
   </body>
 </html>

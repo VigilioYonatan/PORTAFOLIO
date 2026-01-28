@@ -13,6 +13,5 @@ export const conversationSchema = z
 		user_id: z.number().int().positive().nullable(), // FK al admin que responde (opcional)
 		...timeStampSchema.shape,
 	})
-	.strict();
 
 export type ConversationSchema = z.infer<typeof conversationSchema>;

@@ -19,6 +19,5 @@ export const workExperienceSchema = z
 		tenant_id: z.number().int().positive(),
 		...timeStampSchema.shape,
 	})
-	.strict();
 
 export type WorkExperienceSchema = z.infer<typeof workExperienceSchema>;

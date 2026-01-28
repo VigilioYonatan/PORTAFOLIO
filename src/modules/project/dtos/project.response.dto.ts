@@ -3,19 +3,27 @@ import { createPaginatorSchema } from "@infrastructure/schemas/paginator.schema"
 import { techeableSchema } from "@modules/techeable/schemas/techeable.schema";
 import { projectSchema } from "../schemas/project.schema";
 
+import { technologySchema } from "@modules/technology/schemas/technology.schema";
+
 // --- Index / List ---
 export const projectIndexResponseDto = createPaginatorSchema(
 	projectSchema.extend({
-		techeables: z.array(techeableSchema),
+		techeables: z.array(
+			techeableSchema.extend({
+				technology: technologySchema,
+			}),
+		),
 	}),
 );
-export type ProjectIndexResponseDto = z.infer<typeof projectIndexResponseDto>;
+export type ProjectIndexResponseDto = z.infer<typeof projectIndexResponseDto>; // clean
 
 // --- Show ---
 export const projectShowResponseDto = z.object({
 	success: z.literal(true),
 	project: projectSchema.extend({
-		techeables: z.array(techeableSchema),
+		techeables: z.array(techeableSchema.extend({
+			technology: technologySchema,
+		})),
 	}),
 });
 export type ProjectShowResponseDto = z.infer<typeof projectShowResponseDto>;

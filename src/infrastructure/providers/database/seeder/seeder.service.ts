@@ -5,6 +5,7 @@ import { ConversationSeeder } from "@modules/chat/seeders/conversation.seeder";
 import { ContactSeeder } from "@modules/contact/seeders/contact.seeder";
 import { MusicTrackSeeder } from "@modules/music/seeders/music.seeder";
 import { PortfolioConfigSeeder } from "@modules/portfolio-config/seeders/portfolio-config.seeder";
+import { ProjectSeeder } from "@modules/project/seeders/project.seeder";
 import { TechnologySeeder } from "@modules/technology/seeders/technology.seeder";
 import { TenantSeeder } from "@modules/tenant/seeders/tenant.seeder";
 import { UserSeeder } from "@modules/user/seeders/user.seeder";
@@ -35,6 +36,7 @@ export class SeederService {
 		private readonly portfolioConfigSeeder: PortfolioConfigSeeder,
 		private readonly conversationSeeder: ConversationSeeder,
 		private readonly aiConfigSeeder: AiConfigSeeder,
+		private readonly projectSeeder: ProjectSeeder,
 	) {}
 
 	async run() {
@@ -64,6 +66,9 @@ export class SeederService {
 
 		this.logger.log("   - Portfolio Config...");
 		await this.portfolioConfigSeeder.run(tenantId);
+
+		this.logger.log("   - Projects...");
+		await this.projectSeeder.run(tenantId);
 
 		this.logger.log("   - AI Config...");
 		await this.aiConfigSeeder.run(tenantId);

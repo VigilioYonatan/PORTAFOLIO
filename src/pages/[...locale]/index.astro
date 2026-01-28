@@ -1,32 +1,32 @@
 ---
 import WebLayout from "./_components/layouts/web-layout/index.astro";
-import HeroTerminal from "./_components/hero.terminal";
-import TechOrbit from "./_components/tech.orbit";
-import WaveTimeline from "./_components/wave.timeline";
+import HeroTerminal from "./_components/hero-terminal";
+import TechOrbit from "./_components/tech-orbit";
+import WaveTimeline from "./_components/wave-timeline";
 import { ArrowRight, Download } from "lucide-preact";
 import { sizeIcon } from "@infrastructure/utils/client";
 import type { WorkExperienceSchema } from "@modules/work-experience/schemas/work-experience.schema";
 import SectionTitle from "@components/extras/section-title.astro";
-import SystemIntro from "./_components/system.intro";
-import Button from "@components/extras/Button";
+import SystemIntro from "./_components/system-intro";
+import Button from "@components/extras/button";
 import { getLangFromUrl, useTranslations } from "../../i18n";
+import type { WebIndexResponseDto } from "@modules/web/dtos/web.response.dto";
 
 const lang = getLangFromUrl(Astro.url);
 const t = useTranslations(lang);
 
-const { experiences } = Astro.locals.props as {
-  experiences: WorkExperienceSchema[];
-};
+const { experiences, latestProjects, latestPosts } = Astro.locals
+  .props as WebIndexResponseDto;
 ---
 
 <WebLayout>
   <SystemIntro lang={lang} client:load />
-  <main class="relative flex flex-col items-center">
+  <main class="relative flex flex-col items-center gap-24 pb-24">
     {/* Hero Section with Tech Orbit Background */}
     <section
       class="relative w-full min-h-[90vh] flex items-center justify-center py-20 overflow-hidden"
     >
-      {/* Background Tech Orbit */}
+      {/* Background Tech Orbit - Kept as is */}
       <div
         class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-40"
       >
@@ -45,6 +45,8 @@ const { experiences } = Astro.locals.props as {
             variant="primary"
             size="lg"
             className="gap-3 group shadow-glow px-10"
+            href={`/${lang}/projects`}
+            as="a"
           >
             <span class="tracking-[0.2em] font-bold">{t("home.explorer")}</span>
             <ArrowRight
@@ -56,6 +58,9 @@ const { experiences } = Astro.locals.props as {
             variant="outline"
             size="lg"
             className="gap-3 px-10 border-white/20 hover:bg-white/5"
+            href="/cv.pdf"
+            target="_blank"
+            as="a"
           >
             <Download {...sizeIcon.small} />
             <span class="tracking-[0.2em]">{t("home.cv")}</span>
@@ -64,13 +69,114 @@ const { experiences } = Astro.locals.props as {
       </div>
     </section>
 
+    {/* Recent Projects Section */}
+    <section class="w-full container mx-auto px-4">
+      <SectionTitle title={t("projects.title")} />
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12">
+        {
+          latestProjects?.map((project) => (
+            <a
+              href={`/${lang}/projects/${project.slug}`}
+              class="group relative block bg-card border border-white/10 rounded-2xl overflow-hidden hover:border-primary/50 transition-all duration-500 hover:-translate-y-2"
+            >
+              <div class="aspect-video bg-muted overflow-hidden relative">
+                {project.images?.[0] && (
+                  <img
+                    src={project.images[0].key}
+                    alt={project.title}
+                    class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                  />
+                )}
+                <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-sm">
+                  <span class="px-6 py-2 border border-primary text-primary font-mono lowercase rounded-full">
+                    {t("projects.view_more")}
+                  </span>
+                </div>
+              </div>
+              <div class="p-6">
+                <h3 class="text-xl font-bold mb-2 group-hover:text-primary transition-colors">
+                  {project.title}
+                </h3>
+                <p class="text-sm text-muted-foreground line-clamp-2">
+                  {project.description}
+                </p>
+              </div>
+            </a>
+          ))
+        }
+      </div>
+      <div class="flex justify-center mt-12">
+        <Button
+          variant="ghost"
+          href={`/${lang}/projects`}
+          as="a"
+          className="gap-2 text-muted-foreground hover:text-primary"
+        >
+          {t("common.show")}
+          {t("header.projects")}
+          <ArrowRight size={16} />
+        </Button>
+      </div>
+    </section>
+
     {/* Career Timeline Section */}
     <section
-      class="w-full relative z-10 py-32 border-t border-white/5 bg-zinc-950/20"
+      class="w-full relative z-10 py-10 border-t border-white/5 bg-zinc-950/20"
     >
       <div class="container mx-auto px-4">
         <SectionTitle title={t("home.experience")} />
-        <WaveTimeline experiences={experiences} client:load />
+        <WaveTimeline experiences={experiences} lang={lang} client:load />
+      </div>
+    </section>
+
+    {/* Latest Blogs Section */}
+    <section class="w-full container mx-auto px-4">
+      <SectionTitle title={t("blog.title")} />
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
+        {
+          latestPosts?.map((post) => (
+            <a
+              href={`/${lang}/blog/${post.slug}`}
+              class="group flex flex-col gap-4 p-6 rounded-2xl border border-white/5 bg-white/[0.02] hover:bg-white/[0.05] hover:border-primary/20 transition-all duration-300"
+            >
+              <div class="aspect-[2/1] rounded-lg bg-muted overflow-hidden">
+                {post.cover?.[0] && (
+                  <img
+                    src={post.cover[0].key}
+                    alt={post.title}
+                    class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                )}
+              </div>
+              <div class="flex flex-col gap-2">
+                <div class="flex items-center gap-2 text-xs font-mono text-primary/80">
+                  <span>
+                    {post.published_at
+                      ? new Date(post.published_at).toLocaleDateString()
+                      : ""}
+                  </span>
+                  <span>//</span>
+                  <span class="uppercase">ARTICLE</span>
+                </div>
+                <h3 class="text-lg font-bold leading-tight group-hover:text-primary transition-colors">
+                  {post.title}
+                </h3>
+              </div>
+            </a>
+          ))
+        }
+      </div>
+      <div class="flex justify-center mt-12">
+        <Button
+          variant="ghost"
+          href={`/${lang}/blog`}
+          as="a"
+          className="gap-2 text-muted-foreground hover:text-primary"
+        >
+          {t("common.show")}
+          {t("header.blog")}
+          <ArrowRight size={16} />
+        </Button>
       </div>
     </section>
   </main>

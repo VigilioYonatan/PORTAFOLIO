@@ -17,8 +17,16 @@ import {
 	timestamp,
 	unique,
 	varchar,
+	pgEnum,
+	type AnyPgColumn,
 } from "drizzle-orm/pg-core";
 import type { BlogPostSchema } from "../schemas/blog-post.schema";
+
+export const blogPostLanguageEnum = pgEnum("blog_post_language_enum", [
+	"en",
+	"es",
+	"pt",
+]);
 
 export const blogPostEntity = pgTable(
 	"blog_posts",
@@ -40,6 +48,8 @@ export const blogPostEntity = pgTable(
 		author_id: integer()
 			.notNull()
 			.references(() => userEntity.id),
+		language: blogPostLanguageEnum().notNull().default("es"),
+		parent_id: integer().references((): AnyPgColumn => blogPostEntity.id),
 		created_at: timestamp({ withTimezone: true, mode: "date" })
 			.notNull()
 			.defaultNow(),

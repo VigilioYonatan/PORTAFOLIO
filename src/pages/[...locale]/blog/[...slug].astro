@@ -1,45 +1,43 @@
 ---
 import WebLayout from "../_components/layouts/web-layout/index.astro";
-import BlogReader from "@modules/blog/components/blog-reader";
+import BlogReader from "@modules/blog-post/components/blog-reader";
 import { getLangFromUrl, useTranslations } from "../../../i18n";
+import { type WebBlogSlugResponseDto } from "@modules/web/dtos/web.response.dto";
+import dayjs from "dayjs";
 
 const lang = getLangFromUrl(Astro.url);
 const t = useTranslations(lang);
 
+const { post } = Astro.locals.props as WebBlogSlugResponseDto;
 
-const { slug } = Astro.params;
-// In real app, fetch content based on slug
-const content = `
-<h2>Introduction</h2>
-<p>Cyberpunk design is about high contrast, neon colors, and glitch effects...</p>
-<pre><code>.glitch { animation: glitch 1s infinite; }</code></pre>
-<h2>The Aesthetic of the Future</h2>
-<p>When we talk about high-premium cyberpunk design, we refer to the meticulous balance between chaos and order. It's about data-driven visuals that feel alive.</p>
-<blockquote>
-  "The future is here, it's just not evenly distributed yet." - William Gibson
-</blockquote>
-`;
+if (!post) {
+  return Astro.redirect("/404");
+}
 ---
 
-<WebLayout title={`Blog: ${slug}`}>
+<WebLayout title={`Blog: ${post.title}`}>
   <div class="container mx-auto py-20 px-4 max-w-4xl">
     <a
-      href="/en/blog"
+      href={`/${lang}/blog`}
       class="text-[10px] font-mono text-muted-foreground hover:text-primary mb-12 flex items-center gap-2 group transition-all"
     >
-      <span class="group-hover:-translate-x-1 transition-transform inline-block">&lt;</span> {t("slug.back_to_archives")}
+      <span class="group-hover:-translate-x-1 transition-transform inline-block"
+        >&lt;</span
+      >
+      {t("slug.back_to_archives")}
     </a>
 
     <BlogReader
-      client:load
-      title="DESIGNING_CYBERPUNK_UI"
-      content={content}
-      author="ADMIN_01"
-      date="2024-03-15"
-      readingTime="5 MIN"
-      likes={128}
-      comments={12}
+      client:only="preact"
+      title={post.title}
+      content={post.content}
+      author={`Author #${post.author_id}`}
+      date={dayjs(post.published_at).format("YYYY-MM-DD")}
+      readingTime={`${post.reading_time_minutes || 5} MIN`}
+      likes={0}
+      comments={0}
       lang={lang}
+      id={post.id}
     />
   </div>
 </WebLayout>

@@ -49,6 +49,7 @@ export class CacheService {
 	}
 
 	async deleteByPattern(pattern: string): Promise<void> {
+		// biome-ignore lint/suspicious/noExplicitAny: Cache Manager internals
 		const store = (this.cacheManager as any).store;
 		if (!store) {
 			return;

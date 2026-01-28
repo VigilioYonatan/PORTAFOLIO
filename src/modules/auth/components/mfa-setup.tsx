@@ -13,7 +13,7 @@ import {
 	Smartphone,
 } from "lucide-preact";
 import { useEffect } from "preact/hooks";
-import { useForm } from "react-hook-form";
+import { type Resolver, useForm } from "react-hook-form";
 import { authMfaSetupApi } from "../apis/auth.mfa-setup.api";
 import { authMfaVerifyApi } from "../apis/auth.mfa-verify.api";
 import {
@@ -27,7 +27,7 @@ export default function MfaSetup({ onSuccess }: { onSuccess?: () => void }) {
 	const copied = useSignal(false);
 
 	const form = useForm<AuthMfaVerifyDto>({
-		resolver: zodResolver(authMfaVerifyDto),
+		resolver: zodResolver(authMfaVerifyDto) as Resolver<AuthMfaVerifyDto>,
 		defaultValues: {
 			token: "",
 		},

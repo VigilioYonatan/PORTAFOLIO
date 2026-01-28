@@ -17,6 +17,5 @@ export const socialCommentSchema = z
 		reply: z.string().nullable(), // Respuesta del administrador (opcional)
 		...timeStampSchema.shape, // created_at, updated_at
 	})
-	.strict();
 
 export type SocialCommentSchema = z.infer<typeof socialCommentSchema>;

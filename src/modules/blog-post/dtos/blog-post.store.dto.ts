@@ -3,6 +3,8 @@ import { blogPostSchema } from "../schemas/blog-post.schema";
 
 export const blogPostStoreDto = blogPostSchema.omit({
 	id: true,
+	parent_id: true,
+	language: true,
 	created_at: true,
 	updated_at: true,
 	tenant_id: true,
