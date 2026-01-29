@@ -1,3 +1,4 @@
+import Modal from "@components/extras/modal";
 import { cn } from "@infrastructure/utils/client";
 import { DIMENSION_IMAGE } from "@modules/uploads/const/upload.const";
 import { useSignal } from "@preact/signals";
@@ -13,25 +14,24 @@ import {
 	ListMusicIcon,
 	PauseIcon,
 	PlayIcon,
-	RepeatIcon,
 	Repeat1Icon,
+	RepeatIcon,
 	StepBackIcon,
 	StepForwardIcon,
 	Volume2Icon,
 	VolumeXIcon,
 	XIcon,
 } from "lucide-preact";
+import type { CSSProperties } from "preact";
 import { useEffect } from "preact/hooks";
 import MonstercatVisualizer from "./monstercat-visualizer";
 import NatureButton from "./special/nature-button";
 import PlanetButton from "./special/planet-button";
 import ProtostarButton from "./special/protostar-button";
-import Modal from "@components/extras/modal";
-import type { CSSProperties } from "preact";
 
 interface NeuroPlayerProps {
-    className?: string;
-    style?: CSSProperties;
+	className?: string;
+	style?: CSSProperties;
 }
 
 export default function NeuroPlayer(props: NeuroPlayerProps) {
@@ -46,10 +46,17 @@ export default function NeuroPlayer(props: NeuroPlayerProps) {
 		midIntensity,
 		repeatMode,
 	} = audioStore.state;
-	const { togglePlay, nextTrack, prevTrack, setVolume, toggleFavorite, toggleRepeat } =
-		audioStore.methods;
+	const {
+		togglePlay,
+		nextTrack,
+		prevTrack,
+		setVolume,
+		toggleFavorite,
+		toggleRepeat,
+	} = audioStore.methods;
 
 	const isOpenPlaylist = useSignal(false);
+	const showVolumeSlider = useSignal(false);
 
 	useEffect(() => {
 		// Initialize store (fetch from API) if not already done
@@ -115,13 +122,11 @@ export default function NeuroPlayer(props: NeuroPlayerProps) {
 			class={cn(
 				"flex flex-col gap-2 md:gap-3 p-4 md:p-4 border border-white/5 bg-black/40 backdrop-blur-md rounded-2xl font-mono shadow-2xl transition-all relative mt-16",
 				(isNatureActive.value || isPlanetActive.value) && "hidden", // Hide in Nature/Planet Mode
-                props.className
+				props.className,
 			)}
-			style={{
-				boxShadow: `0 0 ${15 + bassIntensity.value * 30}px rgba(var(--primary-rgb),${0.05 + midIntensity.value * 0.1})`,
-                ...props.style
-			}}
+			style={props.style}
 		>
+			<ReactiveGlow bassIntensity={bassIntensity} midIntensity={midIntensity} />
 			{/* Special Buttons - "Floating" above (Desktop Only) */}
 			<div class="hidden md:flex absolute -top-16 left-0 right-0 justify-center gap-4">
 				<ProtostarButton />
@@ -236,15 +241,26 @@ export default function NeuroPlayer(props: NeuroPlayerProps) {
 				{/* Controls */}
 				<div class="space-y-1.5 md:space-y-3 bg-white/5 p-2 md:p-3 rounded-xl border border-white/5">
 					{/* Progress */}
-					<div class="group/prog flex items-center gap-2 cursor-pointer">
-						<span class="text-[9px] font-bold text-muted-foreground w-8 text-right tabular-nums">
+					<div class="group/prog flex items-center gap-3 cursor-pointer py-1">
+						<span class="text-[9px] font-black text-white/40 group-hover/prog:text-primary transition-colors w-8 text-right tabular-nums">
 							{formatTime(audioStore.state.currentTime.value)}
 						</span>
-						<div class="flex-1 h-1 bg-white/10 rounded-full relative overflow-hidden">
+						<div class="flex-1 h-6 flex items-center relative group/slider">
+							{/* Background Bar */}
+							<div class="w-full h-1 bg-white/10 rounded-full relative overflow-hidden">
+								<div
+									class="absolute h-full bg-primary shadow-[0_0_12px_rgba(var(--primary-rgb),0.5)] transition-all duration-75 ease-linear"
+									style={{
+										width: `${(audioStore.state.currentTime.value / audioStore.state.duration.value) * 100}%`,
+									}}
+								/>
+							</div>
+							{/* Hover Thumb Indicator */}
 							<div
-								class="absolute h-full bg-primary shadow-[0_0_8px_var(--primary)] transition-all duration-75 ease-linear"
+								class="absolute h-3 w-3 bg-white border-2 border-primary rounded-full shadow-[0_0_10px_rgba(var(--primary-rgb),0.8)] opacity-0 group-hover/slider:opacity-100 transition-opacity pointer-events-none z-30"
 								style={{
-									width: `${(audioStore.state.currentTime.value / audioStore.state.duration.value) * 100}%`,
+									left: `${(audioStore.state.currentTime.value / audioStore.state.duration.value) * 100}%`,
+									transform: "translateX(-50%)",
 								}}
 							/>
 							<input
@@ -256,94 +272,160 @@ export default function NeuroPlayer(props: NeuroPlayerProps) {
 									const val = Number(e.currentTarget.value);
 									audioStore.methods.seek(val);
 								}}
-								class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20"
+								class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-40"
 							/>
 						</div>
-						<span class="text-[9px] font-bold text-muted-foreground w-8 tabular-nums">
+						<span class="text-[9px] font-black text-white/40 group-hover/prog:text-primary transition-colors w-8 tabular-nums">
 							{formatTime(audioStore.state.duration.value)}
 						</span>
 					</div>
 
-					<div class="flex items-center justify-between gap-2">
+					<div class="flex items-center justify-between gap-4">
 						{/* Playback Buttons */}
-						<div class="flex items-center justify-center gap-1.5 md:gap-3 flex-1">
+						<div class="flex items-center justify-center gap-1.5 md:gap-4 flex-1">
 							<button
 								type="button"
 								onClick={prevTrack}
-								class="text-white/40 hover:text-white hover:scale-110 transition-all"
+								class="text-white/40 hover:text-white hover:scale-125 transition-all active:scale-90"
 								aria-label="Previous Track"
 							>
-								<StepBackIcon size={16} />
+								<StepBackIcon size={18} />
 							</button>
 							<button
 								type="button"
 								onClick={togglePlay}
-								class="w-10 h-10 rounded-full bg-primary/20 text-primary border border-primary/50 flex items-center justify-center hover:scale-110 hover:bg-primary hover:text-black transition-all shadow-glow active:scale-95"
-								aria-label={isPlaying.value ? "Pause" : "Play"}
+								class="w-12 h-12 rounded-full bg-primary/10 text-primary border border-primary/40 flex items-center justify-center hover:scale-110 hover:bg-primary hover:text-black transition-all shadow-glow active:scale-95 group/play"
 							>
 								{isPlaying.value ? (
-									<PauseIcon size={20} fill="currentColor" />
+									<PauseIcon size={24} fill="currentColor" />
 								) : (
-									<PlayIcon size={20} fill="currentColor" class="ml-0.5" />
+									<PlayIcon size={24} fill="currentColor" class="ml-1" />
 								)}
 							</button>
 							<button
 								type="button"
 								onClick={nextTrack}
-								class="text-white/40 hover:text-white hover:scale-110 transition-all"
+								class="text-white/40 hover:text-white hover:scale-125 transition-all active:scale-90"
 								aria-label="Next Track"
 							>
-								<StepForwardIcon size={16} />
+								<StepForwardIcon size={18} />
 							</button>
 							<button
 								type="button"
 								onClick={toggleRepeat}
 								class={cn(
-									"transition-all hover:scale-110",
+									"transition-all hover:scale-125 active:scale-90",
 									repeatMode.value !== "off"
-										? "text-primary"
+										? "text-primary text-glow"
 										: "text-white/40 hover:text-white",
 								)}
 								aria-label="Toggle Repeat"
 								title={`Repeat: ${repeatMode.value}`}
 							>
 								{repeatMode.value === "one" ? (
-									<Repeat1Icon size={16} />
+									<Repeat1Icon size={18} />
 								) : (
-									<RepeatIcon size={16} />
+									<RepeatIcon size={18} />
 								)}
 							</button>
 						</div>
 
-						{/* Volume Mini */}
-						<div class="flex items-center gap-1.5 w-16 group/vol">
+						{/* Volume Section - Vertical Pop-up */}
+						<div class="relative flex items-center justify-center group/vol">
 							<button
 								type="button"
-								onClick={() => setVolume(isMuted.value ? 50 : 0)}
-								class="text-white/40 hover:text-white transition-colors"
+								onClick={() => {
+									showVolumeSlider.value = !showVolumeSlider.value;
+								}}
+								onMouseEnter={() => {
+									showVolumeSlider.value = true;
+								}}
+								class={cn(
+									"p-2 rounded-full transition-all active:scale-90",
+									showVolumeSlider.value || volume.value === 0 || isMuted.value
+										? "bg-primary/20 text-primary border border-primary/30"
+										: "text-white/40 hover:text-primary hover:bg-white/5",
+								)}
 								aria-label={
 									isMuted.value || volume.value === 0 ? "Unmute" : "Mute"
 								}
 							>
 								{isMuted.value || volume.value === 0 ? (
-									<VolumeXIcon size={12} />
+									<VolumeXIcon size={18} />
 								) : (
-									<Volume2Icon size={12} />
+									<Volume2Icon size={18} />
 								)}
 							</button>
-							<div class="flex-1 h-0.5 bg-white/10 rounded-full relative overflow-hidden group-hover/vol:h-1 transition-all">
-								<div
-									class="absolute h-full bg-white/60 transition-all"
-									style={{ width: `${volume.value}%` }}
-								/>
-								<input
-									type="range"
-									min="0"
-									max="100"
-									value={volume.value}
-									onInput={(e) => setVolume(Number(e.currentTarget.value))}
-									class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-								/>
+
+							{/* Vertical Pop-up Slider */}
+							<div
+								onMouseLeave={() => {
+									showVolumeSlider.value = false;
+								}}
+								class={cn(
+									"absolute bottom-full pb-4 left-1/2 -translate-x-1/2 z-50 transition-all duration-300 origin-bottom flex flex-col items-center",
+									showVolumeSlider.value
+										? "opacity-100 scale-100 translate-y-0 pointer-events-auto"
+										: "opacity-0 scale-75 translate-y-4 pointer-events-none",
+								)}
+							>
+								<div class="bg-zinc-950/90 backdrop-blur-xl border border-primary/20 p-4 rounded-full flex flex-col items-center gap-3 shadow-[0_0_30px_rgba(var(--primary-rgb),0.2)]">
+									<div class="h-32 w-10 flex flex-col items-center justify-center relative">
+										{/* Percentage Indicator */}
+										<span class="text-[9px] font-black text-primary mb-2 tabular-nums">
+											{volume.value}%
+										</span>
+
+										{/* Container with range input rotated */}
+										<div class="relative h-24 w-1 flex items-center justify-center">
+											<div class="absolute h-full w-full bg-white/10 rounded-full overflow-hidden">
+												<div
+													class="absolute bottom-0 w-full bg-primary shadow-[0_0_10px_var(--primary)] transition-all"
+													style={{ height: `${volume.value}%` }}
+												/>
+											</div>
+
+											{/* Native hidden range input with large hit area */}
+											<input
+												type="range"
+												min="0"
+												max="100"
+												value={volume.value}
+												onInput={(e) => setVolume(Number(e.currentTarget.value))}
+												class="absolute h-24 w-10 -rotate-90 cursor-pointer opacity-0 z-10"
+												style={{
+													// biome-ignore lint/suspicious/noExplicitAny: custom css variable for slider thumb size
+													"--thumb-size": "40px",
+													width: "96px", // matching 24 * 4
+													height: "40px",
+												}}
+											/>
+
+											{/* Visual Thumb */}
+											<div
+												class="absolute h-3 w-3 bg-white border-2 border-primary rounded-full shadow-glow pointer-events-none z-20"
+												style={{
+													bottom: `${volume.value}%`,
+													transform: "translateY(50%)",
+												}}
+											/>
+										</div>
+
+										<button
+											type="button"
+											onClick={() => setVolume(isMuted.value ? 50 : 0)}
+											class="mt-4 text-white/40 hover:text-white transition-colors"
+										>
+											{isMuted.value || volume.value === 0 ? (
+												<VolumeXIcon size={12} />
+											) : (
+												<Volume2Icon size={12} />
+											)}
+										</button>
+									</div>
+								</div>
+								{/* Arrow indicator */}
+								<div class="w-2 h-2 bg-zinc-950 border-r border-b border-primary/20 rotate-45 -mt-1 shadow-glow" />
 							</div>
 						</div>
 					</div>
@@ -439,5 +521,20 @@ export default function NeuroPlayer(props: NeuroPlayerProps) {
 				</div>
 			</Modal>
 		</div>
+	);
+}
+
+function ReactiveGlow({
+	bassIntensity,
+	midIntensity,
+}: { bassIntensity: any; midIntensity: any }) {
+	return (
+		<div
+			class="absolute inset-0 rounded-2xl pointer-events-none -z-10"
+			style={{
+				boxShadow: `0 0 ${15 + bassIntensity.value * 30}px rgba(var(--primary-rgb),${0.05 + midIntensity.value * 0.1})`,
+				transition: "box-shadow 0.1s ease-out",
+			}}
+		/>
 	);
 }

@@ -1,8 +1,8 @@
 import { CacheService } from "@infrastructure/providers/cache/cache.service";
 import { toNull } from "@infrastructure/utils/server";
 import { Injectable } from "@nestjs/common";
-import type { BlogCategoryEntity } from "../entities/blog-category.entity";
 import type { BlogCategoryQueryDto } from "../dtos/blog-category.query.dto";
+import type { BlogCategoryEntity } from "../entities/blog-category.entity";
 
 @Injectable()
 export class BlogCategoryCache {

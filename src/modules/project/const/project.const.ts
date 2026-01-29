@@ -1,4 +1,3 @@
-
 export const PROJECT_STATUS_ENUM = ["live", "in_dev", "archived"] as const;
 
 export const PROJECT_STATUS_OPTIONS: {

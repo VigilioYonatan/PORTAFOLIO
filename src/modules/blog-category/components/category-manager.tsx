@@ -5,6 +5,7 @@ import { blogCategoryDestroyApi } from "@modules/blog-category/apis/blog-categor
 import { blogCategoryIndexApi } from "@modules/blog-category/apis/blog-category.index.api";
 import { type BlogCategorySchema } from "@modules/blog-category/schemas/blog-category.schema";
 import { useSignal } from "@preact/signals";
+import { type Lang, useTranslations } from "@src/i18n";
 import { useTable } from "@vigilio/preact-table";
 import { sweetModal } from "@vigilio/sweet";
 import { Edit, Plus, Trash } from "lucide-preact";
@@ -15,14 +16,13 @@ import {
 } from "../apis/blog-category.index.api";
 import CategoryStore from "./category-store";
 import CategoryUpdate from "./category-update";
-import { type Lang, useTranslations } from "@src/i18n";
 
 interface CategoryManagerProps {
-    lang?: Lang;
+	lang?: Lang;
 }
 
 export default function CategoryManager({ lang = "es" }: CategoryManagerProps) {
-    const t = useTranslations(lang);
+	const t = useTranslations(lang);
 	const isStoreModalOpen = useSignal<boolean>(false);
 	const categoryEdit = useSignal<BlogCategorySchema | null>(null);
 	const destroyMut = blogCategoryDestroyApi();
@@ -177,27 +177,24 @@ export default function CategoryManager({ lang = "es" }: CategoryManagerProps) {
 				}}
 				contentClassName="max-w-md w-full p-6 bg-zinc-950 border border-white/10"
 			>
-				
-					<CategoryUpdate
-						category={categoryEdit.value!}
-						refetch={(data) => {
-							table.updateData((old, count) => ({
-								result: old.map((item) =>
-									item.id === categoryEdit.value?.id
-										? { ...item, ...data }
-										: item,
-								),
-								count,
-							}));
-							categoryEdit.value = null;
-						}}
-						onClose={() => {
-							categoryEdit.value = null;
-						}}
-					/>
-				
+				<CategoryUpdate
+					category={categoryEdit.value!}
+					refetch={(data) => {
+						table.updateData((old, count) => ({
+							result: old.map((item) =>
+								item.id === categoryEdit.value?.id
+									? { ...item, ...data }
+									: item,
+							),
+							count,
+						}));
+						categoryEdit.value = null;
+					}}
+					onClose={() => {
+						categoryEdit.value = null;
+					}}
+				/>
 			</Modal>
-
 		</div>
 	);
 }

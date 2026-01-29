@@ -37,9 +37,10 @@ export class NotificationRepository {
 					content: false,
 				},
 				extras: {
-					content: sql<string>`substring(${notificationEntity.content} from 1 for 3000)`.as(
-						"content",
-					),
+					content:
+						sql<string>`substring(${notificationEntity.content} from 1 for 3000)`.as(
+							"content",
+						),
 				},
 			}),
 			this.db
@@ -54,7 +55,10 @@ export class NotificationRepository {
 
 	async store(
 		tenant_id: number,
-		body: Omit<NotificationSchema, "id" | "tenant_id" | "created_at" | "updated_at">,
+		body: Omit<
+			NotificationSchema,
+			"id" | "tenant_id" | "created_at" | "updated_at"
+		>,
 	): Promise<NotificationSchema> {
 		const [result] = await this.db
 			.insert(notificationEntity)

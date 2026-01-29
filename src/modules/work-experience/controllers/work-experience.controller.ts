@@ -1,6 +1,5 @@
-import { ZodQueryPipe } from "@infrastructure/pipes/zod-query.pipe";
 import { ZodPipe } from "@infrastructure/pipes/zod.pipe";
-import { workExperienceQueryDto } from "../dtos/work-experience.query.dto";
+import { ZodQueryPipe } from "@infrastructure/pipes/zod-query.pipe";
 import { Public } from "@modules/auth/decorators/public.decorator";
 import { Roles } from "@modules/auth/decorators/roles.decorator";
 import { AuthenticatedGuard } from "@modules/auth/guards/authenticated.guard";
@@ -21,6 +20,7 @@ import {
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
 import type { Request } from "express";
 import { WorkExperienceQueryClassDto } from "../dtos/work-experience.query.class.dto";
+import { workExperienceQueryDto } from "../dtos/work-experience.query.dto";
 import {
 	WorkExperienceDestroyResponseClassDto,
 	WorkExperienceIndexResponseClassDto,

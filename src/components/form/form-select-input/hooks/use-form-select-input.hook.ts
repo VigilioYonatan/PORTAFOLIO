@@ -7,8 +7,7 @@ import {
 	type PathValue,
 	type UseFormReturn,
 } from "react-hook-form";
-import { anidarPropiedades } from "../..";
-import { FormControlContext } from "../..";
+import { anidarPropiedades, FormControlContext } from "../..";
 
 export interface UseFormSelectInputProps<T extends object> {
 	name: Path<T>;

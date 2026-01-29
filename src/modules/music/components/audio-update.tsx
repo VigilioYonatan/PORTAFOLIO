@@ -20,7 +20,7 @@ import {
 	Info,
 	Music,
 } from "lucide-preact";
-import { useForm, type Resolver } from "react-hook-form";
+import { type Resolver, useForm } from "react-hook-form";
 import type { MusicTrackIndexResponseDto } from "../dtos/music.response.dto";
 
 interface AudioUpdateProps {
@@ -37,7 +37,7 @@ export default function AudioUpdate({
 	const musicUpdateMutation = musicTrackUpdateApi(music.id);
 
 	const musicUpdateForm = useForm<MusicUpdateDto>({
-		resolver: zodResolver(musicUpdateDto ) as Resolver<MusicUpdateDto>,
+		resolver: zodResolver(musicUpdateDto) as Resolver<MusicUpdateDto>,
 		mode: "all",
 		defaultValues: { ...music },
 	});

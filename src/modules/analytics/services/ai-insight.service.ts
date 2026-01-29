@@ -31,26 +31,23 @@ export class AiInsightService {
 	): Promise<AiInsightIndexResponseDto> {
 		this.logger.log({ tenant_id }, "Listing AI insights");
 
-		return await paginator<AiInsightQueryDto, AiInsightSchema>(
-			"/ai-insight",
-			{
-				filters: query,
-				cb: async (filters, isClean) => {
-					if (isClean) {
-						const cached = await this.cache.getList(tenant_id, filters);
-						if (cached) return cached;
-					}
+		return await paginator<AiInsightQueryDto, AiInsightSchema>("/ai-insight", {
+			filters: query,
+			cb: async (filters, isClean) => {
+				if (isClean) {
+					const cached = await this.cache.getList(tenant_id, filters);
+					if (cached) return cached;
+				}
 
-					const [data, count] = await this.repository.index(tenant_id, filters);
+				const [data, count] = await this.repository.index(tenant_id, filters);
 
-					if (isClean) {
-						await this.cache.setList(tenant_id, filters, [data, count]);
-					}
+				if (isClean) {
+					await this.cache.setList(tenant_id, filters, [data, count]);
+				}
 
-					return [data, count];
-				},
+				return [data, count];
 			},
-		);
+		});
 	}
 
 	async generate(tenant_id: number): Promise<AiInsightGenerateResponseDto> {

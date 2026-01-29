@@ -13,9 +13,7 @@ import {
 	sql,
 } from "drizzle-orm";
 import type { NodePgDatabase } from "drizzle-orm/node-postgres";
-import type {
-	ConversationQueryDto,
-} from "../dtos/chat.class.dto";
+import type { ConversationQueryDto } from "../dtos/chat.class.dto";
 import { chatMessageEntity } from "../entities/chat-message.entity";
 import { conversationEntity } from "../entities/conversation.entity";
 import { type ChatMessageSchema } from "../schemas/chat-message.schema";
@@ -112,17 +110,16 @@ export class ChatRepository {
 				.offset(offset || 0);
 
 			const countQuery = this.db
-				.select({ count: sql<number>`COUNT(DISTINCT ${conversationEntity.ip_address})` })
+				.select({
+					count: sql<number>`COUNT(DISTINCT ${conversationEntity.ip_address})`,
+				})
 				.from(conversationEntity)
 				.where(baseWhereClause);
 
-			const [items, countResult] = await Promise.all([
-				itemsQuery,
-				countQuery,
-			]);
+			const [items, countResult] = await Promise.all([itemsQuery, countQuery]);
 
 			// Format items to remove join structure
-			return [items.map(i => i.conversations), Number(countResult[0].count)];
+			return [items.map((i) => i.conversations), Number(countResult[0].count)];
 		}
 
 		let orderBy: SQL<unknown>[] = [desc(conversationEntity.updated_at)];
@@ -220,4 +217,3 @@ export class ChatRepository {
 			);
 	}
 }
-

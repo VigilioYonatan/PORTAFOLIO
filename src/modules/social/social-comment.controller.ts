@@ -1,6 +1,5 @@
-import { ZodQueryPipe } from "@infrastructure/pipes/zod-query.pipe";
 import { ZodPipe } from "@infrastructure/pipes/zod.pipe";
-import { socialCommentQueryDto } from "./dtos/social-comment.query.dto";
+import { ZodQueryPipe } from "@infrastructure/pipes/zod-query.pipe";
 import { Public } from "@modules/auth/decorators/public.decorator";
 import { Roles } from "@modules/auth/decorators/roles.decorator";
 import { AuthenticatedGuard } from "@modules/auth/guards/authenticated.guard";
@@ -30,6 +29,7 @@ import {
 } from "./dtos/social.response.class.dto";
 import type { SocialCommentIndexResponseDto } from "./dtos/social.response.dto";
 import { SocialCommentQueryClassDto } from "./dtos/social-comment.query.class.dto";
+import { socialCommentQueryDto } from "./dtos/social-comment.query.dto";
 import { SocialCommentReplyClassDto } from "./dtos/social-comment.reply.class.dto";
 import type { SocialCommentReplyDto } from "./dtos/social-comment.reply.dto";
 import { socialCommentReplyDto } from "./dtos/social-comment.reply.dto";
@@ -52,7 +52,8 @@ export class SocialCommentController {
 	@ApiResponse({ status: 200, type: SocialCommentIndexResponseClassDto })
 	async index(
 		@Req() req: Request,
-		@Query(new ZodQueryPipe(socialCommentQueryDto)) query: SocialCommentQueryClassDto,
+		@Query(new ZodQueryPipe(socialCommentQueryDto))
+		query: SocialCommentQueryClassDto,
 	): Promise<SocialCommentIndexResponseDto> {
 		const tenant_id = req.locals.tenant?.id ?? 1;
 		return this.socialService.index(tenant_id, query);

@@ -8,7 +8,7 @@ import {
 	workMilestoneStoreDto,
 } from "@modules/work-milestone/dtos/work-milestone.store.dto";
 import { sweetModal } from "@vigilio/sweet";
-import { useForm, type Resolver } from "react-hook-form";
+import { type Resolver, useForm } from "react-hook-form";
 import type { WorkMilestoneIndexResponseDto } from "../dtos/work-milestone.response.dto";
 
 interface MilestoneStoreProps {
@@ -25,7 +25,9 @@ export default function MilestoneStore({
 	const workMilestoneStoreMutation = workMilestoneStoreApi();
 
 	const workMilestoneStoreForm = useForm<WorkMilestoneStoreDto>({
-		resolver: zodResolver(workMilestoneStoreDto) as Resolver<WorkMilestoneStoreDto>,
+		resolver: zodResolver(
+			workMilestoneStoreDto,
+		) as Resolver<WorkMilestoneStoreDto>,
 		mode: "all",
 	});
 

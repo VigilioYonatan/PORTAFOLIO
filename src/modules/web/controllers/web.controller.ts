@@ -1,3 +1,4 @@
+import * as os from "node:os";
 import { astroRender } from "@infrastructure/utils/server";
 import { Public } from "@modules/auth/decorators/public.decorator";
 import {
@@ -12,7 +13,6 @@ import {
 import type { NextFunction, Request, Response } from "express";
 import { WebPath } from "../routers/web.routers";
 import { WebService } from "../services/web.service";
-import * as os from "node:os";
 
 @Controller({ path: "/", version: VERSION_NEUTRAL })
 export class WebController {
@@ -28,7 +28,7 @@ export class WebController {
 		const props = await this.webService.index(req.locals.language);
 		return await astroRender(props)(req, res, next);
 	}
-	
+
 	@Public()
 	@Get("/stats")
 	getStats() {
@@ -161,11 +161,15 @@ export class WebController {
 		const language = req.locals.language;
 		const props = {
 			title: language === "es" ? "Página no encontrada" : "Page Not Found",
-			description: language === "es" ? "La página que buscas no existe." : "The page you are looking for does not exist.",
+			description:
+				language === "es"
+					? "La página que buscas no existe."
+					: "The page you are looking for does not exist.",
 		};
 		return await astroRender(props)(req, res, next);
 	}
 
+	@Public()
 	@All("*")
 	async catchAll(
 		@Req() req: Request,

@@ -1,12 +1,13 @@
 import { formatTimeAgo } from "@infrastructure/utils/hybrid";
+import { setChatOpen } from "@modules/web/libs/sound-manager";
+import { signal, useComputed, useSignal } from "@preact/signals";
 import { MessageSquareIcon, SendIcon, UserIcon } from "lucide-preact";
-import { useSignal, useComputed, signal } from "@preact/signals";
 import { useEffect, useRef } from "preact/hooks";
-import { conversationIndexApi } from "../apis/conversation.index.api";
-import { chatMessageIndexApi } from "../apis/chat-message.index.api";
-import type { ConversationSchema } from "../schemas/conversation.schema";
-import type { ChatMessageSchema } from "../schemas/chat-message.schema";
 import type { JSX } from "preact/jsx-runtime";
+import { chatMessageIndexApi } from "../apis/chat-message.index.api";
+import { conversationIndexApi } from "../apis/conversation.index.api";
+import type { ChatMessageSchema } from "../schemas/chat-message.schema";
+import type { ConversationSchema } from "../schemas/conversation.schema";
 import {
 	connectChatSocket,
 	getChatSocket,
@@ -30,8 +31,11 @@ export const selectedConversationId = signal<number | null>(null);
 export const selectedConversationIp = signal<string>("");
 
 export function ConversationList() {
-	const { data, isLoading, isSuccess, isError, refetch } =
-		conversationIndexApi(null, null, { grouped: true });
+	const { data, isLoading, isSuccess, isError, refetch } = conversationIndexApi(
+		null,
+		null,
+		{ grouped: true },
+	);
 
 	// Listen for new conversations
 	useEffect(() => {
@@ -146,7 +150,7 @@ export function ChatViewer() {
 
 	// Load messages and connect to WebSocket
 	// Load messages
-	const { data: messagesData, isLoading: isMessagesLoading } = chatMessageIndexApi(
+	const { data: messagesData } = chatMessageIndexApi(
 		selectedConversationId.value ?? 0,
 	);
 
@@ -162,6 +166,7 @@ export function ChatViewer() {
 		const convId = selectedConversationId.value;
 		if (!convId) return;
 
+		setChatOpen(true);
 		connectChatSocket();
 		joinConversation(convId, "admin", TENANT_ID);
 
@@ -178,6 +183,7 @@ export function ChatViewer() {
 		});
 
 		return () => {
+			setChatOpen(false);
 			leaveConversation(convId);
 			removeAllChatListeners();
 		};
@@ -219,7 +225,9 @@ export function ChatViewer() {
 				<div class="flex-1 p-8 flex items-center justify-center text-muted-foreground">
 					<div class="text-center">
 						<MessageSquareIcon size={48} class="mx-auto mb-4 opacity-50" />
-						<p>Seleccione una conversación para ver el historial o intervenir.</p>
+						<p>
+							Seleccione una conversación para ver el historial o intervenir.
+						</p>
 					</div>
 				</div>
 			</div>

@@ -2,6 +2,7 @@ import Form, { formSelectNumber } from "@components/form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { Refetch } from "@infrastructure/types/client";
 import { handlerError } from "@infrastructure/utils/client/handler-error";
+import { slugify } from "@infrastructure/utils/hybrid";
 import { blogCategoryIndexApi } from "@modules/blog-category/apis/blog-category.index.api";
 import { blogPostStoreApi } from "@modules/blog-post/apis/blog-post.store.api";
 import {
@@ -12,42 +13,43 @@ import {
 	typeTextExtensions,
 	UPLOAD_CONFIG,
 } from "@modules/uploads/const/upload.const";
+import { type Lang, useTranslations } from "@src/i18n";
 import { sweetModal } from "@vigilio/sweet";
 import { FileText, Image as ImageIcon, Link, Tag } from "lucide-preact";
 import { useEffect, useMemo } from "preact/hooks";
-import { useForm, type Resolver } from "react-hook-form";
+import { type Resolver, useForm } from "react-hook-form";
 import type { BlogPostIndexResponseDto } from "../dtos/blog-post.response.dto";
-import { slugify } from "@infrastructure/utils/hybrid";
-import { type Lang, useTranslations } from "@src/i18n";
 
 interface BlogPostStoreProps {
 	refetch: (data: Refetch<BlogPostIndexResponseDto["results"]>) => void;
 	onClose: () => void;
-    lang?: Lang;
+	lang?: Lang;
 }
 
 export default function BlogPostStore({
 	refetch,
 	onClose,
-    lang = "es"
+	lang = "es",
 }: BlogPostStoreProps) {
-    const t = useTranslations(lang);
+	const t = useTranslations(lang);
 	const blogPostStoreMutation = blogPostStoreApi();
 	const categoriesQuery = blogCategoryIndexApi(null);
 
 	const blogPostStoreForm = useForm<BlogPostStoreDto>({
 		resolver: zodResolver(blogPostStoreDto) as Resolver<BlogPostStoreDto>,
 		mode: "all",
-        defaultValues:{
-			seo:{
-				title:"",
-				description:"",keywords:null,og_image:null
-			}
-		}
+		defaultValues: {
+			seo: {
+				title: "",
+				description: "",
+				keywords: null,
+				og_image: null,
+			},
+		},
 	});
 
 	const title = blogPostStoreForm.watch("title");
-		console.log(blogPostStoreForm.formState.errors);
+	console.log(blogPostStoreForm.formState.errors);
 
 	useEffect(() => {
 		if (title) {
@@ -156,7 +158,8 @@ export default function BlogPostStore({
 
 				<div class="space-y-4 pt-4 border-t border-white/5">
 					<h3 class="text-sm font-semibold text-muted-foreground uppercase tracking-widest flex items-center gap-2">
-						<Tag size={14} class="text-primary" /> {t("dashboard.blog.form.seo_opt")}
+						<Tag size={14} class="text-primary" />{" "}
+						{t("dashboard.blog.form.seo_opt")}
 					</h3>
 					<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 						<Form.control<BlogPostStoreDto>

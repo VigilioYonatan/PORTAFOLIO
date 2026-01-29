@@ -1,6 +1,7 @@
-import { AI_TECHNICAL_PROTECTION } from "@modules/ai/const/ai-prompts.const";
 import { slugify } from "@infrastructure/utils/hybrid/slug.utils";
 import { paginator } from "@infrastructure/utils/server";
+import { AI_TECHNICAL_PROTECTION } from "@modules/ai/const/ai-prompts.const";
+import { AiService } from "@modules/ai/services/ai.service";
 import { Injectable, Logger, NotFoundException } from "@nestjs/common";
 import { BlogPostCache } from "../cache/blog-post.cache";
 import { type BlogPostQueryDto } from "../dtos/blog-post.query.dto";
@@ -15,7 +16,6 @@ import { type BlogPostStoreDto } from "../dtos/blog-post.store.dto";
 import { type BlogPostUpdateDto } from "../dtos/blog-post.update.dto";
 import { BlogPostRepository } from "../repositories/blog-post.repository";
 import { type BlogPostSchema } from "../schemas/blog-post.schema";
-import { AiService } from "@modules/ai/services/ai.service";
 
 @Injectable()
 export class BlogPostService {
@@ -83,14 +83,21 @@ export class BlogPostService {
 					const jsonResponse = await this.aiService.generate({
 						model: "openai/gpt-4o-mini",
 						temperature: 0.3,
-						system: "You are a professional translator. Return only valid JSON.",
+						system:
+							"You are a professional translator. Return only valid JSON.",
 						messages: [{ role: "user", content: prompt }],
 					});
 
 					const cleanJson = jsonResponse.replace(/```json|```/g, "").trim();
 					const translated = JSON.parse(cleanJson);
 
-					const { id, created_at, updated_at, tenant_id: t_id, ...rest } = originalPost;
+					const {
+						id,
+						created_at,
+						updated_at,
+						tenant_id: t_id,
+						...rest
+					} = originalPost;
 
 					return {
 						...rest,

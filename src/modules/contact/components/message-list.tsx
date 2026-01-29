@@ -9,17 +9,17 @@ import {
 import MessageDetail from "@modules/contact/components/message-detail";
 import type { ContactMessageSchema } from "@modules/contact/schemas/contact-message.schema";
 import { useSignal } from "@preact/signals";
+import { type Lang, useTranslations } from "@src/i18n";
 import { useTable } from "@vigilio/preact-table";
 import { Eye, Mail, MailOpen, MessageSquare, Search } from "lucide-preact";
 import { useEffect } from "preact/hooks";
-import { type Lang, useTranslations } from "@src/i18n";
 
 interface MessageListProps {
-    lang?: Lang;
+	lang?: Lang;
 }
 
 export default function MessageList({ lang = "es" }: MessageListProps) {
-    const t = useTranslations(lang);
+	const t = useTranslations(lang);
 	const selectedMessage = useSignal<ContactMessageSchema | null>(null);
 
 	const table = useTable<
@@ -108,7 +108,7 @@ export default function MessageList({ lang = "es" }: MessageListProps) {
 	]);
 
 	return (
-		<VigilioTable  table={table} query={query}>
+		<VigilioTable table={table} query={query}>
 			<div class="flex flex-col gap-4 mb-6">
 				<div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
 					<div class="flex flex-col">
@@ -165,7 +165,7 @@ export default function MessageList({ lang = "es" }: MessageListProps) {
 			>
 				<MessageDetail
 					message={selectedMessage.value!}
-                    lang={lang}
+					lang={lang}
 					onUpdate={(data) => {
 						table.updateData((old, count) => ({
 							result: old.map((m) =>
@@ -176,7 +176,6 @@ export default function MessageList({ lang = "es" }: MessageListProps) {
 					}}
 				/>
 			</Modal>
-
 		</VigilioTable>
 	);
 }

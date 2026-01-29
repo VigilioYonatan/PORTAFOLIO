@@ -1,5 +1,6 @@
 import Modal from "@components/extras/modal";
 import { useEntranceAnimation } from "@hooks/use-motion";
+import { LANGUAGES, type Language } from "@infrastructure/types/i18n";
 import { cn } from "@infrastructure/utils/client";
 import { formatDateTz } from "@infrastructure/utils/hybrid/date.utils";
 import { printFileWithDimension } from "@infrastructure/utils/hybrid/file.utils";
@@ -9,6 +10,7 @@ import BlogPostStore from "@modules/blog-post/components/blog-post-store";
 import BlogPostUpdate from "@modules/blog-post/components/blog-post-update";
 import { DIMENSION_IMAGE } from "@modules/uploads/const/upload.const";
 import { useComputed, useSignal } from "@preact/signals";
+import { type Lang, useTranslations } from "@src/i18n";
 import { audioStore } from "@stores/audio.store";
 import usePaginator from "@vigilio/preact-paginator";
 import { sweetModal } from "@vigilio/sweet";
@@ -16,22 +18,20 @@ import {
 	Edit,
 	ExternalLink,
 	FileText,
+	Languages,
 	Plus,
 	Search,
 	Trash,
 } from "lucide-preact";
 import { useEffect } from "preact/hooks";
 import type { BlogPostSchema } from "../schemas/blog-post.schema";
-import { type Lang, useTranslations } from "@src/i18n";
-import { type Language, LANGUAGES } from "@infrastructure/types/i18n";
-import { Languages } from "lucide-preact";
 
 interface PostBentoGridProps {
-    lang?: Lang;
+	lang?: Lang;
 }
 
 export default function PostBentoGrid({ lang = "es" }: PostBentoGridProps) {
-    const t = useTranslations(lang);
+	const t = useTranslations(lang);
 	const containerRef = useEntranceAnimation(0.2);
 	const bassIntensity = useComputed(() => audioStore.state.bassIntensity.value);
 	const isStoreModalOpen = useSignal(false);
@@ -41,7 +41,7 @@ export default function PostBentoGrid({ lang = "es" }: PostBentoGridProps) {
 	const paginator = usePaginator({ limit: 12 });
 
 	// Fetch posts
-    const language = useSignal<Language>("es");
+	const language = useSignal<Language>("es");
 	const query = blogPostIndexApi(null, paginator, { language: language.value });
 
 	// Results synced with query for manual updates
@@ -54,15 +54,19 @@ export default function PostBentoGrid({ lang = "es" }: PostBentoGridProps) {
 	}, [query.data]);
 
 	useEffect(() => {
-		query.refetch(false)
-	}, [paginator.search.debounceTerm,paginator.pagination.page, language.value]);
+		query.refetch(false);
+	}, [
+		paginator.search.debounceTerm,
+		paginator.pagination.page,
+		language.value,
+	]);
 	return (
 		<div class="space-y-6">
 			{/* Header Action */}
 			<div class="flex justify-between items-center bg-zinc-950/40 border border-white/5 p-4 rounded-xl backdrop-blur-sm">
 				<div class="flex items-center gap-4 w-full md:w-auto">
 					{/* Search */}
-						<div class="relative group w-full md:w-64">
+					<div class="relative group w-full md:w-64">
 						<div class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/40 group-focus-within:text-primary transition-colors">
 							<Search size={14} />
 						</div>
@@ -76,28 +80,42 @@ export default function PostBentoGrid({ lang = "es" }: PostBentoGridProps) {
 							}
 						/>
 					</div>
-                    {/* Language Filter */}
-                    <div class="relative group">
-                        <div class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/40 pointer-events-none">
-                            <Languages size={14} />
-                        </div>
-                        <select
-                            class="bg-black/40 border border-white/5 text-[10px] font-mono tracking-widest rounded-lg pl-9 pr-8 py-2.5 appearance-none focus:outline-none focus:ring-1 focus:ring-primary/40 focus:border-primary/40 transition-all cursor-pointer uppercase text-muted-foreground hover:text-white"
-                            value={language.value}
-                            onChange={(e) => {
-                                language.value = e.currentTarget.value as Language;
-                            }}
-                        >
-                            {LANGUAGES.map((lang) => (
-                                <option key={lang} value={lang} class="bg-zinc-950 text-white">
-                                    {lang.toUpperCase()}
-                                </option>
-                            ))}
-                        </select>
-                         <div class="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/40 pointer-events-none">
-                           <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down"><path d="m6 9 6 6 6-6"/></svg>
-                        </div>
-                    </div>
+					{/* Language Filter */}
+					<div class="relative group">
+						<div class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/40 pointer-events-none">
+							<Languages size={14} />
+						</div>
+						<select
+							class="bg-black/40 border border-white/5 text-[10px] font-mono tracking-widest rounded-lg pl-9 pr-8 py-2.5 appearance-none focus:outline-none focus:ring-1 focus:ring-primary/40 focus:border-primary/40 transition-all cursor-pointer uppercase text-muted-foreground hover:text-white"
+							value={language.value}
+							onChange={(e) => {
+								language.value = e.currentTarget.value as Language;
+							}}
+						>
+							{LANGUAGES.map((lang) => (
+								<option key={lang} value={lang} class="bg-zinc-950 text-white">
+									{lang.toUpperCase()}
+								</option>
+							))}
+						</select>
+						<div class="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/40 pointer-events-none">
+
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								width="12"
+								height="12"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="2"
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								class="lucide lucide-chevron-down"
+							><title> </title>
+								<path d="m6 9 6 6 6-6" />
+							</svg>
+						</div>
+					</div>
 				</div>
 				<button
 					type="button"
@@ -124,7 +142,9 @@ export default function PostBentoGrid({ lang = "es" }: PostBentoGridProps) {
 				<div class="w-full h-64 flex items-center justify-center border border-dashed border-border rounded-xl">
 					<div class="text-center text-muted-foreground">
 						<FileText size={32} class="mx-auto mb-2 opacity-50" />
-						<p className="font-mono text-xs">{t("dashboard.blog.post.empty")}</p>
+						<p className="font-mono text-xs">
+							{t("dashboard.blog.post.empty")}
+						</p>
 					</div>
 				</div>
 			) : (
@@ -170,7 +190,7 @@ export default function PostBentoGrid({ lang = "es" }: PostBentoGridProps) {
 										<FileText className="text-zinc-800" size={48} />
 									</div>
 								)}
-								<div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/20 to-transparent opacity-80" />
+								<div className="absolute inset-0 bg-linear-to-t from-zinc-950 via-zinc-950/20 to-transparent opacity-80" />
 
 								{/* Category Chip */}
 								{post.category_id && (
@@ -228,7 +248,9 @@ export default function PostBentoGrid({ lang = "es" }: PostBentoGridProps) {
 																);
 																sweetModal({
 																	icon: "success",
-																	title: t("dashboard.blog.post.delete_success"),
+																	title: t(
+																		"dashboard.blog.post.delete_success",
+																	),
 																});
 															},
 														});

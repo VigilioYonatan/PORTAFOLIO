@@ -36,9 +36,7 @@ function TbodyRow<T extends object>({
 						colspan={table.table.Thead()[0].length}
 						class="dark:text-white w-full text-center align-middle"
 					>
-						<div class="flex items-center justify-center">
-							{title}
-						</div>
+						<div class="flex items-center justify-center">{title}</div>
 					</td>
 				</tr>
 			) : (
@@ -57,4 +55,3 @@ function TbodyRow<T extends object>({
 }
 
 export default TbodyRow;
-

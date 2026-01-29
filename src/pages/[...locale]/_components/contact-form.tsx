@@ -1,11 +1,11 @@
 import WebForm from "@components/web_form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useTranslations } from "@src/i18n";
-import { Mail, User, Send } from "lucide-preact";
-import { type Resolver, useForm } from "react-hook-form";
 import type { ContactStoreDto } from "@modules/contact/dtos/contact.store.dto";
 import { contactStoreDto } from "@modules/contact/dtos/contact.store.dto";
 import type { Lang } from "@src/i18n";
+import { useTranslations } from "@src/i18n";
+import { Mail, Send, User } from "lucide-preact";
+import { type Resolver, useForm } from "react-hook-form";
 
 interface ContactFormProps {
 	lang?: Lang;
@@ -26,23 +26,23 @@ export default function ContactForm({ lang = "es" }: ContactFormProps) {
 
 	function onContactSubmit(_body: ContactStoreDto) {
 		// console.log("Contact form submitted:", body);
-        // Alert is temporary until API integration
-        alert(t("contact.form.success"));
-        contactForm.reset();
+		// Alert is temporary until API integration
+		alert(t("contact.form.success"));
+		contactForm.reset();
 	}
 
 	return (
 		<div className="w-full max-w-[600px] relative font-mono">
 			{/* Terminal-like Container */}
 			<div className="bg-[#0a0f14]/90 backdrop-blur-xl border border-primary/20 rounded-none shadow-[0_0_40px_rgba(6,182,212,0.15)] relative overflow-hidden group">
-                {/* Decoration Lines */}
+				{/* Decoration Lines */}
 				<div className="absolute top-0 left-0 w-2 h-2 border-l-2 border-t-2 border-primary" />
 				<div className="absolute top-0 right-0 w-2 h-2 border-r-2 border-t-2 border-primary" />
 				<div className="absolute bottom-0 left-0 w-2 h-2 border-l-2 border-b-2 border-primary" />
 				<div className="absolute bottom-0 right-0 w-2 h-2 border-r-2 border-b-2 border-primary" />
 
 				<div className="p-8 pt-6 relative z-10">
-                    <div className="flex items-center gap-3 mb-8">
+					<div className="flex items-center gap-3 mb-8">
 						<Mail className="text-primary w-6 h-6 animate-pulse" />
 						<h1 className="text-xl font-bold text-white tracking-wider flex items-center gap-2">
 							{">"} {t("contact.title")}
@@ -70,12 +70,12 @@ export default function ContactForm({ lang = "es" }: ContactFormProps) {
 							className="bg-[#05080a] border-primary/40 text-primary placeholder:text-primary/50 focus:border-primary/50 rounded-none h-12 font-mono text-sm tracking-wide"
 						/>
 
-                        <WebForm.control.area<ContactStoreDto>
-                            name="message"
-                            title={t("contact.form.message")}
-                            placeholder={t("contact.subtitle")}
-                            className="bg-[#05080a] border-primary/40 text-primary placeholder:text-primary/50 focus:border-primary/50 rounded-none h-32 font-mono text-sm tracking-wide resize-none p-3"
-                        />
+						<WebForm.control.area<ContactStoreDto>
+							name="message"
+							title={t("contact.form.message")}
+							placeholder={t("contact.subtitle")}
+							className="bg-[#05080a] border-primary/40 text-primary placeholder:text-primary/50 focus:border-primary/50 rounded-none h-32 font-mono text-sm tracking-wide resize-none p-3"
+						/>
 
 						<button
 							type="submit"
@@ -83,7 +83,7 @@ export default function ContactForm({ lang = "es" }: ContactFormProps) {
 						>
 							<div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
 							<span className="relative z-10 flex items-center gap-2">
-                                [ {t("contact.form.submit")} ] <Send className="w-4 h-4" />
+								[ {t("contact.form.submit")} ] <Send className="w-4 h-4" />
 							</span>
 						</button>
 					</WebForm>

@@ -9,7 +9,7 @@ import {
 	siPython,
 	siReact,
 	siTypescript,
-} from "simple-icons/icons";
+} from "simple-icons";
 import { SimpleIcon } from "./simple-icon";
 
 // Helper to render SimpleIcon

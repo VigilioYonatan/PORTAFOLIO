@@ -1,9 +1,8 @@
 import { z } from "@infrastructure/config/zod-i18n.config";
 import { createPaginatorSchema } from "@infrastructure/schemas/paginator.schema";
 import { techeableSchema } from "@modules/techeable/schemas/techeable.schema";
-import { projectSchema } from "../schemas/project.schema";
-
 import { technologySchema } from "@modules/technology/schemas/technology.schema";
+import { projectSchema } from "../schemas/project.schema";
 
 // --- Index / List ---
 export const projectIndexResponseDto = createPaginatorSchema(
@@ -21,9 +20,11 @@ export type ProjectIndexResponseDto = z.infer<typeof projectIndexResponseDto>; /
 export const projectShowResponseDto = z.object({
 	success: z.literal(true),
 	project: projectSchema.extend({
-		techeables: z.array(techeableSchema.extend({
-			technology: technologySchema,
-		})),
+		techeables: z.array(
+			techeableSchema.extend({
+				technology: technologySchema,
+			}),
+		),
 	}),
 });
 export type ProjectShowResponseDto = z.infer<typeof projectShowResponseDto>;

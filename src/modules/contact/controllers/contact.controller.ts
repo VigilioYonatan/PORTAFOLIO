@@ -1,10 +1,10 @@
-import { ZodQueryPipe } from "@infrastructure/pipes/zod-query.pipe";
 import { ZodPipe } from "@infrastructure/pipes/zod.pipe";
-import { contactQueryDto } from "@modules/contact/dtos/contact.query.dto";
+import { ZodQueryPipe } from "@infrastructure/pipes/zod-query.pipe";
 import { Public } from "@modules/auth/decorators/public.decorator";
 import { Roles } from "@modules/auth/decorators/roles.decorator";
 import { AuthenticatedGuard } from "@modules/auth/guards/authenticated.guard";
 import { ContactQueryClassDto } from "@modules/contact/dtos/contact.query.class.dto";
+import { contactQueryDto } from "@modules/contact/dtos/contact.query.dto";
 import {
 	ContactDestroyResponseClassDto,
 	ContactIndexResponseClassDto,

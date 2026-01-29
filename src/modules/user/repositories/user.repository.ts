@@ -219,4 +219,3 @@ export class UserRepository {
 		return Number(result[0].count);
 	}
 }
-

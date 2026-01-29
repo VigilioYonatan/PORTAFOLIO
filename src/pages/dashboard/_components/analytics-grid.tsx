@@ -1,22 +1,22 @@
-import type { DashboardMetricsSchema } from "@modules/analytics/dtos/dashboard.response.dto";
-import InsightsRadar from "@modules/analytics/components/insights-radar";
-import { Activity, Brain, Eye, ShieldAlertIcon, Users } from "lucide-preact";
 import {
 	Card,
 	CardContent,
 	CardHeader,
 	CardTitle,
 } from "@components/extras/card";
+import InsightsRadar from "@modules/analytics/components/insights-radar";
+import type { DashboardMetricsSchema } from "@modules/analytics/dtos/dashboard.response.dto";
 import { type Lang, useTranslations } from "@src/i18n";
+import { Activity, Brain, Eye, ShieldAlertIcon, Users } from "lucide-preact";
 
 interface AnalyticsGridProps {
 	metrics?: DashboardMetricsSchema;
 	isLoading?: boolean | null;
-    lang?: Lang;
+	lang?: Lang;
 }
 
 export function AnalyticsGrid({ metrics, lang = "es" }: AnalyticsGridProps) {
-    const t = useTranslations(lang);
+	const t = useTranslations(lang);
 	const formatNumber = (num: number) => {
 		if (num >= 1000) {
 			return `${(num / 1000).toFixed(1)}K`;
@@ -169,11 +169,14 @@ export function AnalyticsGrid({ metrics, lang = "es" }: AnalyticsGridProps) {
 										<span class="text-primary font-bold">
 											{t("dashboard.insights.dist_systems")}
 										</span>{" "}
-                                        {/* Since translate func doesn't support easy interpolation inside grammar here without param, I just concated. 
+										{/* Since translate func doesn't support easy interpolation inside grammar here without param, I just concated. 
                                             Ideally t('key', {param: val}). But here structure is split. I'll join them reasonably. 
                                         */}
 										{t("dashboard.insights.suggest")}{" "}
-										<span class="text-white/80 italic">{t("dashboard.insights.protocols")}</span>.
+										<span class="text-white/80 italic">
+											{t("dashboard.insights.protocols")}
+										</span>
+										.
 									</p>
 								</div>
 							</div>

@@ -1,20 +1,16 @@
 import { slugify } from "@infrastructure/utils/hybrid";
 import { paginator } from "@infrastructure/utils/server/helpers";
-import {
-	Injectable,
-	Logger,
-	NotFoundException,
-} from "@nestjs/common";
+import { Injectable, Logger, NotFoundException } from "@nestjs/common";
 import { TenantCache } from "../caches/tenant.cache";
 import type { TenantQueryDto } from "../dtos/tenant.query.dto";
 import type {
+	TenantDestroyResponseDto,
 	TenantIndexResponseDto,
 	TenantSettingResponseDto,
 	TenantShowResponseDto,
 	TenantStoreResponseDto,
 	TenantUpdateMeResponseDto,
 	TenantUpdateResponseDto,
-	TenantDestroyResponseDto,
 } from "../dtos/tenant.response.dto";
 import type { TenantStoreDto } from "../dtos/tenant.store.dto";
 import type { TenantUpdateDto } from "../dtos/tenant.update.dto";

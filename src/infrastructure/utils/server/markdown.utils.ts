@@ -65,26 +65,36 @@ export async function renderMarkdown(content: string): Promise<string> {
         </div>`;
 	};
 
-interface MarkedToken {
-	text?: string;
-	tokens?: { text: string }[];
-}
+	interface MarkedToken {
+		text?: string;
+		tokens?: { text: string }[];
+	}
 
 	renderer.blockquote = (quote) => {
-        // Handle token format if Marked parses it as object
-        // Typings for renderer.blockquote suggest string but internal marked might pass token
+		// Handle token format if Marked parses it as object
+		// Typings for renderer.blockquote suggest string but internal marked might pass token
 		const text =
 			typeof quote === "string"
 				? quote
 				: quote.text ||
-					(quote as unknown as MarkedToken).tokens?.map((t) => t.text).join("") ||
+					(quote as unknown as MarkedToken).tokens
+						?.map((t) => t.text)
+						.join("") ||
 					"";
 		return `<blockquote class="border-l-4 border-primary/50 bg-primary/5 pl-4 py-2 my-4 italic text-muted-foreground rounded-r-lg backdrop-blur-sm">
             ${text}
         </blockquote>`;
 	};
 
-	renderer.link = function ({ href, title, tokens }: { href: string; title?: string | null; tokens: any[] }) {
+	renderer.link = function ({
+		href,
+		title,
+		tokens,
+	}: {
+		href: string;
+		title?: string | null;
+		tokens: any[];
+	}) {
 		const linkHref = href;
 		const linkTitle = title;
 		const linkText = this.parser.parseInline(tokens);

@@ -11,6 +11,8 @@ import SystemIntro from "./_components/system-intro";
 import Button from "@components/extras/button";
 import { getLangFromUrl, useTranslations } from "../../i18n";
 import type { WebIndexResponseDto } from "@modules/web/dtos/web.response.dto";
+import RecentProjects from "./_components/home/recent-projects";
+import RecentBlogs from "./_components/home/recent-blogs";
 
 const lang = getLangFromUrl(Astro.url);
 const t = useTranslations(lang);
@@ -21,10 +23,10 @@ const { experiences, latestProjects, latestPosts } = Astro.locals
 
 <WebLayout>
   <SystemIntro lang={lang} client:load />
-  <main class="relative flex flex-col items-center gap-24 pb-24">
+  <main class="relative flex flex-col items-center pb-24">
     {/* Hero Section with Tech Orbit Background */}
     <section
-      class="relative w-full min-h-[90vh] flex items-center justify-center py-20 overflow-hidden"
+      class="relative w-full min-h-[90vh] flex items-center justify-center py-16 overflow-hidden"
     >
       {/* Background Tech Orbit - Kept as is */}
       <div
@@ -68,113 +70,50 @@ const { experiences, latestProjects, latestPosts } = Astro.locals
         </div>
       </div>
     </section>
-
+    {/* Career Timeline Section */}
+    <section
+      class="w-full relative z-10 border-y border-white/5 bg-zinc-950/20 py-24"
+    >
+      <div class="container mx-auto px-4">
+        <SectionTitle title={t("home.experience")} className="mb-12" />
+        <WaveTimeline experiences={experiences} lang={lang} client:load />
+      </div>
+    </section>
     {/* Recent Projects Section */}
-    <section class="w-full container mx-auto px-4">
-      <SectionTitle title={t("projects.title")} />
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12">
-        {
-          latestProjects?.map((project) => (
-            <a
-              href={`/${lang}/projects/${project.slug}`}
-              class="group relative block bg-card border border-white/10 rounded-2xl overflow-hidden hover:border-primary/50 transition-all duration-500 hover:-translate-y-2"
-            >
-              <div class="aspect-video bg-muted overflow-hidden relative">
-                {project.images?.[0] && (
-                  <img
-                    src={project.images[0].key}
-                    alt={project.title}
-                    class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                  />
-                )}
-                <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-sm">
-                  <span class="px-6 py-2 border border-primary text-primary font-mono lowercase rounded-full">
-                    {t("projects.view_more")}
-                  </span>
-                </div>
-              </div>
-              <div class="p-6">
-                <h3 class="text-xl font-bold mb-2 group-hover:text-primary transition-colors">
-                  {project.title}
-                </h3>
-                <p class="text-sm text-muted-foreground line-clamp-2">
-                  {project.description}
-                </p>
-              </div>
-            </a>
-          ))
-        }
+    <section class="w-full container mx-auto px-4 py-24">
+      <SectionTitle title={t("projects.title")} className="mb-12" />
+      <div class="">
+         <RecentProjects latestProjects={latestProjects} lang={lang} client:visible />
       </div>
       <div class="flex justify-center mt-12">
         <Button
           variant="ghost"
           href={`/${lang}/projects`}
           as="a"
-          className="gap-2 text-muted-foreground hover:text-primary"
+          className="gap-2 text-muted-foreground hover:text-primary transition-all hover:gap-3"
         >
-          {t("common.show")}
-          {t("header.projects")}
+          {t("common.show")} {t("header.projects")}
           <ArrowRight size={16} />
         </Button>
       </div>
     </section>
 
-    {/* Career Timeline Section */}
-    <section
-      class="w-full relative z-10 py-10 border-t border-white/5 bg-zinc-950/20"
-    >
-      <div class="container mx-auto px-4">
-        <SectionTitle title={t("home.experience")} />
-        <WaveTimeline experiences={experiences} lang={lang} client:load />
-      </div>
-    </section>
+   
 
     {/* Latest Blogs Section */}
-    <section class="w-full container mx-auto px-4">
-      <SectionTitle title={t("blog.title")} />
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
-        {
-          latestPosts?.map((post) => (
-            <a
-              href={`/${lang}/blog/${post.slug}`}
-              class="group flex flex-col gap-4 p-6 rounded-2xl border border-white/5 bg-white/[0.02] hover:bg-white/[0.05] hover:border-primary/20 transition-all duration-300"
-            >
-              <div class="aspect-[2/1] rounded-lg bg-muted overflow-hidden">
-                {post.cover?.[0] && (
-                  <img
-                    src={post.cover[0].key}
-                    alt={post.title}
-                    class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
-                )}
-              </div>
-              <div class="flex flex-col gap-2">
-                <div class="flex items-center gap-2 text-xs font-mono text-primary/80">
-                  <span>
-                    {post.published_at
-                      ? new Date(post.published_at).toLocaleDateString()
-                      : ""}
-                  </span>
-                  <span>//</span>
-                  <span class="uppercase">ARTICLE</span>
-                </div>
-                <h3 class="text-lg font-bold leading-tight group-hover:text-primary transition-colors">
-                  {post.title}
-                </h3>
-              </div>
-            </a>
-          ))
-        }
+    <section class="w-full container mx-auto px-4 py-24 border-t border-white/5">
+      <SectionTitle title={t("blog.title")} className="mb-12" />
+      <div class="">
+          <RecentBlogs latestPosts={latestPosts} lang={lang} client:visible />
       </div>
       <div class="flex justify-center mt-12">
         <Button
           variant="ghost"
           href={`/${lang}/blog`}
           as="a"
-          className="gap-2 text-muted-foreground hover:text-primary"
+          className="gap-2 text-muted-foreground hover:text-primary transition-all hover:gap-3"
         >
-          {t("common.show")}
-          {t("header.blog")}
+          {t("common.show")} {t("header.blog")}
           <ArrowRight size={16} />
         </Button>
       </div>

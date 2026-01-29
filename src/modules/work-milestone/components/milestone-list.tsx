@@ -173,22 +173,22 @@ export default function MilestoneList({ experienceId }: MilestoneListProps) {
 				}}
 				contentClassName="max-w-md w-full p-6 bg-zinc-950 border border-white/10"
 			>
-					<MilestoneUpdate
-						experienceId={experienceId}
-						milestone={editMilestone.value!}
-						refetch={(data: WorkMilestoneSchema) => {
-							query.transformData((prev) => ({
-								...prev,
-								results: prev.results.map((item) =>
-									item.id === data.id ? data : item,
-								),
-							}));
-							editMilestone.value = null;
-						}}
-						onClose={() => {
-							editMilestone.value = null;
-						}}
-					/>
+				<MilestoneUpdate
+					experienceId={experienceId}
+					milestone={editMilestone.value!}
+					refetch={(data: WorkMilestoneSchema) => {
+						query.transformData((prev) => ({
+							...prev,
+							results: prev.results.map((item) =>
+								item.id === data.id ? data : item,
+							),
+						}));
+						editMilestone.value = null;
+					}}
+					onClose={() => {
+						editMilestone.value = null;
+					}}
+				/>
 			</Modal>
 		</div>
 	);

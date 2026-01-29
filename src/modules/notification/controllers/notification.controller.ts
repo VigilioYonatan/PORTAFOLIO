@@ -1,6 +1,5 @@
-import { ZodQueryPipe } from "@infrastructure/pipes/zod-query.pipe";
 import { ZodPipe } from "@infrastructure/pipes/zod.pipe";
-import { notificationQueryDto } from "../dtos/notification.query.dto";
+import { ZodQueryPipe } from "@infrastructure/pipes/zod-query.pipe";
 import { Roles } from "@modules/auth/decorators/roles.decorator";
 import {
 	Body,
@@ -10,12 +9,14 @@ import {
 	Param,
 	ParseIntPipe,
 	Patch,
+	Post,
 	Query,
 	Req,
 } from "@nestjs/common";
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
 import { type Request } from "express";
 import { NotificationQueryClassDto } from "../dtos/notification.query.class.dto";
+import { notificationQueryDto } from "../dtos/notification.query.dto";
 import {
 	NotificationDestroyAllResponseClassDto,
 	NotificationIndexResponseClassDto,
@@ -31,6 +32,7 @@ import {
 	type NotificationUpdateDto,
 	notificationUpdateDto,
 } from "../dtos/notification.update.dto";
+import { SubscriptionStoreDto } from "../dtos/subscription.store.dto";
 import { NotificationService } from "../services/notification.service";
 
 @ApiTags("Notifications")
@@ -66,11 +68,7 @@ export class NotificationController {
 		@Param("id", ParseIntPipe) id: number,
 		@Body(new ZodPipe(notificationUpdateDto)) body: NotificationUpdateDto,
 	): Promise<NotificationUpdateResponseDto> {
-		return this.notificationService.update(
-			req.locals.tenant.id,
-			id,
-			body,
-		);
+		return this.notificationService.update(req.locals.tenant.id, id, body);
 	}
 
 	@Delete("/all")
@@ -82,8 +80,31 @@ export class NotificationController {
 		type: NotificationDestroyAllResponseClassDto,
 	})
 	destroyAll(@Req() req: Request): Promise<NotificationDestroyAllResponseDto> {
-		return this.notificationService.destroyAll(
+		return this.notificationService.destroyAll(req.locals.tenant.id);
+	}
+
+	@Post("/subscribe")
+	@ApiOperation({ summary: "Subscribe to Web Push notifications" })
+	async subscribe(@Req() req: Request, @Body() body: SubscriptionStoreDto) {
+		return this.notificationService.subscribe(
 			req.locals.tenant.id,
+			req.locals.user.id,
+			body,
+		);
+	}
+
+	@Post("/test-push")
+	@ApiOperation({ summary: "Send test push notification" })
+	async testPush(@Req() req: Request) {
+		return this.notificationService.sendPushNotification(
+			req.locals.tenant.id,
+			req.locals.user.id,
+			{
+				title: "Test Notification",
+				body: "This is a test from Portfolio!",
+				url: "/admin/dashboard",
+				icon: "/favicon.ico",
+			},
 		);
 	}
 }

@@ -1,6 +1,5 @@
-import { ZodQueryPipe } from "@infrastructure/pipes/zod-query.pipe";
 import { ZodPipe } from "@infrastructure/pipes/zod.pipe";
-import { projectQueryDto } from "../dtos/project.query.dto";
+import { ZodQueryPipe } from "@infrastructure/pipes/zod-query.pipe";
 import { Public } from "@modules/auth/decorators/public.decorator";
 import { Roles } from "@modules/auth/decorators/roles.decorator";
 import {
@@ -19,6 +18,7 @@ import {
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
 import type { Request } from "express";
 import { ProjectQueryClassDto } from "../dtos/project.query.class.dto";
+import { projectQueryDto } from "../dtos/project.query.dto";
 import {
 	ProjectDestroyResponseClassDto,
 	ProjectIndexResponseClassDto,

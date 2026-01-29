@@ -73,4 +73,6 @@ export const uploadFormidableResponseDto = z.object({
 	data: z.array(filesSchema()),
 	fields: z.any(), // Fields from formidable can be complex, verify if strict typing is needed or any is acceptable for now
 });
-export type UploadFormidableResponseDto = z.infer<typeof uploadFormidableResponseDto>;
+export type UploadFormidableResponseDto = z.infer<
+	typeof uploadFormidableResponseDto
+>;

@@ -3,7 +3,7 @@ import { Inject, Injectable } from "@nestjs/common";
 import {
 	desc,
 	eq,
-    getTableColumns,
+	getTableColumns,
 	type InferInsertModel,
 	type InferSelectModel,
 	isNull,
@@ -37,9 +37,9 @@ export class DatabaseService {
 		prefix = "",
 		tenantId,
 	}: GenerateCodeOptions) {
-        const columns = getTableColumns(Item);
-        const codeCol = columns[latestCodeColumn];
-        const tenantCol = columns.tenant_id;
+		const columns = getTableColumns(Item);
+		const codeCol = columns[latestCodeColumn];
+		const tenantCol = columns.tenant_id;
 
 		const latestRow = await this.db
 			.select({
@@ -151,7 +151,7 @@ export class DatabaseService {
 						relation.childrenField
 					] as Record<string, unknown>[]) || [];
 
-			for (const [childIndex, child] of children.entries()) {
+				for (const [childIndex, child] of children.entries()) {
 					let childData = { ...child } as Record<string, unknown>;
 
 					// 1. Limpieza de campos
@@ -168,7 +168,7 @@ export class DatabaseService {
 					// 3. Before Create Hook
 					// biome-ignore lint/suspicious/noExplicitAny: Generic hook
 					if (relation.config.beforeCreate) {
-                        // Cast to any because generic complexity is high here
+						// Cast to any because generic complexity is high here
 						childData = relation.config.beforeCreate(
 							childData as unknown,
 							childIndex,
@@ -177,7 +177,9 @@ export class DatabaseService {
 					}
 
 					childrenToInsert.push(childData);
-					nextParentsData.push(child as Record<string, unknown> & { id: number }); // Guardamos la data original del hijo para el siguiente nivel
+					nextParentsData.push(
+						child as Record<string, unknown> & { id: number },
+					); // Guardamos la data original del hijo para el siguiente nivel
 				}
 			}
 

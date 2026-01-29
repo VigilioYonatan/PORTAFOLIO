@@ -24,4 +24,6 @@ export const healthLivenessResponseDto = z.object({
 	timestamp: z.string(),
 	pid: z.number(),
 });
-export type HealthLivenessResponseDto = z.infer<typeof healthLivenessResponseDto>;
+export type HealthLivenessResponseDto = z.infer<
+	typeof healthLivenessResponseDto
+>;

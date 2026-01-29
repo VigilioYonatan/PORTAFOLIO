@@ -1,75 +1,74 @@
-import { renderHook, act } from '@testing-library/preact';
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import useCopyToClipboard from '../use-copy-to-clipboard';
+import { act, renderHook } from "@testing-library/preact";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import useCopyToClipboard from "../use-copy-to-clipboard";
 
-describe('useCopyToClipboard', () => {
-  let writeTextMock: ReturnType<typeof vi.fn>;
+describe("useCopyToClipboard", () => {
+	let writeTextMock: ReturnType<typeof vi.fn>;
 
-  beforeEach(() => {
-    writeTextMock = vi.fn().mockResolvedValue(undefined);
-    vi.stubGlobal('navigator', {
-      clipboard: {
-        writeText: writeTextMock,
-      },
-    });
-  });
+	beforeEach(() => {
+		writeTextMock = vi.fn().mockResolvedValue(undefined);
+		vi.stubGlobal("navigator", {
+			clipboard: {
+				writeText: writeTextMock,
+			},
+		});
+	});
 
-  afterEach(() => {
-    vi.unstubAllGlobals();
-    vi.restoreAllMocks();
-  });
+	afterEach(() => {
+		vi.unstubAllGlobals();
+		vi.restoreAllMocks();
+	});
 
-  it('should initialize with null copied text', () => {
-    const { result } = renderHook(() => useCopyToClipboard());
-    const [, copiedText] = result.current;
-    
-    expect(copiedText).toBeNull();
-  });
+	it("should initialize with null copied text", () => {
+		const { result } = renderHook(() => useCopyToClipboard());
+		const [, copiedText] = result.current;
 
-  it('should copy text to clipboard and update state', async () => {
-    const { result } = renderHook(() => useCopyToClipboard());
-    const [copy] = result.current;
-    const textToCopy = 'Hello World';
+		expect(copiedText).toBeNull();
+	});
 
-    let success: boolean | undefined;
-    await act(async () => {
-      success = await copy(textToCopy);
-    });
+	it("should copy text to clipboard and update state", async () => {
+		const { result } = renderHook(() => useCopyToClipboard());
+		const [copy] = result.current;
+		const textToCopy = "Hello World";
 
-    expect(writeTextMock).toHaveBeenCalledWith(textToCopy);
-    expect(success).toBe(true);
-    expect(result.current[1]).toBe(textToCopy);
-  });
+		let success: boolean | undefined;
+		await act(async () => {
+			success = await copy(textToCopy);
+		});
 
-  it('should handle clipboard write failure', async () => {
-    writeTextMock.mockRejectedValueOnce(new Error('Failed'));
+		expect(writeTextMock).toHaveBeenCalledWith(textToCopy);
+		expect(success).toBe(true);
+		expect(result.current[1]).toBe(textToCopy);
+	});
 
-    const { result } = renderHook(() => useCopyToClipboard());
-    const [copy] = result.current;
-    const textToCopy = 'Fail Text';
+	it("should handle clipboard write failure", async () => {
+		writeTextMock.mockRejectedValueOnce(new Error("Failed"));
 
-    let success: boolean | undefined;
-    await act(async () => {
-      success = await copy(textToCopy);
-    });
+		const { result } = renderHook(() => useCopyToClipboard());
+		const [copy] = result.current;
+		const textToCopy = "Fail Text";
 
-    expect(writeTextMock).toHaveBeenCalledWith(textToCopy);
-    expect(success).toBe(false);
-    expect(result.current[1]).toBeNull();
-  });
-  
-  it('should handle missing clipboard API', async () => {
-    vi.stubGlobal('navigator', { clipboard: undefined });
+		let success: boolean | undefined;
+		await act(async () => {
+			success = await copy(textToCopy);
+		});
 
-    const { result } = renderHook(() => useCopyToClipboard());
-    const [copy] = result.current;
-    
-    let success: boolean | undefined;
-    await act(async () => {
-      success = await copy('test');
-    });
+		expect(writeTextMock).toHaveBeenCalledWith(textToCopy);
+		expect(success).toBe(false);
+		expect(result.current[1]).toBeNull();
+	});
 
-    expect(success).toBe(false);
-  });
+	it("should handle missing clipboard API", async () => {
+		vi.stubGlobal("navigator", { clipboard: undefined });
+
+		const { result } = renderHook(() => useCopyToClipboard());
+		const [copy] = result.current;
+
+		let success: boolean | undefined;
+		await act(async () => {
+			success = await copy("test");
+		});
+
+		expect(success).toBe(false);
+	});
 });
-

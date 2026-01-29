@@ -1,9 +1,9 @@
-import { AI_TECHNICAL_PROTECTION } from "../const/ai-prompts.const";
 import { schema } from "@infrastructure/providers/database/database.schema";
 import { DRIZZLE } from "@infrastructure/providers/database/database.service";
 import { now } from "@infrastructure/utils/hybrid";
 import { Inject, Injectable, Logger } from "@nestjs/common";
 import type { NodePgDatabase } from "drizzle-orm/node-postgres";
+import { AI_TECHNICAL_PROTECTION } from "../const/ai-prompts.const";
 import { aiModelConfigEntity } from "../entities/ai-config.entity";
 import type { AiConfigSchema } from "../schemas/ai-config.schema";
 

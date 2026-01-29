@@ -28,7 +28,10 @@ export function notificationIndexApi(
 	paginator: UsePaginator | null = null,
 	filters?: { limit?: number; offset?: number },
 ) {
-	const query = useQuery<NotificationIndexResponseDto, NotificationIndexApiError>(
+	const query = useQuery<
+		NotificationIndexResponseDto,
+		NotificationIndexApiError
+	>(
 		"/notification",
 		async (url) => {
 			const data = new URLSearchParams();

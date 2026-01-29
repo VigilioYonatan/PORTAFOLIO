@@ -52,7 +52,9 @@ export function mockLucidePreact() {
 		FileText: () => <span data-testid="file-text-icon">FileText</span>,
 		Loader2: () => <span data-testid="loader2-icon">Loader2</span>,
 		CheckCircle: () => <span data-testid="check-circle-icon">CheckCircle</span>,
-		CheckCircle2: () => <span data-testid="check-circle2-icon">CheckCircle2</span>,
+		CheckCircle2: () => (
+			<span data-testid="check-circle2-icon">CheckCircle2</span>
+		),
 		AlertCircle: () => <span data-testid="alert-circle-icon">AlertCircle</span>,
 		Building: () => <span data-testid="building-icon">Building</span>,
 		Terminal: () => <span data-testid="terminal-icon">Terminal</span>,

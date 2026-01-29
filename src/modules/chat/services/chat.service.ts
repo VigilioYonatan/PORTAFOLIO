@@ -2,8 +2,11 @@ import { sanitizeInput } from "@infrastructure/utils/hybrid/ai.utils";
 import { paginator } from "@infrastructure/utils/server";
 import { AiService } from "@modules/ai/services/ai.service";
 import { AiConfigService } from "@modules/ai/services/ai-config.service";
+import { DocumentRepository } from "@modules/documents/repositories/document.repository";
+import { NotificationService } from "@modules/notification/services/notification.service";
 import { Injectable, Logger, NotFoundException } from "@nestjs/common";
 import type { Observable } from "rxjs";
+import { ChatCache } from "../caches/chat.cache";
 import type {
 	ChatMessagePublicStoreDto,
 	ChatMessageStoreDto,
@@ -17,11 +20,9 @@ import type {
 	ConversationStoreResponseDto,
 } from "../dtos/chat.response.dto";
 import { ChatRepository } from "../repositories/chat.repository";
-import { type ConversationSchema } from "../schemas/conversation.schema";
-import { ChatCache } from "../caches/chat.cache";
+import { ConversationRepository } from "../repositories/conversation.repository";
 import type { ChatMessageSchema } from "../schemas/chat-message.schema";
-import { DocumentRepository } from "@modules/documents/repositories/document.repository";
-import  { ConversationRepository } from "../repositories/conversation.repository";
+import { type ConversationSchema } from "../schemas/conversation.schema";
 
 @Injectable()
 export class ChatService {
@@ -34,6 +35,7 @@ export class ChatService {
 		private readonly conversationRepository: ConversationRepository,
 		private readonly documentRepository: DocumentRepository,
 		private readonly cache: ChatCache,
+		private readonly notificationService: NotificationService,
 	) {}
 
 	async index(
@@ -53,7 +55,10 @@ export class ChatService {
 						if (cached) return cached;
 					}
 
-					const result = await this.repository.indexConversations(tenant_id, filters);
+					const result = await this.repository.indexConversations(
+						tenant_id,
+						filters,
+					);
 
 					if (isClean) {
 						await this.cache.setList(tenant_id, filters, result);
@@ -104,6 +109,16 @@ export class ChatService {
 			tenant_id,
 			messagePayload,
 		);
+
+		// Send push notification to Admin (user_id 1)
+		// In a real scenario, we would find who needs to be notified
+		this.notificationService.sendPushNotification(tenant_id, 1, {
+			title: "New Message",
+			body: sanitizedContent,
+			url: `/dashboard/inbox/${conversation_id}`,
+			icon: "/favicon.ico",
+		});
+
 		await this.cache.invalidateLists(tenant_id);
 		return { success: true, message };
 	}
@@ -134,7 +149,10 @@ export class ChatService {
 		tenant_id: number,
 		conversation_id: number,
 	): Promise<Observable<{ data: { content: string } }>> {
-		this.logger.log({ tenant_id, conversation_id }, "Starting AI stream with RAG");
+		this.logger.log(
+			{ tenant_id, conversation_id },
+			"Starting AI stream with RAG",
+		);
 
 		// 1. Context: Conversation & Messages
 		await this.showConversation(tenant_id, conversation_id);
@@ -174,7 +192,10 @@ export class ChatService {
 						.join("\n\n");
 				}
 			} catch (error) {
-				this.logger.warn("RAG Retrieval Failed (proceeding without context)", error);
+				this.logger.warn(
+					"RAG Retrieval Failed (proceeding without context)",
+					error,
+				);
 			}
 		}
 
@@ -227,7 +248,6 @@ ${contextText ? contextText : "No specific context found for this query."}
 		}
 		return conversation;
 	}
-
 
 	async storeConversation(
 		tenant_id: number,

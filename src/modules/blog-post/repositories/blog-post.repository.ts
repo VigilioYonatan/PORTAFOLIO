@@ -15,7 +15,10 @@ export class BlogPostRepository {
 
 	async store(
 		tenant_id: number,
-		body: Omit<BlogPostSchema, "id" | "tenant_id" | "created_at" | "updated_at">,
+		body: Omit<
+			BlogPostSchema,
+			"id" | "tenant_id" | "created_at" | "updated_at"
+		>,
 	): Promise<BlogPostSchema> {
 		const [blogPost] = await this.db
 			.insert(blogPostEntity)
@@ -26,7 +29,10 @@ export class BlogPostRepository {
 
 	async bulkStore(
 		tenant_id: number,
-		bodies: Omit<BlogPostSchema, "id" | "tenant_id" | "created_at" | "updated_at">[],
+		bodies: Omit<
+			BlogPostSchema,
+			"id" | "tenant_id" | "created_at" | "updated_at"
+		>[],
 	): Promise<BlogPostSchema[]> {
 		if (bodies.length === 0) return [];
 		return await this.db
@@ -88,14 +94,8 @@ export class BlogPostRepository {
 		tenant_id: number,
 		query: BlogPostQueryDto,
 	): Promise<[BlogPostSchema[], number]> {
-		const {
-			limit,
-			offset,
-			search,
-			category_id,
-			is_published,
-			language,
-		} = query;
+		const { limit, offset, search, category_id, is_published, language } =
+			query;
 
 		const whereClause = and(
 			eq(blogPostEntity.tenant_id, tenant_id),
@@ -120,9 +120,10 @@ export class BlogPostRepository {
 				content: false,
 			},
 			extras: {
-				content: sql<string>`substring(${blogPostEntity.content} from 1 for 500)`.as(
-					"content",
-				),
+				content:
+					sql<string>`substring(${blogPostEntity.content} from 1 for 500)`.as(
+						"content",
+					),
 			},
 		});
 

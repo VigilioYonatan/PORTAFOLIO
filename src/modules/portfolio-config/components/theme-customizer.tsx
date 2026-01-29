@@ -1,6 +1,9 @@
+import { BrandIcon } from "@components/extras/brand-icon";
+import { siLinkedin } from "@components/extras/custom-simple-icons";
 import Form from "@components/form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { handlerError } from "@infrastructure/utils/client/handler-error";
+import { type Lang, useTranslations } from "@src/i18n";
 import { sweetModal } from "@vigilio/sweet";
 import {
 	Fingerprint,
@@ -12,28 +15,22 @@ import {
 	Type,
 	User,
 } from "lucide-preact";
-import { BrandIcon } from "@components/extras/brand-icon";
-import {
-	siGithub,
-	siYoutube,
-} from "simple-icons/icons";
-import { siX } from "simple-icons";
-import { siLinkedin } from "@components/extras/custom-simple-icons";
 import { useEffect } from "preact/hooks";
 import type { JSX } from "preact/jsx-runtime";
 import { type Resolver, useForm } from "react-hook-form";
+import { siX } from "simple-icons";
+import { siGithub, siYoutube } from "simple-icons";
 import { portfolioConfigShowApi } from "../apis/portfolio-config.show.api";
 import { portfolioConfigUpdateApi } from "../apis/portfolio-config.update.api";
 import type { PortfolioConfigSchema } from "../schemas/portfolio-config.schema";
 import { portfolioConfigSchema } from "../schemas/portfolio-config.schema";
-import { type Lang, useTranslations } from "@src/i18n";
 
 interface ThemeCustomizerProps {
-    lang?: Lang;
+	lang?: Lang;
 }
 
 export default function ThemeCustomizer({ lang = "es" }: ThemeCustomizerProps) {
-    const t = useTranslations(lang);
+	const t = useTranslations(lang);
 	const query = portfolioConfigShowApi();
 	const updateMutation = portfolioConfigUpdateApi();
 

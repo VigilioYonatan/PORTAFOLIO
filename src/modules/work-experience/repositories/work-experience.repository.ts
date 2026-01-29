@@ -97,9 +97,10 @@ export class WorkExperienceRepository {
 					description: false,
 				},
 				extras: {
-					description: sql<string>`substring(${workExperienceEntity.description} from 1 for 3000)`.as(
-						"description",
-					),
+					description:
+						sql<string>`substring(${workExperienceEntity.description} from 1 for 3000)`.as(
+							"description",
+						),
 				},
 			}),
 			this.db

@@ -180,7 +180,7 @@ export default function DocumentTable() {
 
 			<VigilioTable.table>
 				<VigilioTable.thead>
-						<VigilioTable.thead.th />
+					<VigilioTable.thead.th />
 				</VigilioTable.thead>
 				<VigilioTable.tbody>
 					<VigilioTable.tbody.row title="SCANNING_ARCHIVES...">

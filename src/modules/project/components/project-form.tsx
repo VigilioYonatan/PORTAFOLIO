@@ -19,9 +19,9 @@ import { useEffect } from "preact/hooks";
 import type { UseFormReturn } from "react-hook-form";
 
 interface ProjectFormProps {
-    // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 	form: UseFormReturn<any>;
-    // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 	onSubmit: (data: any) => void;
 	isLoading: boolean;
 	technologies: TechnologyIndexResponseDto["results"];
@@ -89,21 +89,23 @@ export function ProjectForm({
 				/>
 
 				<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <Form.control.area<ProjectUpdateDto>
-                        name="impact_summary"
-                        title={t("dashboard.project.form.impact")}
-                        placeholder="Resultados senior y métricas de impacto..."
-                        rows={2}
-                    />
-                     <Form.control<ProjectUpdateDto>
-                        name="sort_order"
-                        title={t("dashboard.project.form.sort_order") || "ORDEN DE PRIORIDAD"}
-                        type="number"
-                        placeholder="0"
-                        ico={<Info size={18} />}
-                        options={{ setValueAs: formSelectNumber }}
-				    />
-                </div>
+					<Form.control.area<ProjectUpdateDto>
+						name="impact_summary"
+						title={t("dashboard.project.form.impact")}
+						placeholder="Resultados senior y métricas de impacto..."
+						rows={2}
+					/>
+					<Form.control<ProjectUpdateDto>
+						name="sort_order"
+						title={
+							t("dashboard.project.form.sort_order") || "ORDEN DE PRIORIDAD"
+						}
+						type="number"
+						placeholder="0"
+						ico={<Info size={18} />}
+						options={{ setValueAs: formSelectNumber }}
+					/>
+				</div>
 
 				<div class="space-y-1">
 					<Form.control.area<ProjectUpdateDto>
@@ -164,7 +166,6 @@ export function ProjectForm({
 						/>
 					</div>
 				</div>
-
 
 				<div class="space-y-4 pt-4 border-t border-white/5">
 					<h3 class="text-sm font-semibold text-muted-foreground uppercase tracking-widest flex items-center gap-2">
@@ -237,7 +238,7 @@ export function ProjectForm({
 					loading_title={t("dashboard.project.form.loading")}
 					isLoading={isLoading}
 					disabled={isLoading}
-                    className="w-full mt-4 bg-primary text-primary-foreground font-black py-4 tracking-widest uppercase rounded-lg hover:opacity-90 transition-opacity"
+					className="w-full mt-4 bg-primary text-primary-foreground font-black py-4 tracking-widest uppercase rounded-lg hover:opacity-90 transition-opacity"
 				/>
 			</Form>
 		</div>

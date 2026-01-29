@@ -1,35 +1,37 @@
 import WebForm from "@components/web_form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import type { Refetch } from "@infrastructure/types/client";
 import { handlerError } from "@infrastructure/utils/client/handler-error";
 import { blogCategoryStoreApi } from "@modules/blog-category/apis/blog-category.store.api";
 import {
 	type BlogCategoryStoreDto,
 	blogCategoryStoreDto,
 } from "@modules/blog-category/dtos/blog-category.store.dto";
+import { type Lang, useTranslations } from "@src/i18n";
 import { sweetModal } from "@vigilio/sweet";
 import { Tag } from "lucide-preact";
-import type { Refetch } from "@infrastructure/types/client";
 import { useEffect } from "preact/hooks";
 import { type Resolver, useForm } from "react-hook-form";
 import type { BlogCategoryIndexResponseDto } from "../dtos/blog-category.response.dto";
-import { type Lang, useTranslations } from "@src/i18n";
 
 interface CategoryStoreProps {
 	refetch: (data: Refetch<BlogCategoryIndexResponseDto["results"]>) => void;
 	onClose: () => void;
-    lang?: Lang;
+	lang?: Lang;
 }
 
 export default function CategoryStore({
 	refetch,
 	onClose,
-    lang = "es"
+	lang = "es",
 }: CategoryStoreProps) {
-    const t = useTranslations(lang);
+	const t = useTranslations(lang);
 	const storeMut = blogCategoryStoreApi();
 
 	const form = useForm<BlogCategoryStoreDto>({
-		resolver: zodResolver(blogCategoryStoreDto) as Resolver<BlogCategoryStoreDto>,
+		resolver: zodResolver(
+			blogCategoryStoreDto,
+		) as Resolver<BlogCategoryStoreDto>,
 	});
 
 	const name = form.watch("name");
@@ -63,7 +65,9 @@ export default function CategoryStore({
 
 	return (
 		<div className="space-y-4">
-			<h2 className="text-xl font-bold mb-4 text-white">{t("dashboard.category.form.create_title")}</h2>
+			<h2 className="text-xl font-bold mb-4 text-white">
+				{t("dashboard.category.form.create_title")}
+			</h2>
 			<WebForm {...form} onSubmit={onSubmit}>
 				<WebForm.control
 					name="name"

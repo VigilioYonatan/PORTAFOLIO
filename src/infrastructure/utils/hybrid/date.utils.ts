@@ -50,7 +50,10 @@ export function formatDateTwo(
 	return dayjs(date).format(format);
 }
 
-export function formatDate(date: Date | string | null, format = "DD/MM/YYYY"):Date | string {
+export function formatDate(
+	date: Date | string | null,
+	format = "DD/MM/YYYY",
+): Date | string {
 	if (!date) return "-";
 	return dayjs(date).format(format);
 }

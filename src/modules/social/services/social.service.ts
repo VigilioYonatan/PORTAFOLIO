@@ -1,4 +1,5 @@
 import { paginator } from "@infrastructure/utils/server";
+import { NotificationService } from "@modules/notification/services/notification.service";
 import { Injectable, Logger } from "@nestjs/common";
 import { SocialCache } from "../caches/social.cache";
 import type {
@@ -25,6 +26,7 @@ export class SocialService {
 	constructor(
 		private readonly repository: SocialRepository,
 		private readonly socialCache: SocialCache,
+		private readonly notificationService: NotificationService,
 	) {}
 
 	async index(
@@ -60,6 +62,15 @@ export class SocialService {
 			reply: null, // No reply yet
 		});
 		await this.socialCache.invalidateLists(tenant_id);
+
+		// Send push notification to Admin
+		this.notificationService.sendPushNotification(tenant_id, 1, {
+			title: `New Comment from ${body.name}`,
+			body: body.content.substring(0, 50) + "...",
+			url: `/dashboard/content`, // Or specific project/post url
+			icon: "/favicon.ico",
+		});
+
 		return { success: true, comment };
 	}
 
@@ -74,7 +85,7 @@ export class SocialService {
 			tenant_id,
 			visitor_id,
 			body.reactable_id,
-			body.reactable_type 
+			body.reactable_type,
 		);
 
 		if (existing) {
@@ -97,7 +108,7 @@ export class SocialService {
 		const reaction = await this.repository.storeReaction(tenant_id, {
 			...body,
 			visitor_id,
-		} );
+		});
 		return { action: "ADDED", reaction };
 	}
 
@@ -105,7 +116,10 @@ export class SocialService {
 		reactable_id: number,
 		reactable_type: SocialReactionSchema["reactable_type"],
 	): Promise<SocialReactionCountResponseDto> {
-		this.logger.log({ reactable_id, reactable_type }, "Fetching reaction counts");
+		this.logger.log(
+			{ reactable_id, reactable_type },
+			"Fetching reaction counts",
+		);
 
 		// 1. Try Cache
 		const cached = await this.socialCache.getReactionCounts(
@@ -123,7 +137,11 @@ export class SocialService {
 		);
 
 		// 3. Set Cache
-		await this.socialCache.setReactionCounts(reactable_id, reactable_type, counts);
+		await this.socialCache.setReactionCounts(
+			reactable_id,
+			reactable_type,
+			counts,
+		);
 
 		return counts;
 	}

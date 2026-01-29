@@ -1,10 +1,10 @@
-import { json, urlencoded } from "express";
 import { WebPath } from "@modules/web/routers/web.routers";
 import {
 	type INestApplication,
 	RequestMethod,
 	VersioningType,
 } from "@nestjs/common";
+import { json, urlencoded } from "express";
 
 export function configureApp(app: INestApplication): void {
 	// Global Prefix with exclusions

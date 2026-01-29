@@ -1,6 +1,5 @@
-import { ZodQueryPipe } from "@infrastructure/pipes/zod-query.pipe";
 import { ZodPipe } from "@infrastructure/pipes/zod.pipe";
-import { musicQueryDto } from "../dtos/music.query.dto";
+import { ZodQueryPipe } from "@infrastructure/pipes/zod-query.pipe";
 import { Public } from "@modules/auth/decorators/public.decorator";
 import { Roles } from "@modules/auth/decorators/roles.decorator";
 import { AuthenticatedGuard } from "@modules/auth/guards/authenticated.guard";
@@ -22,6 +21,7 @@ import {
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
 import type { Request } from "express";
 import { MusicQueryClassDto } from "../dtos/music.class.dto";
+import { musicQueryDto } from "../dtos/music.query.dto";
 import {
 	MusicTrackDestroyResponseClassDto,
 	MusicTrackIndexResponseClassDto,

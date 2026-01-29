@@ -33,7 +33,10 @@ export function socialCommentIndexApi(
 	table: SocialCommentIndexTable | null = null,
 	paginator: UsePaginator | null = null,
 ) {
-	const query = useQuery<SocialCommentIndexResponseDto, SocialCommentIndexApiError>(
+	const query = useQuery<
+		SocialCommentIndexResponseDto,
+		SocialCommentIndexApiError
+	>(
 		"/social-comment",
 		async (url) => {
 			const data = new URLSearchParams();

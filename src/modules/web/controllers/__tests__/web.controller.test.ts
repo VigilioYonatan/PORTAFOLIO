@@ -21,9 +21,9 @@ describe("WebController", () => {
 		contact: vi.fn(),
 	};
 
-	const mockReq = { 
+	const mockReq = {
 		originalUrl: "/test",
-		locals: { language: "es" }
+		locals: { language: "es" },
 	} as unknown as Request;
 	const mockRes = {} as unknown as Response;
 	const mockNext = vi.fn();

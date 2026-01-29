@@ -28,12 +28,11 @@ export default function NatureOverlay() {
 		{ src: "/video/bird.mp4", label: "AVES_CLASS" },
 		{ src: "/video/ballena.mp4", label: "CETACEA_GIGAS" },
 	];
-    
-    // Track which video is concurrently focused (Mobile tap logic)
-    const focusedIndex = useSignal<number | null>(null);
+
+	// Track which video is concurrently focused (Mobile tap logic)
+	const focusedIndex = useSignal<number | null>(null);
 
 	return (
-
 		<div
 			class={cn(
 				"fixed inset-0 z-100 bg-black flex flex-col items-center justify-center transition-opacity duration-700",
@@ -50,20 +49,20 @@ export default function NatureOverlay() {
 			{/* Video Grid - Split Screen (3 Columns) */}
 			<div class="flex flex-col md:flex-row w-full h-full">
 				{videos.map((vid, idx) => (
-					<VideoColumn 
-                        key={idx} 
-                        vid={vid} 
-                        isActive={isActive}
-                        isFocused={focusedIndex.value === idx}
-                        onToggleFocus={() => {
-                            // Toggle: If self, turn off. If other, turn on.
-                            if (focusedIndex.value === idx) {
-                                focusedIndex.value = null;
-                            } else {
-                                focusedIndex.value = idx;
-                            }
-                        }}
-                    />
+					<VideoColumn
+						key={idx}
+						vid={vid}
+						isActive={isActive}
+						isFocused={focusedIndex.value === idx}
+						onToggleFocus={() => {
+							// Toggle: If self, turn off. If other, turn on.
+							if (focusedIndex.value === idx) {
+								focusedIndex.value = null;
+							} else {
+								focusedIndex.value = idx;
+							}
+						}}
+					/>
 				))}
 			</div>
 
@@ -95,31 +94,31 @@ export default function NatureOverlay() {
 function VideoColumn({
 	vid,
 	isActive,
-    isFocused,
-    onToggleFocus
+	isFocused,
+	onToggleFocus,
 }: {
 	vid: { src: string; label: string };
 	isActive: boolean;
-    isFocused: boolean;
-    onToggleFocus: () => void;
+	isFocused: boolean;
+	onToggleFocus: () => void;
 }) {
 	const videoRef = useRef<HTMLVideoElement>(null);
 	const isVideoLoading = useSignal(true);
 	const hasError = useSignal(false);
-    // Removed internal isFocused signal
+	// Removed internal isFocused signal
 
 	// Sync Playback state with Focus
-    useEffect(() => {
-        if (!videoRef.current) return;
-        
-        if (isFocused) {
-            videoRef.current.muted = false;
-            videoRef.current.play().catch(() => {});
-        } else {
-            videoRef.current.muted = true;
-            videoRef.current.pause();
-        }
-    }, [isFocused]);
+	useEffect(() => {
+		if (!videoRef.current) return;
+
+		if (isFocused) {
+			videoRef.current.muted = false;
+			videoRef.current.play().catch(() => {});
+		} else {
+			videoRef.current.muted = true;
+			videoRef.current.pause();
+		}
+	}, [isFocused]);
 
 	// Sync loading state with actual video readyState
 	useEffect(() => {
@@ -172,10 +171,14 @@ function VideoColumn({
 				class={cn(
 					"w-full h-full object-cover transition-all duration-700",
 					// Desktop: Hover effects. Mobile: "isFocused" state removes filters.
-					(isFocused) ? "grayscale-0 opacity-100" : "grayscale group-hover:grayscale-0",
+					isFocused
+						? "grayscale-0 opacity-100"
+						: "grayscale group-hover:grayscale-0",
 					isVideoLoading.value
 						? "opacity-0"
-						: (isFocused ? "opacity-100" : "opacity-40 group-hover:opacity-100"),
+						: isFocused
+							? "opacity-100"
+							: "opacity-40 group-hover:opacity-100",
 					hasError.value && "hidden",
 				)}
 				muted={!isFocused} // Unmute when focused
@@ -184,20 +187,20 @@ function VideoColumn({
 				preload="metadata"
 				onClick={(e) => {
 					e.preventDefault();
-                    onToggleFocus();
-                    
-                    // Immediate play feedback handled by effect or parent logic, 
-                    // but we can try to force play here if we just became focused.
-                    // However, strictly, prop change will trigger re-render.
-                    // We'll rely on the re-render and effect updates, 
-                    // or simpler: just toggle the state and let Reactivity handle muted prop.
-                    
-                    // Actually, we must manually play/pause here or in an effect because props are reactive but video imperative APIs aren't fully declarative.
-                    // Let's us a simplified sync in the click specific to the new state intent.
-                    
-                    // const willFocus = !isFocused; // Based on what it WAS. Note: Parent updates this.
-                    // Wait, we can't predict parent logic 100% (though we know it).
-                    // Better to use an Effect on `isFocused` prop.
+					onToggleFocus();
+
+					// Immediate play feedback handled by effect or parent logic,
+					// but we can try to force play here if we just became focused.
+					// However, strictly, prop change will trigger re-render.
+					// We'll rely on the re-render and effect updates,
+					// or simpler: just toggle the state and let Reactivity handle muted prop.
+
+					// Actually, we must manually play/pause here or in an effect because props are reactive but video imperative APIs aren't fully declarative.
+					// Let's us a simplified sync in the click specific to the new state intent.
+
+					// const willFocus = !isFocused; // Based on what it WAS. Note: Parent updates this.
+					// Wait, we can't predict parent logic 100% (though we know it).
+					// Better to use an Effect on `isFocused` prop.
 				}}
 				onCanPlay={() => {
 					isVideoLoading.value = false;

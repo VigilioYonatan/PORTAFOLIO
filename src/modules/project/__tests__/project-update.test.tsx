@@ -34,7 +34,6 @@ vi.mock("@components/form/form-mkd-editor", () => ({
 	FormMKDEditor: () => <div data-testid="mkd-editor" />,
 }));
 
-
 const mockProject: ProjectWithRelations = {
 	id: 1,
 	title: "Test Project",
@@ -141,7 +140,9 @@ describe("ProjectUpdate", () => {
 		);
 
 		expect(
-			screen.getByRole("button", { name: /dashboard\.project\.form\.loading/i }),
+			screen.getByRole("button", {
+				name: /dashboard\.project\.form\.loading/i,
+			}),
 		).toBeInTheDocument();
 	});
 

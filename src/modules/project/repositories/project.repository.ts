@@ -1,6 +1,8 @@
 import { schema } from "@infrastructure/providers/database/database.schema";
 import { DRIZZLE } from "@infrastructure/providers/database/database.service";
 import { toNull } from "@infrastructure/utils/server";
+import { techeableEntity } from "@modules/techeable/entities/techeable.entity";
+import { TECHEABLE_TYPES } from "@modules/techeable/schemas/techeable.schema";
 import { Inject, Injectable } from "@nestjs/common";
 import {
 	and,
@@ -14,15 +16,12 @@ import {
 	sql,
 } from "drizzle-orm";
 import type { NodePgDatabase } from "drizzle-orm/node-postgres";
-import { techeableEntity } from "@modules/techeable/entities/techeable.entity";
-import { projectEntity } from "../entities/project.entity";
-import { TECHEABLE_TYPES } from "@modules/techeable/schemas/techeable.schema";
 import type { ProjectQueryDto } from "../dtos/project.query.dto";
+import { projectEntity } from "../entities/project.entity";
 import type {
- 	ProjectSchema,
- 	ProjectWithRelations,
+	ProjectSchema,
+	ProjectWithRelations,
 } from "../schemas/project.schema";
-
 
 @Injectable()
 export class ProjectRepository {
@@ -32,10 +31,7 @@ export class ProjectRepository {
 
 	async store(
 		tenant_id: number,
-		body: Omit<
-			ProjectSchema,
-			"id" | "tenant_id" | "created_at" | "updated_at"
-		>,
+		body: Omit<ProjectSchema, "id" | "tenant_id" | "created_at" | "updated_at">,
 	): Promise<ProjectSchema> {
 		// 1. Crear el proyecto
 		const [result] = await this.db
@@ -94,7 +90,10 @@ export class ProjectRepository {
 		return result;
 	}
 
-	async destroyTecheables(tenant_id: number, project_id: number): Promise<void> {
+	async destroyTecheables(
+		tenant_id: number,
+		project_id: number,
+	): Promise<void> {
 		await this.db
 			.delete(techeableEntity)
 			.where(
@@ -203,12 +202,14 @@ export class ProjectRepository {
 					impact_summary: false,
 				},
 				extras: {
-					content: sql<string>`substring(${projectEntity.content} from 1 for 3000)`.as(
-						"content",
-					),
-					impact_summary: sql<string>`substring(${projectEntity.impact_summary} from 1 for 3000)`.as(
-						"impact_summary",
-					),
+					content:
+						sql<string>`substring(${projectEntity.content} from 1 for 3000)`.as(
+							"content",
+						),
+					impact_summary:
+						sql<string>`substring(${projectEntity.impact_summary} from 1 for 3000)`.as(
+							"impact_summary",
+						),
 				},
 			}),
 			this.db

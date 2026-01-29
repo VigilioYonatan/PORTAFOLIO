@@ -1,10 +1,10 @@
+import { IS_PUBLIC_KEY } from "@modules/auth/decorators/public.decorator";
+import { Reflector } from "@nestjs/core";
 import { Test, type TestingModule } from "@nestjs/testing";
 import type { NextFunction, Request, Response } from "express";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { WebController } from "../controllers/web.controller";
 import { WebService } from "../services/web.service";
-import { IS_PUBLIC_KEY } from "@modules/auth/decorators/public.decorator";
-import { Reflector } from "@nestjs/core";
 
 // Mock astroRender
 vi.mock("@infrastructure/utils/server", () => ({
@@ -53,7 +53,7 @@ describe("WebController", () => {
 			const isPublic = reflector.get(IS_PUBLIC_KEY, controller.projectSlug);
 			expect(isPublic).toBe(true);
 		});
-		
+
 		it("should mark blog as public", () => {
 			const isPublic = reflector.get(IS_PUBLIC_KEY, controller.blog);
 			expect(isPublic).toBe(true);
@@ -82,9 +82,9 @@ describe("WebController", () => {
 			const mockProps = { posts: [] };
 			vi.spyOn(service, "blog").mockResolvedValue(mockProps as any);
 
-			const req = { 
+			const req = {
 				query: { page: "2" },
-				locals: { language: "es" }
+				locals: { language: "es" },
 			} as unknown as Request;
 			const res = { locals: {} } as Response;
 			const next = vi.fn() as NextFunction;

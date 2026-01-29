@@ -19,7 +19,7 @@ import {
 	Info,
 	Music,
 } from "lucide-preact";
-import { useForm, type Resolver } from "react-hook-form";
+import { type Resolver, useForm } from "react-hook-form";
 import type { MusicTrackIndexResponseDto } from "../dtos/music.response.dto";
 
 interface AudioStoreProps {

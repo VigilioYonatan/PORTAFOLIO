@@ -2,7 +2,10 @@ import { CacheService } from "@infrastructure/providers/cache/cache.service";
 import { toNull } from "@infrastructure/utils/server";
 import { Injectable } from "@nestjs/common";
 import type { ProjectQueryDto } from "../dtos/project.query.dto";
-import type { ProjectSchema, ProjectWithRelations } from "../schemas/project.schema";
+import type {
+	ProjectSchema,
+	ProjectWithRelations,
+} from "../schemas/project.schema";
 
 @Injectable()
 export class ProjectCache {

@@ -75,9 +75,10 @@ export class ContactRepository {
 					message: false,
 				},
 				extras: {
-					message: sql<string>`substring(${contactMessageEntity.message} from 1 for 3000)`.as(
-						"message",
-					),
+					message:
+						sql<string>`substring(${contactMessageEntity.message} from 1 for 3000)`.as(
+							"message",
+						),
 				},
 			}),
 			this.db

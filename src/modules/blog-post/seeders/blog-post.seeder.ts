@@ -1,3 +1,5 @@
+import * as fs from "node:fs";
+import * as path from "node:path";
 import { faker } from "@faker-js/faker";
 import { schema } from "@infrastructure/providers/database/database.schema";
 import { DRIZZLE } from "@infrastructure/providers/database/database.service";
@@ -5,8 +7,6 @@ import { now } from "@infrastructure/utils/hybrid";
 import { Inject, Injectable } from "@nestjs/common";
 import { sql } from "drizzle-orm";
 import { type NodePgDatabase } from "drizzle-orm/node-postgres";
-import * as fs from "node:fs";
-import * as path from "node:path";
 
 @Injectable()
 export class BlogPostSeeder {
@@ -15,7 +15,10 @@ export class BlogPostSeeder {
 	) {}
 
 	async run(tenant_id: number, author_id: number, category_id?: number) {
-		const contentDir = path.join(process.cwd(), "src/modules/blog-post/seeders/content");
+		const contentDir = path.join(
+			process.cwd(),
+			"src/modules/blog-post/seeders/content",
+		);
 		// biome-ignore lint/suspicious/noConsole: Seeder debug
 		console.log(`Content directory: ${contentDir}`);
 
@@ -64,121 +67,239 @@ export class BlogPostSeeder {
 				slug: "advanced-nestjs-microservices",
 				file: "advanced-nestjs-microservices.md",
 				category: "Backend",
-				es: { title: "Microservicios NestJS de Alto Rendimiento: gRPC, NATS y Redis" },
-				en: { title: "High-Performance NestJS Microservices: gRPC, NATS, and Redis" },
-				pt: { title: "Microsserviços NestJS de Alto Desempenho: gRPC, NATS e Redis" },
+				es: {
+					title:
+						"Microservicios NestJS de Alto Rendimiento: gRPC, NATS y Redis",
+				},
+				en: {
+					title: "High-Performance NestJS Microservices: gRPC, NATS, and Redis",
+				},
+				pt: {
+					title: "Microsserviços NestJS de Alto Desempenho: gRPC, NATS e Redis",
+				},
 			},
 			{
 				slug: "distributed-indexing-strategies",
 				file: "distributed-indexing-strategies.md",
 				category: "Database",
-				es: { title: "Estrategias de Indexación Avanzadas y Optimización SQL Senior" },
-				en: { title: "Advanced Indexing Strategies and Senior SQL Optimization" },
-				pt: { title: "Estratégias de Indexação Avançadas e Otimização SQL Sênior" },
+				es: {
+					title:
+						"Estrategias de Indexación Avanzadas y Optimización SQL Senior",
+				},
+				en: {
+					title: "Advanced Indexing Strategies and Senior SQL Optimization",
+				},
+				pt: {
+					title: "Estratégias de Indexação Avançadas e Otimização SQL Sênior",
+				},
 			},
 			{
 				slug: "kubernetes-best-practices",
 				file: "kubernetes-best-practices.md",
 				category: "DevOps",
-				es: { title: "Kubernetes en la Empresa: Patrones de Orquestación y Resiliencia" },
-				en: { title: "Kubernetes in the Enterprise: Orchestration and Resilience Patterns" },
-				pt: { title: "Kubernetes na Empresa: Padrões de Orquestração e Resiliência" },
+				es: {
+					title:
+						"Kubernetes en la Empresa: Patrones de Orquestación y Resiliencia",
+				},
+				en: {
+					title:
+						"Kubernetes in the Enterprise: Orchestration and Resilience Patterns",
+				},
+				pt: {
+					title: "Kubernetes na Empresa: Padrões de Orquestração e Resiliência",
+				},
 			},
 			{
 				slug: "rag-architecture-langchain",
 				file: "rag-architecture-langchain.md",
 				category: "AI",
-				es: { title: "Arquitectura RAG Avanzada: Optimizando LangChain para Producción" },
-				en: { title: "Advanced RAG Architecture: Optimizing LangChain for Production" },
-				pt: { title: "Arquitetura RAG Avançada: Otimizando LangChain para Produção" },
+				es: {
+					title:
+						"Arquitectura RAG Avanzada: Optimizando LangChain para Producción",
+				},
+				en: {
+					title:
+						"Advanced RAG Architecture: Optimizing LangChain for Production",
+				},
+				pt: {
+					title: "Arquitetura RAG Avançada: Otimizando LangChain para Produção",
+				},
 			},
 			{
 				slug: "typescript-enterprise-patterns",
 				file: "typescript-enterprise-patterns.md",
 				category: "Backend",
-				es: { title: "Patrones Enterprise en TypeScript: Modelado de Dominio y Tipado Estricto" },
-				en: { title: "Enterprise Patterns in TypeScript: Domain Modeling and Strict Typing" },
-				pt: { title: "Padrões Enterprise em TypeScript: Modelagem de Domínio e Tipagem Estrita" },
+				es: {
+					title:
+						"Patrones Enterprise en TypeScript: Modelado de Dominio y Tipado Estricto",
+				},
+				en: {
+					title:
+						"Enterprise Patterns in TypeScript: Domain Modeling and Strict Typing",
+				},
+				pt: {
+					title:
+						"Padrões Enterprise em TypeScript: Modelagem de Domínio e Tipagem Estrita",
+				},
 			},
 			{
 				slug: "zero-downtime-migrations",
 				file: "zero-downtime-migrations.md",
 				category: "Database",
-				es: { title: "Migraciones de Base de Datos Zero-Downtime: Estrategias Avanzadas" },
+				es: {
+					title:
+						"Migraciones de Base de Datos Zero-Downtime: Estrategias Avanzadas",
+				},
 				en: { title: "Zero-Downtime Database Migrations: Advanced Strategies" },
-				pt: { title: "Migrações de Banco de Dados Zero-Downtime: Estratégias Avançadas" },
+				pt: {
+					title:
+						"Migrações de Banco de Dados Zero-Downtime: Estratégias Avançadas",
+				},
 			},
 			{
 				slug: "observability-at-scale",
 				file: "observability-at-scale.md",
 				category: "DevOps",
-				es: { title: "Observabilidad a Escala: OpenTelemetry, Prometheus y Grafana" },
-				en: { title: "Observability at Scale: OpenTelemetry, Prometheus, and Grafana" },
-				pt: { title: "Observabilidade em Escala: OpenTelemetry, Prometheus e Grafana" },
+				es: {
+					title: "Observabilidad a Escala: OpenTelemetry, Prometheus y Grafana",
+				},
+				en: {
+					title:
+						"Observability at Scale: OpenTelemetry, Prometheus, and Grafana",
+				},
+				pt: {
+					title:
+						"Observabilidade em Escala: OpenTelemetry, Prometheus e Grafana",
+				},
 			},
 			{
 				slug: "advanced-security-auth",
 				file: "advanced-security-auth.md",
 				category: "Backend",
-				es: { title: "Seguridad Avanzada: OAuth2, OIDC y Gestión de Identidad Enterprise" },
-				en: { title: "Advanced Security: OAuth2, OIDC, and Enterprise Identity Management" },
-				pt: { title: "Segurança Avançada: OAuth2, OIDC e Gestão de Identidade Enterprise" },
+				es: {
+					title:
+						"Seguridad Avanzada: OAuth2, OIDC y Gestión de Identidad Enterprise",
+				},
+				en: {
+					title:
+						"Advanced Security: OAuth2, OIDC, and Enterprise Identity Management",
+				},
+				pt: {
+					title:
+						"Segurança Avançada: OAuth2, OIDC e Gestão de Identidade Enterprise",
+				},
 			},
 			{
 				slug: "clean-architecture-ddd",
 				file: "clean-architecture-ddd.md",
 				category: "Backend",
-				es: { title: "Clean Architecture y DDD con NestJS: Guía para Sistemas Escalables" },
-				en: { title: "Clean Architecture & DDD with NestJS: Guide for Scalable Systems" },
-				pt: { title: "Clean Architecture e DDD com NestJS: Guia para Sistemas Escaláveis" },
+				es: {
+					title:
+						"Clean Architecture y DDD con NestJS: Guía para Sistemas Escalables",
+				},
+				en: {
+					title:
+						"Clean Architecture & DDD with NestJS: Guide for Scalable Systems",
+				},
+				pt: {
+					title:
+						"Clean Architecture e DDD com NestJS: Guia para Sistemas Escaláveis",
+				},
 			},
 			{
 				slug: "high-performance-ai",
 				file: "high-performance-ai.md",
 				category: "AI",
-				es: { title: "Arquitecturas de IA de Alto Rendimiento: Vector DBs y Caching Semántico" },
-				en: { title: "High-Performance AI Architectures: Vector DBs and Semantic Caching" },
-				pt: { title: "Arquiteturas de IA de Alto Desempenho: Vector DBs e Cache Semântico" },
+				es: {
+					title:
+						"Arquitecturas de IA de Alto Rendimiento: Vector DBs y Caching Semántico",
+				},
+				en: {
+					title:
+						"High-Performance AI Architectures: Vector DBs and Semantic Caching",
+				},
+				pt: {
+					title:
+						"Arquiteturas de IA de Alto Desempenho: Vector DBs e Cache Semântico",
+				},
 			},
 			{
 				slug: "serverless-orchestration-aws",
 				file: "serverless-orchestration-aws.md",
 				category: "Cloud",
-				es: { title: "Orquestación Serverless en AWS: Step Functions y EventBridge" },
-				en: { title: "Serverless Orchestration on AWS: Step Functions and EventBridge" },
-				pt: { title: "Orquestração Serverless na AWS: Step Functions e EventBridge" },
+				es: {
+					title: "Orquestación Serverless en AWS: Step Functions y EventBridge",
+				},
+				en: {
+					title:
+						"Serverless Orchestration on AWS: Step Functions and EventBridge",
+				},
+				pt: {
+					title: "Orquestração Serverless na AWS: Step Functions e EventBridge",
+				},
 			},
 			{
 				slug: "cicd-gitops",
 				file: "cicd-gitops.md",
 				category: "DevOps",
-				es: { title: "CI/CD para Ingenieros Senior: De lo Básico a GitOps y Canary" },
-				en: { title: "CI/CD for Senior Engineers: From Basics to GitOps and Canary" },
-				pt: { title: "CI/CD para Engenheiros Sênior: Do Básico a GitOps e Canary" },
+				es: {
+					title: "CI/CD para Ingenieros Senior: De lo Básico a GitOps y Canary",
+				},
+				en: {
+					title: "CI/CD for Senior Engineers: From Basics to GitOps and Canary",
+				},
+				pt: {
+					title: "CI/CD para Engenheiros Sênior: Do Básico a GitOps e Canary",
+				},
 			},
 			{
 				slug: "advanced-testing-strategies",
 				file: "advanced-testing-strategies.md",
 				category: "Quality",
-				es: { title: "Estrategias de Testing Avanzadas: Contrato, Mutación y E2E Pro" },
-				en: { title: "Advanced Testing Strategies: Contract, Mutation, and E2E Pro" },
-				pt: { title: "Estratégias de Teste Avançadas: Contrato, Mutação e E2E Pro" },
+				es: {
+					title:
+						"Estrategias de Testing Avanzadas: Contrato, Mutación y E2E Pro",
+				},
+				en: {
+					title: "Advanced Testing Strategies: Contract, Mutation, and E2E Pro",
+				},
+				pt: {
+					title: "Estratégias de Teste Avançadas: Contrato, Mutação e E2E Pro",
+				},
 			},
 			{
 				slug: "bff-pattern",
 				file: "bff-pattern.md",
 				category: "Backend",
-				es: { title: "Patrón BFF (Backend for Frontend): Optimizando la UX Multi-Cliente" },
-				en: { title: "BFF (Backend for Frontend) Pattern: Optimizing Multi-Client UX" },
-				pt: { title: "Padrão BFF (Backend for Frontend): Otimizando a UX Multi-Cliente" },
+				es: {
+					title:
+						"Patrón BFF (Backend for Frontend): Optimizando la UX Multi-Cliente",
+				},
+				en: {
+					title:
+						"BFF (Backend for Frontend) Pattern: Optimizing Multi-Client UX",
+				},
+				pt: {
+					title:
+						"Padrão BFF (Backend for Frontend): Otimizando a UX Multi-Cliente",
+				},
 			},
 			{
 				slug: "nodejs-performance-tuning",
 				file: "nodejs-performance-tuning.md",
 				category: "Backend",
-				es: { title: "Node.js Performance Tuning: Perfilado, GC y Optimización Extrema" },
-				en: { title: "Node.js Performance Tuning: Profiling, GC, and Extreme Optimization" },
-				pt: { title: "Node.js Performance Tuning: Profiling, GC e Otimização Extrema" },
+				es: {
+					title:
+						"Node.js Performance Tuning: Perfilado, GC y Optimización Extrema",
+				},
+				en: {
+					title:
+						"Node.js Performance Tuning: Profiling, GC, and Extreme Optimization",
+				},
+				pt: {
+					title:
+						"Node.js Performance Tuning: Profiling, GC e Otimização Extrema",
+				},
 			},
 			{
 				slug: "nestjs-multitenancy",
@@ -200,9 +321,17 @@ export class BlogPostSeeder {
 				slug: "senior-docker-kubernetes-security",
 				file: "senior-docker-kubernetes-security.md",
 				category: "DevOps",
-				es: { title: "Seguridad de Contenedores Senior (Hardening Docker & Kubernetes)" },
-				en: { title: "Senior Container Security (Hardening Docker & Kubernetes)" },
-				pt: { title: "Segurança de Contêineres Sênior (Hardening Docker & Kubernetes)" },
+				es: {
+					title:
+						"Seguridad de Contenedores Senior (Hardening Docker & Kubernetes)",
+				},
+				en: {
+					title: "Senior Container Security (Hardening Docker & Kubernetes)",
+				},
+				pt: {
+					title:
+						"Segurança de Contêineres Sênior (Hardening Docker & Kubernetes)",
+				},
 			},
 			{
 				slug: "langchain-multi-agent-systems",
@@ -224,73 +353,151 @@ export class BlogPostSeeder {
 				slug: "micro-frontends-astro",
 				file: "micro-frontends-astro.md",
 				category: "Frontend",
-				es: { title: "Micro-Frontends Senior con Astro: Arquitectura de Ilhas y Rendimiento Extremo" },
-				en: { title: "Senior Micro-Frontends with Astro: Island Architecture and Extreme Performance" },
-				pt: { title: "Micro-Frontends Sênior com Astro: Arquitetura de Ilhas e Desempenho Extremo" },
+				es: {
+					title:
+						"Micro-Frontends Senior con Astro: Arquitectura de Ilhas y Rendimiento Extremo",
+				},
+				en: {
+					title:
+						"Senior Micro-Frontends with Astro: Island Architecture and Extreme Performance",
+				},
+				pt: {
+					title:
+						"Micro-Frontends Sênior com Astro: Arquitetura de Ilhas e Desempenho Extremo",
+				},
 			},
 			{
 				slug: "advanced-sharding-drizzle",
 				file: "advanced-sharding-drizzle.md",
 				category: "Database",
-				es: { title: "Sharding y Particionamiento Avanzado con PostgreSQL y DrizzleORM" },
-				en: { title: "Advanced Sharding and Partitioning with PostgreSQL and DrizzleORM" },
-				pt: { title: "Sharding e Particionamento Avançado com PostgreSQL e DrizzleORM" },
+				es: {
+					title:
+						"Sharding y Particionamiento Avanzado con PostgreSQL y DrizzleORM",
+				},
+				en: {
+					title:
+						"Advanced Sharding and Partitioning with PostgreSQL and DrizzleORM",
+				},
+				pt: {
+					title:
+						"Sharding e Particionamento Avançado com PostgreSQL e DrizzleORM",
+				},
 			},
 			{
 				slug: "cloud-native-disaster-recovery",
 				file: "cloud-native-disaster-recovery.md",
 				category: "Cloud",
-				es: { title: "Disaster Recovery Cloud-Native: Estrategias Multi-Región y Resiliencia" },
-				en: { title: "Cloud-Native Disaster Recovery: Multi-Region Strategies and Resilience" },
-				pt: { title: "Disaster Recovery Cloud-Native: Estratégias Multi-Região e Resiliência" },
+				es: {
+					title:
+						"Disaster Recovery Cloud-Native: Estrategias Multi-Región y Resiliencia",
+				},
+				en: {
+					title:
+						"Cloud-Native Disaster Recovery: Multi-Region Strategies and Resilience",
+				},
+				pt: {
+					title:
+						"Disaster Recovery Cloud-Native: Estratégias Multi-Região e Resiliência",
+				},
 			},
 			{
 				slug: "custom-llm-framework",
 				file: "custom-llm-framework.md",
 				category: "AI",
-				es: { title: "Construyendo tu propio Framework de LLM con LangChain y LangGraph" },
-				en: { title: "Building Your Own LLM Framework with LangChain and LangGraph" },
-				pt: { title: "Construindo seu próprio Framework de LLM com LangChain e LangGraph" },
+				es: {
+					title:
+						"Construyendo tu propio Framework de LLM con LangChain y LangGraph",
+				},
+				en: {
+					title: "Building Your Own LLM Framework with LangChain and LangGraph",
+				},
+				pt: {
+					title:
+						"Construindo seu próprio Framework de LLM com LangChain e LangGraph",
+				},
 			},
 			{
 				slug: "high-load-nodejs-engineering",
 				file: "high-load-nodejs-engineering.md",
 				category: "Backend",
-				es: { title: "Ingeniería de Alto Rendimiento en Node.js: Worker Threads y Memoria Compartida" },
-				en: { title: "High-Performance Engineering in Node.js: Worker Threads and Shared Memory" },
-				pt: { title: "Engenharia de Alto Desempenho no Node.js: Worker Threads e Memória Compartilhada" },
+				es: {
+					title:
+						"Ingeniería de Alto Rendimiento en Node.js: Worker Threads y Memoria Compartida",
+				},
+				en: {
+					title:
+						"High-Performance Engineering in Node.js: Worker Threads and Shared Memory",
+				},
+				pt: {
+					title:
+						"Engenharia de Alto Desempenho no Node.js: Worker Threads e Memória Compartilhada",
+				},
 			},
 			{
 				slug: "advanced-nestjs-patterns",
 				file: "advanced-nestjs-patterns.md",
 				category: "Backend",
-				es: { title: "Patrones Senior en NestJS: CQRS, DDD y Arquitecturas Limpias" },
-				en: { title: "Senior Patterns in NestJS: CQRS, DDD, and Clean Architectures" },
-				pt: { title: "Padrões Sênior no NestJS: CQRS, DDD e Arquiteturas Limpas" },
+				es: {
+					title: "Patrones Senior en NestJS: CQRS, DDD y Arquitecturas Limpias",
+				},
+				en: {
+					title:
+						"Senior Patterns in NestJS: CQRS, DDD, and Clean Architectures",
+				},
+				pt: {
+					title: "Padrões Sênior no NestJS: CQRS, DDD e Arquiteturas Limpas",
+				},
 			},
 			{
 				slug: "drizzle-orm-advanced",
 				file: "drizzle-orm-advanced.md",
 				category: "Database",
-				es: { title: "Drizzle ORM Avanzado: Relaciones Complejas y Optimización de Consultas" },
-				en: { title: "Advanced Drizzle ORM: Complex Relations and Query Optimization" },
-				pt: { title: "Drizzle ORM Avançado: Relações Complexas e Otimização de Consultas" },
+				es: {
+					title:
+						"Drizzle ORM Avanzado: Relaciones Complejas y Optimización de Consultas",
+				},
+				en: {
+					title:
+						"Advanced Drizzle ORM: Complex Relations and Query Optimization",
+				},
+				pt: {
+					title:
+						"Drizzle ORM Avançado: Relações Complexas e Otimização de Consultas",
+				},
 			},
 			{
 				slug: "expressjs-performance-tuning",
 				file: "expressjs-performance-tuning.md",
 				category: "Backend",
-				es: { title: "Optimización Extrema de ExpressJS: Guía Senior para Alto Rendimiento" },
-				en: { title: "Extreme ExpressJS Optimization: Senior Guide for High Performance" },
-				pt: { title: "Otimização Extrema do ExpressJS: Guia Sênior para Alto Desempenho" },
+				es: {
+					title:
+						"Optimización Extrema de ExpressJS: Guía Senior para Alto Rendimiento",
+				},
+				en: {
+					title:
+						"Extreme ExpressJS Optimization: Senior Guide for High Performance",
+				},
+				pt: {
+					title:
+						"Otimização Extrema do ExpressJS: Guia Sênior para Alto Desempenho",
+				},
 			},
 			{
 				slug: "aws-event-driven-serverless",
 				file: "aws-event-driven-serverless.md",
 				category: "Cloud",
-				es: { title: "Arquitecturas Serverless en AWS: EventBridge, Step Functions y Drizzle" },
-				en: { title: "Serverless Architectures on AWS: EventBridge, Step Functions, and Drizzle" },
-				pt: { title: "Arquiteturas Serverless na AWS: EventBridge, Step Functions e Drizzle" },
+				es: {
+					title:
+						"Arquitecturas Serverless en AWS: EventBridge, Step Functions y Drizzle",
+				},
+				en: {
+					title:
+						"Serverless Architectures on AWS: EventBridge, Step Functions, and Drizzle",
+				},
+				pt: {
+					title:
+						"Arquiteturas Serverless na AWS: EventBridge, Step Functions e Drizzle",
+				},
 			},
 			{
 				slug: "langchain-production-rag",
@@ -356,7 +563,9 @@ export class BlogPostSeeder {
 
 			const fullContent = fs.readFileSync(filePath, "utf-8");
 			// biome-ignore lint/suspicious/noConsole: Seeder debug
-			console.log(`Found content for ${postInfo.file}, length: ${fullContent.length}`);
+			console.log(
+				`Found content for ${postInfo.file}, length: ${fullContent.length}`,
+			);
 			const sections = fullContent.split("---");
 
 			const contentMap: Record<string, string> = {};
@@ -445,7 +654,9 @@ export class BlogPostSeeder {
 		}
 
 		// Final check in seeder
-		const count = await this.db.select({ count: sql`count(*)` }).from(schema.blogPostEntity);
+		const count = await this.db
+			.select({ count: sql`count(*)` })
+			.from(schema.blogPostEntity);
 		// biome-ignore lint/suspicious/noConsole: Seeder verify
 		console.log(`📊 Total blog posts in DB: ${count[0].count}`);
 

@@ -1,4 +1,5 @@
 import { paginator } from "@infrastructure/utils/server/helpers";
+import { NotificationService } from "@modules/notification/services/notification.service";
 import { NotFoundException } from "@nestjs/common";
 import { Test, TestingModule } from "@nestjs/testing";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -31,6 +32,10 @@ describe("ContactService", () => {
 		invalidate: vi.fn(),
 	};
 
+	const mockNotificationService = {
+		sendPushNotification: vi.fn(),
+	};
+
 	const mockMessage: ContactMessageSchema = {
 		id: 1,
 		tenant_id: 1,
@@ -52,6 +57,7 @@ describe("ContactService", () => {
 				ContactService,
 				{ provide: ContactRepository, useValue: mockContactRepository },
 				{ provide: ContactCache, useValue: mockContactCache },
+				{ provide: NotificationService, useValue: mockNotificationService },
 			],
 		}).compile();
 

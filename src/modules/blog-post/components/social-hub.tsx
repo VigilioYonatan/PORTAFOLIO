@@ -1,39 +1,33 @@
+import { zodResolver } from "@hookform/resolvers/zod";
 import { cn } from "@infrastructure/utils/client";
-import { useSignal } from "@preact/signals";
-import {
-	MessageSquare,
-	ThumbsUp,
-	Send,
-	User,
-	Loader2,
-} from "lucide-preact";
-import { useEffect } from "preact/hooks";
+import { formatTimeAgo } from "@infrastructure/utils/hybrid/date.utils";
+import { socialCommentStoreApi } from "@modules/social/apis/social-comment.api";
 import {
 	socialReactionsSummaryApi,
 	socialReactionToggleApi,
 } from "@modules/social/apis/social-reaction.api";
-import { socialCommentStoreApi } from "@modules/social/apis/social-comment.api";
-import { useForm } from "react-hook-form";
-import { socialCommentStoreDto } from "@modules/social/dtos/social-comment.store.dto";
-import { zodResolver } from "@hookform/resolvers/zod";
-import usePaginator from "@vigilio/preact-paginator";
-import { sweetModal } from "@vigilio/sweet";
-import { formatTimeAgo } from "@infrastructure/utils/hybrid/date.utils";
-import { useQuery } from "@vigilio/preact-fetching";
-import type { SocialReactionSchema } from "@modules/social/schemas/social-reaction.schema";
 import type { SocialCommentStoreDto } from "@modules/social/dtos/social-comment.store.dto";
+import { socialCommentStoreDto } from "@modules/social/dtos/social-comment.store.dto";
 import type { SocialReactionStoreDto } from "@modules/social/dtos/social-reaction.store.dto";
 import type { SocialCommentSchema } from "@modules/social/schemas/social-comment.schema";
+import type { SocialReactionSchema } from "@modules/social/schemas/social-reaction.schema";
+import { useSignal } from "@preact/signals";
+import { useQuery } from "@vigilio/preact-fetching";
+import usePaginator from "@vigilio/preact-paginator";
+import { sweetModal } from "@vigilio/sweet";
+import { Loader2, MessageSquare, Send, ThumbsUp, User } from "lucide-preact";
+import { useEffect } from "preact/hooks";
+import { useForm } from "react-hook-form";
 
 interface SocialHubProps {
 	likes?: number;
 	comments?: number;
 	lang?: string;
 	id: number;
-    // Use the comprehensive entity type or the specific one?
-    // Comments only support POST/PROJECT. Reactions support more.
-    // Since this hub supports both, we must limit to the intersection effectively,
-    // which is what SocialCommentSchema provides.
+	// Use the comprehensive entity type or the specific one?
+	// Comments only support POST/PROJECT. Reactions support more.
+	// Since this hub supports both, we must limit to the intersection effectively,
+	// which is what SocialCommentSchema provides.
 	entityType: SocialCommentSchema["commentable_type"];
 }
 
@@ -61,39 +55,39 @@ export default function SocialHub({
 	// API Integrations
 	const reactionsQuery = socialReactionsSummaryApi(String(id), entityType);
 	const likeMutation = socialReactionToggleApi();
-    
-    // Fetch comment count effectively (limit=1 just to get count metadata)
-    const commentCountQuery = useQuery<{ count: number }, unknown>(
-        `/api/v1/social-comment?limit=1&commentable_id=${id}&commentable_type=${entityType}&is_visible=true`,
-        async (url) => {
+
+	// Fetch comment count effectively (limit=1 just to get count metadata)
+	const commentCountQuery = useQuery<{ count: number }, unknown>(
+		`/api/v1/social-comment?limit=1&commentable_id=${id}&commentable_type=${entityType}&is_visible=true`,
+		async (url) => {
 			const response = await fetch(`${url}`);
 			const data = await response.json();
 			return data;
+		},
+	);
+
+	const commentCount = useSignal(comments);
+
+	// Update comment count from API
+	useEffect(() => {
+		if (commentCountQuery.data) {
+			commentCount.value = commentCountQuery.data.count;
 		}
-    );
+	}, [commentCountQuery.data]);
 
-    const commentCount = useSignal(comments);
-
-    // Update comment count from API
-    useEffect(() => {
-        if (commentCountQuery.data) {
-            commentCount.value = commentCountQuery.data.count;
-        }
-    }, [commentCountQuery.data]);
-
-    // Refetch counts when a new comment is added
-    useEffect(() => {
-        function handleNewComment() {
-             commentCountQuery.refetch(false);
-        }
-        window.addEventListener("comment-added", handleNewComment);
-        return () => window.removeEventListener("comment-added", handleNewComment);
-    }, []);
+	// Refetch counts when a new comment is added
+	useEffect(() => {
+		function handleNewComment() {
+			commentCountQuery.refetch(false);
+		}
+		window.addEventListener("comment-added", handleNewComment);
+		return () => window.removeEventListener("comment-added", handleNewComment);
+	}, []);
 
 	// Update like count from API if available
 	useEffect(() => {
 		if (reactionsQuery.data) {
-            // Data is Record<string, number> where keys are reaction types (LIKE, LOVE etc)
+			// Data is Record<string, number> where keys are reaction types (LIKE, LOVE etc)
 			const count = reactionsQuery.data["LIKE"];
 			if (typeof count === "number") {
 				likeCount.value = count;
@@ -209,7 +203,7 @@ function SocialCommentForm({
 			commentable_id: entityId,
 			commentable_type: entityType,
 			visitor_id: visitorId, // Correctly nullable
-            ip_address: null, // Initial value
+			ip_address: null, // Initial value
 		},
 	});
 
@@ -219,7 +213,7 @@ function SocialCommentForm({
 			commentable_id: entityId,
 			commentable_type: entityType,
 			visitor_id: visitorId,
-            ip_address: null, // Backend handles IP usually, but schema allows null
+			ip_address: null, // Backend handles IP usually, but schema allows null
 		};
 
 		commentMutation.mutate(payload, {
@@ -325,7 +319,10 @@ function SocialCommentList({
 }) {
 	const paginator = usePaginator({ limit: 12 });
 
-	const query = useQuery<{ count: number; results: SocialCommentSchema[] }, unknown>(
+	const query = useQuery<
+		{ count: number; results: SocialCommentSchema[] },
+		unknown
+	>(
 		`/api/v1/social-comment?commentable_id=${entityId}&commentable_type=${entityType}&offset=${paginator.pagination.value.offset}&limit=${paginator.pagination.value.limit}&is_visible=true`,
 		async (url) => {
 			const response = await fetch(`${url}`);

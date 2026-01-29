@@ -1,13 +1,19 @@
 import Form from "@components/form";
-import { UPLOAD_CONFIG, typeTextExtensions } from "@modules/uploads/const/upload.const";
-import { handlerError } from "@infrastructure/utils/client";
-import type { Refetch } from "@infrastructure/types/client";
 import { zodResolver } from "@hookform/resolvers/zod";
+import type { Refetch } from "@infrastructure/types/client";
+import { handlerError } from "@infrastructure/utils/client";
+import {
+	typeTextExtensions,
+	UPLOAD_CONFIG,
+} from "@modules/uploads/const/upload.const";
 import { sweetModal } from "@vigilio/sweet";
 import { type Resolver, useForm } from "react-hook-form";
 import { documentsStoreApi } from "../apis/documents.store.api";
-import { type DocumentStoreDto, documentStoreDto } from "../dtos/document.store.dto";
 import type { DocumentIndexResponseDto } from "../dtos/document.response.dto";
+import {
+	type DocumentStoreDto,
+	documentStoreDto,
+} from "../dtos/document.store.dto";
 import type { DocumentSchema } from "../schemas/document.schema";
 
 // ... existing code
@@ -19,8 +25,8 @@ interface DocumentStoreProps {
 export default function DocumentStore({ refetch }: DocumentStoreProps) {
 	const documentStoreForm = useForm<DocumentStoreDto>({
 		resolver: zodResolver(documentStoreDto) as Resolver<DocumentStoreDto>,
-		mode: "all",defaultValues:{metadata:null}
-		
+		mode: "all",
+		defaultValues: { metadata: null },
 	});
 
 	const storeMutation = documentsStoreApi();
@@ -76,11 +82,7 @@ export default function DocumentStore({ refetch }: DocumentStoreProps) {
 // STATUS BADGE (Exported for reuse)
 // ============================================
 
-export function IndexStatus({
-	status,
-}: {
-	status: DocumentSchema["status"];
-}) {
+export function IndexStatus({ status }: { status: DocumentSchema["status"] }) {
 	const colors = {
 		PENDING: "bg-yellow-500/20 text-yellow-500",
 		PROCESSING: "bg-blue-500/20 text-blue-500 animate-pulse",

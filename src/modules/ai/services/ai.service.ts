@@ -13,7 +13,6 @@ import type {
 import type { AiConfigUpdateDto } from "../dtos/ai-config.update.dto";
 import { AiConfigRepository } from "../repositories/ai-config.repository";
 
-
 @Injectable()
 export class AiService {
 	private readonly logger = new Logger(AiService.name);
@@ -62,7 +61,11 @@ export class AiService {
 			throw new Error("AI Configuration not found (Update failed)");
 		}
 
-		const config = await this.aiConfigRepository.update(tenant_id, existing.id, body);
+		const config = await this.aiConfigRepository.update(
+			tenant_id,
+			existing.id,
+			body,
+		);
 
 		// Invalidate Cache
 		await this.aiCache.invalidate(tenant_id);
@@ -154,7 +157,10 @@ export class AiService {
 	}
 
 	async getEmbeddings(text: string): Promise<number[]> {
-		this.logger.debug({ textLength: text.length }, "Generating embeddings via API");
+		this.logger.debug(
+			{ textLength: text.length },
+			"Generating embeddings via API",
+		);
 
 		const apiKey = this.configService.get("OPENROUTER_API_KEY", {
 			infer: true,

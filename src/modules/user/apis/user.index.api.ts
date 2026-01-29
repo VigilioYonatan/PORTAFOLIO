@@ -89,7 +89,9 @@ export function userIndexApi(
 				if (paginator) {
 					paginator.updateData({
 						total: data.count,
-						cursor: table ? undefined : data.results[data.results.length - 1]?.id,
+						cursor: table
+							? undefined
+							: data.results[data.results.length - 1]?.id,
 					});
 				}
 			},

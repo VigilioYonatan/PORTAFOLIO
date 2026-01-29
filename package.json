@@ -68,6 +68,7 @@
 		"@types/passport": "^1.0.17",
 		"@types/passport-local": "^1.0.38",
 		"@types/qrcode": "^1.5.6",
+		"@types/web-push": "^3.6.4",
 		"@vigilio/preact-fetching": "^2.5.2",
 		"@vigilio/preact-paginator": "0.0.13",
 		"@vigilio/preact-table": "1.2.8",
@@ -126,6 +127,7 @@
 		"socket.io": "^4.8.1",
 		"socket.io-client": "^4.8.3",
 		"tailwind-merge": "^3.4.0",
+		"web-push": "^3.6.7",
 		"wouter": "^3.9.0",
 		"wouter-preact": "^3.9.0",
 		"zod": "^4.3.5"

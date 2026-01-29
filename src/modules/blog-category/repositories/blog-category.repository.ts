@@ -27,7 +27,10 @@ export class BlogCategoryRepository {
 
 	async store(
 		tenant_id: number,
-		body: Omit<BlogCategorySchema, "id" | "tenant_id" | "created_at" | "updated_at">,
+		body: Omit<
+			BlogCategorySchema,
+			"id" | "tenant_id" | "created_at" | "updated_at"
+		>,
 	): Promise<BlogCategorySchema> {
 		const [result] = await this.db
 			.insert(blogCategoryEntity)
@@ -114,9 +117,10 @@ export class BlogCategoryRepository {
 					description: false,
 				},
 				extras: {
-					description: sql<string>`substring(${blogCategoryEntity.description} from 1 for 3000)`.as(
-						"description",
-					),
+					description:
+						sql<string>`substring(${blogCategoryEntity.description} from 1 for 3000)`.as(
+							"description",
+						),
 				},
 			}),
 			this.db

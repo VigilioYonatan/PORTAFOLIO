@@ -7,7 +7,7 @@ import {
 	isProtostarActive,
 } from "@stores/special-mode.store";
 import { Loader2Icon, XIcon } from "lucide-preact";
-import { useEffect, useRef } from "preact/hooks";
+import { useMemo, useEffect, useRef } from "preact/hooks";
 
 export default function ProtostarOverlay() {
 	// Lazy Load State - refactored to Signal
@@ -64,6 +64,22 @@ export default function ProtostarOverlay() {
 		}
 	}, [isOpen]);
 
+	// Memoize particles to prevent heavy re-calculation and flickering on every time update
+	const particles = useMemo(() => {
+		return Array.from({ length: 40 }).map((_, i) => ({
+			id: i,
+			style: {
+				top: `${Math.random() * 110}%`,
+				left: `${Math.random() * 100}%`,
+				width: `${Math.random() * 6 + 2}px`,
+				height: `${Math.random() * 6 + 2}px`,
+				animation: `float ${Math.random() * 5 + 5}s infinite linear`,
+				animationDelay: `-${Math.random() * 5}s`,
+				boxShadow: `0 0 ${Math.random() * 10 + 5}px rgba(255,255,255,0.4)`,
+			},
+		}));
+	}, []);
+
 	const handleVideoLoad = () => {
 		isLoading.value = false;
 		if (isOpen) videoRef.current?.play();
@@ -77,32 +93,24 @@ export default function ProtostarOverlay() {
 	return (
 		<div
 			class={cn(
-				"fixed inset-0 z-[100] bg-black flex items-center justify-center overflow-hidden transition-opacity duration-700",
+				"fixed inset-0 z-100 bg-black flex items-center justify-center overflow-hidden transition-opacity duration-700",
 				isOpen
 					? "opacity-100 pointer-events-auto"
 					: "opacity-0 pointer-events-none",
 			)}
 		>
-			{/* Fog / Particles Effect - Enhanced */}
+			{/* Fog / Particles Effect - Enhanced (Static Data) */}
 			<div class="absolute inset-0 z-10 pointer-events-none overflow-hidden">
-				{Array.from({ length: 40 }).map((_, i) => (
+				{particles.map((p: any) => (
 					<div
-						key={i}
+						key={p.id}
 						class="absolute rounded-full bg-white blur-[2px] opacity-0"
-						style={{
-							top: `${Math.random() * 110}%`,
-							left: `${Math.random() * 100}%`,
-							width: `${Math.random() * 6 + 2}px`,
-							height: `${Math.random() * 6 + 2}px`,
-							animation: `float ${Math.random() * 5 + 5}s infinite linear`,
-							animationDelay: `-${Math.random() * 5}s`,
-							boxShadow: `0 0 ${Math.random() * 10 + 5}px rgba(255,255,255,0.4)`, // Glow for fog feel
-						}}
+						style={p.style}
 					/>
 				))}
 				{/* Specific Fog Layers (Gradient overlays) */}
 				<div class="absolute inset-0 bg-linear-to-t from-green-900/10 via-transparent to-transparent mix-blend-screen" />
-				<div class="absolute bottom-0 left-0 right-0 h-1/3 bg-gradient-to-t from-green-500/5 to-transparent blur-xl" />
+				<div class="absolute bottom-0 left-0 right-0 h-1/3 bg-linear-to-t from-green-500/5 to-transparent blur-xl" />
 			</div>
 
 			{/* Video */}
@@ -152,78 +160,90 @@ export default function ProtostarOverlay() {
 				</button>
 			)}
 
-			{/* Video Controls */}
-			<div class="absolute bottom-10 left-0 right-0 z-50 flex justify-center gap-4 px-4 w-full max-w-6xl mx-auto pointer-events-auto">
-				<div class="grid grid-cols-4 md:grid-cols-7 gap-4 w-full">
-					{(() => {
-						const buttons = [
-							{ label: "0%", time: 0 },
-							{ label: "30%", time: 31, highlightAt: [37, 75.5, 148, 186] },
-							{ label: "60%", time: 95, highlightAt: [42.5, 97, 153, 208] },
-							{ label: "WARNING", time: 121, highlightAt: [53, 164] },
-							{ label: "80%", time: 155, highlightAt: [48, 158] },
-							{ label: "90%", time: 230 },
-							{ label: "INESTABLE", time: 235 },
-						];
+			{/* Video Controls - Isolated Component to prevent full overlay re-render */}
+			<ProtostarVideoControls
+				currentTime={currentTime}
+				duration={duration}
+				videoRef={videoRef}
+			/>
+		</div>
+	);
+}
 
-						return buttons.map((btn, index) => {
-							const nextBtn = buttons[index + 1];
-							const startTime = btn.time;
-							// Last segment covers until end of video (using duration)
-							const endTime = nextBtn ? nextBtn.time : (duration.value || 300);
-							
-							const current = currentTime.value;
-							let progress = 0;
+function ProtostarVideoControls({
+	currentTime,
+	duration,
+	videoRef,
+}: {
+	currentTime: { value: number };
+	duration: { value: number };
+	videoRef: { current: HTMLVideoElement | null };
+}) {
+	const buttons = [
+		{ label: "0%", time: 0 },
+		{ label: "30%", time: 31, highlightAt: [37, 75.5, 148, 186] },
+		{ label: "60%", time: 95, highlightAt: [42.5, 97, 153, 208] },
+		{ label: "WARNING", time: 121, highlightAt: [53, 164] },
+		{ label: "80%", time: 155, highlightAt: [48, 158] },
+		{ label: "90%", time: 230 },
+		{ label: "INESTABLE", time: 235 },
+	];
 
-							if (current >= endTime) {
-								progress = 100;
-							} else if (current > startTime) {
-								progress = ((current - startTime) / (endTime - startTime)) * 100;
-							}
+	return (
+		<div class="absolute bottom-10 left-0 right-0 z-50 flex justify-center gap-4 px-4 w-full max-w-6xl mx-auto pointer-events-auto">
+			<div class="grid grid-cols-4 md:grid-cols-7 gap-4 w-full">
+				{buttons.map((btn, index) => {
+					const nextBtn = buttons[index + 1];
+					const startTime = btn.time;
+					const endTime = nextBtn ? nextBtn.time : duration.value || 300;
+					const current = currentTime.value;
 
-							const isHighlighted =
-								btn.highlightAt?.some(
-									(time) => current >= time && current < time + 1,
-								);
+					let progress = 0;
+					if (current >= endTime) {
+						progress = 100;
+					} else if (current > startTime) {
+						progress = ((current - startTime) / (endTime - startTime)) * 100;
+					}
 
-							const isRed = ["WARNING", "INESTABLE"].includes(btn.label);
-							// Fill color for the progress bar (semi-transparent)
-							const fillColor = isRed
-								? "rgba(220, 38, 38, 0.5)" // Red
-								: "rgba(34, 197, 94, 0.5)"; // Green
+					const isHighlighted = btn.highlightAt?.some(
+						(time) => current >= time && current < time + 1,
+					);
 
-							return (
-								<button
-									key={btn.label}
-									type="button"
-									onClick={() => {
-										if (videoRef.current) {
-											videoRef.current.currentTime = btn.time;
-											videoRef.current.play();
-										}
-									}}
-									style={{
-										background: isHighlighted
-											? undefined // Class handles background when highlighted
-											: `linear-gradient(90deg, ${fillColor} ${progress}%, transparent ${progress}%)`,
-									}}
-									class={cn(
-										"backdrop-blur-sm border font-mono text-xs md:text-sm py-3 px-2 rounded-lg transition-all duration-300 transform uppercase tracking-wider",
-										isHighlighted
-											? isRed
-												? "bg-red-500 shadow-[0_0_30px_rgba(239,68,68,1)] scale-110 border-red-400 z-10 ring-2 ring-white/50 text-white"
-												: "bg-green-500 shadow-[0_0_30px_rgba(34,197,94,1)] scale-110 border-green-400 z-10 ring-2 ring-white/50 text-white"
-											: isRed
-												? "bg-red-600/10 border-red-500/50 hover:bg-red-500/30 text-red-100 hover:scale-105 active:scale-95"
-												: "bg-green-600/10 border-green-500/50 hover:bg-green-500/30 text-white hover:scale-105 active:scale-95",
-									)}
-								>
-									{btn.label}
-								</button>
-							);
-						});
-					})()}
-				</div>
+					const isRed = ["WARNING", "INESTABLE"].includes(btn.label);
+					const fillColor = isRed
+						? "rgba(220, 38, 38, 0.5)"
+						: "rgba(34, 197, 94, 0.5)";
+
+					return (
+						<button
+							key={btn.label}
+							type="button"
+							onClick={() => {
+								if (videoRef.current) {
+									videoRef.current.currentTime = btn.time;
+									videoRef.current.play();
+								}
+							}}
+							style={{
+								background: isHighlighted
+									? undefined
+									: `linear-gradient(90deg, ${fillColor} ${progress}%, transparent ${progress}%)`,
+							}}
+							class={cn(
+								"backdrop-blur-sm border font-mono text-[10px] md:text-sm py-3 px-2 rounded-lg transition-all duration-300 transform uppercase tracking-wider",
+								isHighlighted
+									? isRed
+										? "bg-red-500 shadow-[0_0_30px_rgba(239,68,68,1)] scale-110 border-red-400 z-10 ring-2 ring-white/50 text-white"
+										: "bg-green-500 shadow-[0_0_30px_rgba(34,197,94,1)] scale-110 border-green-400 z-10 ring-2 ring-white/50 text-white"
+									: isRed
+										? "bg-red-600/10 border-red-500/50 hover:bg-red-500/30 text-red-100 hover:scale-105 active:scale-95"
+										: "bg-green-600/10 border-green-500/50 hover:bg-green-500/30 text-white hover:scale-105 active:scale-95",
+							)}
+						>
+							{btn.label}
+						</button>
+					);
+				})}
 			</div>
 		</div>
 	);

@@ -1,9 +1,9 @@
+import type { Language } from "@infrastructure/types/i18n";
 import { useQuery } from "@vigilio/preact-fetching";
 import type { UsePaginator } from "@vigilio/preact-paginator";
 import type { UseTable } from "@vigilio/preact-table";
 import type { BlogPostIndexResponseDto } from "../dtos/blog-post.response.dto";
 import type { BlogPostSchema } from "../schemas/blog-post.schema";
-import type { Language } from "@infrastructure/types/i18n";
 
 export type BlogPostIndexSecondaryPaginator = "action";
 export type BlogPostIndexMethods = {
@@ -30,7 +30,7 @@ export function blogPostIndexApi(
 	filters?: {
 		limit?: number;
 		category_id?: number | null;
-        language?: Language;
+		language?: Language;
 	},
 ) {
 	const query = useQuery<BlogPostIndexResponseDto, BlogPostIndexApiError>(
@@ -83,9 +83,9 @@ export function blogPostIndexApi(
 			if (filters?.category_id) {
 				data.append("category_id", String(filters.category_id));
 			}
-            if (filters?.language) {
-                data.append("language", filters.language);
-            }
+			if (filters?.language) {
+				data.append("language", filters.language);
+			}
 
 			const response = await fetch(`/api/v1${url}?${data}`);
 			const result = await response.json();

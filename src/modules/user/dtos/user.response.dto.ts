@@ -18,20 +18,19 @@ export const userShowResponseDto = z.object({
 export type UserShowResponseDto = z.infer<typeof userShowResponseDto>;
 
 // --- Me ---
-export const userMeResponseDto = z
-	.object({
-		success: z.literal(true),
-		user: userSchema.pick({
-			id: true,
-			username: true,
-			email: true,
-			role_id: true,
-			status: true,
-			avatar: true,
-			created_at: true,
-			updated_at: true,
-		}),
-	})
+export const userMeResponseDto = z.object({
+	success: z.literal(true),
+	user: userSchema.pick({
+		id: true,
+		username: true,
+		email: true,
+		role_id: true,
+		status: true,
+		avatar: true,
+		created_at: true,
+		updated_at: true,
+	}),
+});
 export type UserMeResponseDto = z.infer<typeof userMeResponseDto>;
 
 // --- Store ---

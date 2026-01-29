@@ -1,7 +1,7 @@
+import type { Signal } from "@preact/signals";
 import { useMutation } from "@vigilio/preact-fetching";
 import type { ChatMessagePublicStoreResponseDto } from "../dtos/chat.response.dto";
 import type { ChatMessagePublicStoreDto } from "../dtos/chat-message.public-store.dto";
-import type { Signal } from "@preact/signals";
 
 export interface ChatMessagePublicStoreApiError {
 	success: false;
@@ -14,21 +14,26 @@ export interface ChatMessagePublicStoreApiError {
  * @method POST
  * @body ChatMessagePublicStoreDto
  */
-export function chatMessagePublicStoreApi(conversationId: Signal<number|null>) {
+export function chatMessagePublicStoreApi(
+	conversationId: Signal<number | null>,
+) {
 	return useMutation<
 		ChatMessagePublicStoreResponseDto,
 		ChatMessagePublicStoreDto,
 		ChatMessagePublicStoreApiError
-	>(`/chat/conversations/${conversationId.value}/messages`, async (url, body) => {
-		const response = await fetch(`/api/v1${url}`, {
-			method: "POST",
-			body: JSON.stringify(body),
-			headers: { "Content-Type": "application/json" },
-		});
-		const result = await response.json();
-		if (!response.ok) {
-			throw result;
-		}
-		return result;
-	});
+	>(
+		`/chat/conversations/${conversationId.value}/messages`,
+		async (url, body) => {
+			const response = await fetch(`/api/v1${url}`, {
+				method: "POST",
+				body: JSON.stringify(body),
+				headers: { "Content-Type": "application/json" },
+			});
+			const result = await response.json();
+			if (!response.ok) {
+				throw result;
+			}
+			return result;
+		},
+	);
 }

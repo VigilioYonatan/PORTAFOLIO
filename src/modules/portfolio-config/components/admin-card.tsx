@@ -5,6 +5,7 @@ import {
 	type UserProfileUpdateDto,
 	userProfileUpdateDto,
 } from "@modules/user/dtos/user.profile.update.dto";
+import { type Lang, useTranslations } from "@src/i18n";
 import { useQuery } from "@vigilio/preact-fetching";
 import { sweetModal } from "@vigilio/sweet";
 import {
@@ -18,23 +19,24 @@ import {
 } from "lucide-preact";
 import { useEffect } from "preact/hooks";
 import type { JSX } from "preact/jsx-runtime";
-import { useForm, type Resolver } from "react-hook-form";
+import { type Resolver, useForm } from "react-hook-form";
 import { authSessionApi } from "../../auth/apis/auth.session.api";
 import { userProfileUpdateApi } from "../../user/apis/user.profile-update.api";
-import { type Lang, useTranslations } from "@src/i18n";
 
 interface AdminCardProps {
-    lang?: Lang;
+	lang?: Lang;
 }
 
 export default function AdminCard({ lang = "es" }: AdminCardProps) {
-    const t = useTranslations(lang);
+	const t = useTranslations(lang);
 	// Use authSessionApi with useQuery
 	const query = useQuery("auth-session", authSessionApi);
 	const updateMutation = userProfileUpdateApi();
 
 	const form = useForm<UserProfileUpdateDto>({
-		resolver: zodResolver(userProfileUpdateDto) as Resolver<UserProfileUpdateDto>,
+		resolver: zodResolver(
+			userProfileUpdateDto,
+		) as Resolver<UserProfileUpdateDto>,
 		mode: "all",
 	});
 

@@ -103,15 +103,24 @@ export class SocialRepository {
 		tenant_id: number,
 		query: SocialCommentQueryDto,
 	): Promise<[SocialCommentSchema[], number]> {
-		const { limit, offset, commentable_id, commentable_type, sortBy, sortDir, search } =
-			query;
+		const {
+			limit,
+			offset,
+			commentable_id,
+			commentable_type,
+			sortBy,
+			sortDir,
+			search,
+		} = query;
 
 		const baseWhere: SQL[] = [eq(socialCommentEntity.tenant_id, tenant_id)];
 
 		if (commentable_id)
 			baseWhere.push(eq(socialCommentEntity.commentable_id, commentable_id));
 		if (commentable_type)
-			baseWhere.push(eq(socialCommentEntity.commentable_type, commentable_type));
+			baseWhere.push(
+				eq(socialCommentEntity.commentable_type, commentable_type),
+			);
 		if (search)
 			baseWhere.push(ilike(socialCommentEntity.content, `%${search}%`));
 
@@ -138,12 +147,14 @@ export class SocialRepository {
 					reply: false,
 				},
 				extras: {
-					content: sql<string>`substring(${socialCommentEntity.content} from 1 for 3000)`.as(
-						"content",
-					),
-					reply: sql<string>`substring(${socialCommentEntity.reply} from 1 for 3000)`.as(
-						"reply",
-					),
+					content:
+						sql<string>`substring(${socialCommentEntity.content} from 1 for 3000)`.as(
+							"content",
+						),
+					reply:
+						sql<string>`substring(${socialCommentEntity.reply} from 1 for 3000)`.as(
+							"reply",
+						),
 				},
 			}),
 			this.db

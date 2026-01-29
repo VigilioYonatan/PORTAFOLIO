@@ -1,5 +1,6 @@
-import { AI_TECHNICAL_PROTECTION } from "@modules/ai/const/ai-prompts.const";
 import { paginator } from "@infrastructure/utils/server";
+import { AI_TECHNICAL_PROTECTION } from "@modules/ai/const/ai-prompts.const";
+import { AiService } from "@modules/ai/services/ai.service";
 import {
 	BadRequestException,
 	Injectable,
@@ -19,8 +20,7 @@ import type {
 import type { ProjectStoreDto } from "../dtos/project.store.dto";
 import type { ProjectUpdateDto } from "../dtos/project.update.dto";
 import { ProjectRepository } from "../repositories/project.repository";
-import type {  ProjectWithRelations } from "../schemas/project.schema";
-import { AiService } from "@modules/ai/services/ai.service";
+import type { ProjectWithRelations } from "../schemas/project.schema";
 import { type ProjectSchema } from "../schemas/project.schema";
 
 @Injectable()
@@ -129,14 +129,21 @@ export class ProjectService {
 					const jsonResponse = await this.aiService.generate({
 						model: "openai/gpt-4o-mini",
 						temperature: 0.3,
-						system: "You are a professional translator. Return only valid JSON.",
+						system:
+							"You are a professional translator. Return only valid JSON.",
 						messages: [{ role: "user", content: prompt }],
 					});
 
 					const cleanJson = jsonResponse.replace(/```json|```/g, "").trim();
 					const translated = JSON.parse(cleanJson);
 
-					const { id, created_at, updated_at, tenant_id: t_id, ...rest } = originalProject;
+					const {
+						id,
+						created_at,
+						updated_at,
+						tenant_id: t_id,
+						...rest
+					} = originalProject;
 
 					return {
 						...rest,

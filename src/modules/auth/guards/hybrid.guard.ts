@@ -1,4 +1,3 @@
-
 import {
 	type ExecutionContext,
 	Injectable,
@@ -44,7 +43,7 @@ export class HybridAuthGuard extends AuthGuard("jwt") {
 					// @ts-expect-error - Initialize if strictly necessary, but Express usually has it
 					req.locals = {};
 				}
-				
+
 				// Typescript should know req.user exists after successful guard execution if types are correct.
 				// However, req.user from passport might not align perfectly with our UserAuth type.
 				// We assume req.user matches UserAuth structure or strict subset required.

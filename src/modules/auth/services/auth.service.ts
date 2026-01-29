@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
-import { slugify } from "@infrastructure/utils/hybrid";
 import type { Environments } from "@infrastructure/config/server";
+import { slugify } from "@infrastructure/utils/hybrid";
 import {
 	decrypt,
 	encrypt,

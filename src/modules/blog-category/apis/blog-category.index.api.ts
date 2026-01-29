@@ -23,7 +23,10 @@ export interface BlogCategoryIndexApiError {
  * @method GET
  */
 export function blogCategoryIndexApi(table: BlogCategoryIndexTable | null) {
-	const query = useQuery<BlogCategoryIndexResponseDto, BlogCategoryIndexApiError>(
+	const query = useQuery<
+		BlogCategoryIndexResponseDto,
+		BlogCategoryIndexApiError
+	>(
 		"/blog-category",
 		async (url) => {
 			const data = new URLSearchParams();

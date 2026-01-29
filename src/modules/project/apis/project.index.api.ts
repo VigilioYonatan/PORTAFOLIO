@@ -1,9 +1,9 @@
-import { useQuery } from "@vigilio/preact-fetching";
-import type { UseTable } from "@vigilio/preact-table";
-import type { ProjectIndexResponseDto } from "../dtos/project.response.dto";
-import type { UsePaginator } from "@vigilio/preact-paginator";
 import type { Refetch } from "@infrastructure/types/client";
 import type { Language } from "@infrastructure/types/i18n";
+import { useQuery } from "@vigilio/preact-fetching";
+import type { UsePaginator } from "@vigilio/preact-paginator";
+import type { UseTable } from "@vigilio/preact-table";
+import type { ProjectIndexResponseDto } from "../dtos/project.response.dto";
 
 export type ProjectIndexSecondaryPaginator = "action";
 export type ProjectIndexMethods = {
@@ -31,7 +31,7 @@ export function projectIndexApi(
 	filters?: {
 		limit?: number;
 		is_featured?: boolean;
-        language?: Language;
+		language?: Language;
 	},
 ) {
 	const query = useQuery<ProjectIndexResponseDto, ProjectIndexApiError>(
@@ -81,9 +81,9 @@ export function projectIndexApi(
 			if (filters?.is_featured !== undefined) {
 				data.append("is_featured", String(filters.is_featured));
 			}
-            if (filters?.language) {
-                data.append("language", filters.language);
-            }
+			if (filters?.language) {
+				data.append("language", filters.language);
+			}
 
 			const response = await fetch(`/api/v1${url}?${data}`);
 			const result = await response.json();

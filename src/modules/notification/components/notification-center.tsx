@@ -22,11 +22,9 @@ export function NotificationCenter() {
 						),
 					}));
 				},
-
 			},
 		);
 	}
-
 
 	function handleDeleteAll() {
 		sweetModal({
@@ -47,8 +45,6 @@ export function NotificationCenter() {
 						sweetModal({ icon: "success", title: "¡Limpiado!" });
 					},
 				});
-
-
 			}
 		});
 	}

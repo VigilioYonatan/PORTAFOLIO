@@ -1,12 +1,11 @@
 import { cn } from "@infrastructure/utils/client";
 import { useSignal } from "@preact/signals";
+import { type Lang, useTranslations } from "@src/i18n";
 import { useEffect, useMemo } from "preact/hooks";
 
-import { useTranslations } from "@src/i18n";
+export default function SystemIntro({ lang = "es" }: { lang?: Lang }) {
+	const t = useTranslations(lang);
 
-export default function SystemIntro({ lang = "es" }: { lang?: string }) {
-    const t = useTranslations(lang as any);
-	
 	const BOOT_LOGS = [
 		{ id: "0x00A1", text: t("intro.boot.kernel"), status: "OK" },
 		{ id: "0x00B4", text: t("intro.boot.filesystem"), status: "OK" },
@@ -17,16 +16,16 @@ export default function SystemIntro({ lang = "es" }: { lang?: string }) {
 		{ id: "0x010A", text: t("intro.boot.uplink"), status: "PENDING" },
 	];
 
-// Helper to generate random starts
-const generateStars = (count: number) => {
-	let value = "";
-	for (let i = 0; i < count; i++) {
-		const x = Math.floor(Math.random() * 2000);
-		const y = Math.floor(Math.random() * 2000);
-		value += `${x}px ${y}px #FFF, `;
-	}
-	return value.slice(0, -2);
-};
+	// Helper to generate random starts
+	const generateStars = (count: number) => {
+		let value = "";
+		for (let i = 0; i < count; i++) {
+			const x = Math.floor(Math.random() * 2000);
+			const y = Math.floor(Math.random() * 2000);
+			value += `${x}px ${y}px #FFF, `;
+		}
+		return value.slice(0, -2);
+	};
 
 	/* Moved BOOT_LOGS inside component to access t() */
 	const isVisible = useSignal(true);
@@ -110,7 +109,7 @@ const generateStars = (count: number) => {
 				}}
 			>
 				<div
-					class="w-[1px] h-[1px] bg-transparent absolute top-0 left-0"
+					class="w-[1px] h-px bg-transparent absolute top-0 left-0"
 					style={{
 						boxShadow: smallStars,
 						animation: "animStar 50s linear infinite",
@@ -136,7 +135,7 @@ const generateStars = (count: number) => {
 			<div class="absolute inset-0 bg-scanline opacity-[0.03] pointer-events-none" />
 
 			{/* Vignette */}
-			<div class="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-transparent via-black/40 to-black opacity-90" />
+			<div class="absolute inset-0 bg-[radial-gradient(circle_at_center,var(--tw-gradient-stops))] from-transparent via-black/40 to-black opacity-90" />
 
 			<div class="z-10 w-full max-w-2xl px-6 flex flex-col gap-8">
 				{/* Header */}

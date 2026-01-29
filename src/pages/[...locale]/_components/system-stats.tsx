@@ -1,4 +1,5 @@
 import { useSignal } from "@preact/signals";
+import { useTranslations, type Lang } from "@src/i18n";
 import { audioStore } from "@stores/audio.store";
 import {
 	ActivityIcon,
@@ -8,11 +9,9 @@ import {
 	ShieldCheckIcon,
 } from "lucide-preact";
 import { useEffect, useRef } from "preact/hooks";
-import { useTranslations } from "@src/i18n";
 
-export default function SystemStats({ lang = "es" }: { lang?: string }) {
-    const t = useTranslations(lang as any);
-	const { bassIntensity, midIntensity } = audioStore.state;
+export default function SystemStats({ lang = "es" }: { lang?: Lang }) {
+	const t = useTranslations(lang);
 	const cpuLoad = useSignal(0);
 	const memLoad = useSignal(0);
 	const uptime = useSignal("00:00:00:00");
@@ -188,19 +187,7 @@ export default function SystemStats({ lang = "es" }: { lang?: string }) {
 					</div>
 				</div>
 
-				<div class="flex gap-[2px] items-end h-4 relative z-10 px-2 border-l border-primary/20">
-					{[...Array(8)].map((_, i) => (
-						<div
-							key={i}
-							class="w-[2px] bg-primary group-hover:bg-white transition-colors duration-500"
-							style={{
-								height: `${15 + (i % 2 === 0 ? bassIntensity.value : midIntensity.value) * 85}%`,
-								transition: "height 0.1s ease-out",
-								transitionDelay: `${i * 15}ms`,
-							}}
-						/>
-					))}
-				</div>
+				<ReactiveBars />
 			</div>
 
 			<div class="flex items-center justify-between pt-2 border-t border-white/5 opacity-40 selection:bg-primary">
@@ -209,6 +196,25 @@ export default function SystemStats({ lang = "es" }: { lang?: string }) {
 				</span>
 				<NetworkIcon size={10} />
 			</div>
+		</div>
+	);
+}
+
+function ReactiveBars() {
+	const { bassIntensity, midIntensity } = audioStore.state;
+	return (
+		<div class="flex gap-[2px] items-end h-4 relative z-10 px-2 border-l border-primary/20">
+			{[...Array(8)].map((_, i) => (
+				<div
+					key={i}
+					class="w-[2px] bg-primary group-hover:bg-white transition-colors duration-500"
+					style={{
+						height: `${15 + (i % 2 === 0 ? bassIntensity.value : midIntensity.value) * 85}%`,
+						transition: "height 0.1s ease-out",
+						transitionDelay: `${i * 15}ms`,
+					}}
+				/>
+			))}
 		</div>
 	);
 }

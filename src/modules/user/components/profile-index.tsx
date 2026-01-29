@@ -31,7 +31,7 @@ import {
 	User,
 } from "lucide-preact";
 import { useEffect } from "preact/hooks";
-import { useForm, type Resolver } from "react-hook-form";
+import { type Resolver, useForm } from "react-hook-form";
 import { userAvatarUpdateApi } from "../apis/user.avatar-update.api";
 import { userPasswordChangeApi } from "../apis/user.password-change.api";
 import { userProfileUpdateApi } from "../apis/user.profile-update.api";
@@ -58,14 +58,18 @@ export default function ProfileIndex() {
 
 	// Profile form
 	const profileForm = useForm<UserProfileUpdateDto>({
-		resolver: zodResolver(userProfileUpdateDto) as Resolver<UserProfileUpdateDto>,
+		resolver: zodResolver(
+			userProfileUpdateDto,
+		) as Resolver<UserProfileUpdateDto>,
 		mode: "all",
 		defaultValues: { ...user },
 	});
 
 	// Password form
 	const passwordForm = useForm<UserPasswordChangeDto>({
-		resolver: zodResolver(userPasswordChangeDto) as Resolver<UserPasswordChangeDto>,
+		resolver: zodResolver(
+			userPasswordChangeDto,
+		) as Resolver<UserPasswordChangeDto>,
 		mode: "all",
 	});
 

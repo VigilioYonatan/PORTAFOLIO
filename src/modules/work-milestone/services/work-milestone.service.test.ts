@@ -1,7 +1,7 @@
+import { WorkExperienceCache } from "@modules/work-experience/cache/work-experience.cache";
 import { NotFoundException } from "@nestjs/common";
 import { Test, TestingModule } from "@nestjs/testing";
 import { vi } from "vitest";
-import { WorkExperienceCache } from "@modules/work-experience/cache/work-experience.cache";
 import { WorkMilestoneCache } from "../cache/work-milestone.cache";
 import { WorkMilestoneRepository } from "../repositories/work-milestone.repository";
 import type { WorkMilestoneSchema } from "../schemas/work-milestone.schema";
@@ -11,7 +11,6 @@ describe("WorkMilestoneService", () => {
 	let service: WorkMilestoneService;
 	let repository: WorkMilestoneRepository;
 	let cache: WorkMilestoneCache;
-
 
 	const mockRepository = {
 		store: vi.fn(),
@@ -57,7 +56,6 @@ describe("WorkMilestoneService", () => {
 		repository = module.get<WorkMilestoneRepository>(WorkMilestoneRepository);
 		cache = module.get<WorkMilestoneCache>(WorkMilestoneCache);
 
-
 		vi.clearAllMocks();
 	});
 
@@ -98,14 +96,14 @@ describe("WorkMilestoneService", () => {
 			const cachedList = [[{ id: 1 }], 1];
 			(cache.getList as any).mockReturnValue(Promise.resolve(cachedList));
 
-			const result = await service.index(1, { });
+			const result = await service.index(1, {});
 			expect(cache.getList).toHaveBeenCalledWith(
 				1,
 				expect.objectContaining({ limit: 20, offset: 0 }),
 			);
 			expect(repository.index).not.toHaveBeenCalled();
-			expect(result).toEqual({ 
-				success: true, 
+			expect(result).toEqual({
+				success: true,
 				results: cachedList[0],
 				count: cachedList[1],
 				next: null,
@@ -119,7 +117,7 @@ describe("WorkMilestoneService", () => {
 			const dbResult = [dbList, 1];
 			(repository.index as any).mockReturnValue(Promise.resolve(dbResult));
 
-			const result = await service.index(1, { });
+			const result = await service.index(1, {});
 
 			expect(repository.index).toHaveBeenCalledWith(
 				1,
@@ -130,11 +128,11 @@ describe("WorkMilestoneService", () => {
 			);
 			expect(cache.setList).toHaveBeenCalledWith(
 				1,
-				expect.objectContaining({ }),
+				expect.objectContaining({}),
 				dbResult,
 			);
-			expect(result).toEqual({ 
-				success: true, 
+			expect(result).toEqual({
+				success: true,
 				results: dbList,
 				count: 1,
 				next: null,

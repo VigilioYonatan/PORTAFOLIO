@@ -2,7 +2,12 @@ import WebForm from "@components/web_form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { sizeIcon } from "@infrastructure/utils/client";
 import { useSignal } from "@preact/signals";
-import { getTranslatedPath, useTranslations, type Lang, type T } from "@src/i18n";
+import {
+	getTranslatedPath,
+	type Lang,
+	type T,
+	useTranslations,
+} from "@src/i18n";
 import { sweetModal } from "@vigilio/sweet";
 import {
 	ArrowRight,
@@ -40,10 +45,7 @@ interface PasswordRequirement {
 // PASSWORD STRENGTH LOGIC
 // ============================================
 
-function calculatePasswordStrength(
-	password: string,
-	t: T,
-): PasswordStrength {
+function calculatePasswordStrength(password: string, t: T): PasswordStrength {
 	const requirements: PasswordRequirement[] = [
 		{ met: password.length >= 8, label: t("auth.password.req.8char") },
 		{ met: /[A-Z]/.test(password), label: t("auth.password.req.upper") },

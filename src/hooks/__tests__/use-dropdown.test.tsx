@@ -1,102 +1,102 @@
-import { renderHook, act } from '@testing-library/preact';
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import useDropdown from '../use-dropdown';
+import { act, renderHook } from "@testing-library/preact";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import useDropdown from "../use-dropdown";
 
-describe('useDropdown', () => {
-  beforeEach(() => {
-    vi.useFakeTimers();
-  });
+describe("useDropdown", () => {
+	beforeEach(() => {
+		vi.useFakeTimers();
+	});
 
-  afterEach(() => {
-    vi.useRealTimers();
-  });
+	afterEach(() => {
+		vi.useRealTimers();
+	});
 
-  it('should initialize with closed dropdown', () => {
-    const { result } = renderHook(() => useDropdown());
-    expect(result.current.dropdownOpen).toBe(false);
-  });
+	it("should initialize with closed dropdown", () => {
+		const { result } = renderHook(() => useDropdown());
+		expect(result.current.dropdownOpen).toBe(false);
+	});
 
-  it('should open dropdown with onOpen', () => {
-    const { result } = renderHook(() => useDropdown());
+	it("should open dropdown with onOpen", () => {
+		const { result } = renderHook(() => useDropdown());
 
-    act(() => {
-      result.current.onOpen();
-    });
+		act(() => {
+			result.current.onOpen();
+		});
 
-    expect(result.current.dropdownOpen).toBe(true);
-  });
+		expect(result.current.dropdownOpen).toBe(true);
+	});
 
-  it('should close dropdown with onClose', () => {
-    const { result } = renderHook(() => useDropdown());
+	it("should close dropdown with onClose", () => {
+		const { result } = renderHook(() => useDropdown());
 
-    act(() => {
-      result.current.onOpen();
-    });
-    expect(result.current.dropdownOpen).toBe(true);
+		act(() => {
+			result.current.onOpen();
+		});
+		expect(result.current.dropdownOpen).toBe(true);
 
-    act(() => {
-      result.current.onClose();
-      vi.advanceTimersByTime(0); // onClose uses setTimeout even with 0 delay
-    });
+		act(() => {
+			result.current.onClose();
+			vi.advanceTimersByTime(0); // onClose uses setTimeout even with 0 delay
+		});
 
-    expect(result.current.dropdownOpen).toBe(false);
-  });
+		expect(result.current.dropdownOpen).toBe(false);
+	});
 
-  it('should close dropdown with delay', () => {
-    const { result } = renderHook(() => useDropdown());
+	it("should close dropdown with delay", () => {
+		const { result } = renderHook(() => useDropdown());
 
-    act(() => {
-      result.current.onOpen();
-    });
+		act(() => {
+			result.current.onOpen();
+		});
 
-    act(() => {
-      result.current.onClose(1); // 1 second delay
-    });
+		act(() => {
+			result.current.onClose(1); // 1 second delay
+		});
 
-    // Still open before delay
-    expect(result.current.dropdownOpen).toBe(true);
+		// Still open before delay
+		expect(result.current.dropdownOpen).toBe(true);
 
-    act(() => {
-      vi.advanceTimersByTime(1000);
-    });
+		act(() => {
+			vi.advanceTimersByTime(1000);
+		});
 
-    expect(result.current.dropdownOpen).toBe(false);
-  });
+		expect(result.current.dropdownOpen).toBe(false);
+	});
 
-  it('should toggle dropdown with onOpenClose', () => {
-    const { result } = renderHook(() => useDropdown());
+	it("should toggle dropdown with onOpenClose", () => {
+		const { result } = renderHook(() => useDropdown());
 
-    act(() => {
-      result.current.onOpenClose();
-    });
-    expect(result.current.dropdownOpen).toBe(true);
+		act(() => {
+			result.current.onOpenClose();
+		});
+		expect(result.current.dropdownOpen).toBe(true);
 
-    act(() => {
-      result.current.onOpenClose();
-    });
-    expect(result.current.dropdownOpen).toBe(false);
-  });
+		act(() => {
+			result.current.onOpenClose();
+		});
+		expect(result.current.dropdownOpen).toBe(false);
+	});
 
-  it('should return trigger and dropdown refs', () => {
-    const { result } = renderHook(() => useDropdown());
-    
-    expect(result.current.trigger).toBeDefined();
-    expect(result.current.dropdown).toBeDefined();
-  });
+	it("should return trigger and dropdown refs", () => {
+		const { result } = renderHook(() => useDropdown());
 
-  it('should close on Escape key', () => {
-    const { result } = renderHook(() => useDropdown());
+		expect(result.current.trigger).toBeDefined();
+		expect(result.current.dropdown).toBeDefined();
+	});
 
-    act(() => {
-      result.current.onOpen();
-    });
-    expect(result.current.dropdownOpen).toBe(true);
+	it("should close on Escape key", () => {
+		const { result } = renderHook(() => useDropdown());
 
-    act(() => {
-      const event = new KeyboardEvent('keydown', { key: 'Escape' });
-      document.dispatchEvent(event);
-    });
+		act(() => {
+			result.current.onOpen();
+		});
+		expect(result.current.dropdownOpen).toBe(true);
 
-    expect(result.current.dropdownOpen).toBe(false);
-  });
+		act(() => {
+			const event = new KeyboardEvent("keydown", { key: "Escape" });
+			document.dispatchEvent(event);
+		});
+
+		expect(result.current.dropdownOpen).toBe(false);
+	});
 });

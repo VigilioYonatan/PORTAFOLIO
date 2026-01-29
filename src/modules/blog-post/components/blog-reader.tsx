@@ -15,11 +15,10 @@ interface BlogReaderProps {
 	comments: number;
 	class?: string;
 	lang?: string;
-    id: number;
+	id: number;
 }
 
-import { useTranslations } from "@src/i18n";
-import { type Lang } from "@src/i18n";
+import { type Lang, useTranslations } from "@src/i18n";
 
 export default function BlogReader({
 	title,
@@ -31,7 +30,7 @@ export default function BlogReader({
 	comments,
 	class: className,
 	lang = "es",
-    id,
+	id,
 }: BlogReaderProps) {
 	const t = useTranslations(lang as Lang);
 	const progress = useSignal(0);
@@ -105,18 +104,29 @@ export default function BlogReader({
 				{/* Side metadata (Desktop only) */}
 				<aside class="absolute -left-32 top-0 hidden lg:flex flex-col gap-8 opacity-40 hover:opacity-100 transition-opacity">
 					<div class="flex flex-col gap-1 border-l border-primary/20 pl-4 py-2">
-						<span class="text-[8px] font-mono text-zinc-500">{t("blog.version")}</span>
+						<span class="text-[8px] font-mono text-zinc-500">
+							{t("blog.version")}
+						</span>
 						<span class="text-[10px] font-mono  text-primary">v2.4.0</span>
 					</div>
 					<div class="flex flex-col gap-1 border-l border-primary/20 pl-4 py-2">
-						<span class="text-[8px] font-mono text-zinc-500">{t("blog.status")}</span>
-						<span class="text-[10px] font-mono  text-green-500">{t("blog.verified")}</span>
+						<span class="text-[8px] font-mono text-zinc-500">
+							{t("blog.status")}
+						</span>
+						<span class="text-[10px] font-mono  text-green-500">
+							{t("blog.verified")}
+						</span>
 					</div>
 				</aside>
 
 				<FuturisticMDX content={content} />
 
-				<SocialHub likes={likes} comments={comments} id={id} entityType="BLOG_POST" />
+				<SocialHub
+					likes={likes}
+					comments={comments}
+					id={id}
+					entityType="BLOG_POST"
+				/>
 
 				{/* Footer decorations */}
 				<div class="mt-20 pt-10 border-t border-white/5 flex justify-between items-center text-[10px] font-mono text-muted-foreground/30 uppercase tracking-[0.4em]">

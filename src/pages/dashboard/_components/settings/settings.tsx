@@ -1,14 +1,16 @@
 import AdminCard from "@modules/portfolio-config/components/admin-card";
 import ThemeCustomizer from "@modules/portfolio-config/components/theme-customizer";
-import { CogIcon, Palette, ShieldIcon, SlidersIcon } from "lucide-preact";
 import { type Lang, useTranslations } from "@src/i18n";
+import { CogIcon, Palette, ShieldIcon, SlidersIcon } from "lucide-preact";
 
 interface SettingsProps {
-    lang?: Lang;
+	params: {
+		lang: Lang;
+	};
 }
 
-export default function Settings({ lang = "es" }: SettingsProps) {
-    const t = useTranslations(lang);
+export default function Settings({ params }: SettingsProps) {
+	const t = useTranslations(params.lang);
 	return (
 		<div class="space-y-12 animate-in fade-in duration-500 max-w-5xl mx-auto relative pb-20">
 			{/* Ambient System Scanlines */}
@@ -58,7 +60,7 @@ export default function Settings({ lang = "es" }: SettingsProps) {
 						</span>
 					</div>
 					<div class="hover:border-primary/20 transition-all rounded-sm">
-						<AdminCard lang={lang} />
+						<AdminCard lang={params.lang} />
 					</div>
 				</section>
 
@@ -76,7 +78,7 @@ export default function Settings({ lang = "es" }: SettingsProps) {
 						</span>
 					</div>
 					<div class="bg-zinc-950/40 p-1 border border-white/5 rounded-sm hover:border-primary/10 transition-all">
-						<ThemeCustomizer lang={lang} />
+						<ThemeCustomizer lang={params.lang} />
 					</div>
 				</section>
 			</div>

@@ -9,6 +9,7 @@ import TechnologyUpdate from "@modules/technology/components/technology-update";
 import type { TechnologySchema } from "@modules/technology/schemas/technology.schema";
 import { DIMENSION_IMAGE } from "@modules/uploads/const/upload.const";
 import { useSignal } from "@preact/signals";
+import { type Lang, useTranslations } from "@src/i18n";
 import { useTable } from "@vigilio/preact-table";
 import { sweetModal } from "@vigilio/sweet";
 import { Edit, Image as ImageIcon, Plus, Trash2 } from "lucide-preact";
@@ -17,17 +18,16 @@ import type {
 	TechnologyIndexMethods,
 	TechnologyIndexSecondaryPaginator,
 } from "../apis/technology.index.api";
-import { type Lang, useTranslations } from "@src/i18n";
 
 interface TechnologyTableProps {
-    lang?: Lang;
+	lang?: Lang;
 }
 
 export default function TechnologyTable({ lang = "es" }: TechnologyTableProps) {
 	const destroyMutation = technologyDestroyApi();
 	const editingTech = useSignal<TechnologySchema | null>(null);
 	const isStoreModalOpen = useSignal<boolean>(false);
-    const t = useTranslations(lang);
+	const t = useTranslations(lang);
 
 	const table = useTable<
 		TechnologySchema,
@@ -177,7 +177,7 @@ export default function TechnologyTable({ lang = "es" }: TechnologyTableProps) {
 
 			<VigilioTable.table>
 				<VigilioTable.thead>
-						<VigilioTable.thead.th />
+					<VigilioTable.thead.th />
 				</VigilioTable.thead>
 				<VigilioTable.tbody>
 					<VigilioTable.tbody.row title="No se encontraron tecnologías">

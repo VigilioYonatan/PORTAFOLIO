@@ -1,20 +1,20 @@
-import InsightsRadar from "@modules/analytics/components/insights-radar";
 import ModelConfigForm from "@modules/ai/components/model-config-form";
+import InsightsRadar from "@modules/analytics/components/insights-radar";
 import {
 	ChatViewer,
 	ConversationList,
 } from "@modules/chat/components/chat-components";
-
+import DocumentStore from "@modules/documents/components/document-store";
 import {
 	BrainCircuitIcon,
 	CpuIcon,
 	DatabaseIcon,
 	NetworkIcon,
 } from "lucide-preact";
+import type { Lang } from "@src/i18n";
 import IndexStatus from "./index-status";
-import DocumentStore from "@modules/documents/components/document-store";
 
-export default function AIWorkspace() {
+export default function AIWorkspace({ params }: { params: { lang: Lang } }) {
 	return (
 		<div class="flex flex-col gap-6 p-2 animate-in fade-in duration-500 relative">
 			{/* Ambient System Scanlines */}
@@ -52,7 +52,7 @@ export default function AIWorkspace() {
 
 			<div class="grid grid-cols-1 lg:grid-cols-4 gap-6 relative z-10">
 				<div class="lg:col-span-3">
-					<DocumentStore  />
+					<DocumentStore />
 				</div>
 				<div class="lg:col-span-1">
 					<div class="bg-zinc-950/60 border border-white/5 p-6 rounded-sm h-full flex flex-col justify-between group hover:border-primary/20 transition-all">

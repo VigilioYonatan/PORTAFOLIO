@@ -1,11 +1,12 @@
-import { useState, useCallback, useEffect } from "preact/hooks";
-import { X, ChevronLeft, ChevronRight, ZoomIn } from "lucide-preact";
+import { type Lang } from "@src/i18n";
 import type { FilesSchema } from "@modules/uploads/schemas/upload.schema";
+import { ChevronLeft, ChevronRight, X, ZoomIn } from "lucide-preact";
+import { useCallback, useEffect, useState } from "preact/hooks";
 
 interface ProjectGalleryProps {
 	images: FilesSchema[];
 	projectTitle: string;
-	lang: string;
+	lang: Lang;
 }
 
 export function ProjectGallery({

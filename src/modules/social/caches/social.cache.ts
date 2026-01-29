@@ -1,7 +1,7 @@
 import { CacheService } from "@infrastructure/providers/cache/cache.service";
 import { Injectable } from "@nestjs/common";
-import type { SocialReactionSchema } from "../schemas/social-reaction.schema";
 import type { SocialCommentQueryDto } from "../dtos/social-comment.query.dto";
+import type { SocialReactionSchema } from "../schemas/social-reaction.schema";
 
 @Injectable()
 export class SocialCache {
@@ -47,18 +47,28 @@ export class SocialCache {
 
 	// --- Comments List Cache ---
 
-	private getListKey(tenant_id: number, filters: Record<string, unknown>): string {
+	private getListKey(
+		tenant_id: number,
+		filters: Record<string, unknown>,
+	): string {
 		return `${this.PREFIX}:list:${tenant_id}:${JSON.stringify(filters)}`;
 	}
 
-	async getList<T>(tenant_id: number, filters: SocialCommentQueryDto): Promise<T | null> {
+	async getList<T>(
+		tenant_id: number,
+		filters: SocialCommentQueryDto,
+	): Promise<T | null> {
 		const cached = await this.cacheService.get<T>(
 			this.getListKey(tenant_id, filters),
 		);
 		return cached || null;
 	}
 
-	async setList<T>(tenant_id: number, filters: SocialCommentQueryDto, data: T): Promise<void> {
+	async setList<T>(
+		tenant_id: number,
+		filters: SocialCommentQueryDto,
+		data: T,
+	): Promise<void> {
 		await this.cacheService.set(
 			this.getListKey(tenant_id, filters),
 			data,

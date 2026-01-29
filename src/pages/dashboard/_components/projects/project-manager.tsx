@@ -1,13 +1,15 @@
 import ProjectTable from "@modules/project/components/project-table";
-import { ArchiveIcon, DatabaseIcon } from "lucide-preact";
 import { type Lang, useTranslations } from "@src/i18n";
+import { ArchiveIcon, DatabaseIcon } from "lucide-preact";
 
 interface ProjectManagerProps {
-    lang?: Lang;
+	params: {
+		lang: Lang;
+	};
 }
 
-export default function ProjectManager({ lang = "es" }: ProjectManagerProps) {
-    const t = useTranslations(lang);
+export default function ProjectManager({ params }: ProjectManagerProps) {
+	const t = useTranslations(params.lang);
 	return (
 		<div class="flex flex-col gap-8 animate-in fade-in duration-500 relative">
 			{/* Ambient Artifacts */}
@@ -47,7 +49,7 @@ export default function ProjectManager({ lang = "es" }: ProjectManagerProps) {
 				<div class="absolute -left-4 top-0 bottom-0 w-px bg-linear-to-b from-transparent via-primary/20 to-transparent" />
 
 				<div class="animate-in fade-in slide-in-from-bottom-2 duration-500">
-					<ProjectTable lang={lang} />
+					<ProjectTable lang={params.lang} />
 				</div>
 			</div>
 		</div>

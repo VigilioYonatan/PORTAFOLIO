@@ -1,4 +1,4 @@
-import { Injectable, type ExecutionContext } from "@nestjs/common";
+import { type ExecutionContext, Injectable } from "@nestjs/common";
 import { AuthGuard } from "@nestjs/passport";
 
 @Injectable()

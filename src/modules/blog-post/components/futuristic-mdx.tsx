@@ -1,38 +1,49 @@
 import { cn } from "@infrastructure/utils/client";
 import { marked } from "marked";
-import { createHighlighter } from "shiki";
 import { useEffect, useState } from "preact/hooks";
+import { createHighlighter } from "shiki";
 
 interface FuturisticMDXProps {
 	content: string;
-    renderedHtml?: string;
+	renderedHtml?: string;
 	class?: string;
 }
 
 export default function FuturisticMDX({
 	content,
-    renderedHtml,
+	renderedHtml,
 	class: className,
 }: FuturisticMDXProps) {
 	const [htmlContent, setHtmlContent] = useState(renderedHtml || "");
 
 	useEffect(() => {
-        if (renderedHtml) {
-            setHtmlContent(renderedHtml);
-            return;
-        }
+		if (renderedHtml) {
+			setHtmlContent(renderedHtml);
+			return;
+		}
 
 		async function highlight() {
 			const highlighter = await createHighlighter({
 				themes: ["dracula"],
-				langs: ["typescript", "javascript", "json", "bash", "sql", "html", "css"],
+				langs: [
+					"typescript",
+					"javascript",
+					"json",
+					"bash",
+					"sql",
+					"html",
+					"css",
+				],
 			});
 
 			const renderer = new marked.Renderer();
 			renderer.code = ({ text, lang }: { text: string; lang?: string }) => {
 				const language = lang || "text";
 				try {
-					return highlighter.codeToHtml(text, { lang: language, theme: "dracula" });
+					return highlighter.codeToHtml(text, {
+						lang: language,
+						theme: "dracula",
+					});
 				} catch {
 					return `<pre><code class="language-${language}">${text}</code></pre>`;
 				}
@@ -44,12 +55,14 @@ export default function FuturisticMDX({
 		highlight();
 	}, [content, renderedHtml]);
 
-    if (!htmlContent) {
-        // Fallback or loading state
-         return (
-             <div class={cn("animate-pulse bg-white/5 rounded h-64 w-full", className)}></div>
-         )
-    }
+	if (!htmlContent) {
+		// Fallback or loading state
+		return (
+			<div
+				class={cn("animate-pulse bg-white/5 rounded h-64 w-full", className)}
+			></div>
+		);
+	}
 
 	return (
 		<article
@@ -64,7 +77,7 @@ export default function FuturisticMDX({
 				"prose-blockquote:border-l-primary prose-blockquote:bg-primary/5 prose-blockquote:py-4 prose-blockquote:px-6 prose-blockquote:italic prose-blockquote:text-zinc-300",
 				"prose-strong:text-foreground prose-strong:font-bold",
 				"prose-a:text-primary prose-a:no-underline hover:prose-a:text-glow transition-all",
-                "prose-img:rounded-lg prose-img:border prose-img:border-white/10 prose-img:shadow-lg",
+				"prose-img:rounded-lg prose-img:border prose-img:border-white/10 prose-img:shadow-lg",
 				className,
 			)}
 			dangerouslySetInnerHTML={{ __html: htmlContent }}

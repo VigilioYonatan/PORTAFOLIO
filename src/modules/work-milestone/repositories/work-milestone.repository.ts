@@ -18,14 +18,8 @@ export class WorkMilestoneRepository {
 		tenant_id: number,
 		query: WorkMilestoneQueryDto,
 	): Promise<[WorkMilestoneSchema[], number]> {
-		const {
-			work_experience_id,
-			limit,
-			offset,
-			sortBy,
-			sortDir,
-			cursor,
-		} = query;
+		const { work_experience_id, limit, offset, sortBy, sortDir, cursor } =
+			query;
 
 		const baseWhere: SQL[] = [eq(workMilestoneEntity.tenant_id, tenant_id)];
 

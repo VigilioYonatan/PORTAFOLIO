@@ -139,7 +139,9 @@ export function LoginForm({ lang = "es" }: LoginFormProps) {
 								className="bg-red-500/20 border border-red-500/50 p-4 text-red-500 text-xs font-mono space-y-2 animate-pulse"
 							>
 								<div className="font-black flex items-center gap-2">
-									<span className="bg-red-500 text-black px-1">SECURITY_BLOCK</span>
+									<span className="bg-red-500 text-black px-1">
+										SECURITY_BLOCK
+									</span>
 									{t("auth.error.locked")}
 								</div>
 								<p className="opacity-80">
@@ -161,11 +163,14 @@ export function LoginForm({ lang = "es" }: LoginFormProps) {
 							<span className="relative z-10 flex items-center gap-2">
 								{authLoginMutation.isLoading ? (
 									<>
-										<span className="animate-pulse">{t("auth.terminal.processing")}</span>
+										<span className="animate-pulse">
+											{t("auth.terminal.processing")}
+										</span>
 									</>
 								) : (
 									<>
-										[ {t("auth.terminal.execute")} ] <ArrowRight className="w-4 h-4" />
+										[ {t("auth.terminal.execute")} ]{" "}
+										<ArrowRight className="w-4 h-4" />
 									</>
 								)}
 							</span>

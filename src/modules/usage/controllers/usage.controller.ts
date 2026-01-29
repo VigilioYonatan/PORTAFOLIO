@@ -1,5 +1,4 @@
 import { ZodQueryPipe } from "@infrastructure/pipes/zod-query.pipe";
-import { usageQuotaQueryDto } from "../dtos/usage-quota.query.dto";
 import { AuthenticatedGuard } from "@modules/auth/guards/authenticated.guard";
 import { Controller, Get, Query, Req, UseGuards } from "@nestjs/common";
 import { ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
@@ -12,7 +11,10 @@ import type {
 	UsageHistoryResponseDto,
 	UsageIndexResponseDto,
 } from "../dtos/usage.response.dto";
-import { UsageQuotaQueryDto } from "../dtos/usage-quota.query.dto";
+import {
+	UsageQuotaQueryDto,
+	usageQuotaQueryDto,
+} from "../dtos/usage-quota.query.dto";
 import { UsageService } from "../services/usage.service";
 
 @ApiTags("Usage")

@@ -121,10 +121,6 @@ describe("LoginForm", () => {
 
 		render(<LoginForm />);
 
-		expect(
-			screen.getByText("auth.terminal.processing"),
-		).toBeInTheDocument();
+		expect(screen.getByText("auth.terminal.processing")).toBeInTheDocument();
 	});
-
-
 });

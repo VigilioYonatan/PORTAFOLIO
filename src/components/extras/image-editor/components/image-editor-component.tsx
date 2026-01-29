@@ -369,7 +369,7 @@ function ImageEditor(
 						Guardar Cambios
 					</Button>
 				</div>
-				</Card.Content>
+			</Card.Content>
 		</Card>
 	);
 }

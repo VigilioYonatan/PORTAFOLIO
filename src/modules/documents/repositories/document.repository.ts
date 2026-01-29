@@ -85,7 +85,7 @@ export class DocumentRepository {
 				eq(documentEntity.id, id),
 			),
 		});
-		return toNull(result)
+		return toNull(result);
 	}
 
 	/**
@@ -155,7 +155,7 @@ export class DocumentRepository {
 				and(eq(documentEntity.id, id), eq(documentEntity.tenant_id, tenant_id)),
 			)
 			.returning();
-		return result ;
+		return result;
 	}
 
 	/**
@@ -205,7 +205,7 @@ export class DocumentRepository {
 			where: eq(documentChunkEntity.document_id, document_id),
 			orderBy: [asc(documentChunkEntity.chunk_index)],
 		});
-		return result
+		return result;
 	}
 
 	/**
@@ -243,7 +243,7 @@ export class DocumentRepository {
 			.orderBy(desc(similarity))
 			.limit(limit);
 
-		return result
+		return result;
 	}
 
 	async countByTenant(tenant_id: number): Promise<number> {
@@ -254,4 +254,3 @@ export class DocumentRepository {
 		return Number(result[0].count);
 	}
 }
-

@@ -13,8 +13,12 @@ import { DashboardService } from "../services/dashboard.service";
 @Module({
 	imports: [AiModule, ChatModule, DocumentModule, UserModule],
 	controllers: [AiInsightController, DashboardController],
-	providers: [AiInsightService, AiInsightRepository, AiInsightCache, DashboardService],
+	providers: [
+		AiInsightService,
+		AiInsightRepository,
+		AiInsightCache,
+		DashboardService,
+	],
 	exports: [],
 })
 export class AnalyticsModule {}
-

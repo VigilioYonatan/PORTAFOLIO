@@ -1,7 +1,7 @@
 import { Module } from "@nestjs/common";
 import { MusicTrackCache } from "./cache/music.cache";
-import { MusicTrackRepository } from "./repositories/music.repository";
 import { MusicController } from "./controllers/music.controller";
+import { MusicTrackRepository } from "./repositories/music.repository";
 import { MusicService } from "./services/music.service";
 
 @Module({

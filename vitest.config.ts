@@ -67,7 +67,7 @@ export default defineConfig({
 			include: [
 				"src/modules/**/*.ts",
 				"src/hooks/**/*.ts",
-				"src/utils/**/*.ts"
+				"src/utils/**/*.ts",
 			],
 			exclude: [
 				"**/*.dto.ts",

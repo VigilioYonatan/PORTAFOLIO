@@ -4,31 +4,31 @@ import { handlerError } from "@infrastructure/utils/client/handler-error";
 import { formatDate, now } from "@infrastructure/utils/hybrid/date.utils";
 import type { ProjectIndexResponseDto } from "@modules/project/dtos/project.response.dto";
 import { technologyIndexApi } from "@modules/technology/apis/technology.index.api";
+import { type Lang, useTranslations } from "@src/i18n";
 import { sweetModal } from "@vigilio/sweet";
-import { useForm, type Resolver } from "react-hook-form";
+import { type Resolver, useForm } from "react-hook-form";
 import { projectUpdateApi } from "../apis/project.update.api";
 import {
 	type ProjectUpdateDto,
 	projectUpdateDto,
 } from "../dtos/project.update.dto";
 import type { ProjectWithRelations } from "../schemas/project.schema";
-import { type Lang, useTranslations } from "@src/i18n";
 import { ProjectForm } from "./project-form";
 
 interface ProjectUpdateProps {
 	project: ProjectWithRelations;
 	refetch: (data: Refetch<ProjectIndexResponseDto["results"]>) => void;
 	onClose: () => void;
-    lang?: Lang;
+	lang?: Lang;
 }
 
 export default function ProjectUpdate({
 	project,
 	refetch,
 	onClose,
-    lang = "es"
+	lang = "es",
 }: ProjectUpdateProps) {
-    const t = useTranslations(lang);
+	const t = useTranslations(lang);
 	const projectUpdateMutation = projectUpdateApi(project.id);
 	const technologiesQuery = technologyIndexApi(null, null, { limit: 100 });
 
@@ -44,15 +44,18 @@ export default function ProjectUpdate({
 				? (formatDate(project.end_date, "YYYY-MM-DD") as Date)
 				: undefined,
 			techeables: project.techeables.map((t) => t.technology_id),
-			
 		},
 	});
 
-	console.log({errors:projectUpdateForm.formState.errors});
-	
+	console.log({ errors: projectUpdateForm.formState.errors });
+
 	function onProjectUpdate(body: ProjectUpdateDto) {
 		sweetModal({
-			title: t("dashboard.project.delete_confirm_title")?.replace("DELETE", "UPDATE") || "¿CONFIRMAR ACTUALIZACIÓN?",
+			title:
+				t("dashboard.project.delete_confirm_title")?.replace(
+					"DELETE",
+					"UPDATE",
+				) || "¿CONFIRMAR ACTUALIZACIÓN?",
 			text: `¿Guardar cambios para "${project.title}"?`,
 			icon: "warning",
 			showCancelButton: true,
@@ -82,13 +85,13 @@ export default function ProjectUpdate({
 	}
 
 	return (
-        <ProjectForm
-            form={projectUpdateForm}
-            onSubmit={onProjectUpdate}
-            isLoading={projectUpdateMutation.isLoading || false}
-            technologies={technologiesQuery.data?.results || []}
-            isUpdate
-            initialTitle={project.title}
-        />
+		<ProjectForm
+			form={projectUpdateForm}
+			onSubmit={onProjectUpdate}
+			isLoading={projectUpdateMutation.isLoading || false}
+			technologies={technologiesQuery.data?.results || []}
+			isUpdate
+			initialTitle={project.title}
+		/>
 	);
 }

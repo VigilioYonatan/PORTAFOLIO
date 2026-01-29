@@ -2,35 +2,36 @@ import Form, { formSelectNumber } from "@components/form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { Refetch } from "@infrastructure/types/client";
 import { handlerError } from "@infrastructure/utils/client/handler-error";
+import { formatDate } from "@infrastructure/utils/hybrid";
 import { workExperienceUpdateApi } from "@modules/work-experience/apis/work-experience.update.api";
 import type { WorkExperienceStoreDto } from "@modules/work-experience/dtos/work-experience.store.dto";
 import { workExperienceUpdateDto } from "@modules/work-experience/dtos/work-experience.update.dto";
-
 import type { WorkExperienceSchema } from "@modules/work-experience/schemas/work-experience.schema";
-import { sweetModal } from "@vigilio/sweet";
-import { useForm, type Resolver } from "react-hook-form";
-import type { WorkExperienceIndexResponseDto } from "../dtos/work-experience.response.dto";
-import { formatDate } from "@infrastructure/utils/hybrid";
 import { type Lang, useTranslations } from "@src/i18n";
+import { sweetModal } from "@vigilio/sweet";
+import { type Resolver, useForm } from "react-hook-form";
+import type { WorkExperienceIndexResponseDto } from "../dtos/work-experience.response.dto";
 
 interface ExperienceUpdateProps {
 	experience: WorkExperienceSchema;
 	refetch: (data: Refetch<WorkExperienceIndexResponseDto["results"]>) => void;
 	onClose: () => void;
-    lang?: Lang;
+	lang?: Lang;
 }
 
 export default function ExperienceUpdate({
 	experience,
 	refetch,
 	onClose,
-    lang = "es"
+	lang = "es",
 }: ExperienceUpdateProps) {
-    const t = useTranslations(lang);
+	const t = useTranslations(lang);
 	const workExperienceUpdateMutation = workExperienceUpdateApi(experience.id);
 
 	const workExperienceUpdateForm = useForm<WorkExperienceStoreDto>({
-		resolver: zodResolver(workExperienceUpdateDto) as Resolver<WorkExperienceStoreDto>,
+		resolver: zodResolver(
+			workExperienceUpdateDto,
+		) as Resolver<WorkExperienceStoreDto>,
 		mode: "all",
 		defaultValues: {
 			...experience,
@@ -54,11 +55,7 @@ export default function ExperienceUpdate({
 				onClose();
 			},
 			onError(error) {
-				handlerError(
-					workExperienceUpdateForm,
-					error,
-					t("common.error"),
-				);
+				handlerError(workExperienceUpdateForm, error, t("common.error"));
 			},
 		});
 	}

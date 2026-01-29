@@ -13,28 +13,28 @@ import {
 	typeTextExtensions,
 	UPLOAD_CONFIG,
 } from "@modules/uploads/const/upload.const";
+import { type Lang, useTranslations } from "@src/i18n";
 import { sweetModal } from "@vigilio/sweet";
 import { FileText, Image as ImageIcon, Link, Tag } from "lucide-preact";
 import { useEffect, useMemo } from "preact/hooks";
-import { useForm, type Resolver } from "react-hook-form";
+import { type Resolver, useForm } from "react-hook-form";
 import type { BlogPostIndexResponseDto } from "../dtos/blog-post.response.dto";
 import type { BlogPostSchema } from "../schemas/blog-post.schema";
-import { type Lang, useTranslations } from "@src/i18n";
 
 interface BlogPostUpdateProps {
 	post: BlogPostSchema;
 	refetch: (data: Refetch<BlogPostIndexResponseDto["results"]>) => void;
 	onClose: () => void;
-    lang?: Lang;
+	lang?: Lang;
 }
 
 export default function BlogPostUpdate({
 	post,
 	refetch,
 	onClose,
-    lang = "es"
+	lang = "es",
 }: BlogPostUpdateProps) {
-    const t = useTranslations(lang);
+	const t = useTranslations(lang);
 	const blogPostUpdateMutation = blogPostUpdateApi(post.id);
 	const categoriesQuery = blogCategoryIndexApi(null);
 
@@ -73,11 +73,7 @@ export default function BlogPostUpdate({
 				onClose();
 			},
 			onError(error) {
-				handlerError(
-					blogPostUpdateForm,
-					error,
-					t("common.error"),
-				);
+				handlerError(blogPostUpdateForm, error, t("common.error"));
 			},
 		});
 	}
@@ -160,7 +156,8 @@ export default function BlogPostUpdate({
 
 				<div class="space-y-4 pt-4 border-t border-white/5">
 					<h3 class="text-sm font-semibold text-muted-foreground uppercase tracking-widest flex items-center gap-2">
-						<Tag size={14} class="text-primary" /> {t("dashboard.blog.form.seo_opt")}
+						<Tag size={14} class="text-primary" />{" "}
+						{t("dashboard.blog.form.seo_opt")}
 					</h3>
 					<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 						<Form.control<BlogPostUpdateDto>

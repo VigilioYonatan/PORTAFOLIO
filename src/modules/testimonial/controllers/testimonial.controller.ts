@@ -1,6 +1,5 @@
-import { ZodQueryPipe } from "@infrastructure/pipes/zod-query.pipe";
 import { ZodPipe } from "@infrastructure/pipes/zod.pipe";
-import { testimonialQueryDto } from "../dtos/testimonial.query.dto";
+import { ZodQueryPipe } from "@infrastructure/pipes/zod-query.pipe";
 import { Public } from "@modules/auth/decorators/public.decorator";
 import { Roles } from "@modules/auth/decorators/roles.decorator";
 import { AuthenticatedGuard } from "@modules/auth/guards/authenticated.guard";
@@ -21,6 +20,7 @@ import {
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
 import type { Request } from "express";
 import { TestimonialQueryClassDto } from "../dtos/testimonial.query.class.dto";
+import { testimonialQueryDto } from "../dtos/testimonial.query.dto";
 import {
 	TestimonialDestroyResponseClassDto,
 	TestimonialIndexResponseClassDto,
@@ -61,7 +61,8 @@ export class TestimonialController {
 	})
 	index(
 		@Req() req: Request,
-		@Query(new ZodQueryPipe(testimonialQueryDto)) query: TestimonialQueryClassDto,
+		@Query(new ZodQueryPipe(testimonialQueryDto))
+		query: TestimonialQueryClassDto,
 	): Promise<TestimonialIndexResponseDto> {
 		const tenant_id = req.locals.tenant.id;
 		return this.testimonialService.index(tenant_id, {

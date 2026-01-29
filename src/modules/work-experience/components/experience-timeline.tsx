@@ -8,23 +8,25 @@ import { workExperienceIndexApi } from "@modules/work-experience/apis/work-exper
 import type { WorkExperienceSchema } from "@modules/work-experience/schemas/work-experience.schema";
 import MilestoneList from "@modules/work-milestone/components/milestone-list";
 import { useSignal } from "@preact/signals";
+import { type Lang, useTranslations } from "@src/i18n";
 import usePaginator from "@vigilio/preact-paginator";
 import { sweetModal } from "@vigilio/sweet";
 import { Briefcase, Calendar, Edit, MapPin, Plus, Trash2 } from "lucide-preact";
 import { useEffect } from "preact/hooks";
 import ExperienceStore from "./experience-store";
 import ExperienceUpdate from "./experience-update";
-import { type Lang, useTranslations } from "@src/i18n";
 
 interface ExperienceTimelineProps {
-    lang?: Lang;
+	lang?: Lang;
 }
 
-export default function ExperienceTimeline({ lang = "es" }: ExperienceTimelineProps) {
+export default function ExperienceTimeline({
+	lang = "es",
+}: ExperienceTimelineProps) {
 	const experienceEdit = useSignal<WorkExperienceSchema | null>(null);
 	const isStoreModalOpen = useSignal<boolean>(false);
 	const destroyMutation = workExperienceDestroyApi();
-    const t = useTranslations(lang);
+	const t = useTranslations(lang);
 
 	const pagination = usePaginator({ limit: 20 });
 	const indexQuery = workExperienceIndexApi(null, pagination);
@@ -77,8 +79,7 @@ export default function ExperienceTimeline({ lang = "es" }: ExperienceTimelinePr
 					{t("common.error").toUpperCase()}
 				</p>
 				<p class="text-[10px] mt-2 opacity-60">
-					{(indexQuery.error)?.message ||
-						"Error de comunicación desconocido."}
+					{indexQuery.error?.message || "Error de comunicación desconocido."}
 				</p>
 			</div>
 		);
@@ -156,7 +157,9 @@ export default function ExperienceTimeline({ lang = "es" }: ExperienceTimelinePr
 											<div class="flex items-center gap-1.5 text-[10px] font-bold text-muted-foreground/60 uppercase">
 												<Calendar size={12} class="text-primary/50" />
 												{formatDate(exp.start_date)} —{" "}
-												{exp.is_current ? t("dashboard.timeline.present") : formatDate(exp.end_date)}
+												{exp.is_current
+													? t("dashboard.timeline.present")
+													: formatDate(exp.end_date)}
 											</div>
 											{exp.location && (
 												<div class="flex items-center gap-1.5 text-[10px] font-bold text-muted-foreground/60 uppercase">

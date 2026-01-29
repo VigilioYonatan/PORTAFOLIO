@@ -1,6 +1,6 @@
 import WebForm from "@components/web_form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { type Lang, useTranslations, type T } from "@src/i18n";
+import { type Lang, type T, useTranslations } from "@src/i18n";
 import {
 	ArrowLeft,
 	ArrowRight,
@@ -64,7 +64,9 @@ export function ForgotPasswordForm({ lang = "es" }: ForgotPasswordFormProps) {
 	const forgotPasswordMutation = authForgotPasswordApi();
 
 	const forgotPasswordForm = useForm<AuthForgotPasswordDto>({
-		resolver: zodResolver(authForgotPasswordDto) as Resolver<AuthForgotPasswordDto>,
+		resolver: zodResolver(
+			authForgotPasswordDto,
+		) as Resolver<AuthForgotPasswordDto>,
 		mode: "all",
 	});
 
@@ -139,7 +141,9 @@ export function ForgotPasswordForm({ lang = "es" }: ForgotPasswordFormProps) {
 						{forgotPasswordMutation.isLoading ? (
 							<>
 								<div class="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />
-								<span class="animate-pulse">{t("auth.terminal.processing")}</span>
+								<span class="animate-pulse">
+									{t("auth.terminal.processing")}
+								</span>
 							</>
 						) : (
 							<>

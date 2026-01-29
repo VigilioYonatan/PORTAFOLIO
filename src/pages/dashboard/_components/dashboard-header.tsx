@@ -1,3 +1,4 @@
+import { type Lang, useTranslations } from "@src/i18n";
 import {
 	Activity,
 	Bell,
@@ -7,15 +8,17 @@ import {
 	ShieldCheckIcon,
 	WifiIcon,
 } from "lucide-preact";
-import { type Lang, useTranslations } from "@src/i18n";
 
 interface DashboardHeaderProps {
-    onMenuClick?: () => void;
-    lang?: Lang;
+	onMenuClick?: () => void;
+	lang?: Lang;
 }
 
-export default function DashboardHeader({ onMenuClick, lang = "es" }: DashboardHeaderProps) {
-    const t = useTranslations(lang);
+export default function DashboardHeader({
+	onMenuClick,
+	lang = "es",
+}: DashboardHeaderProps) {
+	const t = useTranslations(lang);
 	return (
 		<header class="h-16 border-b border-white/5 bg-zinc-950/60 backdrop-blur-md sticky top-0 z-30 flex items-center justify-between px-4 md:px-8">
 			{/* Ambient Artifact */}
@@ -23,19 +26,22 @@ export default function DashboardHeader({ onMenuClick, lang = "es" }: DashboardH
 
 			{/* Left: Breadcrumbs / System Identity */}
 			<div class="flex items-center gap-4 md:gap-6 relative z-10">
-                <button 
-                    onClick={onMenuClick}
-                    class="md:hidden p-2 -ml-2 text-muted-foreground hover:text-white"
-                >
-                    <Menu size={20} />
-                </button>
+				<button
+					type="button"
+					onClick={onMenuClick}
+					class="md:hidden p-2 -ml-2 text-muted-foreground hover:text-white"
+				>
+					<Menu size={20} />
+				</button>
 				<div class="flex items-center gap-3 text-[10px] font-mono uppercase tracking-[0.3em] text-muted-foreground">
 					<div class="w-2 h-2 rounded-full bg-primary/20 border border-primary/40 shadow-glow animate-pulse" />
 					<span class="text-white font-black group hover:text-primary transition-colors cursor-pointer">
 						{t("dashboard.header.system_root")}
 					</span>
 					<span class="opacity-20">/</span>
-					<span class="text-primary/80 font-bold">{t("dashboard.header.protocol")}</span>
+					<span class="text-primary/80 font-bold">
+						{t("dashboard.header.protocol")}
+					</span>
 					<span class="opacity-20">/</span>
 					<span class="animate-pulse">_</span>
 				</div>
@@ -97,6 +103,20 @@ export default function DashboardHeader({ onMenuClick, lang = "es" }: DashboardH
 						</button>
 						<span class="absolute top-2 right-2 w-1.5 h-1.5 bg-primary rounded-full animate-ping shadow-glow" />
 					</div>
+
+					{/* Web Push Subscription Action */}
+					<button
+						type="button"
+						onClick={() => {
+							import("@modules/web/libs/push-manager").then((m) =>
+								m.subscribeUserToPush(),
+							);
+						}}
+						class="px-3 py-1 text-[8px] font-black uppercase tracking-widest border border-primary/20 bg-primary/5 hover:bg-primary/20 text-primary transition-all rounded-sm flex items-center gap-2 group"
+					>
+						<WifiIcon size={12} class="group-hover:animate-pulse" />
+						<span>ENABLE_PUSH</span>
+					</button>
 				</div>
 
 				<div class="h-8 w-px bg-white/5 mx-2" />

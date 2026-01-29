@@ -24,9 +24,7 @@ describe("SkillBentoGrid Component", () => {
 
 	it("renders descriptions for categories", () => {
 		render(<SkillBentoGrid />);
-		expect(
-			screen.getByText(/skills\.cat\.frontend\.desc/),
-		).toBeInTheDocument();
+		expect(screen.getByText(/skills\.cat\.frontend\.desc/)).toBeInTheDocument();
 		expect(screen.getByText(/skills\.cat\.ai\.desc/i)).toBeInTheDocument();
 	});
 });

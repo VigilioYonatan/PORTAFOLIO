@@ -49,11 +49,7 @@ function VigilioTable<
 	T extends Record<string, any>,
 	K extends string,
 	Y extends object,
->({
-	query,
-	table,
-	children,
-}: VigilioTableProps<T, K, Y>) {
+>({ query, table, children }: VigilioTableProps<T, K, Y>) {
 	return (
 		<VigilioTableContext.Provider
 			value={{

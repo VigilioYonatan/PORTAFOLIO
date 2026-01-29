@@ -22,11 +22,13 @@ import {
 } from "../../../../components/extras/card";
 
 interface HRDashboardProps {
-    lang?: Lang;
+	params: {
+		lang: Lang;
+	};
 }
 
-export default function HRDashboard({ lang = "es" }: HRDashboardProps) {
-    const t = useTranslations(lang);
+export default function HRDashboard({ params }: HRDashboardProps) {
+	const t = useTranslations(params.lang);
 	const stats = [
 		{
 			label: t("dashboard.hr.stats.recruiter"),
@@ -115,7 +117,7 @@ export default function HRDashboard({ lang = "es" }: HRDashboardProps) {
 						</div>
 					</div>
 					<div class="bg-zinc-950/20 border border-white/5 p-6 rounded-sm backdrop-blur-sm hover:border-primary/10 transition-all">
-						<ExperienceTimeline lang={lang} />
+						<ExperienceTimeline lang={params.lang} />
 					</div>
 				</div>
 
@@ -135,7 +137,7 @@ export default function HRDashboard({ lang = "es" }: HRDashboardProps) {
 						</div>
 					</div>
 					<div class="bg-zinc-950/20 border border-white/5 p-6 rounded-sm backdrop-blur-sm hover:border-amber-500/10 transition-all">
-						<TestimonialTable lang={lang} />
+						<TestimonialTable lang={params.lang} />
 					</div>
 				</div>
 			</div>
@@ -156,7 +158,7 @@ export default function HRDashboard({ lang = "es" }: HRDashboardProps) {
 					</div>
 				</div>
 				<div class="bg-zinc-950/20 border border-white/5 p-6 rounded-sm backdrop-blur-sm hover:border-blue-500/10 transition-all">
-					<TechnologyTable lang={lang} />
+					<TechnologyTable lang={params.lang} />
 				</div>
 			</div>
 
@@ -176,7 +178,7 @@ export default function HRDashboard({ lang = "es" }: HRDashboardProps) {
 					</div>
 				</div>
 				<div class="bg-zinc-950/20 border border-white/5 p-6 rounded-sm backdrop-blur-sm hover:border-emerald-500/10 transition-all">
-					<MessageList lang={lang} />
+					<MessageList lang={params.lang} />
 				</div>
 			</div>
 		</div>

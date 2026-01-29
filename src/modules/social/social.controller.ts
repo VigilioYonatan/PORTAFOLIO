@@ -1,6 +1,5 @@
-import { ZodQueryPipe } from "@infrastructure/pipes/zod-query.pipe";
 import { ZodPipe } from "@infrastructure/pipes/zod.pipe";
-import { socialReactionQueryDto } from "./dtos/social-reaction.query.dto";
+import { ZodQueryPipe } from "@infrastructure/pipes/zod-query.pipe";
 import { Public } from "@modules/auth/decorators/public.decorator";
 import {
 	Body,
@@ -20,6 +19,7 @@ import {
 import type { SocialReactionToggleResponseDto } from "./dtos/social.response.dto";
 import { SocialReactionStoreClassDto } from "./dtos/social-reaction.class.dto";
 import { SocialReactionQueryClassDto } from "./dtos/social-reaction.query.class.dto";
+import { socialReactionQueryDto } from "./dtos/social-reaction.query.dto";
 import {
 	type SocialReactionStoreDto,
 	socialReactionStoreDto,

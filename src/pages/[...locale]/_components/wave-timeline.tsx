@@ -3,34 +3,32 @@ import { cn } from "@infrastructure/utils/client";
 import { formatDateTz } from "@infrastructure/utils/hybrid/date.utils";
 import type { WorkExperienceSchema } from "@modules/work-experience/schemas/work-experience.schema";
 import { useSignal } from "@preact/signals";
+import { type Lang, useTranslations } from "@src/i18n";
 import { audioStore } from "@stores/audio.store";
 import { useEffect } from "preact/hooks";
-import { useTranslations } from "@src/i18n";
-
-import { type Lang } from "@src/i18n";
 
 interface WaveTimelineProps {
 	className?: string;
 	experiences: WorkExperienceSchema[];
-    lang?: Lang;
+	lang?: Lang;
 }
 
 export default function WaveTimeline({
 	className,
 	experiences,
-    lang = "es"
+	lang = "es",
 }: WaveTimelineProps) {
 	const containerRef = useEntranceAnimation(0.2);
-    const t = useTranslations(lang);
+	const t = useTranslations(lang);
 
 	return (
 		<div
 			ref={containerRef}
-			class={cn("relative w-full py-32 px-4 overflow-hidden", className)}
+			class={cn("relative w-full py-8 px-4 overflow-hidden", className)}
 		>
 			<div class="relative max-w-5xl mx-auto flex flex-col md:flex-row justify-between gap-16 md:gap-4 items-center md:items-start">
 				{/* Horizontal Base Line (Desktop) */}
-				<div class="absolute top-[12px] left-0 w-full h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent hidden md:block" />
+				<div class="absolute top-[12px] left-0 w-full h-px bg-linear-to-r from-transparent via-primary/20 to-transparent hidden md:block" />
 
 				{
 					/* Mock Data Fallback if empty - keeps UI looking good */

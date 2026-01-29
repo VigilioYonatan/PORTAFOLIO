@@ -1,5 +1,6 @@
 import { analyticsDashboardApi } from "@modules/analytics/apis/analytics.dashboard.api";
 import { NotificationCenter } from "@modules/notification/components/notification-center";
+import { type Lang, useTranslations } from "@src/i18n";
 import {
 	CartesianGrid,
 	Line,
@@ -16,15 +17,17 @@ import {
 	CardTitle,
 } from "../../../components/extras/card";
 import AnalyticsGrid from "./analytics-grid";
-import { type Lang, useTranslations } from "@src/i18n";
 
 interface DashboardHomeProps {
-    lang?: Lang;
+	params:{
+
+		lang: Lang;
+	}
 }
 
-export default function DashboardHome({ lang = "es" }: DashboardHomeProps) {
+export default function DashboardHome({ params }: DashboardHomeProps) {
 	const { data, isLoading } = analyticsDashboardApi();
-    const t = useTranslations(lang);
+	const t = useTranslations(params.lang);
 
 	const weeklyVisits = data?.metrics?.weeklyVisits ?? [
 		{ name: "Lun", visits: 0 },
@@ -44,7 +47,11 @@ export default function DashboardHome({ lang = "es" }: DashboardHomeProps) {
 				</h2>
 			</div>
 
-			<AnalyticsGrid metrics={data?.metrics} isLoading={isLoading} lang={lang} />
+			<AnalyticsGrid
+				metrics={data?.metrics}
+				isLoading={isLoading}
+				lang={params.lang}
+			/>
 
 			<div class="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
 				<div class="col-span-3 h-[400px]">
@@ -100,4 +107,3 @@ export default function DashboardHome({ lang = "es" }: DashboardHomeProps) {
 		</div>
 	);
 }
-

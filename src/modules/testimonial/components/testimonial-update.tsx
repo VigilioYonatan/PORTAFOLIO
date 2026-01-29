@@ -8,29 +8,31 @@ import {
 	testimonialUpdateDto,
 } from "@modules/testimonial/dtos/testimonial.update.dto";
 import type { TestimonialSchema } from "@modules/testimonial/schemas/testimonial.schema";
-import { sweetModal } from "@vigilio/sweet";
-import { useForm, type Resolver } from "react-hook-form";
-import type { TestimonialIndexResponseDto } from "../dtos/testimonial.response.dto";
 import { type Lang, useTranslations } from "@src/i18n";
+import { sweetModal } from "@vigilio/sweet";
+import { type Resolver, useForm } from "react-hook-form";
+import type { TestimonialIndexResponseDto } from "../dtos/testimonial.response.dto";
 
 interface TestimonialUpdateProps {
 	testimonial: TestimonialSchema;
 	refetch: (data: Refetch<TestimonialIndexResponseDto["results"]>) => void;
 	onClose: () => void;
-    lang?: Lang;
+	lang?: Lang;
 }
 
 export default function TestimonialUpdate({
 	testimonial,
 	refetch,
 	onClose,
-    lang = "es"
+	lang = "es",
 }: TestimonialUpdateProps) {
 	const updateMut = testimonialUpdateApi(testimonial.id);
-    const t = useTranslations(lang);
+	const t = useTranslations(lang);
 
 	const form = useForm<TestimonialUpdateDto>({
-		resolver: zodResolver(testimonialUpdateDto) as Resolver<TestimonialUpdateDto>,
+		resolver: zodResolver(
+			testimonialUpdateDto,
+		) as Resolver<TestimonialUpdateDto>,
 		mode: "all",
 		defaultValues: { ...testimonial },
 	});
@@ -53,7 +55,7 @@ export default function TestimonialUpdate({
 
 	return (
 		<Form {...form} onSubmit={onSubmit}>
-            <div class="flex flex-col gap-1 border-b border-white/5 pb-4 mb-4">
+			<div class="flex flex-col gap-1 border-b border-white/5 pb-4 mb-4">
 				<h2 class="text-xl font-black tracking-tight text-foreground uppercase">
 					{t("dashboard.testimonial.form.edit_title")}
 				</h2>

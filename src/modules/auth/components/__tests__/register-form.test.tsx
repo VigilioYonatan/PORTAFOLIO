@@ -37,22 +37,22 @@ vi.mock("@src/i18n", () => ({
 			"auth.terms.and": "y",
 			"auth.createAccount": "Crear Cuenta",
 			"auth.enterDetails": "Ingresa tus detalles",
-            "auth.password.req.8char": "8 caracteres",
-            "auth.password.req.upper": "Mayúscula",
-            "auth.password.req.lower": "Minúscula",
-            "auth.password.req.number": "Número",
-            "auth.password.req.special": "Carácter especial",
-            "auth.password.strength.0": "Débil", 
-            "auth.password.strength.1": "Regular",
-            "auth.password.strength.2": "Bien",
-            "auth.password.strength.3": "Fuerte",
-            "auth.password.strength.4": "Muy Fuerte",
-            "auth.password.match": "Coinciden",
-            "auth.password.mismatch": "No coinciden",
-            "auth.orRegister": "O registrate con",
-            "auth.alreadyHaveAccount": "¿Ya tienes cuenta?",
-            "auth.login": "Iniciar Sesión",
-            "auth.password.strength.label": "Fortaleza",
+			"auth.password.req.8char": "8 caracteres",
+			"auth.password.req.upper": "Mayúscula",
+			"auth.password.req.lower": "Minúscula",
+			"auth.password.req.number": "Número",
+			"auth.password.req.special": "Carácter especial",
+			"auth.password.strength.0": "Débil",
+			"auth.password.strength.1": "Regular",
+			"auth.password.strength.2": "Bien",
+			"auth.password.strength.3": "Fuerte",
+			"auth.password.strength.4": "Muy Fuerte",
+			"auth.password.match": "Coinciden",
+			"auth.password.mismatch": "No coinciden",
+			"auth.orRegister": "O registrate con",
+			"auth.alreadyHaveAccount": "¿Ya tienes cuenta?",
+			"auth.login": "Iniciar Sesión",
+			"auth.password.strength.label": "Fortaleza",
 		};
 		return translations[key] || key;
 	},
@@ -93,7 +93,6 @@ describe("RegisterForm", () => {
 		});
 
 		render(<RegisterForm />);
-
 
 		const userInput = screen.getAllByPlaceholderText("juan_perez")[0];
 		const emailInput = screen.getByPlaceholderText("admin@ejemplo.com");

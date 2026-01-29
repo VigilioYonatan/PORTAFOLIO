@@ -7,18 +7,18 @@ import type { FilesSchema } from "@modules/uploads/schemas/upload.schema";
 import { userEntity } from "@modules/user/entities/user.entity";
 import { type InferSelectModel, relations } from "drizzle-orm";
 import {
+	type AnyPgColumn,
 	boolean,
 	index,
 	integer,
 	jsonb,
+	pgEnum,
 	pgTable,
 	serial,
 	text,
 	timestamp,
 	unique,
 	varchar,
-	pgEnum,
-	type AnyPgColumn,
 } from "drizzle-orm/pg-core";
 import type { BlogPostSchema } from "../schemas/blog-post.schema";
 

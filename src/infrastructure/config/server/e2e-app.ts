@@ -99,7 +99,7 @@ export class E2EApp {
 				return next();
 			}
 
-            const mockReq = req as MockRequest;
+			const mockReq = req as MockRequest;
 
 			// Identity can be provided per-test or use default admin/user from seed
 			// biome-ignore lint/suspicious/noExplicitAny: Mocking internal Express property

@@ -75,6 +75,7 @@ describe("ProjectModule (e2e)", () => {
 				is_featured: false,
 				sort_order: 1,
 				images: null,
+				videos: null,
 				seo: null,
 				techeables: [],
 			};
@@ -87,6 +88,7 @@ describe("ProjectModule (e2e)", () => {
 				.send(payload);
 
 			if (response.status !== 201) {
+				// biome-ignore lint/suspicious/noConsole: <explanation>
 				console.error(
 					"❌ POST /api/v1/project failed:",
 					JSON.stringify(response.body, null, 2),
@@ -131,6 +133,7 @@ describe("ProjectModule (e2e)", () => {
 				is_featured: true,
 				sort_order: 2,
 				images: null,
+				videos: null,
 				seo: null,
 				techeables: [],
 			};

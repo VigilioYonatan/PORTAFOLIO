@@ -29,7 +29,10 @@ export function conversationIndexApi(
 	paginator: UsePaginator | null = null,
 	extraParams: Record<string, string | boolean | number> = {},
 ) {
-	const query = useQuery<ConversationIndexResponseClassDto, ConversationIndexApiError>(
+	const query = useQuery<
+		ConversationIndexResponseClassDto,
+		ConversationIndexApiError
+	>(
 		"/chat/conversations",
 		async (url) => {
 			const data = new URLSearchParams();

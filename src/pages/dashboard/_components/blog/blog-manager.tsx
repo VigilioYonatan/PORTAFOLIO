@@ -1,14 +1,16 @@
 import CategoryManager from "@modules/blog-category/components/category-manager";
 import PostBentoGrid from "@modules/blog-post/components/post-bento-grid";
-import { ArchiveIcon, FileCodeIcon, List } from "lucide-preact";
 import { type Lang, useTranslations } from "@src/i18n";
+import { ArchiveIcon, FileCodeIcon, List } from "lucide-preact";
 
 interface BlogManagerProps {
-    lang?: Lang;
+	params: {
+		lang: Lang;
+	};
 }
 
-export default function BlogManager({ lang = "es" }: BlogManagerProps) {
-    const t = useTranslations(lang);
+export default function BlogManager({ params }: BlogManagerProps) {
+	const t = useTranslations(params.lang);
 	return (
 		<div class="flex flex-col gap-8 animate-in fade-in duration-500 relative">
 			{/* Ambient Artifacts */}
@@ -54,11 +56,11 @@ export default function BlogManager({ lang = "es" }: BlogManagerProps) {
 								<span>{t("dashboard.blog.filter")}</span>
 								<List size={10} />
 							</div>
-							<CategoryManager lang={lang} />
+							<CategoryManager lang={params.lang} />
 						</div>
 					</div>
 					<div class="lg:col-span-9">
-						<PostBentoGrid lang={lang} />
+						<PostBentoGrid lang={params.lang} />
 					</div>
 				</div>
 			</div>

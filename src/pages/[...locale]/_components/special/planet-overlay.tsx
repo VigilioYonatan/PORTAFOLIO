@@ -29,11 +29,10 @@ export default function PlanetOverlay() {
 		{ src: "/video/reaper_ovni.mp4", label: "REAPER_ASCENT" },
 	];
 
-    // Track which video is currently focused
-    const focusedIndex = useSignal<number | null>(null);
+	// Track which video is currently focused
+	const focusedIndex = useSignal<number | null>(null);
 
 	return (
-
 		<div
 			class={cn(
 				"fixed inset-0 z-100 bg-black flex flex-col items-center justify-center transition-opacity duration-700",
@@ -50,19 +49,19 @@ export default function PlanetOverlay() {
 			{/* Video Grid - Split Screen (3 Columns) */}
 			<div class="flex flex-col md:flex-row w-full h-full">
 				{videos.map((vid, idx) => (
-					<VideoColumn 
-                        key={idx} 
-                        vid={vid} 
-                        isActive={isActive} 
-                        isFocused={focusedIndex.value === idx}
-                        onToggleFocus={() => {
-                            if (focusedIndex.value === idx) {
-                                focusedIndex.value = null;
-                            } else {
-                                focusedIndex.value = idx;
-                            }
-                        }}
-                    />
+					<VideoColumn
+						key={idx}
+						vid={vid}
+						isActive={isActive}
+						isFocused={focusedIndex.value === idx}
+						onToggleFocus={() => {
+							if (focusedIndex.value === idx) {
+								focusedIndex.value = null;
+							} else {
+								focusedIndex.value = idx;
+							}
+						}}
+					/>
 				))}
 			</div>
 
@@ -94,13 +93,13 @@ export default function PlanetOverlay() {
 function VideoColumn({
 	vid,
 	isActive,
-    isFocused,
-    onToggleFocus
+	isFocused,
+	onToggleFocus,
 }: {
 	vid: { src: string; label: string };
 	isActive: boolean;
-    isFocused: boolean;
-    onToggleFocus: () => void;
+	isFocused: boolean;
+	onToggleFocus: () => void;
 }) {
 	const videoRef = useRef<HTMLVideoElement>(null);
 	const isVideoLoading = useSignal(true);
@@ -108,17 +107,17 @@ function VideoColumn({
 	// Removed internal isFocused
 
 	// Sync Playback state with Focus Prop
-    useEffect(() => {
-        if (!videoRef.current) return;
-        
-        if (isFocused) {
-            videoRef.current.muted = false;
-            videoRef.current.play().catch(() => {});
-        } else {
-            videoRef.current.muted = true;
-            videoRef.current.pause();
-        }
-    }, [isFocused]);
+	useEffect(() => {
+		if (!videoRef.current) return;
+
+		if (isFocused) {
+			videoRef.current.muted = false;
+			videoRef.current.play().catch(() => {});
+		} else {
+			videoRef.current.muted = true;
+			videoRef.current.pause();
+		}
+	}, [isFocused]);
 	useEffect(() => {
 		// Safety timeout
 		const timeout = setTimeout(() => {
@@ -166,10 +165,14 @@ function VideoColumn({
 				src={vid.src}
 				class={cn(
 					"w-full h-full object-cover transition-all duration-700",
-					(isFocused) ? "grayscale-0 opacity-100" : "grayscale group-hover:grayscale-0",
+					isFocused
+						? "grayscale-0 opacity-100"
+						: "grayscale group-hover:grayscale-0",
 					isVideoLoading.value
 						? "opacity-0"
-						: (isFocused ? "opacity-100" : "opacity-40 group-hover:opacity-100"),
+						: isFocused
+							? "opacity-100"
+							: "opacity-40 group-hover:opacity-100",
 				)}
 				muted={!isFocused}
 				loop

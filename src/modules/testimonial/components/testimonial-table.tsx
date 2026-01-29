@@ -12,23 +12,25 @@ import {
 import type { TestimonialSchema } from "@modules/testimonial/schemas/testimonial.schema";
 import { DIMENSION_IMAGE } from "@modules/uploads/const/upload.const";
 import { useSignal } from "@preact/signals";
+import { type Lang, useTranslations } from "@src/i18n";
 import { useTable } from "@vigilio/preact-table";
 import { sweetModal } from "@vigilio/sweet";
 import { Edit, Plus, Search, Trash2 } from "lucide-preact";
 import { useEffect } from "preact/hooks";
 import TestimonialStore from "./testimonial-store";
 import TestimonialUpdate from "./testimonial-update";
-import { type Lang, useTranslations } from "@src/i18n";
 
 interface TestimonialTableProps {
-    lang?: Lang;
+	lang?: Lang;
 }
 
-export default function TestimonialTable({ lang = "es" }: TestimonialTableProps) {
+export default function TestimonialTable({
+	lang = "es",
+}: TestimonialTableProps) {
 	const testimonialEdit = useSignal<TestimonialSchema | null>(null);
 	const isStoreModalOpen = useSignal<boolean>(false);
 	const destroyMutation = testimonialDestroyApi();
-    const t = useTranslations(lang);
+	const t = useTranslations(lang);
 
 	const table = useTable<
 		TestimonialSchema,
@@ -97,7 +99,9 @@ export default function TestimonialTable({ lang = "es" }: TestimonialTableProps)
 							!row.is_visible && "bg-zinc-800 text-zinc-500 border-white/5",
 						)}
 					>
-						{row.is_visible ? t("dashboard.testimonial.visible") : t("dashboard.testimonial.hidden")}
+						{row.is_visible
+							? t("dashboard.testimonial.visible")
+							: t("dashboard.testimonial.hidden")}
 					</Badge>
 				),
 			},
@@ -133,7 +137,10 @@ export default function TestimonialTable({ lang = "es" }: TestimonialTableProps)
 													result: results.filter((item) => item.id !== row.id),
 													count: count - 1,
 												}));
-												sweetModal({ icon: "success", title: t("common.success") });
+												sweetModal({
+													icon: "success",
+													title: t("common.success"),
+												});
 											},
 										});
 									}

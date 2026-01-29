@@ -1,6 +1,8 @@
 import Form, { formSelectNumber } from "@components/form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import type { Refetch } from "@infrastructure/types/client";
 import { handlerError } from "@infrastructure/utils/client/handler-error";
+import { formatDate } from "@infrastructure/utils/hybrid/date.utils";
 import { workMilestoneUpdateApi } from "@modules/work-milestone/apis/work-milestone.update.api";
 import {
 	type WorkMilestoneStoreDto,
@@ -9,8 +11,6 @@ import {
 import type { WorkMilestoneSchema } from "@modules/work-milestone/schemas/work-milestone.schema";
 import { sweetModal } from "@vigilio/sweet";
 import { type Resolver, useForm } from "react-hook-form";
-import type { Refetch } from "@infrastructure/types/client";
-import { formatDate } from "@infrastructure/utils/hybrid/date.utils";
 
 interface MilestoneUpdateProps {
 	experienceId: number;
@@ -28,7 +28,9 @@ export default function MilestoneUpdate({
 	const workMilestoneUpdateMutation = workMilestoneUpdateApi(milestone.id);
 
 	const workMilestoneUpdateForm = useForm<WorkMilestoneStoreDto>({
-		resolver: zodResolver(workMilestoneStoreDto) as Resolver<WorkMilestoneStoreDto>,
+		resolver: zodResolver(
+			workMilestoneStoreDto,
+		) as Resolver<WorkMilestoneStoreDto>,
 		mode: "all",
 		defaultValues: {
 			...milestone,

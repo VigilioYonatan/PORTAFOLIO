@@ -9,23 +9,28 @@ import {
 	RssIcon,
 	UserIcon,
 } from "lucide-preact";
-import { useTranslations } from "../../../i18n";
+import { type Lang, useTranslations } from "../../../i18n";
 
 interface NavLinksProps {
-	lang: string;
+	lang: Lang;
 	vertical?: boolean;
 	className?: string;
 }
 
 export default function NavLinks({ lang, vertical, className }: NavLinksProps) {
-	const t = useTranslations(lang as any);
+	const t = useTranslations(lang);
 
 	const links: { href: string; label: string; icon: LucideIcon }[] = [
 		{ href: `/${lang}`, label: t("header.home"), icon: HomeIcon },
 		{ href: `/${lang}/about`, label: t("header.about"), icon: UserIcon },
+		{
+			href: `/${lang}/experience`,
+			label: t("header.briefcase"),
+			icon: DatabaseIcon,
+		},
 		{ href: `/${lang}/projects`, label: t("header.projects"), icon: GridIcon },
 		{ href: `/${lang}/blog`, label: t("header.blog"), icon: RssIcon },
-		{ href: `/${lang}/experience`, label: t("header.briefcase"), icon: DatabaseIcon },
+		
 		{ href: `/${lang}/contact`, label: t("header.contact"), icon: MailIcon },
 	];
 

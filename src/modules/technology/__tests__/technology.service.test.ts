@@ -128,7 +128,6 @@ describe("TechnologyService", () => {
 			expect(repository.store).toHaveBeenCalledWith(TENANT_ID, body);
 			expect(cache.invalidateLists).toHaveBeenCalledWith(TENANT_ID);
 			expect(result.technology).toEqual(tech);
-
 		});
 	});
 

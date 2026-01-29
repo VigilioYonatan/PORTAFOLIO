@@ -1,6 +1,7 @@
 import { formatDateTz } from "@infrastructure/utils/hybrid/date.utils";
 import { contactMarkAsReadApi } from "@modules/contact/apis/contact.mark-as-read.api";
 import type { ContactMessageSchema } from "@modules/contact/schemas/contact-message.schema";
+import { type Lang, useTranslations } from "@src/i18n";
 import {
 	Calendar,
 	Info,
@@ -11,20 +12,18 @@ import {
 } from "lucide-preact";
 import { useEffect } from "preact/hooks";
 
-import { type Lang, useTranslations } from "@src/i18n";
-
 interface MessageDetailProps {
 	message: ContactMessageSchema;
 	onUpdate: (data: Partial<ContactMessageSchema>) => void;
-    lang?: Lang;
+	lang?: Lang;
 }
 
 export default function MessageDetail({
 	message,
 	onUpdate,
-    lang = "es"
+	lang = "es",
 }: MessageDetailProps) {
-    const t = useTranslations(lang);
+	const t = useTranslations(lang);
 	const updateMutation = contactMarkAsReadApi();
 
 	useEffect(() => {
@@ -36,7 +35,6 @@ export default function MessageDetail({
 			});
 		}
 	}, [message.id]);
-
 
 	return (
 		<div class="space-y-6 py-2">

@@ -1,5 +1,7 @@
 import { paginator } from "@infrastructure/utils/server";
 import { Injectable, Logger } from "@nestjs/common";
+import * as webpush from "web-push";
+import { NotificationCache } from "../caches/notification.cache";
 import type { NotificationQueryDto } from "../dtos/notification.query.dto";
 import type {
 	NotificationDestroyAllResponseDto,
@@ -7,9 +9,13 @@ import type {
 	NotificationUpdateResponseDto,
 } from "../dtos/notification.response.dto";
 import type { NotificationUpdateDto } from "../dtos/notification.update.dto";
+import type {
+	SendNotificationDto,
+	SubscriptionStoreDto,
+} from "../dtos/subscription.store.dto";
 import { NotificationRepository } from "../repositories/notification.repository";
+import { SubscriptionRepository } from "../repositories/subscription.repository";
 import type { NotificationSchema } from "../schemas/notification.schema";
-import { NotificationCache } from "../caches/notification.cache";
 
 @Injectable()
 export class NotificationService {
@@ -18,7 +24,54 @@ export class NotificationService {
 	constructor(
 		private readonly notificationRepository: NotificationRepository,
 		private readonly cache: NotificationCache,
-	) {}
+		private readonly subscriptionRepository: SubscriptionRepository,
+	) {
+		// Initialize VAPID (In production use ConfigService)
+		webpush.setVapidDetails(
+			"mailto:admin@vigilio.com",
+			"BNHhKhWwwUQXbFqbSmHAuIXBfFIzfAPOxrImmxkih8rPZ_TK7ftRUj5iuyMLK3nLTvN2huaTXCAPTq5C8yZ227Q",
+			"Th-luq2VLebgIG3MvvUk4P59ZMDTBbYIjH0P_FKlaTQ",
+		);
+	}
+
+	async subscribe(
+		tenant_id: number,
+		user_id: number,
+		body: SubscriptionStoreDto,
+	) {
+		return await this.subscriptionRepository.store(tenant_id, user_id, body);
+	}
+
+	async sendPushNotification(
+		tenant_id: number,
+		user_id: number,
+		payload: SendNotificationDto,
+	) {
+		const subscriptions = await this.subscriptionRepository.getByUser(
+			tenant_id,
+			user_id,
+		);
+
+		const notifications = subscriptions.map((sub) => {
+			return webpush
+				.sendNotification(
+					{
+						endpoint: sub.endpoint,
+						keys: sub.keys,
+					},
+					JSON.stringify(payload),
+				)
+				.catch((err) => {
+					if (err.statusCode === 410 || err.statusCode === 404) {
+						this.subscriptionRepository.deleteByEndpoint(sub.endpoint);
+					}
+					this.logger.error("Error sending push", err);
+				});
+		});
+
+		await Promise.all(notifications);
+		return { success: true };
+	}
 
 	async index(
 		tenant_id: number,

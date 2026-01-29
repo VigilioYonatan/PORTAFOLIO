@@ -7,19 +7,19 @@ import type { FilesSchema } from "@modules/uploads/schemas/upload.schema";
 import type { InferSelectModel } from "drizzle-orm";
 import { relations } from "drizzle-orm";
 import {
+	type AnyPgColumn,
 	boolean,
 	index,
 	integer,
 	jsonb,
 	date as pgDate,
+	pgEnum,
 	pgTable,
 	serial,
 	text,
 	timestamp,
 	unique,
 	varchar,
-	pgEnum,
-	type AnyPgColumn,
 } from "drizzle-orm/pg-core";
 import type { ProjectSchema } from "../schemas/project.schema";
 

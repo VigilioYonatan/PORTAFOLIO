@@ -1,11 +1,11 @@
 import { BlogPostService } from "@modules/blog-post/services/blog-post.service";
 import { MusicService } from "@modules/music/services/music.service";
+import { ProjectService } from "@modules/project/services/project.service";
+import { TechnologyService } from "@modules/technology/services/technology.service";
+import { WorkExperienceService } from "@modules/work-experience/services/work-experience.service";
 import { Test, type TestingModule } from "@nestjs/testing";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { WebService } from "../services/web.service";
-
-import { ProjectService } from "@modules/project/services/project.service";
-import { WorkExperienceService } from "@modules/work-experience/services/work-experience.service";
 
 describe("WebService", () => {
 	let service: WebService;
@@ -30,6 +30,10 @@ describe("WebService", () => {
 		index: vi.fn(),
 	};
 
+	const mockTechnologyService = {
+		index: vi.fn(),
+	};
+
 	beforeEach(async () => {
 		const module: TestingModule = await Test.createTestingModule({
 			providers: [
@@ -37,6 +41,7 @@ describe("WebService", () => {
 				{ provide: MusicService, useValue: mockMusicService },
 				{ provide: BlogPostService, useValue: mockBlogPostService },
 				{ provide: ProjectService, useValue: mockProjectService },
+				{ provide: TechnologyService, useValue: mockTechnologyService },
 				{ provide: WorkExperienceService, useValue: mockWorkExperienceService },
 			],
 		}).compile();
@@ -53,19 +58,39 @@ describe("WebService", () => {
 	describe("index", () => {
 		it("should return home props with music tracks", async () => {
 			const mockTracks = [{ id: 1, title: "Track 1" }];
-			(musicService.index as any).mockReturnValue(Promise.resolve({
-				success: true,
-				count: 1,
-				next: null,
-				previous: null,
-				results: mockTracks,
-			}));
+			(musicService.index as any).mockReturnValue(
+				Promise.resolve({
+					success: true,
+					count: 1,
+					next: null,
+					previous: null,
+					results: mockTracks,
+				}),
+			);
 
-			(mockWorkExperienceService.index as any).mockReturnValue(Promise.resolve({
-				success: true,
-				count: 0,
-				results: [],
-			}));
+			(mockWorkExperienceService.index as any).mockReturnValue(
+				Promise.resolve({
+					success: true,
+					count: 0,
+					results: [],
+				}),
+			);
+
+			(mockProjectService.index as any).mockReturnValue(
+				Promise.resolve({
+					success: true,
+					count: 0,
+					results: [],
+				}),
+			);
+
+			(mockBlogPostService.index as any).mockReturnValue(
+				Promise.resolve({
+					success: true,
+					count: 0,
+					results: [],
+				}),
+			);
 
 			const result = await service.index("es");
 
@@ -74,6 +99,8 @@ describe("WebService", () => {
 				description: "Mi Portafolio Profesional",
 				musicTracks: mockTracks,
 				experiences: [],
+				latestProjects: [],
+				latestPosts: [],
 			});
 			expect(musicService.index).toHaveBeenCalledWith(1, {
 				limit: 10,
@@ -85,13 +112,15 @@ describe("WebService", () => {
 	describe("blog", () => {
 		it("should return blog props with paginated posts", async () => {
 			const mockPosts = [{ id: 1, title: "Post 1" }];
-			(blogPostService.index as any).mockReturnValue(Promise.resolve({
-				success: true,
-				results: mockPosts,
-				count: 1,
-				next: null,
-				previous: null,
-			}));
+			(blogPostService.index as any).mockReturnValue(
+				Promise.resolve({
+					success: true,
+					results: mockPosts,
+					count: 1,
+					next: null,
+					previous: null,
+				}),
+			);
 
 			const result = await service.blog("es", 1, 9);
 
@@ -100,6 +129,8 @@ describe("WebService", () => {
 				description: "Lee nuestras últimas noticias y artículos.",
 				posts: mockPosts,
 				total: 1,
+				page: 1,
+				limit: 9,
 			});
 			expect(blogPostService.index).toHaveBeenCalledWith(1, {
 				limit: 9,
@@ -112,10 +143,12 @@ describe("WebService", () => {
 	describe("blogSlug", () => {
 		it("should return blog post props by slug", async () => {
 			const mockPost = { id: 1, title: "Post 1", extract: "Summary" };
-			(blogPostService.showBySlug as any).mockReturnValue(Promise.resolve({
-				success: true,
-				post: mockPost,
-			}));
+			(blogPostService.showBySlug as any).mockReturnValue(
+				Promise.resolve({
+					success: true,
+					post: mockPost,
+				}),
+			);
 
 			const result = await service.blogSlug("es", "post-1");
 
@@ -131,11 +164,13 @@ describe("WebService", () => {
 	describe("projects", () => {
 		it("should return projects props with paginated projects", async () => {
 			const mockProjects = [{ id: 1, title: "Project 1" }];
-			(mockProjectService.index as any).mockReturnValue(Promise.resolve({
-				success: true,
-				results: mockProjects,
-				count: 1,
-			}));
+			(mockProjectService.index as any).mockReturnValue(
+				Promise.resolve({
+					success: true,
+					results: mockProjects,
+					count: 1,
+				}),
+			);
 
 			const result = await service.projects("es", 1, 9);
 
@@ -144,6 +179,8 @@ describe("WebService", () => {
 				description: "Explora mi trabajo y proyectos.",
 				projects: mockProjects,
 				total: 1,
+				page: 1,
+				limit: 9,
 			});
 			expect(mockProjectService.index).toHaveBeenCalledWith(1, {
 				limit: 9,

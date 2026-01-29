@@ -7,27 +7,29 @@ import {
 	type WorkExperienceStoreDto,
 	workExperienceStoreDto,
 } from "@modules/work-experience/dtos/work-experience.store.dto";
-import { sweetModal } from "@vigilio/sweet";
-import { useForm, type Resolver } from "react-hook-form";
-import type { WorkExperienceIndexResponseDto } from "../dtos/work-experience.response.dto";
 import { type Lang, useTranslations } from "@src/i18n";
+import { sweetModal } from "@vigilio/sweet";
+import { type Resolver, useForm } from "react-hook-form";
+import type { WorkExperienceIndexResponseDto } from "../dtos/work-experience.response.dto";
 
 interface ExperienceStoreProps {
 	refetch: (data: Refetch<WorkExperienceIndexResponseDto["results"]>) => void;
 	onClose: () => void;
-    lang?: Lang;
+	lang?: Lang;
 }
 
 export default function ExperienceStore({
 	refetch,
 	onClose,
-    lang = "es"
+	lang = "es",
 }: ExperienceStoreProps) {
-    const t = useTranslations(lang);
+	const t = useTranslations(lang);
 	const workExperienceStoreMutation = workExperienceStoreApi();
 
 	const workExperienceStoreForm = useForm<WorkExperienceStoreDto>({
-		resolver: zodResolver(workExperienceStoreDto) as Resolver<WorkExperienceStoreDto>,
+		resolver: zodResolver(
+			workExperienceStoreDto,
+		) as Resolver<WorkExperienceStoreDto>,
 		mode: "all",
 	});
 
@@ -42,11 +44,7 @@ export default function ExperienceStore({
 				onClose();
 			},
 			onError(error) {
-				handlerError(
-					workExperienceStoreForm,
-					error,
-					t("common.error"),
-				);
+				handlerError(workExperienceStoreForm, error, t("common.error"));
 			},
 		});
 	}

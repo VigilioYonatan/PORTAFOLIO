@@ -124,7 +124,6 @@ export function UserShow({ user }: UserShowProps) {
 									<Badge variant="default" className="text-[10px] uppercase">
 										Superuser
 									</Badge>
-
 								</div>
 							)}
 

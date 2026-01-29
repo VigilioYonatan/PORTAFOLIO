@@ -1,17 +1,17 @@
 import { useEntranceAnimation } from "@hooks/use-motion";
+import { type Lang, useTranslations } from "@src/i18n";
 import { audioStore } from "@stores/audio.store";
 import { useEffect, useRef } from "preact/hooks";
-import { type Lang, useTranslations } from "@src/i18n";
 
 interface HeroTerminalProps {
-    lang?: Lang;
+	lang?: Lang;
 }
 
 export default function HeroTerminal({ lang = "es" }: HeroTerminalProps) {
 	const containerRef = useEntranceAnimation(0.2);
 	const { bassIntensity, beatDetected } = audioStore.state;
 	const glowRef = useRef<HTMLDivElement>(null);
-    const t = useTranslations(lang);
+	const t = useTranslations(lang);
 
 	// Removed internal boot logic as it is now handled by Global SystemIntro
 
@@ -38,9 +38,9 @@ export default function HeroTerminal({ lang = "es" }: HeroTerminalProps) {
 	}, [bassIntensity, beatDetected]);
 
 	return (
-		<section
+		<div
 			ref={containerRef}
-			class="relative w-full py-8 md:py-12 flex flex-col items-center justify-center overflow-hidden min-h-[500px] md:min-h-[600px]"
+			class="relative w-full py-4 flex flex-col items-center justify-center overflow-hidden"
 		>
 			{/* Reactive Background Glow */}
 			<div
@@ -101,7 +101,9 @@ export default function HeroTerminal({ lang = "es" }: HeroTerminalProps) {
 									<span class="text-primary">&gt;</span>
 									<span>
 										{t("home.hero.desc1")}{" "}
-										<span class="text-foreground">{t("home.hero.desc1_highlight")}</span>{" "}
+										<span class="text-foreground">
+											{t("home.hero.desc1_highlight")}
+										</span>{" "}
 										{t("home.hero.desc1_end")}
 									</span>
 								</p>
@@ -109,7 +111,9 @@ export default function HeroTerminal({ lang = "es" }: HeroTerminalProps) {
 									<span class="text-primary">&gt;</span>
 									<span>
 										{t("home.hero.desc2")}{" "}
-										<span class="text-foreground">{t("home.hero.desc2_highlight")}</span>
+										<span class="text-foreground">
+											{t("home.hero.desc2_highlight")}
+										</span>
 										{t("home.hero.desc2_end")}
 									</span>
 								</p>
@@ -141,6 +145,6 @@ export default function HeroTerminal({ lang = "es" }: HeroTerminalProps) {
 					</div>
 				</div>
 			</div>
-		</section>
+		</div>
 	);
 }

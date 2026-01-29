@@ -11,21 +11,23 @@ import { SessionConfigService } from "@modules/auth/config/session.config";
 import { HybridAuthGuard } from "@modules/auth/guards/hybrid.guard";
 import { RolesGuard } from "@modules/auth/guards/roles.guard";
 import { AuthModule } from "@modules/auth/modules/auth.module";
+import { BlogCategoryModule } from "@modules/blog-category/blog-category.module";
+import { BlogPostModule } from "@modules/blog-post/blog-post.module";
 import { ContactModule } from "@modules/contact/modules/contact.module";
 // import { DemoModule } from "@modules/demo/demo.module";
 import { DocumentModule } from "@modules/documents/document.module";
 import { MusicModule } from "@modules/music/music.module";
 import { NotificationModule } from "@modules/notification/notification.module";
 import { PortfolioConfigModule } from "@modules/portfolio-config/portfolio-config.module";
-import { TestimonialModule } from "@modules/testimonial/modules/testimonial.module";
 import { ProjectModule } from "@modules/project/project.module";
 import { TecheableModule } from "@modules/techeable/techeable.module";
-import { BlogPostModule } from "@modules/blog-post/blog-post.module";
 import { TechnologyModule } from "@modules/technology/technology.module";
 import { TenantModule } from "@modules/tenant/modules/tenant.module";
+import { TestimonialModule } from "@modules/testimonial/modules/testimonial.module";
 import { UploadModule } from "@modules/uploads/modules/upload.module";
 import { UserModule } from "@modules/user/user.module";
 import { WebModule } from "@modules/web/modules/web.module";
+import { WorkExperienceModule } from "@modules/work-experience/work-experience.module";
 import { WorkMilestoneModule } from "@modules/work-milestone/work-milestone.module";
 import type { MiddlewareConsumer, NestModule } from "@nestjs/common";
 import { Module } from "@nestjs/common";
@@ -34,8 +36,6 @@ import { EventEmitterModule } from "@nestjs/event-emitter";
 import { ThrottlerModule } from "@nestjs/throttler";
 import { ChatModule } from "./modules/chat/chat.module";
 import { SocialModule } from "./modules/social/social.module";
-import { BlogCategoryModule } from "@modules/blog-category/blog-category.module";
-import { WorkExperienceModule } from "@modules/work-experience/work-experience.module";
 
 @Module({
 	imports: [

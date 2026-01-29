@@ -1,4 +1,3 @@
-
 import { render, screen } from "@testing-library/preact";
 import { describe, expect, it, vi } from "vitest";
 import WaveTimeline from "../wave-timeline";
@@ -78,4 +77,3 @@ describe("WaveTimeline Component", () => {
 		expect(screen.getByText(/TECH_CORP/)).toBeInTheDocument();
 	});
 });
-

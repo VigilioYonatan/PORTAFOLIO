@@ -1,4 +1,6 @@
+import { ZodPipe } from "@infrastructure/pipes/zod.pipe";
 import { ZodQueryPipe } from "@infrastructure/pipes/zod-query.pipe";
+import { Public } from "@modules/auth/decorators/public.decorator";
 import { Roles } from "@modules/auth/decorators/roles.decorator";
 import { AuthenticatedGuard } from "@modules/auth/guards/authenticated.guard";
 import {
@@ -16,13 +18,24 @@ import {
 } from "@nestjs/common";
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
 import type { Request } from "express";
-import { Public } from "@modules/auth/decorators/public.decorator";
 import type { Observable } from "rxjs";
-import { ChatMessagePublicStoreClassDto, chatMessagePublicStoreDto, ConversationQueryClassDto, conversationQueryDto, ConversationStoreClassDto, type ChatMessagePublicStoreDto, type ConversationStoreDto } from "../dtos/chat.class.dto";
-import { ChatMessageIndexResponseClassDto, ChatMessagePublicStoreResponseClassDto, ConversationIndexResponseClassDto, ConversationStoreResponseClassDto } from "../dtos/chat.response.class.dto";
-import { ZodPipe } from "@infrastructure/pipes/zod.pipe";
-import  { ChatService } from "../services/chat.service";
+import {
+	ChatMessagePublicStoreClassDto,
+	type ChatMessagePublicStoreDto,
+	ConversationQueryClassDto,
+	ConversationStoreClassDto,
+	type ConversationStoreDto,
+	chatMessagePublicStoreDto,
+	conversationQueryDto,
+} from "../dtos/chat.class.dto";
+import {
+	ChatMessageIndexResponseClassDto,
+	ChatMessagePublicStoreResponseClassDto,
+	ConversationIndexResponseClassDto,
+	ConversationStoreResponseClassDto,
+} from "../dtos/chat.response.class.dto";
 import { conversationStoreDto } from "../dtos/conversation.store.dto";
+import { ChatService } from "../services/chat.service";
 
 @ApiTags("Chat & Community")
 @UseGuards(AuthenticatedGuard)

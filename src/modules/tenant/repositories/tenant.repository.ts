@@ -96,9 +96,10 @@ export class TenantRepository {
 					address: false,
 				},
 				extras: {
-					address: sql<string>`substring(${tenantEntity.address} from 1 for 3000)`.as(
-						"address",
-					),
+					address:
+						sql<string>`substring(${tenantEntity.address} from 1 for 3000)`.as(
+							"address",
+						),
 				},
 			}),
 			this.db
@@ -125,7 +126,6 @@ export class TenantRepository {
 			return { ...tenant, setting };
 		});
 	}
-
 
 	async update(id: number, body: Partial<TenantSchema>): Promise<TenantSchema> {
 		const [result] = await this.db

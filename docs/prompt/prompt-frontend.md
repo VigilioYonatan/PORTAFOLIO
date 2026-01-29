@@ -11,8 +11,10 @@
 > Tipar todas las variables y cuando tipes usar los Schemas claro si lo necesitas no crear tipos objetos por querer y no poner codigo duro,por ejemplo tiene un <select> los values de ese select deben ser tipados del schema claro si se esta usando ENUMS o number segun sea el caso, eso se llama no escribir codigo duro. usar const y poner en archivo .const.ts
 > Procura usar useRef de preact en vez de document.querySelector, Importa useRef de preact.
 > Las paginas que estan en dentro de un [...all].astro no tendrán SSR, eso quiero decir que se usará full wouter, nada de .astro.
+> Pon accesibilidad a los botones type="button" aria-label, a los svg <title></title>, etc. sigue buenas practicas de accesibilidad en html semantica.
 > Imporante separa store.tsx y update.tsx al crear formularios no pueden ir juntos osea difrentes componentes.
->  No usar <script>  en componentes de astro, usar componentes de preact .tsx.
+> No usar <script> en componentes de astro, usar componentes de preact .tsx.
+
 ## 🏆 REGLAS DE ORO (MANDATORIO)
 
 > **Client vs Server vs Hybrid:**
@@ -27,6 +29,25 @@
 > No harcodear tipos, heredar de los .schemas.ts Pick<ExampleSchema> o Omit<ExampleSchema>, ExampleSchema["field"], pero nunca harcodees tipos osea nada de as "PORTFOLIO_PROJECT" | "BLOG_POST" sino usa ExampleSchema["techeable_type"], es un ejemplo.
 > **NO PONGAS ANTIGRAVITY** No escribas antigavity en el css ni html, nigun lado.
 > **lOS NOMBRES DE LOS COMPONENTES EN MINUSCULAS** ejemplo example.store.tsx, example.update.tsx, example.index.tsx,example.show.tsx, example-list.tsx,etc.
+> **Usar signals (OBLIGATORIO)** No usar useState, usar signals y cuando usas signal global trata de usar un objeto ejemplo const state = signal({
+> isOpen: false,
+> isLoading: false,
+> data: null,
+> }). Es solo un ejemplo, evita crear muchos signals globales.
+
+```ts
+// Correcto
+const state = signal({
+  isOpen: false,
+  isLoading: false,
+  data: null,
+});
+//Incorrecto
+const isOpen = signal(false);
+const isLoading = signal(false);
+const data = signal(null);
+```
+
 > **NO CREES otro .css** Ya no crees otro archivo .css , todo eso esta en src/assets/css/global.css
 
 > No uses `Date` o `new Date` (API de JS). Usa `dayjs` importado de `@infrastructure/utils/hybrid/date.utils`. Ahí hay más funciones; si no hay, créala, pero usa dayjs.
@@ -2758,7 +2779,7 @@ export function useExampleContext(){
 
 
 <ExampleProvider>
-	<Router base="/dashboard">
+	<Router base="/">
 				<Suspense fallback={null}>
 					<Switch>
 						<Route path="/"  />
@@ -2771,7 +2792,7 @@ export function useExampleContext(){
 
 
 Crear rutas para dashboard, admin o otros pagina que no necesita ssr y rutas de wouter, Recuerda en el layout poner los links para acceder, claro segun el caso.
-    <Router base="/dashboard">
+    <Router base="/">
         <Suspense fallback={null}>
           <Switch>
             <Route path="/" component={lazy(() => import("./index"))} />
@@ -2786,6 +2807,16 @@ Crear rutas para dashboard, admin o otros pagina que no necesita ssr y rutas de 
         </Suspense>
       </Router>
 
+Si la pagina componente tiene otros parametros como slug etc puedes usar el children
+Esto es solo un ejemplo
+
+const ProjectManager = lazy(
+	() => import("./_components/projects/project-manager"),
+);
+	<Route
+							path="/content"
+							children={<ProjectManager params={{ lang }} />}
+						/>
 ---
 
 ### 1.30 Const & Utils
@@ -3494,3 +3525,5 @@ Aquí tienes la lista maestra definitiva, consolidada y purgada de duplicados, e
 - **Focus:** Visible focus rings on all active elements.
 - **ARIA:** Use proper roles (e.g., `role="dialog"` for modals).
 ````
+
+### TAILWDINCSS VERSION 4

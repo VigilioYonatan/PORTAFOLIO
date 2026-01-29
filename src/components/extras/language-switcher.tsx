@@ -32,7 +32,10 @@ export default function LanguageSwitcher({ className }: LanguageSwitcherProps) {
 		const segments = currentPath.split("/").filter(Boolean);
 
 		let newPath = "";
-		if (segments.length > 0 && (LANGUAGES as readonly string[]).includes(segments[0])) {
+		if (
+			segments.length > 0 &&
+			(LANGUAGES as readonly string[]).includes(segments[0])
+		) {
 			segments[0] = langCode;
 			newPath = `/${segments.join("/")}`;
 		} else {

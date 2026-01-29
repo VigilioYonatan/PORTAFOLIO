@@ -47,7 +47,11 @@ describe("Social Module (E2E)", () => {
 			const filterRes = await request(e2e.app.getHttpServer())
 				.get("/api/v1/social-comment")
 				.set("Host", "localhost")
-				.query({ commentable_id: 1, commentable_type: "BLOG_POST", is_visible: true });
+				.query({
+					commentable_id: 1,
+					commentable_type: "BLOG_POST",
+					is_visible: true,
+				});
 
 			expect(filterRes.status).toBe(200);
 			expect(filterRes.body.results.length).toBeGreaterThanOrEqual(1);

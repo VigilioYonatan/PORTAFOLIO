@@ -7,10 +7,15 @@ export function getLangFromUrl(url: URL) {
 }
 
 // Helper to access nested properties by dot notation
-function getNestedValue(obj: any, key: string): string | undefined {
-	return key.split(".").reduce((o, i) => (o ? o[i] : undefined), obj) as
-		| string
-		| undefined;
+function getNestedValue(
+	obj: typeof ui.es | typeof ui.en | typeof ui.pt,
+	key: string,
+): string | undefined {
+	const val = key
+		.split(".")
+		// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+		.reduce((o, i) => (o ? (o as unknown as any)[i] : undefined), obj);
+	return typeof val === "string" ? val : undefined;
 }
 
 // Utility type for dot notation keys
@@ -55,19 +60,16 @@ type Paths<T, D extends number = 10> = [D] extends [never]
 					: never;
 			}[keyof T]
 		: "";
-            
+
 export type TxKeyPath = Paths<typeof ui.es>;
 
-export function useTranslations(lang: keyof typeof ui = defaultLang) {
-	return function t(
-		key: TxKeyPath,
-		params?: Record<string, string | number>,
-	) {
+export function useTranslations(lang: Lang = defaultLang) {
+	return function t(key: TxKeyPath, params?: Record<string, string | number>) {
 		let translation =
 			getNestedValue(ui[lang], key as string) ||
 			getNestedValue(ui[defaultLang], key as string);
-        
-        if (!translation) return key as string;
+
+		if (!translation) return key as string;
 
 		if (params) {
 			for (const [k, v] of Object.entries(params)) {
@@ -78,7 +80,7 @@ export function useTranslations(lang: keyof typeof ui = defaultLang) {
 	};
 }
 
-export function getTranslatedPath(path: string, lang: string) {
+export function getTranslatedPath(path: string, lang: Lang) {
 	return `/${lang}${path}`;
 }
 

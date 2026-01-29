@@ -15,7 +15,6 @@ vi.mock("../../apis/auth.mfa-login.api", () => ({
 	authMfaLoginApi: vi.fn(),
 }));
 
-
 // Mock i18n
 vi.mock("@src/i18n", () => ({
 	useTranslations: () => (key: string) => {
@@ -25,7 +24,7 @@ vi.mock("@src/i18n", () => ({
 			"auth.mfa.verify.verifying": "Verificando...",
 			"auth.mfa.verify.submit": "Verificar y Continuar",
 			"auth.mfa.verify.back": "Volver a Login",
-            "auth.mfa.verify.subtitle": "Ingresa el código de 6 dígitos",
+			"auth.mfa.verify.subtitle": "Ingresa el código de 6 dígitos",
 		};
 		return translations[key] || key;
 	},

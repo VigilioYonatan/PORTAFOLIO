@@ -1,7 +1,9 @@
 import { cn } from "@infrastructure/utils/client";
 import { chatMessagePublicStoreApi } from "@modules/chat/apis/chat-message.public-store.api";
 import { conversationStoreApi } from "@modules/chat/apis/conversation.store.api";
+import type { ChatMessageSchema } from "@modules/chat/schemas/chat-message.schema";
 import {
+	type ChatMode,
 	connectChatSocket,
 	disconnectChatSocket,
 	getChatSocket,
@@ -10,10 +12,9 @@ import {
 	onNewMessage,
 	removeAllChatListeners,
 	sendChatMessage,
-	type ChatMode,
 } from "@modules/chat/utils/client/chat.socket";
-import type { ChatMessageSchema } from "@modules/chat/schemas/chat-message.schema";
 import { useSignal } from "@preact/signals";
+import { isChatOpen } from "@stores/chat.store";
 import {
 	BotIcon,
 	SendIcon,
@@ -24,7 +25,6 @@ import {
 	XIcon,
 } from "lucide-preact";
 import { useEffect, useRef } from "preact/hooks";
-import { isChatOpen } from "@stores/chat.store";
 
 interface ChatMessage {
 	role: ChatMessageSchema["role"];
@@ -50,10 +50,15 @@ export default function FloatingActionChat() {
 		if (conversationId.value && !modeSelected.value) {
 			modeSelected.value = true;
 			if (messages.value.length === 0) {
-				messages.value = [{ 
-					role: "ASSISTANT", 
-					content: chatMode.value === "AI" ? "AI_LINK_REESTABLISHED: Protocol active." : "HUMAN_LINK_REESTABLISHED: Connection restored." 
-				}];
+				messages.value = [
+					{
+						role: "ASSISTANT",
+						content:
+							chatMode.value === "AI"
+								? "AI_LINK_REESTABLISHED: Protocol active."
+								: "HUMAN_LINK_REESTABLISHED: Connection restored.",
+					},
+				];
 			}
 		}
 	}, [conversationId.value]);
@@ -138,10 +143,13 @@ export default function FloatingActionChat() {
 		if (!inputValue.value.trim() || isTyping.value) return;
 
 		// 30 Message limit
-		if (messages.value.filter(m => m.role === "USER").length >= 30) {
+		if (messages.value.filter((m) => m.role === "USER").length >= 30) {
 			messages.value = [
 				...messages.value,
-				{ role: "ASSISTANT", content: "ERROR: MESSAGE_LIMIT_REACHED. Connection terminated." }
+				{
+					role: "ASSISTANT",
+					content: "ERROR: MESSAGE_LIMIT_REACHED. Connection terminated.",
+				},
 			];
 			return;
 		}
@@ -370,7 +378,13 @@ export default function FloatingActionChat() {
 									onClick={() => {
 										chatMode.value = "AI";
 										modeSelected.value = true;
-										messages.value = [{ role: "ASSISTANT", content: "AI_LINK_STABLE: I am the AI Nexus. Protocol engaged." }];
+										messages.value = [
+											{
+												role: "ASSISTANT",
+												content:
+													"AI_LINK_STABLE: I am the AI Nexus. Protocol engaged.",
+											},
+										];
 									}}
 									class="group relative px-6 py-3 bg-primary text-black font-black text-xs uppercase tracking-widest rounded-sm hover:scale-105 active:scale-95 transition-all overflow-hidden"
 								>
@@ -384,7 +398,13 @@ export default function FloatingActionChat() {
 									onClick={() => {
 										chatMode.value = "LIVE";
 										modeSelected.value = true;
-										messages.value = [{ role: "ASSISTANT", content: "HUMAN_LINK_INITIALIZING: Awaiting Yonatan Vigilio's connection..." }];
+										messages.value = [
+											{
+												role: "ASSISTANT",
+												content:
+													"HUMAN_LINK_INITIALIZING: Awaiting Yonatan Vigilio's connection...",
+											},
+										];
 									}}
 									class="group relative px-6 py-3 bg-zinc-800 text-white font-black text-xs uppercase tracking-widest rounded-sm hover:bg-zinc-700 hover:scale-105 active:scale-95 transition-all border border-white/5"
 								>
@@ -397,11 +417,7 @@ export default function FloatingActionChat() {
 						</div>
 					)}
 					{messages.value.map((msg, i) => {
-						if (
-							msg.role === "ASSISTANT" &&
-							!msg.content &&
-							msg.isStreaming
-						)
+						if (msg.role === "ASSISTANT" && !msg.content && msg.isStreaming)
 							return null;
 						return (
 							<div
@@ -490,20 +506,31 @@ export default function FloatingActionChat() {
 							type="text"
 							aria-label="Nexus Input"
 							class="flex-1 bg-transparent px-4 py-2 text-[11px] font-mono text-white focus:outline-none placeholder:text-white/20"
-							placeholder={messages.value.filter(m => m.role === "USER").length >= 30 ? "LIMIT_REACHED" : "INITIALIZE_COMMAND..."}
+							placeholder={
+								messages.value.filter((m) => m.role === "USER").length >= 30
+									? "LIMIT_REACHED"
+									: "INITIALIZE_COMMAND..."
+							}
 							value={inputValue.value}
 							onInput={(e) => {
 								inputValue.value = e.currentTarget.value;
 							}}
 							onKeyDown={(e) => e.key === "Enter" && handleSend()}
-							disabled={isTyping.value || messages.value.filter(m => m.role === "USER").length >= 30}
+							disabled={
+								isTyping.value ||
+								messages.value.filter((m) => m.role === "USER").length >= 30
+							}
 						/>
 						<button
 							aria-label="Transmit"
 							class="w-8 h-8 flex items-center justify-center bg-primary text-black rounded-sm hover:scale-105 active:scale-95 transition-all shadow-glow disabled:opacity-50 disabled:cursor-not-allowed group/send"
 							onClick={handleSend}
 							type="button"
-							disabled={!inputValue.value.trim() || isTyping.value || messages.value.filter(m => m.role === "USER").length >= 30}
+							disabled={
+								!inputValue.value.trim() ||
+								isTyping.value ||
+								messages.value.filter((m) => m.role === "USER").length >= 30
+							}
 						>
 							<SendIcon
 								size={14}
@@ -513,7 +540,8 @@ export default function FloatingActionChat() {
 					</div>
 					<div class="mt-2 flex justify-between items-center opacity-20 px-1">
 						<span class="text-[7px] font-bold tracking-[0.2em]">
-							{messages.value.filter(m => m.role === "USER").length}/30 MESSAGES
+							{messages.value.filter((m) => m.role === "USER").length}/30
+							MESSAGES
 						</span>
 						<span class="text-[7px] font-bold tracking-[0.2em]">
 							{chatMode.value === "AI" ? "SSE_STREAM" : "WEBSOCKET_LIVE"}
@@ -521,18 +549,20 @@ export default function FloatingActionChat() {
 					</div>
 				</div>
 
-			{/* FAB Button */}
-			<button
-				type="button"
-				aria-label={isChatOpen.value ? "Close Interface" : "Open AI Nexus"}
-				onClick={() => isChatOpen.value = !isChatOpen.value}
-				class={cn(
-					"fixed bottom-6 right-6 z-50 p-4 rounded-full shadow-[0_0_30px_rgba(6,182,212,0.4)] transition-all hover:scale-110 active:scale-95 group",
-					isChatOpen.value ? "bg-red-500 hover:bg-red-600 text-white" : "bg-black/80 border border-primary/50 text-primary hover:bg-primary hover:text-black backdrop-blur-md"
-				)}
-			>
-				{isChatOpen.value ? <XIcon size={24} /> : <BotIcon size={24} />}
-			</button>
+				{/* FAB Button */}
+				<button
+					type="button"
+					aria-label={isChatOpen.value ? "Close Interface" : "Open AI Nexus"}
+					onClick={() => (isChatOpen.value = !isChatOpen.value)}
+					class={cn(
+						"fixed bottom-6 right-6 z-50 p-4 rounded-full shadow-[0_0_30px_rgba(6,182,212,0.4)] transition-all hover:scale-110 active:scale-95 group",
+						isChatOpen.value
+							? "bg-red-500 hover:bg-red-600 text-white"
+							: "bg-black/80 border border-primary/50 text-primary hover:bg-primary hover:text-black backdrop-blur-md",
+					)}
+				>
+					{isChatOpen.value ? <XIcon size={24} /> : <BotIcon size={24} />}
+				</button>
 			</div>
 		</>
 	);

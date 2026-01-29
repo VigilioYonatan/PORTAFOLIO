@@ -76,9 +76,10 @@ export class TestimonialRepository {
 					content: false,
 				},
 				extras: {
-					content: sql<string>`substring(${testimonialEntity.content} from 1 for 3000)`.as(
-						"content",
-					),
+					content:
+						sql<string>`substring(${testimonialEntity.content} from 1 for 3000)`.as(
+							"content",
+						),
 				},
 			}) as Promise<TestimonialSchema[]>,
 			this.db

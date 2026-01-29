@@ -1,7 +1,7 @@
 import { schema } from "@infrastructure/providers/database/database.schema";
 import { DRIZZLE } from "@infrastructure/providers/database/database.service";
 import { Inject, Injectable } from "@nestjs/common";
-import { type InferInsertModel, and, eq } from "drizzle-orm";
+import { and, eq, type InferInsertModel } from "drizzle-orm";
 import type { NodePgDatabase } from "drizzle-orm/node-postgres";
 import { musicTrackEntity } from "../entities/music.entity";
 
@@ -93,9 +93,7 @@ export class MusicTrackSeeder {
 			});
 
 			if (!exists) {
-				await this.db
-					.insert(musicTrackEntity)
-					.values({ ...track, tenant_id });
+				await this.db.insert(musicTrackEntity).values({ ...track, tenant_id });
 			}
 		}
 	}

@@ -5,11 +5,10 @@ import { portfolioConfigSchema } from "@modules/portfolio-config/schemas/portfol
  * Response DTO for GET /config
  * Returns the full portfolio configuration
  */
-export const portfolioConfigShowResponseDto = z
-	.object({
-		success: z.literal(true),
-		config: portfolioConfigSchema,
-	})
+export const portfolioConfigShowResponseDto = z.object({
+	success: z.literal(true),
+	config: portfolioConfigSchema,
+});
 
 export type PortfolioConfigShowResponseDto = z.infer<
 	typeof portfolioConfigShowResponseDto
@@ -19,11 +18,10 @@ export type PortfolioConfigShowResponseDto = z.infer<
  * Response DTO for PUT /config
  * Returns the updated portfolio configuration
  */
-export const portfolioConfigUpdateResponseDto = z
-	.object({
-		success: z.literal(true),
-		config: portfolioConfigSchema,
-	})
+export const portfolioConfigUpdateResponseDto = z.object({
+	success: z.literal(true),
+	config: portfolioConfigSchema,
+});
 
 export type PortfolioConfigUpdateResponseDto = z.infer<
 	typeof portfolioConfigUpdateResponseDto
@@ -33,13 +31,11 @@ export type PortfolioConfigUpdateResponseDto = z.infer<
  * Response DTO for GET /config/cv/download
  * Returns binary PDF data metadata
  */
-export const portfolioConfigCvResponseDto = z
-	.object({
-		success: z.literal(true),
-		contentType: z.enum(["application/pdf", "text/plain; charset=utf-8"]),
-		filename: z.string(),
-	})
-;
+export const portfolioConfigCvResponseDto = z.object({
+	success: z.literal(true),
+	contentType: z.enum(["application/pdf", "text/plain; charset=utf-8"]),
+	filename: z.string(),
+});
 
 export type PortfolioConfigCvResponseDto = z.infer<
 	typeof portfolioConfigCvResponseDto

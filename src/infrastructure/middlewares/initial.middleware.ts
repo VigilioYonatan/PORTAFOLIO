@@ -1,4 +1,4 @@
-import { type Language, LANGUAGES } from "@infrastructure/types/i18n";
+import { LANGUAGES, type Language } from "@infrastructure/types/i18n";
 import { TenantRepository } from "@modules/tenant/repositories/tenant.repository";
 import type { TenantShowSchema } from "@modules/tenant/schemas/tenant.schema";
 import type { UserAuth } from "@modules/user/schemas/user.schema";
@@ -26,7 +26,9 @@ export class InitialCacheMiddleware implements NestMiddleware {
 			req.originalUrl.startsWith("/auth") ||
 			Object.values(WebPath).some((path) =>
 				// Replace * with .* and :param with [^/]+
-				new RegExp(`^${path.replace(/\*/g, ".*").replace(/:\w+/g, "[^/]+")}$`).test(
+				new RegExp(
+					`^${path.replace(/\*/g, ".*").replace(/:\w+/g, "[^/]+")}$`,
+				).test(
 					req.originalUrl.split("?")[0], // Ignore query params
 				),
 			);

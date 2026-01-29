@@ -24,7 +24,6 @@ vi.mock("@vigilio/sweet", () => ({
 	sweetModal: vi.fn(() => Promise.resolve({ isConfirmed: true })),
 }));
 
-
 // Mock i18n
 vi.mock("@src/i18n", () => ({
 	useTranslations: () => (key: string) => {
@@ -34,11 +33,11 @@ vi.mock("@src/i18n", () => ({
 			"auth.mfa.setup.qr_alt": "MFA QR Code",
 			"auth.mfa.setup.copy_secret": "Copy secret",
 			"auth.mfa.setup.verify_code": "Verify Code",
-            "auth.mfa.setup.code_label": "Code",
-            "auth.mfa.setup.submit": "Enable 2FA",
-            "auth.mfa.setup.step1": "Scan QR",
-            "auth.mfa.setup.step2": "Enter Code",
-            "auth.mfa.setup.success": "MFA Enabled",
+			"auth.mfa.setup.code_label": "Code",
+			"auth.mfa.setup.submit": "Enable 2FA",
+			"auth.mfa.setup.step1": "Scan QR",
+			"auth.mfa.setup.step2": "Enter Code",
+			"auth.mfa.setup.success": "MFA Enabled",
 		};
 		return translations[key] || key;
 	},
@@ -133,24 +132,26 @@ describe("MfaSetup", () => {
 		});
 
 		render(<MfaSetup />);
-        
-        // With mocked WebForm removed, use actual selectors
-        // Since we didn't check mfa-setup.tsx content, assuming standard WebForm usage
-        // WebForm uses id/name. It usually doesn't have data-testid on input unless passed.
-        // Assuming mfa-setup.tsx passes data-testid="input-token" OR we need to use other selectors.
-        // Let's use getByPlaceholderText or Label if possible.
-        // Assuming placeholder exists. Or just keep testId and hope, if not fix later.
-        // Wait, mfa-setup.test.tsx HAD mocked WebForm that ADDED tests ids.
-        // If I remove the mock, I lose the test ids unless the component has them.
-        // Let's check the component briefly or assume typical structure.
-        // I will use `container.querySelector` or generic input selector if failing.
-        // But let's look at the input-token usage.
-        
+
+		// With mocked WebForm removed, use actual selectors
+		// Since we didn't check mfa-setup.tsx content, assuming standard WebForm usage
+		// WebForm uses id/name. It usually doesn't have data-testid on input unless passed.
+		// Assuming mfa-setup.tsx passes data-testid="input-token" OR we need to use other selectors.
+		// Let's use getByPlaceholderText or Label if possible.
+		// Assuming placeholder exists. Or just keep testId and hope, if not fix later.
+		// Wait, mfa-setup.test.tsx HAD mocked WebForm that ADDED tests ids.
+		// If I remove the mock, I lose the test ids unless the component has them.
+		// Let's check the component briefly or assume typical structure.
+		// I will use `container.querySelector` or generic input selector if failing.
+		// But let's look at the input-token usage.
+
 		const tokenInput = screen.getByRole("textbox"); // Likely only one textbox enabled or visible?
 		fireEvent.input(tokenInput, { target: { value: "123456" } });
 
 		// The component uses "Verify and Activate" hardcoded
-		const submitButton = screen.getByRole("button", { name: /Verify and Activate/i });
+		const submitButton = screen.getByRole("button", {
+			name: /Verify and Activate/i,
+		});
 		fireEvent.click(submitButton);
 
 		await waitFor(() => {

@@ -2,6 +2,8 @@ import Badge from "@components/extras/badge";
 import Modal from "@components/extras/modal";
 import VigilioTable from "@components/tables";
 import { format } from "@formkit/tempo";
+import type { Refetch } from "@infrastructure/types/client";
+import { LANGUAGES, type Language } from "@infrastructure/types/i18n";
 import { cn } from "@infrastructure/utils/client/cn";
 import { projectDestroyApi } from "@modules/project/apis/project.destroy.api";
 import type {
@@ -16,31 +18,29 @@ import ProjectUpdate from "@modules/project/components/project-update";
 import TechStackIcons from "@modules/project/components/tech-stack-icons";
 import type { ProjectWithRelations } from "@modules/project/schemas/project.schema";
 import { useSignal } from "@preact/signals";
+import { type Lang, useTranslations } from "@src/i18n";
 import { useTable } from "@vigilio/preact-table";
 import { sweetModal } from "@vigilio/sweet";
 import {
 	Edit,
 	Eye,
 	EyeOff,
+	Languages,
 	Layers,
 	Plus,
 	RefreshCw,
 	Trash2,
 } from "lucide-preact";
 import { useEffect } from "preact/hooks";
-import type { ProjectUpdateDto } from "../dtos/project.update.dto";
-import type { Refetch } from "@infrastructure/types/client";
 import type { ProjectIndexResponseDto } from "../dtos/project.response.dto";
-import { type Lang, useTranslations } from "@src/i18n";
-import { type Language, LANGUAGES } from "@infrastructure/types/i18n";
-import { Languages } from "lucide-preact";
+import type { ProjectUpdateDto } from "../dtos/project.update.dto";
 
 interface ProjectTableProps {
-    lang?: Lang;
+	lang?: Lang;
 }
 
 export default function ProjectTable({ lang = "es" }: ProjectTableProps) {
-    const t = useTranslations(lang);
+	const t = useTranslations(lang);
 	const projectDestroyMutation = projectDestroyApi();
 	const projectSyncMutation = projectSyncApi();
 	const editingProject = useSignal<ProjectWithRelations | null>(null);
@@ -124,7 +124,9 @@ export default function ProjectTable({ lang = "es" }: ProjectTableProps) {
 				isSort: true,
 				cell: (row) => (
 					<div class="flex items-center gap-1.5 text-[10px] font-bold text-primary/80">
-						<span class="opacity-40 whitespace-nowrap">{t("dashboard.project.stars")}</span>{" "}
+						<span class="opacity-40 whitespace-nowrap">
+							{t("dashboard.project.stars")}
+						</span>{" "}
 						{row.github_stars ?? 0}
 					</div>
 				),
@@ -135,7 +137,9 @@ export default function ProjectTable({ lang = "es" }: ProjectTableProps) {
 				isSort: true,
 				cell: (row) => (
 					<span class="text-[10px] font-mono text-muted-foreground/50 uppercase">
-						{row.updated_at ? format(row.updated_at, "short") : t("dashboard.project.never")}
+						{row.updated_at
+							? format(row.updated_at, "short")
+							: t("dashboard.project.never")}
 					</span>
 				),
 			},
@@ -155,14 +159,15 @@ export default function ProjectTable({ lang = "es" }: ProjectTableProps) {
 											onSuccess(data) {
 												table.updateData((old, count) => ({
 													result: old.map((item) =>
-														item.id === row.id ? { ...item, ...data.project } : item,
+														item.id === row.id
+															? { ...item, ...data.project }
+															: item,
 													),
 													count,
 												}));
 											},
 										},
 									);
-
 								}}
 								class="p-2 text-muted-foreground hover:text-primary rounded-lg hover:bg-primary/10 transition-all"
 								title={row.is_visible ? t("common.hide") : t("common.show")}
@@ -213,7 +218,9 @@ export default function ProjectTable({ lang = "es" }: ProjectTableProps) {
 										text: `${t("dashboard.project.delete_confirm_text")} "${row.title}"?`,
 										icon: "danger",
 										showCancelButton: true,
-										confirmButtonText: t("dashboard.project.delete_confirm_btn"),
+										confirmButtonText: t(
+											"dashboard.project.delete_confirm_btn",
+										),
 									}).then(({ isConfirmed }) => {
 										if (isConfirmed) {
 											projectDestroyMutation.mutate(row.id, {
@@ -242,9 +249,9 @@ export default function ProjectTable({ lang = "es" }: ProjectTableProps) {
 			},
 		],
 		pagination: { limit: 10 },
-        filters: {
-            language: "es", // Default
-        }
+		filters: {
+			language: "es", // Default
+		},
 	});
 
 	const query = projectIndexApi(table);
@@ -260,7 +267,7 @@ export default function ProjectTable({ lang = "es" }: ProjectTableProps) {
 	]);
 
 	const activeFilter = table.filters.value.status ?? null;
-    const activeLanguage = table.filters.value.language ?? "es";
+	const activeLanguage = table.filters.value.language ?? "es";
 
 	return (
 		<VigilioTable table={table} query={query}>
@@ -307,28 +314,44 @@ export default function ProjectTable({ lang = "es" }: ProjectTableProps) {
 						/>
 					</div>
 
-                    {/* Language Filter */}
-                    <div class="relative group">
-                        <div class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/40 pointer-events-none">
-                            <Languages size={14} />
-                        </div>
-                        <select
-                            class="bg-black/60 border border-white/10 text-[10px] font-mono tracking-widest rounded-xl pl-9 pr-8 py-3 appearance-none focus:outline-none focus:ring-1 focus:ring-primary/40 focus:border-primary/40 transition-all cursor-pointer uppercase text-muted-foreground hover:text-white"
-                            value={activeLanguage as string}
-                            onChange={(e) => {
-                                table.filters.update("language", e.currentTarget.value as Language);
-                            }}
-                        >
-                            {LANGUAGES.map((lang) => (
-                                <option key={lang} value={lang} class="bg-zinc-950 text-white">
-                                    {lang.toUpperCase()}
-                                </option>
-                            ))}
-                        </select>
-                         <div class="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/40 pointer-events-none">
-                           <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down"><path d="m6 9 6 6 6-6"/></svg>
-                        </div>
-                    </div>
+					{/* Language Filter */}
+					<div class="relative group">
+						<div class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/40 pointer-events-none">
+							<Languages size={14} />
+						</div>
+						<select
+							class="bg-black/60 border border-white/10 text-[10px] font-mono tracking-widest rounded-xl pl-9 pr-8 py-3 appearance-none focus:outline-none focus:ring-1 focus:ring-primary/40 focus:border-primary/40 transition-all cursor-pointer uppercase text-muted-foreground hover:text-white"
+							value={activeLanguage as string}
+							onChange={(e) => {
+								table.filters.update(
+									"language",
+									e.currentTarget.value as Language,
+								);
+							}}
+						>
+							{LANGUAGES.map((lang) => (
+								<option key={lang} value={lang} class="bg-zinc-950 text-white">
+									{lang.toUpperCase()}
+								</option>
+							))}
+						</select>
+						<div class="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/40 pointer-events-none">
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								width="12"
+								height="12"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="2"
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								class="lucide lucide-chevron-down"
+							>
+								<path d="m6 9 6 6 6-6" />
+							</svg>
+						</div>
+					</div>
 
 					{/* Status Filters */}
 					<div class="flex items-center gap-2 z-10 overflow-x-auto pb-1 lg:pb-0">
@@ -391,21 +414,21 @@ export default function ProjectTable({ lang = "es" }: ProjectTableProps) {
 					}}
 					contentClassName="max-w-4xl bg-zinc-950 border border-white/10 shadow-3xl rounded-3xl"
 				>
-						<ProjectUpdate
-							project={editingProject.value!}
-							refetch={(data) => {
-								table.updateData((old, count) => ({
-									result: old.map((item) =>
-										item.id === data.id ? { ...item, ...data } : item,
-									),
-									count,
-								}));
-								editingProject.value = null;
-							}}
-							onClose={() => {
-								editingProject.value = null;
-							}}
-						/>
+					<ProjectUpdate
+						project={editingProject.value!}
+						refetch={(data) => {
+							table.updateData((old, count) => ({
+								result: old.map((item) =>
+									item.id === data.id ? { ...item, ...data } : item,
+								),
+								count,
+							}));
+							editingProject.value = null;
+						}}
+						onClose={() => {
+							editingProject.value = null;
+						}}
+					/>
 				</Modal>
 
 				<Modal

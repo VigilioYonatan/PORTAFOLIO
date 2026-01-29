@@ -7,23 +7,23 @@ import {
 	type TestimonialStoreDto,
 	testimonialStoreDto,
 } from "@modules/testimonial/dtos/testimonial.store.dto";
-import { sweetModal } from "@vigilio/sweet";
-import { useForm, type Resolver } from "react-hook-form";
-import type { TestimonialIndexResponseDto } from "../dtos/testimonial.response.dto";
 import { type Lang, useTranslations } from "@src/i18n";
+import { sweetModal } from "@vigilio/sweet";
+import { type Resolver, useForm } from "react-hook-form";
+import type { TestimonialIndexResponseDto } from "../dtos/testimonial.response.dto";
 
 interface TestimonialStoreProps {
 	refetch: (data: Refetch<TestimonialIndexResponseDto["results"]>) => void;
 	onClose: () => void;
-    lang?: Lang;
+	lang?: Lang;
 }
 
 export default function TestimonialStore({
 	refetch,
 	onClose,
-    lang = "es"
+	lang = "es",
 }: TestimonialStoreProps) {
-    const t = useTranslations(lang);
+	const t = useTranslations(lang);
 	const storeMut = testimonialStoreApi();
 
 	const form = useForm<TestimonialStoreDto>({
@@ -49,7 +49,7 @@ export default function TestimonialStore({
 
 	return (
 		<Form {...form} onSubmit={onSubmit}>
-            <div class="flex flex-col gap-1 border-b border-white/5 pb-4 mb-4">
+			<div class="flex flex-col gap-1 border-b border-white/5 pb-4 mb-4">
 				<h2 class="text-xl font-black tracking-tight text-foreground uppercase">
 					{t("dashboard.testimonial.form.create_title")}
 				</h2>

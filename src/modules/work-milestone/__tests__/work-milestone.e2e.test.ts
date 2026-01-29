@@ -1,4 +1,6 @@
 /** biome-ignore-all lint/suspicious/noConsole: <explanation> */
+
+import { configureApp } from "@infrastructure/config/server/app.config";
 import type { INestApplication } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import { Test, type TestingModule } from "@nestjs/testing";
@@ -9,7 +11,6 @@ import {
 	seedLocalhostTenant,
 	setupTestDb,
 } from "../../../infrastructure/config/server/setup-test-db";
-import { configureApp } from "@infrastructure/config/server/app.config";
 
 describe("WorkMilestoneModule (e2e)", () => {
 	let app: INestApplication;
@@ -28,7 +29,7 @@ describe("WorkMilestoneModule (e2e)", () => {
 		db = await setupTestDb();
 
 		app = moduleFixture.createNestApplication();
-	
+
 		configureApp(app);
 		jwtService = moduleFixture.get(JwtService);
 

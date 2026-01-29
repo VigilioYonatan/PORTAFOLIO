@@ -1,18 +1,22 @@
 import { ZodQueryPipe } from "@infrastructure/pipes/zod-query.pipe";
-import { aiInsightQueryDto } from "../dtos/ai-insight.query.dto";
 import { Roles } from "@modules/auth/decorators/roles.decorator";
 import { AuthenticatedGuard } from "@modules/auth/guards/authenticated.guard";
 import { RolesGuard } from "@modules/auth/guards/roles.guard";
-import { Controller, Get, HttpCode, Post, Query, Req, UseGuards } from "@nestjs/common";
+import {
+	Controller,
+	Get,
+	HttpCode,
+	Post,
+	Query,
+	Req,
+	UseGuards,
+} from "@nestjs/common";
 import { ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
 import type { Request } from "express";
 import { AiInsightQueryClassDto } from "../dtos/ai-insight.query.class.dto";
-import {
-	AiInsightIndexResponseClassDto,
-} from "../dtos/analytics.response.class.dto";
-import type {
-	AiInsightIndexResponseDto,
-} from "../dtos/analytics.response.dto";
+import { aiInsightQueryDto } from "../dtos/ai-insight.query.dto";
+import { AiInsightIndexResponseClassDto } from "../dtos/analytics.response.class.dto";
+import type { AiInsightIndexResponseDto } from "../dtos/analytics.response.dto";
 import { AiInsightService } from "../services/ai-insight.service";
 
 @ApiTags("IA Insight")

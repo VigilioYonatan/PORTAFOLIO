@@ -20,9 +20,6 @@ vi.mock("@vigilio/sweet", () => ({
 	sweetModal: vi.fn(() => Promise.resolve({ isConfirmed: true })),
 }));
 
-
-
-
 vi.mock("@src/i18n", () => ({
 	useTranslations: () => (key: string) => {
 		const translations: Record<string, string> = {
@@ -71,7 +68,9 @@ describe("ResetPasswordForm", () => {
 
 		const newPassInput = screen.getByLabelText(/New Password/i);
 		const repeatPassInput = screen.getByLabelText(/Confirm Password/i);
-		const submitButton = screen.getByRole("button", { name: /Reset Password/i });
+		const submitButton = screen.getByRole("button", {
+			name: /Reset Password/i,
+		});
 
 		fireEvent.input(newPassInput, { target: { value: "NewPass123!" } });
 		fireEvent.input(repeatPassInput, { target: { value: "NewPass123!" } });
@@ -101,10 +100,11 @@ describe("ResetPasswordForm", () => {
 
 		render(<ResetPasswordForm token="valid-token" />);
 
-
 		const newPassInput = screen.getByLabelText(/New Password/i);
 		const repeatPassInput = screen.getByLabelText(/Confirm Password/i);
-		const submitButton = screen.getByRole("button", { name: /Reset Password/i });
+		const submitButton = screen.getByRole("button", {
+			name: /Reset Password/i,
+		});
 
 		fireEvent.input(newPassInput, { target: { value: "NewPass123!" } });
 		fireEvent.input(repeatPassInput, { target: { value: "NewPass123!" } });

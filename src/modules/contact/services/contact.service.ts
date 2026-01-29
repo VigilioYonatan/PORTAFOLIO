@@ -4,6 +4,7 @@ import type { ContactQueryDto } from "@modules/contact/dtos/contact.query.dto";
 import type { ContactStoreDto } from "@modules/contact/dtos/contact.store.dto";
 import { ContactRepository } from "@modules/contact/repositories/contact.repository";
 import type { ContactMessageSchema } from "@modules/contact/schemas/contact-message.schema";
+import { NotificationService } from "@modules/notification/services/notification.service";
 import { Injectable, Logger, NotFoundException } from "@nestjs/common";
 import type {
 	ContactDestroyResponseDto,
@@ -19,6 +20,7 @@ export class ContactService {
 	constructor(
 		private readonly contactRepository: ContactRepository,
 		private readonly contactCache: ContactCache,
+		private readonly notificationService: NotificationService,
 	) {}
 
 	async store(
@@ -39,6 +41,14 @@ export class ContactService {
 
 			if (tenant_id) {
 				await this.contactCache.invalidateLists(tenant_id);
+
+				// Send push notification to Admin
+				this.notificationService.sendPushNotification(tenant_id, 1, {
+					title: `New Message: ${body.subject || "Contact"}`,
+					body: `${body.name}: ${body.message.substring(0, 50)}...`,
+					url: "/dashboard/inbox",
+					icon: "/favicon.ico",
+				});
 			}
 
 			return { success: true, message };
@@ -56,22 +66,23 @@ export class ContactService {
 		return await paginator<ContactQueryDto, ContactMessageSchema>(
 			"/contact-message",
 			{
-			filters: query,
-			cb: async (filters, isClean) => {
-				if (isClean) {
-					const cached = await this.contactCache.getList(tenant_id, filters);
-					if (cached) return cached;
-				}
+				filters: query,
+				cb: async (filters, isClean) => {
+					if (isClean) {
+						const cached = await this.contactCache.getList(tenant_id, filters);
+						if (cached) return cached;
+					}
 
-				const result = await this.contactRepository.index(tenant_id, filters);
+					const result = await this.contactRepository.index(tenant_id, filters);
 
-				if (isClean) {
-					await this.contactCache.setList(tenant_id, filters, result);
-				}
+					if (isClean) {
+						await this.contactCache.setList(tenant_id, filters, result);
+					}
 
-				return result;
+					return result;
+				},
 			},
-		});
+		);
 	}
 
 	async markAsRead(

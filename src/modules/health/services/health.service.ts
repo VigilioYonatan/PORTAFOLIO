@@ -2,7 +2,11 @@ import { CacheService } from "@infrastructure/providers/cache";
 import { RustFSService } from "@infrastructure/providers/storage/rustfs.service";
 import { Injectable } from "@nestjs/common";
 import { HealthCheckService, MemoryHealthIndicator } from "@nestjs/terminus";
-import type { HealthCheckResponseDto, HealthLivenessResponseDto, HealthReadinessResponseDto } from "../dtos/health.response.dto";
+import type {
+	HealthCheckResponseDto,
+	HealthLivenessResponseDto,
+	HealthReadinessResponseDto,
+} from "../dtos/health.response.dto";
 
 @Injectable()
 export class HealthService {

@@ -1,13 +1,22 @@
 import MessageList from "@modules/contact/components/message-list";
-import { MailIcon, ShieldCheckIcon, WifiIcon } from "lucide-preact";
+import { setChatOpen } from "@modules/web/libs/sound-manager";
 import { type Lang, useTranslations } from "@src/i18n";
+import { MailIcon, ShieldCheckIcon, WifiIcon } from "lucide-preact";
+import { useEffect } from "preact/hooks";
 
 interface InboxProps {
-    lang?: Lang;
+	params: {
+		lang: Lang;
+	};
 }
+export default function Inbox({ params }: InboxProps) {
+	const t = useTranslations(params.lang);
 
-export default function Inbox({ lang = "es" }: InboxProps) {
-    const t = useTranslations(lang);
+	useEffect(() => {
+		setChatOpen(true);
+		return () => setChatOpen(false);
+	}, []);
+
 	return (
 		<div class="h-[calc(100vh-8rem)] flex flex-col animate-in fade-in duration-500 relative">
 			{/* Ambient System Scanlines */}
@@ -54,7 +63,7 @@ export default function Inbox({ lang = "es" }: InboxProps) {
 			{/* MessageList handles the Master-Detail view internally */}
 			<div class="flex-1 overflow-hidden relative z-10  bg-zinc-950/20 border border-white/5 rounded-sm transition-all hover:border-primary/10">
 				<div class="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
-				<MessageList lang={lang} />
+				<MessageList lang={params.lang} />
 			</div>
 		</div>
 	);

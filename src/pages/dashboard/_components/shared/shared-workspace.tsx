@@ -2,13 +2,8 @@ import AudioList from "@modules/music/components/audio-list";
 import WaveEditor from "@modules/music/components/wave-editor";
 import TechIconGrid from "@modules/technology/components/tech-icon-grid";
 import { Database, Disc, Layers } from "lucide-preact";
-import { type Lang } from "@src/i18n";
 
-interface SharedWorkspaceProps {
-    lang?: Lang;
-}
-
-export default function SharedWorkspace({}: SharedWorkspaceProps) {
+export default function SharedWorkspace() {
 	return (
 		<div class="space-y-8 animate-in fade-in duration-500">
 			<div class="mb-6">

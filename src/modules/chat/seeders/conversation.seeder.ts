@@ -21,7 +21,10 @@ export class ConversationSeeder {
 			tenant_id,
 			ip_address: faker.internet.ipv4(),
 			title: faker.lorem.sentence({ min: 3, max: 8 }),
-			mode: faker.helpers.arrayElement(["AI", "LIVE"]) as ConversationSchema["mode"],
+			mode: faker.helpers.arrayElement([
+				"AI",
+				"LIVE",
+			]) as ConversationSchema["mode"],
 			is_active: faker.datatype.boolean(),
 			visitor_id: faker.string.uuid(),
 			user_id: null, // Sin admin asignado

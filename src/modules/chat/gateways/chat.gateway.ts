@@ -1,3 +1,8 @@
+import { Logger } from "@nestjs/common";
+import type {
+	OnGatewayConnection,
+	OnGatewayDisconnect,
+} from "@nestjs/websockets";
 import {
 	ConnectedSocket,
 	MessageBody,
@@ -5,11 +10,9 @@ import {
 	WebSocketGateway,
 	WebSocketServer,
 } from "@nestjs/websockets";
-import type { OnGatewayConnection, OnGatewayDisconnect } from "@nestjs/websockets";
-import { Logger } from "@nestjs/common";
 import type { Server, Socket } from "socket.io";
-import { ChatRepository } from "../repositories/chat.repository";
 import type { ChatMessageStoreDto } from "../dtos/chat.class.dto";
+import { ChatRepository } from "../repositories/chat.repository";
 import type { ChatMessageSchema } from "../schemas/chat-message.schema";
 import type { ConversationSchema } from "../schemas/conversation.schema";
 
@@ -41,9 +44,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	private readonly logger = new Logger(ChatGateway.name);
 	private readonly connections = new Map<string, Socket>();
 
-	constructor(
-		private readonly chatRepository: ChatRepository,
-	) {}
+	constructor(private readonly chatRepository: ChatRepository) {}
 
 	handleConnection(client: Socket) {
 		this.logger.log(`Client connected: ${client.id}`);
@@ -62,9 +63,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	) {
 		const room = `conversation_${payload.conversation_id}`;
 		client.join(room);
-		this.logger.log(
-			`Client ${client.id} joined room ${room}`,
-		);
+		this.logger.log(`Client ${client.id} joined room ${room}`);
 
 		// If admin joins OR user explicitly requests LIVE mode
 		if (payload.visitor_id === "admin" || payload.mode === "LIVE") {
@@ -75,11 +74,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				mode,
 			);
 			this.server.to(room).emit("mode_changed", { mode });
-			
+
 			// Notify admins about the active conversation/mode change
-			this.notifyNewConversation(payload.tenant_id, { 
-				id: payload.conversation_id, 
-				mode 
+			this.notifyNewConversation(payload.tenant_id, {
+				id: payload.conversation_id,
+				mode,
 			});
 		}
 
@@ -98,9 +97,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	}
 
 	@SubscribeMessage("send_message")
-	async handleSendMessage(
-		@MessageBody() payload: MessagePayload,
-	) {
+	async handleSendMessage(@MessageBody() payload: MessagePayload) {
 		this.logger.log(
 			{ conversation_id: payload.conversation_id, role: payload.role },
 			"Message received via WebSocket",

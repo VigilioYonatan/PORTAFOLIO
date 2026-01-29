@@ -8,9 +8,9 @@ import type { WorkExperienceSchema } from "@modules/work-experience/schemas/work
 import { WorkExperienceService } from "@modules/work-experience/services/work-experience.service";
 import { Injectable, Logger, NotFoundException } from "@nestjs/common";
 import type {
+	PortfolioConfigCvResultDto,
 	PortfolioConfigShowResponseDto,
 	PortfolioConfigUpdateResponseDto,
-	PortfolioConfigCvResultDto,
 } from "../dtos/portfolio-config.response.dto";
 
 @Injectable()

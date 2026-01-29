@@ -63,7 +63,9 @@ export const webProjectSlugResponseDto = z.object({
 	description: z.string(),
 	project: projectWithTecheables,
 });
-export type WebProjectSlugResponseDto = z.infer<typeof webProjectSlugResponseDto>;
+export type WebProjectSlugResponseDto = z.infer<
+	typeof webProjectSlugResponseDto
+>;
 
 export const webProjectsResponseDto = z.object({
 	title: z.string(),

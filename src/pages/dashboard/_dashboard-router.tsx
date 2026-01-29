@@ -1,10 +1,13 @@
 import { lazy, Suspense } from "preact/compat";
 import { Route, Router, Switch } from "wouter-preact";
 import DashboardLayout from "./_components/dashboard-layout";
+import { type Lang } from "@src/i18n";
 
-// Lazy load modules (Updated with separated components)
 const DashboardHome = lazy(() => import("./_components/dashboard-home"));
 const AIWorkspace = lazy(() => import("@modules/ai/components/ai-workspace"));
+const DocumentManager = lazy(
+	() => import("./_components/documents/document-manager"),
+);
 const ProjectManager = lazy(
 	() => import("./_components/projects/project-manager"),
 );
@@ -17,10 +20,9 @@ const SharedWorkspace = lazy(
 );
 const Settings = lazy(() => import("./_components/settings/settings"));
 
-import { type Lang } from "@src/i18n";
-
+// Dashboard Router
 interface DashboardRouterProps {
-    lang?: Lang;
+	lang?: Lang;
 }
 
 export function DashboardRouter({ lang = "es" }: DashboardRouterProps) {
@@ -38,43 +40,60 @@ export function DashboardRouter({ lang = "es" }: DashboardRouterProps) {
 					}
 				>
 					<Switch>
-						<Route path="/dashboard">
-                            {() => <DashboardHome lang={lang} />}
-                        </Route>
+						<Route
+							path="/dashboard"
+							children={<DashboardHome params={{ lang }} />}
+						/>
 						{/* Modules */}
-						<Route path="/dashboard/ai" component={AIWorkspace} />
-						<Route path="/dashboard/documents" component={AIWorkspace} />
+						<Route
+							path="/dashboard/ai"
+							children={<AIWorkspace params={{ lang }} />}
+						/>
+						<Route
+							path="/dashboard/documents"
+							children={<DocumentManager params={{ lang }} />}
+						/>
+
 						{/* Separated Content Managers */}
-						<Route path="/dashboard/projects">
-                            {() => <ProjectManager lang={lang} />}
-                        </Route>
-						<Route path="/dashboard/blog">
-                            {() => <BlogManager lang={lang} />}
-                        </Route>
-						<Route path="/dashboard/content">
-                            {() => <ProjectManager lang={lang} />}
-                        </Route>
+						<Route
+							path="/dashboard/projects"
+							children={<ProjectManager params={{ lang }} />}
+						/>
+						<Route
+							path="/dashboard/blog"
+							children={<BlogManager params={{ lang }} />}
+						/>
+						<Route
+							path="/dashboard/content"
+							children={<ProjectManager params={{ lang }} />}
+						/>
+
 						{/* Fallback/Legacy */}
-						{/* Fallback/Legacy */}
-						<Route path="/dashboard/hr">
-                            {() => <HRDashboard lang={lang} />}
-                        </Route>
-						<Route path="/dashboard/inbox">
-                            {() => <Inbox lang={lang} />}
-                        </Route>
-						<Route path="/dashboard/shared">
-                            {() => <SharedWorkspace lang={lang} />}
-                        </Route>
-						<Route path="/dashboard/tech">
-                            {() => <SharedWorkspace lang={lang} />}
-                        </Route>
-						<Route path="/dashboard/settings">
-                            {() => <Settings lang={lang} />}
-                        </Route>
-						<Route path="/dashboard/profile">
-                            {() => <Settings lang={lang} />}
-                        </Route>
-						{/* Alias for Profile */}
+						<Route
+							path="/dashboard/hr"
+							children={<HRDashboard params={{ lang }} />}
+						/>
+						<Route
+							path="/dashboard/inbox"
+							children={<Inbox params={{ lang }} />}
+						/>
+						<Route
+							path="/dashboard/shared"
+							children={<SharedWorkspace />}
+						/>
+						<Route
+							path="/dashboard/tech"
+							children={<SharedWorkspace />}
+						/>
+						<Route
+							path="/dashboard/settings"
+							children={<Settings params={{ lang }} />}
+						/>
+						<Route
+							path="/dashboard/profile"
+							children={<Settings params={{ lang }} />}
+						/>
+
 						{/* Fallback */}
 						<Route>
 							<div class="p-20 text-center text-destructive font-mono text-xs tracking-widest uppercase">

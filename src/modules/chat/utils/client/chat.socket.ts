@@ -1,17 +1,23 @@
-import { io } from "socket.io-client";
 import type { Socket } from "socket.io-client";
+import { io } from "socket.io-client";
 import type { ChatMessageSchema } from "../../schemas/chat-message.schema";
 
 export type ChatMode = "AI" | "LIVE";
 
 // Use Pick from schema to inherit role type
-export type ChatMessage = Pick<ChatMessageSchema, "id" | "content" | "role" | "created_at">;
+export type ChatMessage = Pick<
+	ChatMessageSchema,
+	"id" | "content" | "role" | "created_at"
+>;
 
 export interface ChatSocketEvents {
 	new_message: (message: ChatMessage) => void;
 	mode_changed: (data: { mode: ChatMode }) => void;
 	typing_status: (data: { is_typing: boolean }) => void;
-	new_conversation: (data: { tenant_id: number; conversation: unknown }) => void;
+	new_conversation: (data: {
+		tenant_id: number;
+		conversation: unknown;
+	}) => void;
 }
 
 let socket: Socket | null = null;

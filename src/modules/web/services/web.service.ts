@@ -5,7 +5,16 @@ import { ProjectService } from "@modules/project/services/project.service";
 import { TechnologyService } from "@modules/technology/services/technology.service";
 import { WorkExperienceService } from "@modules/work-experience/services/work-experience.service";
 import { Injectable } from "@nestjs/common";
-import type { WebAboutResponseDto, WebBlogResponseDto, WebBlogSlugResponseDto, WebContactResponseDto, WebIndexResponseDto, WebPageResponseDto, WebProjectsResponseDto, WebProjectSlugResponseDto } from "../dtos/web.response.dto";
+import type {
+	WebAboutResponseDto,
+	WebBlogResponseDto,
+	WebBlogSlugResponseDto,
+	WebContactResponseDto,
+	WebIndexResponseDto,
+	WebPageResponseDto,
+	WebProjectSlugResponseDto,
+	WebProjectsResponseDto,
+} from "../dtos/web.response.dto";
 
 @Injectable()
 export class WebService {
@@ -43,7 +52,10 @@ export class WebService {
 
 		return {
 			title: language === "es" ? "Portafolio" : "Portfolio",
-			description: language === "es" ? "Mi Portafolio Profesional" : "My Professional Portfolio",
+			description:
+				language === "es"
+					? "Mi Portafolio Profesional"
+					: "My Professional Portfolio",
 			musicTracks,
 			experiences,
 			latestProjects,
@@ -65,7 +77,8 @@ export class WebService {
 		});
 
 		return {
-			title: language === "es" ? "Sobre Mí | Portafolio" : "About Me | Portfolio",
+			title:
+				language === "es" ? "Sobre Mí | Portafolio" : "About Me | Portfolio",
 			description:
 				language === "es"
 					? "Conoce más sobre mi experiencia y habilidades."
@@ -79,7 +92,10 @@ export class WebService {
 		// For now using static data as per typical contact page requirements or could fetch from a settings service
 		return {
 			title: language === "es" ? "Contacto | Pylot" : "Contact Us | Pylot",
-			description: language === "es" ? "Ponte en contacto con nuestro equipo." : "Get in touch with our team.",
+			description:
+				language === "es"
+					? "Ponte en contacto con nuestro equipo."
+					: "Get in touch with our team.",
 			email: "contact@example.com",
 			phone: "+1234567890",
 		};
@@ -105,8 +121,6 @@ export class WebService {
 				language,
 			},
 		);
-
-	
 
 		return {
 			title: language === "es" ? "Blog | Pylot" : "Blog | Pylot",
@@ -137,7 +151,10 @@ export class WebService {
 
 		return {
 			title: language === "es" ? "Proyectos | Pylot" : "Projects | Pylot",
-			description: language === "es" ? "Explora mi trabajo y proyectos." : "Explore my work and projects.",
+			description:
+				language === "es"
+					? "Explora mi trabajo y proyectos."
+					: "Explore my work and projects.",
 			projects,
 			total,
 			page,

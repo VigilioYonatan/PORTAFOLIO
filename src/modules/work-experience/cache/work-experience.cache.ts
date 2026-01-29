@@ -1,8 +1,8 @@
 import { CacheService } from "@infrastructure/providers/cache/cache.service";
 import { toNull } from "@infrastructure/utils/server";
 import { Injectable } from "@nestjs/common";
-import type { WorkExperienceSchema } from "../schemas/work-experience.schema";
 import type { WorkExperienceQueryDto } from "../dtos/work-experience.query.dto";
+import type { WorkExperienceSchema } from "../schemas/work-experience.schema";
 
 @Injectable()
 export class WorkExperienceCache {

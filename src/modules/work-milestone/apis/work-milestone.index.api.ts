@@ -28,7 +28,10 @@ export function workMilestoneIndexApi(
 	table: WorkMilestoneIndexTable | null = null,
 	paginator: UsePaginator | null = null,
 ) {
-	const query = useQuery<WorkMilestoneIndexResponseDto, WorkMilestoneIndexApiError>(
+	const query = useQuery<
+		WorkMilestoneIndexResponseDto,
+		WorkMilestoneIndexApiError
+	>(
 		`/work-milestone?work_experience_id=${experienceId}`,
 		async (url) => {
 			const data = new URLSearchParams();

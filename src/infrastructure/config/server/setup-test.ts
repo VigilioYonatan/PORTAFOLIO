@@ -31,7 +31,7 @@ if (typeof window !== "undefined") {
 		typeof CanvasRenderingContext2D !== "undefined" &&
 		!CanvasRenderingContext2D.prototype.ellipse
 	) {
-		CanvasRenderingContext2D.prototype.ellipse = function (
+		CanvasRenderingContext2D.prototype.ellipse = (
 			_x: number,
 			_y: number,
 			_radiusX: number,
@@ -40,7 +40,7 @@ if (typeof window !== "undefined") {
 			_startAngle: number,
 			_endAngle: number,
 			_anticlockwise?: boolean,
-		) {
+		) => {
 			// No-op for testing
 		};
 	}
@@ -48,7 +48,7 @@ if (typeof window !== "undefined") {
 		typeof CanvasRenderingContext2D !== "undefined" &&
 		!CanvasRenderingContext2D.prototype.setLineDash
 	) {
-		CanvasRenderingContext2D.prototype.setLineDash = function () {
+		CanvasRenderingContext2D.prototype.setLineDash = () => {
 			// No-op for testing
 		};
 	}
@@ -56,11 +56,9 @@ if (typeof window !== "undefined") {
 		typeof CanvasRenderingContext2D !== "undefined" &&
 		!CanvasRenderingContext2D.prototype.createRadialGradient
 	) {
-		CanvasRenderingContext2D.prototype.createRadialGradient = function () {
-			return {
-				addColorStop: vi.fn(),
-			};
-		};
+		CanvasRenderingContext2D.prototype.createRadialGradient = () => ({
+			addColorStop: vi.fn(),
+		});
 	}
 }
 

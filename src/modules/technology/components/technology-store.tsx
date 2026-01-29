@@ -12,23 +12,23 @@ import {
 	typeTextExtensions,
 	UPLOAD_CONFIG,
 } from "@modules/uploads/const/upload.const";
+import { type Lang, useTranslations } from "@src/i18n";
 import { sweetModal } from "@vigilio/sweet";
 import { Layers, Type } from "lucide-preact";
-import { useForm, type Resolver } from "react-hook-form";
-import { type Lang, useTranslations } from "@src/i18n";
+import { type Resolver, useForm } from "react-hook-form";
 
 interface TechnologyStoreProps {
 	refetch: (data: Refetch<TechnologyIndexResponseDto["results"]>) => void;
 	onClose: () => void;
-    lang?: Lang;
+	lang?: Lang;
 }
 
 export default function TechnologyStore({
 	refetch,
 	onClose,
-    lang = "es"
+	lang = "es",
 }: TechnologyStoreProps) {
-    const t = useTranslations(lang);
+	const t = useTranslations(lang);
 	const technologyStoreMutation = technologyStoreApi();
 
 	const technologyStoreForm = useForm<TechnologyStoreDto>({

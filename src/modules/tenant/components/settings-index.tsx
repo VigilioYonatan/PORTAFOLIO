@@ -124,7 +124,9 @@ function SettingsContent({
 
 	// Settings Form (colors, language, timezone)
 	const settingsForm = useForm<TenantSettingUpdateMeDto>({
-		resolver: zodResolver(tenantSettingUpdateMeDto) as Resolver<TenantSettingUpdateMeDto>,
+		resolver: zodResolver(
+			tenantSettingUpdateMeDto,
+		) as Resolver<TenantSettingUpdateMeDto>,
 		mode: "all",
 		defaultValues: tenant.setting,
 	});
