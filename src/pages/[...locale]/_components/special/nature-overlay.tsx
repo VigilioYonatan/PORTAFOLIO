@@ -42,7 +42,7 @@ export default function NatureOverlay() {
 			)}
 		>
 			{/* Header */}
-			<div class="absolute top-8 left-8 text-emerald-500 font-black tracking-[0.5em] text-2xl uppercase mix-blend-screen z-50">
+			<div class="absolute top-8 left-8 text-white font-black tracking-[0.5em] text-2xl uppercase mix-blend-screen z-50">
 				NATURE_PROTOCOL
 			</div>
 
@@ -113,6 +113,7 @@ function VideoColumn({
 
 		if (isFocused) {
 			videoRef.current.muted = false;
+			videoRef.current.volume = 0.2;
 			videoRef.current.play().catch(() => {});
 		} else {
 			videoRef.current.muted = true;
@@ -222,7 +223,7 @@ function VideoColumn({
 			/>
 
 			{/* Label Overlay */}
-			<div class="absolute bottom-10 left-1/2 -translate-x-1/2 z-10 border border-emerald-500/30 bg-black/80 px-4 py-2 text-emerald-500 font-mono text-sm font-bold tracking-[0.3em] uppercase opacity-40 group-hover:opacity-100 transition-opacity whitespace-nowrap backdrop-blur-sm">
+			<div class="absolute bottom-10 left-1/2 -translate-x-1/2 z-10 border border-white/30 bg-black/80 px-4 py-2 text-white font-mono text-sm font-bold tracking-[0.3em] uppercase opacity-40 group-hover:opacity-100 transition-opacity whitespace-nowrap backdrop-blur-sm">
 				{vid.label}
 			</div>
 

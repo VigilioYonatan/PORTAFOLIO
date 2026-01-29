@@ -1,4 +1,3 @@
-import { faker } from "@faker-js/faker";
 import { schema } from "@infrastructure/providers/database/database.schema";
 import { DRIZZLE } from "@infrastructure/providers/database/database.service";
 import { now } from "@infrastructure/utils/hybrid";
@@ -15,73 +14,86 @@ export class TechnologySeeder {
 	) {}
 
 	async run(tenant_id: number) {
-		const categories: TechnologySchema["category"][] = [
-			"FRONTEND",
-			"BACKEND",
-			"DATABASE",
-			"DEVOPS",
-			"LANGUAGE",
-		];
+		// Curated technologies from image and user requests
+		const initialTechs: Omit<TechnologySchema, "id">[] = ([
+			// LANGUAGES
+			{ name: "JavaScript", category: "LANGUAGE" },
+			{ name: "TypeScript", category: "LANGUAGE" },
+			{ name: "PHP", category: "LANGUAGE" },
 
-		const technologies: Omit<TechnologySchema, "id">[] = Array.from({
-			length: 1000,
-		}).map((_, i) => ({
-			name: `${faker.hacker.adjective()} ${faker.hacker.noun()} ${i}`,
-			category: faker.helpers.arrayElement(categories),
-			icon: [],
+			// FRONTEND
+			{ name: "HTML5", category: "FRONTEND" },
+			{ name: "CSS3", category: "FRONTEND" },
+			{ name: "Sass", category: "FRONTEND" },
+			{ name: "Tailwind CSS", category: "FRONTEND" },
+			{ name: "Vite", category: "FRONTEND" },
+			{ name: "Astro", category: "FRONTEND" },
+			{ name: "Preact", category: "FRONTEND" },
+			{ name: "React", category: "FRONTEND" },
+			{ name: "React Native", category: "MOBILE" },
+			{ name: "Vue", category: "FRONTEND" },
+			{ name: "Angular", category: "FRONTEND" },
+			{ name: "Alpine.js", category: "FRONTEND" },
+			{ name: "HTMX", category: "FRONTEND" },
+			{ name: "Svelte", category: "FRONTEND" },
+			{ name: "i18next", category: "FRONTEND" },
+			{ name: "Figma", category: "FRONTEND" },
+
+			// BACKEND
+			{ name: "NestJS", category: "BACKEND" },
+			{ name: "AdonisJS", category: "BACKEND" },
+			{ name: "Next.js", category: "BACKEND" },
+			{ name: "Laravel", category: "BACKEND" },
+			{ name: "Hono", category: "BACKEND" },
+			{ name: "Node.js", category: "BACKEND" },
+			{ name: "Bun", category: "BACKEND" },
+			{ name: "Go", category: "BACKEND" },
+			{ name: "PostgreSQL", category: "DATABASE" },
+			{ name: "MySQL", category: "DATABASE" },
+			{ name: "MongoDB", category: "DATABASE" },
+			{ name: "FastAPI", category: "BACKEND" },
+			{ name: "Playwright", category: "BACKEND" },
+			{ name: "Puppeteer", category: "BACKEND" },
+			{ name: "Stitch", category: "BACKEND" },
+
+			// DEVOPS
+			{ name: "Linux", category: "DEVOPS" },
+			{ name: "Docker", category: "DEVOPS" },
+			{ name: "AWS", category: "DEVOPS" },
+			{ name: "Kubernetes", category: "DEVOPS" },
+			{ name: "Podman", category: "DEVOPS" },
+			{ name: "GitHub", category: "DEVOPS" },
+			{ name: "GitHub Actions", category: "DEVOPS" },
+			{ name: "Apache", category: "DEVOPS" },
+			{ name: "Nginx", category: "DEVOPS" },
+			{ name: "Vercel", category: "DEVOPS" },
+			{ name: "NATS", category: "DEVOPS" },
+			{ name: "Redis", category: "DATABASE" },
+			{ name: "Terraform", category: "DEVOPS" },
+
+			// AI
+			{ name: "Groq", category: "AI" },
+			{ name: "Mistral", category: "AI" },
+			{ name: "Ollama", category: "AI" },
+			{ name: "LangChain", category: "AI" },
+			{ name: "n8n", category: "AI" },
+			{ name: "Hugging Face", category: "AI" },
+			{ name: "WhatsApp", category: "AI" },
+			{ name: "ChatGPT", category: "AI" },
+			{ name: "DeepSeek", category: "AI" },
+			{ name: "v0", category: "AI" },
+			{ name: "Antigravity", category: "AI" },
+			{ name: "Claude", category: "AI" },
+		] as const).map((tech) => ({
+			...tech,
 			tenant_id,
+			icon: [],
 			created_at: now().toDate(),
 			updated_at: now().toDate(),
 		}));
 
-		// Specific known technologies for the initial set
-		const initialTechs: Omit<TechnologySchema, "id">[] = [
-			{
-				name: "React",
-				category: "FRONTEND",
-				tenant_id,
-				icon: [],
-				created_at: now().toDate(),
-				updated_at: now().toDate(),
-			},
-			{
-				name: "NestJS",
-				category: "BACKEND",
-				tenant_id,
-				icon: [],
-				created_at: now().toDate(),
-				updated_at: now().toDate(),
-			},
-			{
-				name: "PostgreSQL",
-				category: "DATABASE",
-				tenant_id,
-				icon: [],
-				created_at: now().toDate(),
-				updated_at: now().toDate(),
-			},
-			{
-				name: "Docker",
-				category: "DEVOPS",
-				tenant_id,
-				icon: [],
-				created_at: now().toDate(),
-				updated_at: now().toDate(),
-			},
-			{
-				name: "TypeScript",
-				category: "LANGUAGE",
-				tenant_id,
-				icon: [],
-				created_at: now().toDate(),
-				updated_at: now().toDate(),
-			},
-		];
-
-		const allTechs = [...initialTechs, ...technologies];
-
 		// Batch insert for performance
-		for (const tech of allTechs) {
+		for (const tech of initialTechs) {
 			const exists = await this.db.query.technologyEntity.findFirst({
 				where: and(
 					eq(technologyEntity.tenant_id, tenant_id),

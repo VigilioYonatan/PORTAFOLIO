@@ -112,6 +112,7 @@ function VideoColumn({
 
 		if (isFocused) {
 			videoRef.current.muted = false;
+			videoRef.current.volume = 0.2;
 			videoRef.current.play().catch(() => {});
 		} else {
 			videoRef.current.muted = true;

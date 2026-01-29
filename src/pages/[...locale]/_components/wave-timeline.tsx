@@ -130,7 +130,7 @@ function MilestoneItem({
 			{/* The Reactive Bar (Wave Peak) */}
 			<div class="mb-6 relative h-48 flex items-end justify-center w-full">
 				<div
-					class="w-1.5 md:w-3 bg-gradient-to-t from-primary via-primary/60 to-transparent transition-all duration-75 ease-linear rounded-t-full relative"
+					class="w-1.5 md:w-3 bg-linear-to-t from-primary via-primary/60 to-transparent transition-all duration-75 ease-linear rounded-t-full relative"
 					style={{
 						height: `${barHeight.value}px`,
 						filter: `drop-shadow(0 0 ${10 + bassIntensity.value * 20}px rgba(6,182,212,0.6))`,
@@ -159,7 +159,7 @@ function MilestoneItem({
 					<div class="absolute -inset-2 bg-primary/5 blur-lg opacity-0 group-hover:opacity-100 transition-opacity" />
 				</div>
 
-				<div class="h-[2px] w-12 bg-gradient-to-r from-transparent via-primary/50 to-transparent mx-auto" />
+				<div class="h-[2px] w-12 bg-linear-to-r from-transparent via-primary/50 to-transparent mx-auto" />
 
 				<h4 class="font-bold text-white text-base tracking-widest uppercase leading-tight mt-2 animate-glitch-sm">
 					{title}

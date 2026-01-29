@@ -12,6 +12,14 @@ import {
 } from "simple-icons";
 import { SimpleIcon } from "./simple-icon";
 
+// Helper to convert HEX to RGB string "r, g, b"
+function hexToRgb(hex: string): string {
+	const r = parseInt(hex.slice(1, 3), 16);
+	const g = parseInt(hex.slice(3, 5), 16);
+	const b = parseInt(hex.slice(5, 7), 16);
+	return `${r}, ${g}, ${b}`;
+}
+
 // Helper to render SimpleIcon
 
 export default function TechThemeSwitcher({
@@ -27,6 +35,27 @@ export default function TechThemeSwitcher({
 		{ name: "Docker", color: "#2496ED", icon: siDocker },
 		{ name: "NestJS", color: "#E0234E", icon: siNestjs },
 		{ name: "React", color: "#61DAFB", icon: siReact },
+		{
+			name: "Protostar",
+			color: "#22c55e",
+			icon: {
+				path: "M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0zM12 9v4M12 17h.01",
+			} as any,
+		},
+		{
+			name: "Nature",
+			color: "#ffffff",
+			icon: {
+				path: "M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71L12 2z", // Simple leaf-ish triangle
+			} as any,
+		},
+		{
+			name: "Planet",
+			color: "#a855f7",
+			icon: {
+				path: "M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z", // Simple circle
+			} as any,
+		},
 	];
 
 	const [isOpen, setIsOpen] = useState(false);
@@ -34,7 +63,10 @@ export default function TechThemeSwitcher({
 	const [activeTheme, setActiveTheme] = useState(themes[0]);
 
 	const changeTheme = (theme: (typeof themes)[0]) => {
+		const rgb = hexToRgb(theme.color);
 		document.documentElement.style.setProperty("--primary", theme.color);
+		document.documentElement.style.setProperty("--primary-rgb", rgb);
+
 		localStorage.setItem("theme-color", theme.color);
 		localStorage.setItem("theme-name", theme.name);
 		setActiveTheme(theme);
@@ -45,7 +77,10 @@ export default function TechThemeSwitcher({
 		const savedColor = localStorage.getItem("theme-color");
 		const savedName = localStorage.getItem("theme-name");
 		if (savedColor) {
+			const rgb = hexToRgb(savedColor);
 			document.documentElement.style.setProperty("--primary", savedColor);
+			document.documentElement.style.setProperty("--primary-rgb", rgb);
+
 			const found =
 				themes.find((t) => t.name === savedName) ||
 				themes.find((t) => t.color === savedColor);
@@ -79,11 +114,11 @@ export default function TechThemeSwitcher({
 				type="button"
 				onClick={() => setIsOpen(!isOpen)}
 				class={cn(
-					"w-full flex items-center justify-between gap-3 px-3 py-2.5 bg-zinc-900/50 border border-white/5 rounded-xl hover:border-primary/50 hover:bg-zinc-900 transition-all group shadow-sm",
+					"w-full flex items-center justify-between gap-2 px-2 py-1.5 bg-zinc-900/50 border border-white/5 rounded-xl hover:border-primary/50 hover:bg-zinc-900 transition-all group shadow-sm",
 					isOpen && "border-primary/50 ring-1 ring-primary/20",
 				)}
 			>
-				<div class="flex items-center gap-2.5">
+				<div class="flex items-center gap-1.5">
 					<div class="p-1.5 bg-white/5 rounded-md text-muted-foreground group-hover:text-primary transition-colors">
 						<SimpleIcon icon={activeTheme.icon} size={12} />
 					</div>

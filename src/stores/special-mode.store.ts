@@ -7,6 +7,18 @@ export const isPlanetActive = signal(false); // Planet Mode (Reaper Videos)
 
 const previousTheme = { primary: "", rgb: "" };
 
+const resetToDefault = () => {
+	const docStyle = document.documentElement.style;
+	const defaultColor = "#06b6d4";
+	const defaultRgb = "6, 182, 212";
+
+	docStyle.setProperty("--primary", defaultColor);
+	docStyle.setProperty("--primary-rgb", defaultRgb);
+
+	localStorage.removeItem("theme-color");
+	localStorage.removeItem("theme-name");
+};
+
 export const toggleProtostarMode = (active: boolean) => {
 	// Ensure Other Modes are OFF
 	if (active) {
@@ -28,11 +40,14 @@ export const toggleProtostarMode = (active: boolean) => {
 		// Change theme to Green
 		docStyle.setProperty("--primary", "#22c55e");
 		docStyle.setProperty("--primary-rgb", "34, 197, 94");
+
+		// Persist to LOCAL STORAGE
+		localStorage.setItem("theme-color", "#22c55e");
+		localStorage.setItem("theme-name", "Protostar");
 	} else {
-		// Revert to saved theme ONLY if we are NOT switching to another special mode
+		// Revert to default and CLEAR STORAGE
 		if (!isNatureActive.value && !isPlanetActive.value) {
-			docStyle.setProperty("--primary", previousTheme.primary);
-			docStyle.setProperty("--primary-rgb", previousTheme.rgb);
+			resetToDefault();
 		}
 		isOverlayOpen.value = false;
 	}
@@ -53,19 +68,15 @@ export const toggleNatureMode = (active: boolean) => {
 	const docStyle = document.documentElement.style;
 
 	if (active) {
-		if (!previousTheme.primary) {
-			previousTheme.primary =
-				docStyle.getPropertyValue("--primary") || "#06b6d4";
-			previousTheme.rgb =
-				docStyle.getPropertyValue("--primary-rgb") || "6, 182, 212";
-		}
-
 		docStyle.setProperty("--primary", "#ffffff");
 		docStyle.setProperty("--primary-rgb", "255, 255, 255");
+
+		// Persist to LOCAL STORAGE
+		localStorage.setItem("theme-color", "#ffffff");
+		localStorage.setItem("theme-name", "Nature");
 	} else {
 		if (!isPlanetActive.value && !isProtostarActive.value) {
-			docStyle.setProperty("--primary", previousTheme.primary || "#06b6d4");
-			docStyle.setProperty("--primary-rgb", previousTheme.rgb || "6, 182, 212");
+			resetToDefault();
 		}
 	}
 };
@@ -81,20 +92,16 @@ export const togglePlanetMode = (active: boolean) => {
 	const docStyle = document.documentElement.style;
 
 	if (active) {
-		if (!previousTheme.primary) {
-			previousTheme.primary =
-				docStyle.getPropertyValue("--primary") || "#06b6d4";
-			previousTheme.rgb =
-				docStyle.getPropertyValue("--primary-rgb") || "6, 182, 212";
-		}
-
-		// Planet Mode Theme: Maybe a deep Purple or just keep consistent
-		docStyle.setProperty("--primary", "#a855f7"); // Purple
+		// Planet Mode Theme: Purple
+		docStyle.setProperty("--primary", "#a855f7");
 		docStyle.setProperty("--primary-rgb", "168, 85, 247");
+
+		// Persist to LOCAL STORAGE
+		localStorage.setItem("theme-color", "#a855f7");
+		localStorage.setItem("theme-name", "Planet");
 	} else {
 		if (!isNatureActive.value && !isProtostarActive.value) {
-			docStyle.setProperty("--primary", previousTheme.primary || "#06b6d4");
-			docStyle.setProperty("--primary-rgb", previousTheme.rgb || "6, 182, 212");
+			resetToDefault();
 		}
 	}
 };

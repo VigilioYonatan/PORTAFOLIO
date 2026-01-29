@@ -139,10 +139,11 @@ export default function NeuroPlayer(props: NeuroPlayerProps) {
 				{/* 1. Dynamic Background Layer */}
 				<div class="absolute inset-0 w-full h-full flex items-center justify-center overflow-hidden">
 					<div
+						key={currentTrack.value?.id}
 						class="absolute inset-0 bg-cover bg-center transition-[background-image] duration-1000 ease-in-out"
 						style={{
 							backgroundImage: `url('${currentTrack.value?.cover || "/images/visualizer-bg.png"}')`,
-							animation: "perspectiveShift 3s infinite alternate ease-in-out",
+							animation: "perspectiveShift 16s infinite linear",
 						}}
 					/>
 					{/* Darken for contrast */}
@@ -161,8 +162,8 @@ export default function NeuroPlayer(props: NeuroPlayerProps) {
 
 					{/* Metadata Row: Compact Image + Text */}
 					<div class="flex items-center gap-3">
-						{/* Small Image (Clone of cover) - Tiny (48px) -> Larger (64px) */}
-						<div class="w-16 h-16 shrink-0 border-[1.5px] border-white shadow-[0_0_8px_rgba(0,0,0,0.5)] rounded-none bg-black/50 relative z-30">
+						{/* Small Image (Clone of cover) - Tiny (48px) */}
+						<div class="w-12 h-12 shrink-0 border-[1.5px] border-white shadow-[0_0_8px_rgba(0,0,0,0.5)] rounded-none bg-black/50 relative z-30">
 							{currentTrack.value?.cover ? (
 								<img
 									src={currentTrack.value.cover}
@@ -182,7 +183,7 @@ export default function NeuroPlayer(props: NeuroPlayerProps) {
 						{/* Text / "Letra" - Small */}
 						<div class="flex flex-col justify-center min-w-0 z-30 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
 							{/* Artist Name */}
-							<h2 class="text-white font-[900] text-base tracking-wide uppercase leading-none truncate pr-1">
+							<h2 class="text-white font-[900] text-sm tracking-wide uppercase leading-none truncate pr-1">
 								{currentTrack.value?.artist || "ARTIST"}
 							</h2>
 							{/* Track Title */}
@@ -242,10 +243,10 @@ export default function NeuroPlayer(props: NeuroPlayerProps) {
 				<div class="space-y-1.5 md:space-y-3 bg-white/5 p-2 md:p-3 rounded-xl border border-white/5">
 					{/* Progress */}
 					<div class="group/prog flex items-center gap-3 cursor-pointer py-1">
-						<span class="text-[9px] font-black text-white/40 group-hover/prog:text-primary transition-colors w-8 text-right tabular-nums">
+						<span class="text-[9px] font-black text-white/40 group-hover/prog:text-primary transition-colors w-6 text-right tabular-nums">
 							{formatTime(audioStore.state.currentTime.value)}
 						</span>
-						<div class="flex-1 h-6 flex items-center relative group/slider">
+						<div class="flex-1 h-5 flex items-center relative group/slider">
 							{/* Background Bar */}
 							<div class="w-full h-1 bg-white/10 rounded-full relative overflow-hidden">
 								<div
@@ -275,14 +276,14 @@ export default function NeuroPlayer(props: NeuroPlayerProps) {
 								class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-40"
 							/>
 						</div>
-						<span class="text-[9px] font-black text-white/40 group-hover/prog:text-primary transition-colors w-8 tabular-nums">
+						<span class="text-[9px] font-black text-white/40 group-hover/prog:text-primary transition-colors w-6 tabular-nums">
 							{formatTime(audioStore.state.duration.value)}
 						</span>
 					</div>
 
-					<div class="flex items-center justify-between gap-4">
+					<div class="flex items-center justify-between gap-2">
 						{/* Playback Buttons */}
-						<div class="flex items-center justify-center gap-1.5 md:gap-4 flex-1">
+						<div class="flex items-center justify-center gap-1.5 md:gap-2 flex-1">
 							<button
 								type="button"
 								onClick={prevTrack}
@@ -341,7 +342,7 @@ export default function NeuroPlayer(props: NeuroPlayerProps) {
 									showVolumeSlider.value = true;
 								}}
 								class={cn(
-									"p-2 rounded-full transition-all active:scale-90",
+									"p-1.5 rounded-full transition-all active:scale-90",
 									showVolumeSlider.value || volume.value === 0 || isMuted.value
 										? "bg-primary/20 text-primary border border-primary/30"
 										: "text-white/40 hover:text-primary hover:bg-white/5",
@@ -351,9 +352,9 @@ export default function NeuroPlayer(props: NeuroPlayerProps) {
 								}
 							>
 								{isMuted.value || volume.value === 0 ? (
-									<VolumeXIcon size={18} />
+									<VolumeXIcon size={16} />
 								) : (
-									<Volume2Icon size={18} />
+									<Volume2Icon size={16} />
 								)}
 							</button>
 

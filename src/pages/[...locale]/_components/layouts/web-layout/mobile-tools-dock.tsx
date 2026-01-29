@@ -57,7 +57,7 @@ export default function MobileToolsDock({ lang }: MobileToolsDockProps) {
 				<button
 					onClick={() => {
 						setIsOpen(true);
-					}}
+					}}type="button"
 					className="w-12 h-12 rounded-full bg-primary text-primary-foreground shadow-[0_0_20px_rgba(6,182,212,0.4)] flex items-center justify-center hover:scale-110 active:scale-95 transition-all"
 					aria-label="Open System Tools"
 				>
@@ -68,7 +68,7 @@ export default function MobileToolsDock({ lang }: MobileToolsDockProps) {
 			{/* Full Screen Tools Overlay */}
 			<div
 				className={cn(
-					"md:hidden fixed inset-0 h-[100dvh] bg-background/95 backdrop-blur-xl z-[60] flex flex-col transition-all duration-300 ease-in-out",
+					"md:hidden fixed inset-0 h-dvh bg-background/95 backdrop-blur-xl z-60 flex flex-col transition-all duration-300 ease-in-out",
 					isOpen
 						? "opacity-100 translate-y-0"
 						: "opacity-0 translate-y-full pointer-events-none",
@@ -87,6 +87,7 @@ export default function MobileToolsDock({ lang }: MobileToolsDockProps) {
 						onClick={() => {
 							setIsOpen(false);
 						}}
+						type="button"
 						className="p-2 text-destructive hover:bg-destructive/10 rounded-sm transition-colors"
 						aria-label="Close Tools"
 					>

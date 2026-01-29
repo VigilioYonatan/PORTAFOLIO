@@ -39,7 +39,8 @@ export default function ProtostarOverlay() {
 			// Overlay Open: Pause Music, Play Fullscreen Video
 			if (videoRef.current) {
 				videoRef.current.muted = false;
-				videoRef.current.play();
+				videoRef.current.volume = 0.2;
+				videoRef.current.play().catch(() => {});
 			}
 			if (audioStore.state.isPlaying.value) {
 				audioStore.methods.togglePlay();
@@ -101,7 +102,7 @@ export default function ProtostarOverlay() {
 		>
 			{/* Fog / Particles Effect - Enhanced (Static Data) */}
 			<div class="absolute inset-0 z-10 pointer-events-none overflow-hidden">
-				{particles.map((p: any) => (
+				{particles.map((p) => (
 					<div
 						key={p.id}
 						class="absolute rounded-full bg-white blur-[2px] opacity-0"
@@ -161,11 +162,13 @@ export default function ProtostarOverlay() {
 			)}
 
 			{/* Video Controls - Isolated Component to prevent full overlay re-render */}
-			<ProtostarVideoControls
-				currentTime={currentTime}
-				duration={duration}
-				videoRef={videoRef}
-			/>
+			{!isLoading.value && (
+				<ProtostarVideoControls
+					currentTime={currentTime}
+					duration={duration}
+					videoRef={videoRef}
+				/>
+			)}
 		</div>
 	);
 }
@@ -183,14 +186,14 @@ function ProtostarVideoControls({
 		{ label: "0%", time: 0 },
 		{ label: "30%", time: 31, highlightAt: [37, 75.5, 148, 186] },
 		{ label: "60%", time: 95, highlightAt: [42.5, 97, 153, 208] },
-		{ label: "WARNING", time: 121, highlightAt: [53, 164] },
+		{ label: "WARNING", time: 121, highlightAt: [53, 164, 209] },
 		{ label: "80%", time: 155, highlightAt: [48, 158] },
 		{ label: "90%", time: 230 },
 		{ label: "INESTABLE", time: 235 },
 	];
 
 	return (
-		<div class="absolute bottom-10 left-0 right-0 z-50 flex justify-center gap-4 px-4 w-full max-w-6xl mx-auto pointer-events-auto">
+		<div class="absolute bottom-10 left-0 right-0 z-50 flex justify-center gap-4 px-4 w-full max-w-6xl mx-auto pointer-events-auto animate-in fade-in slide-in-from-bottom-5 duration-1000">
 			<div class="grid grid-cols-4 md:grid-cols-7 gap-4 w-full">
 				{buttons.map((btn, index) => {
 					const nextBtn = buttons[index + 1];

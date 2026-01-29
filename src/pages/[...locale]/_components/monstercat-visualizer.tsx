@@ -22,33 +22,11 @@ export default function MonstercatVisualizer({
 		const barCount = 63; // Odd number for perfect center bar
 		const bars: number[] = new Array(barCount).fill(0);
 
-		// Optimize: Cache color and update rarely
-		let frameCount = 0;
-		let cachedPrimaryColor = "#06b6d4";
-
-		const updateColor = () => {
-			const style = getComputedStyle(document.documentElement)
-				.getPropertyValue("--primary")
-				.trim();
-			if (style) {
-				cachedPrimaryColor =
-					style.startsWith("#") || style.startsWith("rgb")
-						? style
-						: `rgb(${style})`;
-			}
-		};
-		// Initial fetch
-		cachedPrimaryColor = "#FFFFFF"; // Force White as requested
-		// updateColor(); // Disable dynamic color for now
+		// Color configured as white
+		const visualizerColor = "#FFFFFF";
 
 		const render = () => {
 			if (!canvas || !ctx) return;
-
-			frameCount++;
-			// Throttle heavy DOM read to every 60 frames (approx 1 sec)
-			if (frameCount % 60 === 0) {
-				updateColor();
-			}
 
 			// Handle potential resizes better
 			const dpr = window.devicePixelRatio || 1;
@@ -60,7 +38,6 @@ export default function MonstercatVisualizer({
 				canvas.width = rect.width * dpr;
 				canvas.height = rect.height * dpr;
 				ctx.scale(dpr, dpr);
-				updateColor(); // Force update on resize
 			}
 
 			const width = rect.width;
@@ -105,7 +82,7 @@ export default function MonstercatVisualizer({
 				const y = height - h;
 
 				// Design: Sharp bars like reference
-				ctx.fillStyle = cachedPrimaryColor;
+				ctx.fillStyle = visualizerColor;
 
 				ctx.beginPath();
 				ctx.rect(xPos, y, barWidth, h);

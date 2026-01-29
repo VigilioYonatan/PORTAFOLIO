@@ -14,7 +14,7 @@ export interface MusicTrack {
 // --- Audio Store State ---
 const isPlaying = signal<boolean>(false);
 const isMuted = signal<boolean>(false);
-const volume = signal<number>(50);
+const volume = signal<number>(20);
 const currentTime = signal<number>(0);
 const duration = signal<number>(0);
 const trackList = signal<MusicTrack[]>([]);
