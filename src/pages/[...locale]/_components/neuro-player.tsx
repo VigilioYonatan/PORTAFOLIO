@@ -295,6 +295,7 @@ export default function NeuroPlayer(props: NeuroPlayerProps) {
 								type="button"
 								onClick={togglePlay}
 								class="w-12 h-12 rounded-full bg-primary/10 text-primary border border-primary/40 flex items-center justify-center hover:scale-110 hover:bg-primary hover:text-black transition-all shadow-glow active:scale-95 group/play"
+								aria-label={isPlaying.value ? "Pause" : "Play"}
 							>
 								{isPlaying.value ? (
 									<PauseIcon size={24} fill="currentColor" />
@@ -415,6 +416,7 @@ export default function NeuroPlayer(props: NeuroPlayerProps) {
 											type="button"
 											onClick={() => setVolume(isMuted.value ? 50 : 0)}
 											class="mt-4 text-white/40 hover:text-white transition-colors"
+											aria-label="Toggle Mute"
 										>
 											{isMuted.value || volume.value === 0 ? (
 												<VolumeXIcon size={12} />

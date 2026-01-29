@@ -1,137 +1,219 @@
 ### ESPAÑOL (ES)
 
-Diseñar arquitecturas en AWS para aplicaciones de nivel empresarial requiere una mentalidad enfocada en la resiliencia radical, la escalabilidad infinita y la optimización implacable de costes. Ya no basta con "subir un servidor" a la nube; un arquitecto senior diseña sistemas desacoplados que aprovechan servicios gestionados para eliminar la carga operativa y garantizar una disponibilidad del 99.99%. En este artículo exhaustivo, exploraremos los principios de diseño de arquitecturas "Well-Architected" utilizando AWS como plataforma, NestJS como motor de ejecución y DrizzleORM para una gestión de datos eficiente y tipada.
+Diseñar arquitectura en AWS para 2024 va más allá de lanzar instancias EC2. Se trata de construir sistemas serverless o basados en contenedores que sean resilientes, rentables y seguros por diseño. En este artículo, desglosaremos una arquitectura de referencia para una aplicación empresarial de alta escala utilizando el "Well-Architected Framework", integrando servicios como Lambda, Fargate, Aurora Serverless v2 y EventBridge.
 
-#### 1. El Pilar de la Excelencia Operativa: Infraestructura como Código (IaC)
+#### 1. Compute: De EC2 a Fargate y Lambda
 
-Un senior nunca configura un entorno desde la consola de AWS. La infraestructura debe ser reproducible, versionable y auditable.
+![AWS Compute Evolution](./images/aws-architecture/compute.png)
 
-- **AWS CDK vs Terraform**: Mientras que Terraform es el estándar de la industria, AWS CDK permite a los desarrolladores de TypeScript definir su infraestructura utilizando el mismo lenguaje que su código de negocio. Esto facilita la creación de "Constructs" personalizados que encapsulan las mejores prácticas de la empresa (ej: un bucket S3 con cifrado y versionado por defecto).
-- **Inmutabilidad**: Las actualizaciones de infraestructura nunca deben realizarse sobre recursos vivos. Desplegamos nuevas versiones y eliminamos las antiguas, asegurando que el estado del sistema siempre coincida con la definición en el código.
+Para cargas de trabajo modernas, evitamos gestionar servidores (EC2) directamente.
 
-#### 2. Seguridad en Profundidad: Zero Trust Architecture
+- **API REST/GraphQL**: Desplegamos nuestros servicios NestJS en **AWS Fargate** (ECS). Fargate elimina la gestión del clúster subyacente, permitiéndonos definir simplemente CPU y RAM en la definición de tarea.
+- **Procesamiento de Eventos**: Para disparadores asíncronos (S3 uploads, DynamoDB Streams), **AWS Lambda** es insuperable.
+- **Cold Starts**: Mitigamos los arranques en frío de Lambda usando _Provisioned Concurrency_ para funciones críticas o migrando a Fargate para cargas constantes.
 
-La seguridad no es una capa externa; es una propiedad intrínseca del diseño.
+#### 2. Base de Datos: Aurora Serverless v2
 
-- **VPC Design**: Dividimos nuestra red en subredes públicas, privadas y aisladas. La base de datos Postgres (gestionada por RDS) debe vivir siempre en una subred aislada, sin acceso directo a Internet ni a las subredes públicas.
-- **IAM (Identity and Access Management)**: Aplicamos el principio de mínimo privilegio. Los pods de nuestra aplicación NestJS (corriendo en EKS o Fargate) deben usar roles de IAM para service accounts (IRSA), de modo que solo tengan permiso para acceder a los recursos específicos que necesitan (ej: un secreto en Secrets Manager o un objeto en S3), eliminando el uso de claves de acceso estáticas.
+El cuello de botella tradicional de escalabilidad es la base de datos relacional. **Aurora Serverless v2** cambia el juego escalando verticalmente (ACUs) en milisegundos, no minutos.
 
-#### 3. Fiabilidad y Alta Disponibilidad: Multi-AZ y Multi-Region
+```typescript
+// infrastructure-cdk.ts
+const cluster = new rds.DatabaseCluster(this, "AuroraCluster", {
+  engine: rds.DatabaseClusterEngine.auroraPostgres({
+    version: rds.AuroraPostgresEngineVersion.VER_15_2,
+  }),
+  serverlessV2MinCapacity: 0.5, // Escalado hasta 0.5 ACU (1GB RAM) para ahorrar costos en idle
+  serverlessV2MaxCapacity: 16, // Escalado automático hasta 32GB RAM bajo carga
+  writers: rds.ClusterInstance.serverlessV2("Writer"),
+  readers: [
+    rds.ClusterInstance.serverlessV2("Reader", { scaleWithWriter: true }),
+  ],
+});
+```
 
-El fallo es una certeza. Un arquitecto senior diseña para el fallo.
+Integramos esto con **RDS Proxy** para gestionar el pool de conexiones, vital cuando miles de Lambdas intentan conectar simultáneamente.
 
-- **Despliegue Multi-AZ**: Nuestra flota de contenedores debe estar distribuida en al menos tres zonas de disponibilidad. Si una AZ falla, el balanceador de carga (ALB) redirige el tráfico a las AZs sanas sin interrupción.
-- **Amazon Aurora Global Database**: Para aplicaciones de misión crítica, replicamos los datos a nivel físico entre regiones. DrizzleORM se configura para manejar el failover mediante el uso de nombres de host inteligentes que apuntan a la región activa en cada momento.
+#### 3. Event-Driven Architecture con EventBridge
 
-#### 4. Eficiencia de Rendimiento: Computación Serverless y Contenedores
+En lugar de llamadas HTTP síncronas entre microservicios (que crean acoplamiento temporal), usamos **EventBridge**.
 
-- **Amazon ECS con AWS Fargate**: Es la opción preferida por muchos senior por su simplicidad. No gestionamos servidores (nodos); solo definimos la CPU y memoria necesaria para nuestro contenedor NestJS. Fargate se encarga de la escalabilidad y del parcheado del sistema operativo subyacente.
-- **Auto Scaling Inteligente**: No escalamos solo por CPU. Configuramos políticas de escalado basadas en métricas de negocio o latencia de peticiones, asegurando que la aplicación responda bien durante picos de tráfico sin malgastar dinero en horas valle.
+- **Schema Registry**: Definimos esquemas de eventos estrictos.
+- **Rules**: El servicio de "Pedidos" emite un evento `OrderPlaced`. EventBridge lo enruta a 3 destinos: Servicio de Facturación, Servicio de Logística y un Firehose data lake para analítica. Todo sin que el Servicio de Pedidos conozca a los consumidores.
 
-#### 5. Optimización de Costes: El Fin de las Facturas Sorpresa
+#### 4. Seguridad y Networking (VPC Lattice)
 
-Un arquitecto senior es también un gestor financiero de la nube.
+La seguridad perimetral es crítica. Implementamos una estrategia de **Defense in Depth**:
 
-- **Spot Instances**: Para cargas de trabajo no críticas o colas de mensajes, usamos instancias Spot que pueden costar hasta un 90% menos que las On-Demand.
-- **S3 Storage Tiers**: Movemos automáticamente los datos poco consultados a Intelligent-Tiering o Glacier para reducir drásticamente los costes de almacenamiento a largo plazo.
-- **Graviton Processors**: Migramos nuestras cargas de trabajo a procesadores ARM (Graviton) para obtener un 40% mejor rendimiento por cada dólar invertido en comparación con x86.
+- **WAF (Web Application Firewall)**: Frente al ALB/API Gateway para bloquear inyecciones SQL y ataques XSS.
+- **Private Subnets**: Todas las bases de datos y lógica de negocio viven en subredes privadas sin acceso directo a internet (usando NAT Gateway para salidas).
+- **VPC Lattice**: La nueva forma moderna de conectar servicios. A diferencia de VPC Peering o Transit Gateway, Lattice opera en la capa de aplicación, permitiendo políticas de autenticación (IAM) granulares entre servicios ("El servicio A solo puede llamar GET /products en el servicio B").
 
-#### 6. Gestión de Datos con DrizzleORM en AWS
+#### 5. Infraestructura como Código (IaC) con CDK
 
-Drizzle se integra perfectamente con servicios como AWS Aurora Serverless v2.
+No hacemos clic en la consola. Toda la infraestructura se define en TypeScript usando **AWS CDK**.
 
-- **Database Proxy**: Usamos Amazon RDS Proxy para gestionar de forma eficiente el pool de conexiones desde nuestras funciones Lambda o contenedores Fargate, evitando saturar la base de datos con miles de conexiones abiertas simultáneamente.
-- **Secret Rotation**: Automatizamos la rotación de las credenciales de la base de datos en Secrets Manager, y Drizzle recupera las nuevas credenciales en tiempo de ejecución sin necesidad de reiniciar la aplicación.
+```typescript
+// Definiendo una pila de infraestructura segura
+export class CoreStack extends cdk.Stack {
+  constructor(scope: Construct, id: string, props?: cdk.StackProps) {
+    super(scope, id, props);
 
-[Expansión MASIVA adicional de 3000+ caracteres incluyendo: Implementación de arquitecturas orientadas a eventos con EventBridge y SNS/SQS, estrategias de despliegue Blue-Green con AWS CodeDeploy, observabilidad total con X-Ray para trazabilidad distribuida, configuración de WAF (Web Application Firewall) para protección contra ataques SQL Injection y XSS, y guías sobre cómo estructurar el gobierno multi-cuenta con AWS Organizations para separar entornos de Dev, Staging y Prod de forma estricta, garantizando un ecosistema cloud inexpugnable...]
+    const vpc = new ec2.Vpc(this, "MainVPC", {
+      maxAzs: 3, // Alta disponibilidad en 3 zonas
+      natGateways: 1,
+    });
 
-Diseñar en AWS es un ejercicio de equilibrio entre potencia y control. Al combinar el marco de trabajo "Well-Architected" de AWS con la agilidad de NestJS y Drizzle, construimos sistemas que no solo resuelven los retos de hoy, sino que están preparados para el hiper-crecimiento de mañana. La excelencia arquitectónica es lo que transforma una startup en una plataforma tecnológica global de alto impacto.
+    // ... más recursos definidos con tipado fuerte
+  }
+}
+```
+
+Esta arquitectura no solo es escalable, sino que es auditable, reproducible y resiliente a fallos de zona.
 
 ---
 
 ### ENGLISH (EN)
 
-Designing architectures in AWS for enterprise-level applications requires a mindset focused on radical resilience, infinite scalability, and relentless cost optimization. It is no longer enough to "upload a server" to the cloud; a senior architect designs decoupled systems that leverage managed services to eliminate operational burden and guarantee 99.99% availability. In this exhaustive article, we will explore the principles of "Well-Architected" designs using AWS as a platform, NestJS as the execution engine, and DrizzleORM for efficient, typed data management.
+Designing AWS architecture for 2024 goes beyond launching EC2 instances. It is about building serverless or container-based systems that are resilient, cost-effective, and secure by design. In this article, we will break down a reference architecture for a high-scale enterprise application using the "Well-Architected Framework," integrating services like Lambda, Fargate, Aurora Serverless v2, and EventBridge.
 
-#### 1. Operational Excellence Pillar: Infrastructure as Code (IaC)
+#### 1. Compute: From EC2 to Fargate and Lambda
 
-A senior never configures an environment from the AWS console. Infrastructure must be reproducible, versionable, and auditable.
+![AWS Compute Evolution](./images/aws-architecture/compute.png)
 
-- **AWS CDK vs Terraform**: While Terraform is the industry standard, AWS CDK allows TypeScript developers to define their infrastructure using the same language as their business code. This facilitates creating custom "Constructs" that encapsulate company best practices (e.g., an S3 bucket with encryption and versioning by default).
-- **Immutability**: Infrastructure updates should never be made on live resources. We deploy new versions and eliminate the old ones, ensuring the system state always matches the code definition.
+For modern workloads, we avoid managing servers (EC2) directly.
 
-(Detailed technical guide on CDK construct design, pipeline automation, and multi-environment orchestration continue here...)
+- **REST/GraphQL API**: We deploy our NestJS services on **AWS Fargate** (ECS). Fargate eliminates underlying cluster management, allowing us to simply define CPU and RAM in the task definition.
+- **Event Processing**: For asynchronous triggers (S3 uploads, DynamoDB Streams), **AWS Lambda** is unbeaten.
+- **Cold Starts**: We mitigate Lambda cold starts using _Provisioned Concurrency_ for critical functions or migrating to Fargate for consistent loads.
 
-#### 2. Security in Depth: Zero Trust Architecture
+#### 2. Database: Aurora Serverless v2
 
-Security is not an external layer; it is an intrinsic design property.
+The traditional scalability bottleneck is the relational database. **Aurora Serverless v2** changes the game by scaling vertically (ACUs) in milliseconds, not minutes.
 
-- **VPC Design**: We divide our network into public, private, and isolated subnets. The Postgres database (managed by RDS) must always live in an isolated subnet, with no direct access to the Internet or public subnets.
-- **IAM (Identity and Access Management)**: We apply the principle of least privilege. Our NestJS application pods (running on EKS or Fargate) must use IAM roles for service accounts (IRSA), so they only have permission to access specific resources (e.g., a secret in Secrets Manager or an S3 object), eliminating static access keys.
+```typescript
+// infrastructure-cdk.ts
+const cluster = new rds.DatabaseCluster(this, "AuroraCluster", {
+  engine: rds.DatabaseClusterEngine.auroraPostgres({
+    version: rds.AuroraPostgresEngineVersion.VER_15_2,
+  }),
+  serverlessV2MinCapacity: 0.5, // Scale down to 0.5 ACU (1GB RAM) to save costs on idle
+  serverlessV2MaxCapacity: 16, // Auto-scale up to 32GB RAM under load
+  writers: rds.ClusterInstance.serverlessV2("Writer"),
+  readers: [
+    rds.ClusterInstance.serverlessV2("Reader", { scaleWithWriter: true }),
+  ],
+});
+```
 
-(In-depth look at VPC Endpoints, Security Groups, and NACL strategies continue here...)
+We integrate this with **RDS Proxy** to manage connection pooling, vital when thousands of Lambdas attempt to connect simultaneously.
 
-#### 3. Reliability and High Availability: Multi-AZ and Multi-Region
+#### 3. Event-Driven Architecture with EventBridge
 
-Failure is a certainty. A senior architect designs for failure.
+Instead of synchronous HTTP calls between microservices (which create temporal coupling), we use **EventBridge**.
 
-- **Multi-AZ Deployment**: Our container fleet must be distributed across at least three Availability Zones. If one AZ fails, the Application Load Balancer (ALB) redirects traffic to healthy AZs without interruption.
-- **Amazon Aurora Global Database**: For mission-critical applications, we replicate data at the physical level across regions. DrizzleORM is configured to handle failover by using intelligent hostnames pointing to the current active region.
+- **Schema Registry**: We define strict event schemas.
+- **Rules**: The "Orders" service emits an `OrderPlaced` event. EventBridge routes it to 3 destinations: Billing Service, Logistics Service, and a Firehose data lake for analytics. All without the Orders Service knowing the consumers.
 
-#### 4. Performance Efficiency: Serverless and Container Computing
+#### 4. Security and Networking (VPC Lattice)
 
-- **Amazon ECS with AWS Fargate**: The preferred choice for many seniors due to its simplicity. We don't manage nodes; we just define CPU and memory for our NestJS container. Fargate handles scaling and OS patching.
-- **Intelligent Auto Scaling**: We don't scale by CPU alone. We configure scaling policies based on business metrics or request latency, ensuring the app handles traffic spikes without wasting money during off-peak hours.
+Perimeter security is critical. We implement a **Defense in Depth** strategy:
 
-#### 5. Cost Optimization: Ending Surprise Bills
+- **WAF (Web Application Firewall)**: Fronting the ALB/API Gateway to block SQL injections and XSS attacks.
+- **Private Subnets**: All databases and business logic live in private subnets with no direct internet access (using NAT Gateway for egress).
+- **VPC Lattice**: The new modern way to connect services. Unlike VPC Peering or Transit Gateway, Lattice operates at the application layer, allowing granular authentication policies (IAM) between services ("Service A can only call GET /products on Service B").
 
-A senior architect is also a financial manager of the cloud.
+#### 5. Infrastructure as Code (IaC) with CDK
 
-- **Spot Instances**: For non-critical workloads or message queues, we use Snap instances that can cost up to 90% less than On-Demand.
-- **S3 Storage Tiers**: We automatically move rarely accessed data to Intelligent-Tiering or Glacier to drastically reduce long-term storage costs.
-- **Graviton Processors**: Migrating workloads to ARM-based Graviton processors offers 40% better price-performance compared to x86.
+We do not click in the console. All infrastructure is defined in TypeScript using **AWS CDK**.
 
-#### 6. Data Management with DrizzleORM on AWS
+```typescript
+// Defining a secure infrastructure stack
+export class CoreStack extends cdk.Stack {
+  constructor(scope: Construct, id: string, props?: cdk.StackProps) {
+    super(scope, id, props);
 
-Drizzle integrates perfectly with services like AWS Aurora Serverless v2.
+    const vpc = new ec2.Vpc(this, "MainVPC", {
+      maxAzs: 3, // High availability across 3 zones
+      natGateways: 1,
+    });
 
-- **RDS Proxy**: We use Amazon RDS Proxy to efficiently manage the connection pool from Lambda or Fargate, avoiding database saturation from thousands of open connections.
-- **Secret Rotation**: We automate database credential rotation in Secrets Manager, and Drizzle fetches new credentials at runtime without app restarts.
+    // ... more resources defined with strong typing
+  }
+}
+```
 
-[MASSIVE additional expansion of 3500+ characters including: Event-driven architecture implementation with EventBridge and SNS/SQS, Blue-Green deployment strategies with AWS CodeDeploy, total observability with X-Ray, WAF protection, and AWS Organizations for multi-account governance...]
-
-Designing on AWS is a balance of power and control. By combining the AWS Well-Architected Framework with NestJS/Drizzle agility, we build systems that solve today's challenges and are ready for tomorrow's hyper-growth. Architectural excellence transforms startups into global, high-impact platforms.
+This architecture is not only scalable but also auditable, reproducible, and resilient to zone failures.
 
 ---
 
 ### PORTUGUÊS (PT)
 
-Projetar arquiteturas na AWS para aplicações de nível empresarial exige uma mentalidade focada em resiliência radical, escalabilidade infinita e otimização de custos. Um arquiteto sênior projeta sistemas desacoplados que aproveitam serviços gerenciados para eliminar a carga operacional e garantir 99,99% de disponibilidade. Neste artigo abrangente, exploraremos os princípios do design "Well-Architected" usando AWS, NestJS e DrizzleORM.
+Projetar arquitetura na AWS para 2024 vai além de lançar instâncias EC2. Trata-se de construir sistemas serverless ou baseados em contêineres que sejam resilientes, econômicos e seguros por design. Neste artigo, detalharemos uma arquitetura de referência para uma aplicação empresarial de alta escala usando o "Well-Architected Framework", integrando serviços como Lambda, Fargate, Aurora Serverless v2 e EventBridge.
 
-#### 1. Excelência Operacional: Infraestrutura como Código (IaC)
+#### 1. Computação: De EC2 para Fargate e Lambda
 
-Toda a infraestrutura deve ser definida via código (AWS CDK ou Terraform), garantindo que os ambientes sejam reproduzíveis, versionáveis e auditáveis. Evitamos configurações manuais para manter a consistência entre ambientes.
+![AWS Compute Evolution](./images/aws-architecture/compute.png)
 
-#### 2. Segurança Profunda: Zero Trust
+Para cargas de trabalho modernas, evitamos gerenciar servidores (EC2) diretamente.
 
-Dividimos a rede em sub-redes isoladas. O banco de dados Postgres nunca deve ter acesso direto à Internet. Usamos funções IAM para contas de serviço (IRSA) para que os contêineres NestJS tenham apenas os privilégios mínimos necessários.
+- **API REST/GraphQL**: Implantamos nossos serviços NestJS no **AWS Fargate** (ECS). O Fargate elimina o gerenciamento do cluster subjacente, permitindo-nos definir simplesmente CPU e RAM na definição da tarefa.
+- **Processamento de Eventos**: Para gatilhos assíncronos (uploads S3, DynamoDB Streams), o **AWS Lambda** é imbatível.
+- **Cold Starts**: Mitigamos as inicializações a frio do Lambda usando _Provisioned Concurrency_ para funções críticas ou migrando para Fargate para cargas constantes.
 
-#### 3. Confiabilidade: Multi-AZ e Multi-Region
+#### 2. Banco de Dados: Aurora Serverless v2
 
-Projetamos para falhas distribuindo contêineres em múltiplas Zonas de Disponibilidade. Para aplicações críticas, usamos o **Amazon Aurora Global Database** para replicação física entre regiões, permitindo failovers quase instantâneos monitorados pelo DrizzleORM.
+O gargalo tradicional de escalabilidade é o banco de dados relacional. **Aurora Serverless v2** muda o jogo escalando verticalmente (ACUs) em milissegundos, não minutos.
 
-#### 4. Eficiência: Fargate e Auto Scaling
+```typescript
+// infrastructure-cdk.ts
+const cluster = new rds.DatabaseCluster(this, "AuroraCluster", {
+  engine: rds.DatabaseClusterEngine.auroraPostgres({
+    version: rds.AuroraPostgresEngineVersion.VER_15_2,
+  }),
+  serverlessV2MinCapacity: 0.5, // Escalonamento até 0.5 ACU (1GB RAM) para economizar custos em ociosidade
+  serverlessV2MaxCapacity: 16, // Escalonamento automático até 32GB RAM sob carga
+  writers: rds.ClusterInstance.serverlessV2("Writer"),
+  readers: [
+    rds.ClusterInstance.serverlessV2("Reader", { scaleWithWriter: true }),
+  ],
+});
+```
 
-Preferimos o **AWS Fargate** para orquestração de contêineres por ser serverless. Configuramos políticas de auto scaling baseadas em métricas de negócios, garantindo performance durante picos de tráfego sem custos desnecessários em horários de baixa demanda.
+Integramos isso com **RDS Proxy** para gerenciar o pool de conexões, vital quando milhares de Lambdas tentam verificar simultaneamente.
 
-#### 5. Otimização de Custos
+#### 3. Arquitetura Orientada a Eventos com EventBridge
 
-Usamos instâncias Spot para tarefas distribuídas, Intelligent-Tiering para armazenamento S3 e processadores Graviton baseados em ARM para obter o melhor custo-benefício do mercado.
+Em vez de chamadas HTTP síncronas entre microsserviços (que criam acoplamento temporal), usamos **EventBridge**.
 
-#### 6. DrizzleORM na AWS
+- **Schema Registry**: Definimos esquemas de eventos estritos.
+- **Rules**: O serviço de "Pedidos" emite um evento `OrderPlaced`. O EventBridge o roteia para 3 destinos: Serviço de Faturamento, Serviço de Logística e um data lake Firehose para análise. Tudo sem que o Serviço de Pedidos conheça os consumidores.
 
-Utilizamos o **RDS Proxy** para gerenciar conexões de forma eficiente de funções Lambda e contêineres, além de integrar o AWS Secrets Manager para rotação automática de credenciais sem interrupción do serviço.
+#### 4. Segurança e Rede (VPC Lattice)
 
-[Expansão MASSIVA adicional de 3500+ caracteres incluindo: Arquiteturas orientadas a eventos (EventBridge), deploys Blue-Green, observabilidade distribuída com X-Ray, proteção WAF e governança multi-conta com AWS Organizations...]
+A segurança perimetral é crítica. Implementamos uma estratégia de **Defesa em Profundidade**:
 
-Projetar na AWS é equilibrar potência e controle. Ao combinar o framework "Well-Architected" com NestJS e Drizzle, construímos sistemas resilientes e prontos para o crescimento global.
+- **WAF (Web Application Firewall)**: Frente ao ALB/API Gateway para bloquear injeções SQL e ataques XSS.
+- **Private Subnets**: Todos os bancos de dados e lógica de negócios residem em sub-redes privadas sem acesso direto à internet (usando NAT Gateway para saída).
+- **VPC Lattice**: A nova forma moderna de conectar serviços. Ao contrário do VPC Peering ou Transit Gateway, o Lattice opera na camada de aplicação, permitindo políticas de autenticação (IAM) granulares, entre serviços ("O serviço A só pode chamar GET /products no serviço B").
+
+#### 5. Infraestrutura como Código (IaC) com CDK
+
+Não clicamos no console. Toda a infraestrutura é definida em TypeScript usando **AWS CDK**.
+
+```typescript
+// Definindo uma pilha de infraestrutura segura
+export class CoreStack extends cdk.Stack {
+  constructor(scope: Construct, id: string, props?: cdk.StackProps) {
+    super(scope, id, props);
+
+    const vpc = new ec2.Vpc(this, "MainVPC", {
+      maxAzs: 3, // Alta disponibilidade em 3 zonas
+      natGateways: 1,
+    });
+
+    // ... mais recursos definidos com tipagem forte
+  }
+}
+```
+
+Esta arquitetura não é apenas escalável, mas também auditável, reproduzível e resiliente a falhas de zona.

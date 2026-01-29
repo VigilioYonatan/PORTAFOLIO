@@ -1,133 +1,366 @@
 ### ESPAÑOL (ES)
 
-Cuando una aplicación escala, la base de datos se convierte inevitablemente en el primer cuello de botella. En sistemas con una carga de lectura intensiva, como redes sociales, dashboards de analíticas o e-commerce, un solo nodo de PostgreSQL no es capaz de procesar miles de consultas por segundo mientras mantiene la integridad de las escrituras. La solución senior no es simplemente "comprar un servidor más grande" (escalado vertical), sino implementar una arquitectura de **Réplicas de Lectura**. En este artículo, profundizaremos en cómo configurar Read-Write splitting utilizando **Drizzle ORM** en una aplicación ExpressJS, gestionando el lag de replicación y asegurando alta disponibilidad.
+En el ciclo de vida de cualquier aplicación exitosa, llega un momento en que una sola instancia de base de datos ya no puede manejar la carga. Sin embargo, antes de saltar a arquitecturas complejas de Sharding o Microservicios, el paso lógico y más eficiente es escalar las lecturas horizontalmente utilizando **Réplicas de Lectura (Read Replicas)**.
 
-#### 1. Arquitectura de Replicación en PostgreSQL
+El patrón es simple en teoría: una instancia "Primary" para escrituras y múltiples réplicas para lecturas. Pero en la práctica, implementar esto sin romper la consistencia de los datos en una aplicación Node.js/TypeScript requiere una ingeniería cuidadosa.
 
-PostgreSQL soporta replicación física (asíncrona o síncrona). En la mayoría de los casos de uso web, optamos por **replicación asíncrona** por su bajo impacto en el rendimiento de la instancia principal (Primary). Sin embargo, esto introduce el concepto de "Replication Lag": un pequeño periodo (milisegundos o segundos) donde los datos en la réplica no están actualizados respecto al principal.
+#### 1. Arquitectura de Replicación Asíncrona
 
-Un ingeniero senior diseña la aplicación para ser tolerante a este lag, por ejemplo, forzando la lectura desde el principal inmediatamente después de una escritura crítica (Read Your Own Writes).
+![Read Replicas Architecture](./images/postgresql-read-replicas-drizzle/architecture.png)
 
-#### 2. Implementación de Read-Write Splitting en Drizzle ORM
+PostgreSQL utiliza WAL (Write-Ahead Log) Streaming para replicar cambios.
 
-Drizzle no tiene un sistema nativo de "master-slave" out-of-the-box, pero su flexibilidad permite implementarlo fácilmente mediante una abstracción de base de datos. Creamos dos instancias de conexión: una para operaciones de escritura (`dbWriter`) y un pool para operaciones de lectura (`dbReader`).
+- **Primary (Writer)**: Acepta `INSERT`, `UPDATE`, `DELETE`. Envía stream de WAL a las réplicas.
+- **Replicas (Readers)**: Modo "Hot Standby". Solo aceptan `SELECT`. Si intentas escribir, recibirás el error: `cannot execute INSERT in a read-only transaction`.
+
+El desafío principal es el **Replication Lag**. La replicación asíncrona significa que hay un delta de tiempo (milisegundos a segundos) entre que un dato se escribe en el Primary y aparece en la Réplica.
+
+#### 2. Implementación con Drizzle ORM
+
+Aunque Drizzle no es un "load balancer", su arquitectura modular nos permite configurar conexiones separadas para escrituras y lecturas, e incluso usar su utilidad experimental `widthReplicas` (si está disponible) o construir una propia.
 
 ```typescript
-// db.service.ts
+// infrastructure/database/db.provider.ts
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
+import { withReplicas } from "drizzle-orm/pg-core";
 
-const writerPool = new Pool({
-  connectionString: process.env.PRIMARY_DATABASE_URL,
+const primaryPool = new Pool({ connectionString: process.env.DATABASE_URL });
+const readPool1 = new Pool({
+  connectionString: process.env.DATABASE_READ_REPLICA_1,
 });
-const readerPool = new Pool({
-  connectionString: process.env.REPLICA_DATABASE_URL,
+const readPool2 = new Pool({
+  connectionString: process.env.DATABASE_READ_REPLICA_2,
 });
 
-export const dbWriter = drizzle(writerPool);
-export const dbReader = drizzle(readerPool);
+// Instancia Primary
+const primaryDb = drizzle(primaryPool);
 
-// Repository Pattern
-@Injectable()
-export class UserRepository {
-  async getProfile(id: number) {
-    return dbReader.select().from(users).where(eq(users.id, id));
+// Instancia con Réplicas gestionadas por Drizzle
+// Drizzle seleccionará aleatoriamente una réplica para lecturas usando this.
+export const db = withReplicas(primaryDb, [
+  drizzle(readPool1),
+  drizzle(readPool2),
+]);
+```
+
+#### 3. El Problema de "Read-Your-Own-Writes" (RYOW)
+
+Imagina este flujo de usuario:
+
+1.  Usuario edita su perfil (`UPDATE`).
+2.  La API responde "200 OK".
+3.  El frontend redirige al usuario a su dashboard.
+4.  El dashboard hace un `GET` que golpea una Réplica.
+5.  La Réplica tiene 100ms de lag. El usuario ve los datos viejos. 😱
+
+Este es el problema #1 en sistemas distribuidos.
+
+**Solución Sênior: LSN (Log Sequence Number) Tracking**
+
+En lugar de forzar todas las lecturas al Primary (lo que derrotaría el propósito de tener réplicas), verificamos si la réplica está "al día".
+
+```sql
+-- En el Primary: Obtener posición actual del WAL al escribir
+SELECT pg_current_wal_lsn();
+-- Retorna '0/15D68C0'
+```
+
+En la capa de aplicación, guardamos ese token LSN en Redis con el ID del usuario.
+Al leer de una réplica:
+
+```sql
+-- En la Réplica: Verificar si ya procesó hasta ese punto
+SELECT pg_last_wal_replay_lsn() >= '0/15D68C0';
+```
+
+Si retorna `false`, la aplicación tiene dos opciones:
+
+1.  Esperar y reintentar (Polling).
+2.  Fallar hacia el Primary (Fallback to Primary).
+
+#### 4. Balanceo de Carga y PgBouncer
+
+No conectes tus aplicaciones Node.js directamente a las réplicas si tienes tráfico alto. Usa **PgBouncer** o **AWS RDS Proxy**.
+Estos proxies mantienen pools de conexiones persistentes.
+
+- **Session Pooling**: Asigna una conexión de servidor a una conexión de cliente por toda la sesión. Buena compatibilidad.
+- **Transaction Pooling**: Asigna conexión solo durante una transacción. Máxima escalabilidad (permite 10,000 clientes con 50 conexiones reales), pero rompe features como `PREPARE` o `SET` variables de sesión.
+
+#### 5. NestJS y Patrón CQRS
+
+La separación de Lecturas y Escrituras se alinea perfectamente con **CQRS (Command Query Responsibility Segregation)**.
+
+```typescript
+// commands/create-order.handler.ts
+@CommandHandler(CreateOrderCommand)
+export class CreateOrderHandler {
+  constructor(@Inject("DB_WRITER") private db: NodePgDatabase) {}
+
+  async execute(command: CreateOrderCommand) {
+    // Escritas SIEMPRE al Primary
+    return this.db.transaction(async (tx) => { ... });
   }
+}
 
-  async updateProfile(id: number, data: any) {
-    return dbWriter.update(users).set(data).where(eq(users.id, id));
+// queries/get-orders.handler.ts
+@QueryHandler(GetOrdersQuery)
+export class GetOrdersHandler {
+  constructor(@Inject("DB_READER") private db: NodePgDatabase) {}
+
+  async execute(query: GetOrdersQuery) {
+    // Lecturas pueden ir a Réplicas con estrategia RYOW
+    return this.db.select().from(orders)...;
   }
 }
 ```
 
-#### 3. Connection Pooling con PgBouncer
+#### Conclusión
 
-Al escalar a múltiples réplicas, gestionar las conexiones TCP se vuelve crítico. Un senior no conecta la aplicación directamente a cada réplica; utiliza **PgBouncer** como una capa intermedia de pooling. PgBouncer permite que miles de clientes se conecten al pool mientras mantiene un número limitado y eficiente de conexiones reales con PostgreSQL, reduciendo el consumo de memoria y CPU en los nodos de base de datos.
-
-#### 4. Gestión del Lag de Replicación: Sesiones de Usuario
-
-Un patrón avanzado para manejar el lag es utilizar el "Last Write Timestamp". Si un usuario acaba de actualizar su perfil, el Gateway inyecta una cabecera `x-force-primary: true` durante los próximos 5 segundos. La aplicación detecta esta cabecera y dirige todas las lecturas al nodo principal para ese usuario específico, garantizando consistencia inmediata donde más importa, mientras el resto del tráfico sigue distribuyéndose en las réplicas.
-
-#### 5. Alta Disponibilidad con Patroni y HAProxy
-
-En el mundo senior, no confiamos en una sola réplica. Utilizamos **Patroni** para gestionar el ciclo de vida del cluster de Postgres y **HAProxy** como balanceador de carga inteligente. HAProxy verifica la salud de los nodos y diferencia dinámicamente qué nodos están en modo `read-only` y cuál es el `primary`, permitiendo fallos transparentes y mantenimientos sin tiempo de inactividad (zero-downtime).
-
-[Expansión MASIVA de 3000+ caracteres incluyendo: Configuración detallada de slots de replicación, monitorización de `pg_stat_replication`, uso de Drizzle para migraciones seguras en entornos replicados, estrategias de Sharding cuando las réplicas de lectura ya no son suficientes, y guías para configurar backups consistentes desde nodos esclavos para no impactar al principal...]
-
-Dominar la base de datos es lo que diferencia a un desarrollador senior de un arquitecto de datos. Al implementar réplicas de lectura y separar las cargas de trabajo, transformas una aplicación monolítica y frágil en una plataforma robusta capaz de soportar picos de tráfico globales sin degradar la experiencia de usuario.
+Las réplicas de lectura son esenciales para escalar, pero introducen "consistencia eventual". Un arquitecto senior no teme a la consistencia eventual; la gestiona. Al combinar Drizzle ORM con estrategias inteligentes de enrutamiento y CQRS, puedes construir sistemas masivamente escalables que se sienten instantáneos para el usuario.
 
 ---
 
 ### ENGLISH (EN)
 
-When an application scales, the database inevitably becomes the first bottleneck. In systems with read-intensive workloads—such as social networks, analytics dashboards, or e-commerce—a single PostgreSQL node cannot process thousands of queries per second while maintaining write integrity. The senior solution is not simply "buying a bigger server" (vertical scaling) but implementing a **Read Replicas** architecture. In this article, we will delve into how to configure Read-Write splitting using **Drizzle ORM** in an ExpressJS application, managing replication lag and ensuring high availability.
+In the lifecycle of any successful application, there comes a time when a single database instance can no longer handle the load. However, before jumping into complex Sharding or Microservices architectures, the logical and most efficient step is to scale reads horizontally using **Read Replicas**.
 
-#### 1. PostgreSQL Replication Architecture
+The pattern is simple in theory: one "Primary" instance for writes and multiple replicas for reads. But in practice, implementing this without breaking data consistency in a Node.js/TypeScript application requires careful engineering.
 
-PostgreSQL supports physical replication (asynchronous or synchronous). In most web use cases, we opt for **asynchronous replication** due to its low impact on Primary instance performance. However, this introduces "Replication Lag": a small window (milliseconds or seconds) where data in the replica is not yet up to date with the primary.
+#### 1. Asynchronous Replication Architecture
 
-(Technical deep dive into replication models and consistency trade-offs continue here...)
+![Read Replicas Architecture](./images/postgresql-read-replicas-drizzle/architecture.png)
 
-#### 2. Implementing Read-Write Splitting in Drizzle ORM
+PostgreSQL uses WAL (Write-Ahead Log) Streaming to replicate changes.
 
-Drizzle does not have a native master-slave system out-of-the-box, but its flexibility allows for easy implementation through database abstraction. We create two connection instances: one for write operations (`dbWriter`) and a pool for read operations (`dbReader`).
+- **Primary (Writer)**: Accepts `INSERT`, `UPDATE`, `DELETE`. Streams WAL to replicas.
+- **Replicas (Readers)**: "Hot Standby" mode. Only accept `SELECT`. If you try to write, you will receive the error: `cannot execute INSERT in a read-only transaction`.
 
-(Extensive code examples and architectural diagrams of split connection management continue here...)
+The main challenge is **Replication Lag**. Asynchronous replication means there is a time delta (milliseconds to seconds) between when data is written to the Primary and when it appears on the Replica.
 
-#### 3. Connection Pooling with PgBouncer
+#### 2. Implementation with Drizzle ORM
 
-When scaling to multiple replicas, managing TCP connections becomes critical. A senior does not connect the application directly to each replica; they use **PgBouncer** as an intermediate pooling layer. PgBouncer allows thousands of clients to connect to the pool while maintaining a limited and efficient number of real connections to PostgreSQL, reducing memory and CPU consumption on database nodes.
+Although Drizzle is not a "load balancer," its modular architecture allows us to configure separate connections for writes and reads, and even use its experimental `withReplicas` utility (if available) or build our own.
 
-(Detailed guide on PgBouncer configurations, transaction vs session pooling, and optimization strategies...)
+```typescript
+// infrastructure/database/db.provider.ts
+import { drizzle } from "drizzle-orm/node-postgres";
+import { Pool } from "pg";
+import { withReplicas } from "drizzle-orm/pg-core";
 
-#### 4. Managing Replication Lag: User Sessions
+const primaryPool = new Pool({ connectionString: process.env.DATABASE_URL });
+const readPool1 = new Pool({
+  connectionString: process.env.DATABASE_READ_REPLICA_1,
+});
+const readPool2 = new Pool({
+  connectionString: process.env.DATABASE_READ_REPLICA_2,
+});
 
-An advanced pattern for handling lag is using "Last Write Timestamp." If a user has just updated their profile, the Gateway injects an `x-force-primary: true` header for the next 5 seconds. The application detects this header and directs all reads to the primary node for that specific user, ensuring immediate consistency where it matters most, while the rest of the traffic continues to be distributed across replicas.
+// Primary Instance
+const primaryDb = drizzle(primaryPool);
 
-(Analysis of consistency techniques, stateful routing, and user experience preservation...)
+// Instance with Replicas managed by Drizzle
+// Drizzle will randomly select a replica for reads using this.
+export const db = withReplicas(primaryDb, [
+  drizzle(readPool1),
+  drizzle(readPool2),
+]);
+```
 
-#### 5. High Availability with Patroni and HAProxy
+#### 3. The "Read-Your-Own-Writes" (RYOW) Problem
 
-In the senior world, we don't trust a single replica. We use **Patroni** to manage the Postgres cluster lifecycle and **HAProxy** as a smart load balancer. HAProxy checks node health and dynamically differentiates which nodes are in `read-only` mode and which is the `primary`, allowing for transparent failovers and zero-downtime maintenance.
+Imagine this user flow:
 
-[MASSIVE expansion of 3500+ characters including: Detailed replication slot configuration, monitoring `pg_stat_replication`, using Drizzle for safe migrations in replicated environments, Sharding strategies when read replicas are no longer sufficient, and guides for consistent backups from slave nodes...]
+1.  User updates their profile (`UPDATE`).
+2.  API responds "200 OK".
+3.  Frontend redirects user to dashboard.
+4.  Dashboard makes a `GET` hitting a Replica.
+5.  Replica has 100ms lag. User sees old data. 😱
 
-Mastering the database is what separates a senior developer from a data architect. By implementing read replicas and separating workloads, you transform a fragile monolithic application into a robust platform capable of supporting global traffic spikes without degrading user experience.
+This is problem #1 in distributed systems.
+
+**Senior Solution: LSN (Log Sequence Number) Tracking**
+
+Instead of forcing all reads to Primary (which would defeat the purpose of having replicas), we check if the replica is "caught up."
+
+```sql
+-- On Primary: Get current WAL position on write
+SELECT pg_current_wal_lsn();
+-- Returns '0/15D68C0'
+```
+
+In the app layer, we store that LSN token in Redis with the User ID.
+When reading from a replica:
+
+```sql
+-- On Replica: Check if it has processed up to that point
+SELECT pg_last_wal_replay_lsn() >= '0/15D68C0';
+```
+
+If it returns `false`, the app has two choices:
+
+1.  Wait and retry (Polling).
+2.  Fallback to Primary.
+
+#### 4. Load Balancing and PgBouncer
+
+Do not connect your Node.js apps directly to replicas if you have high traffic. Use **PgBouncer** or **AWS RDS Proxy**.
+These proxies maintain persistent connection pools.
+
+- **Session Pooling**: Maps a server connection to a client connection for the entire session. Good compatibility.
+- **Transaction Pooling**: Maps connection only during a transaction. Maximum scalability (allows 10,000 clients with 50 actual real connections), but breaks features like `PREPARE` or `SET` session variables.
+
+#### 5. NestJS and CQRS Pattern
+
+Separating Reads and Writes lines up perfectly with **CQRS (Command Query Responsibility Segregation)**.
+
+```typescript
+// commands/create-order.handler.ts
+@CommandHandler(CreateOrderCommand)
+export class CreateOrderHandler {
+  constructor(@Inject("DB_WRITER") private db: NodePgDatabase) {}
+
+  async execute(command: CreateOrderCommand) {
+    // Writes ALWAYS go to Primary
+    return this.db.transaction(async (tx) => { ... });
+  }
+}
+
+// queries/get-orders.handler.ts
+@QueryHandler(GetOrdersQuery)
+export class GetOrdersHandler {
+  constructor(@Inject("DB_READER") private db: NodePgDatabase) {}
+
+  async execute(query: GetOrdersQuery) {
+    // Reads can go to Replicas with RYOW strategy
+    return this.db.select().from(orders)...;
+  }
+}
+```
+
+#### Conclusion
+
+Read Replicas are essential for scaling but introduce "eventual consistency." A senior architect doesn't fear eventual consistency; they manage it. By combining Drizzle ORM with smart routing strategies and CQRS, you can build massively scalable systems that feel instant to the user.
 
 ---
 
 ### PORTUGUÊS (PT)
 
-Quando uma aplicação escala, o banco de dados inevitavelmente se torna o primeiro gargalo. Em sistemas com uma carga de leitura intensiva, como redes sociais, dashboards de análise ou e-commerce, um único nó do PostgreSQL não é capaz de processar milhares de consultas por segundo enquanto mantém a integridade das gravações. A solução sênior não é apenas "comprar um servidor maior" (escalonamento vertical), mas implementar uma arquitetura de **Réplicas de Leitura**. Neste artigo, aprofundaremos como configurar a divisão de Leitura-Gravação (Read-Write splitting) usando o **Drizzle ORM** em uma aplicação ExpressJS, gerenciando o atraso de replicação e garantindo alta disponibilidade.
+No ciclo de vida de qualquer aplicação de sucesso, chega um momento em que uma única instância de banco de dados não consegue mais lidar com a carga. No entanto, antes de pular para arquiteturas complexas de Sharding ou Microsserviços, o passo lógico e mais eficiente é escalar as leituras horizontalmente usando **Réplicas de Leitura (Read Replicas)**.
 
-#### 1. Arquitetura de Replicação no PostgreSQL
+O padrão é simples na teoria: uma instância "Primary" para gravações e múltiplas réplicas para leituras. Mas na prática, implementar isso sem quebrar a consistência dos dados em uma aplicação Node.js/TypeScript requer engenharia cuidadosa.
 
-O PostgreSQL suporta replicação física (assíncrona ou síncrona). Na maioria dos casos de uso web, optamos pela **replicação assíncrona** por seu baixo impacto no desempenho da instância principal (Primary). No entanto, isso introduz o conceito de "Replication Lag": um pequeno período (milissegundos ou segundos) em que os dados na réplica ainda não estão atualizados em relação ao principal.
+#### 1. Arquitetura de Replicação Assíncrona
 
-(O aprofundamento técnico em modelos de replicação e compensações de consistência continua aqui...)
+![Read Replicas Architecture](./images/postgresql-read-replicas-drizzle/architecture.png)
 
-#### 2. Implementação de Read-Write Splitting no Drizzle ORM
+PostgreSQL usa WAL (Write-Ahead Log) Streaming para replicar mudanças.
 
-O Drizzle não possui um sistema nativo de "mestre-escravo" pronto para uso, mas sua flexibilidade permite implementá-lo facilmente por meio de abstração de banco de dados. Criamos duas instâncias de conexão: uma para operações de gravação (`dbWriter`) e um pool para operações de leitura (`dbReader`).
+- **Primary (Writer)**: Aceita `INSERT`, `UPDATE`, `DELETE`. Envia fluxo de WAL para as réplicas.
+- **Replicas (Readers)**: Modo "Hot Standby". Aceitam apenas `SELECT`. Se tentar escrever, receberá o erro: `cannot execute INSERT in a read-only transaction`.
 
-(Exemplos de código extensivos e diagramas arquitetônicos de gerenciamento de conexão dividida continuam aqui...)
+O principal desafio é o **Replication Lag**. A replicação assíncrona significa que há um delta de tempo (milissegundos a segundos) entre o momento em que um dado é gravado no Primary e quando aparece na Réplica.
 
-#### 3. Connection Pooling com PgBouncer
+#### 2. Implementação com Drizzle ORM
 
-Ao escalar para várias réplicas, o gerenciamento de conexões TCP torna-se crítico. Um sênior não conecta o aplicativo diretamente a cada réplica; ele usa o **PgBouncer** como uma camada de pooling intermediária. O PgBouncer permite que milhares de clientes se conectem ao pool enquanto mantém um número limitado e eficiente de conexões reais com o PostgreSQL.
+Embora o Drizzle não seja um "balanceador de carga", sua arquitetura modular nos permite configurar conexões separadas para gravações e leituras, e até usar seu utilitário experimental `withReplicas` (se disponível) ou construir o nosso próprio.
 
-(Guia detalhado sobre configurações do PgBouncer, pooling de transação vs sessão e estratégias de otimização...)
+```typescript
+// infrastructure/database/db.provider.ts
+import { drizzle } from "drizzle-orm/node-postgres";
+import { Pool } from "pg";
+import { withReplicas } from "drizzle-orm/pg-core";
 
-#### 4. Gerenciando o Atraso de Replicação: Sessões de Usuário
+const primaryPool = new Pool({ connectionString: process.env.DATABASE_URL });
+const readPool1 = new Pool({
+  connectionString: process.env.DATABASE_READ_REPLICA_1,
+});
+const readPool2 = new Pool({
+  connectionString: process.env.DATABASE_READ_REPLICA_2,
+});
 
-Um padrão avançado para lidar com o atraso é usar o "Carimbo de data/hora da última gravação" (Last Write Timestamp). Se um usuário acabou de atualizar seu perfil, o Gateway injeta um cabeçalho `x-force-primary: true` pelos próximos 5 segundos. O aplicativo detecta esse cabeçalho e direciona todas as leituras para o nó principal para aquele usuário específico.
+// Instância Primary
+const primaryDb = drizzle(primaryPool);
 
-(Análise de técnicas de consistência, roteamento com estado e preservação da experiência do usuário...)
+// Instância com Réplicas gerenciadas pelo Drizzle
+// O Drizzle selecionará aleatoriamente uma réplica para leituras usando isso.
+export const db = withReplicas(primaryDb, [
+  drizzle(readPool1),
+  drizzle(readPool2),
+]);
+```
 
-#### 5. Alta Disponibilidade com Patroni e HAProxy
+#### 3. O Problema de "Read-Your-Own-Writes" (RYOW)
 
-No mundo sênior, não confiamos em uma única réplica. Usamos o **Patroni** para gerenciar o ciclo de vida do cluster Postgres e o **HAProxy** como balanceador de carga inteligente. O HAProxy verifica a integridade dos nós e diferencia dinamicamente quais nós estão no modo `read-only` e qual é o `primary`.
+Imagine este fluxo de usuário:
 
-[Expansão MASSIVA de 3500+ caracteres incluindo: Configuração detalhada de slots de replicação, monitoramento de `pg_stat_replication`, uso do Drizzle para migrações seguras, estratégias de Sharding e guias para backups consistentes a partir de nós escravos...]
+1.  Usuário edita seu perfil (`UPDATE`).
+2.  API responde "200 OK".
+3.  Frontend redireciona o usuário para o dashboard.
+4.  O dashboard faz um `GET` que atinge uma Réplica.
+5.  A Réplica tem 100ms de lag. O usuário vê dados antigos. 😱
 
-Dominar o banco de dados é o que diferencia um desenvolvedor sênior de um arquiteto de dados. Ao implementar réplicas de leitura e separar as cargas de trabalho, você transforma uma aplicação monolítica frágil em uma plataforma robusta capaz de suportar picos de tráfego globais.
+Este é o problema #1 em sistemas distribuídos.
+
+**Solução Sênior: Rastreamento via LSN (Log Sequence Number)**
+
+Em vez de forçar todas as leituras para o Primary (o que derrotaria o propósito de ter réplicas), verificamos se a réplica está "em dia".
+
+```sql
+-- No Primary: Obter posição atual do WAL ao escrever
+SELECT pg_current_wal_lsn();
+-- Retorna '0/15D68C0'
+```
+
+Na camada de aplicação, armazenamos esse token LSN no Redis com o ID do usuário.
+Ao ler de uma réplica:
+
+```sql
+-- Na Réplica: Verificar se já processou até aquele ponto
+SELECT pg_last_wal_replay_lsn() >= '0/15D68C0';
+```
+
+Se retornar `false`, a aplicação tem duas opções:
+
+1.  Aguardar e tentar novamente (Polling).
+2.  Fallback para o Primary.
+
+#### 4. Balanceamento de Carga e PgBouncer
+
+Não conecte suas aplicações Node.js diretamente às réplicas se tiver alto tráfego. Use **PgBouncer** ou **AWS RDS Proxy**.
+Esses proxies mantêm pools de conexões persistentes.
+
+- **Session Pooling**: Mapeia uma conexão de servidor para uma conexão de cliente por toda a sessão. Boa compatibilidade.
+- **Transaction Pooling**: Mapeia conexão apenas durante uma transação. Escalabilidade máxima (permite 10.000 clientes com 50 conexões reais), mas quebra recursos como `PREPARE` ou `SET` variáveis de sessão.
+
+#### 5. NestJS e Padrão CQRS
+
+A separação de Leituras e Gravações se alinha perfeitamente com **CQRS (Command Query Responsibility Segregation)**.
+
+```typescript
+// commands/create-order.handler.ts
+@CommandHandler(CreateOrderCommand)
+export class CreateOrderHandler {
+  constructor(@Inject("DB_WRITER") private db: NodePgDatabase) {}
+
+  async execute(command: CreateOrderCommand) {
+    // Gravações SEMPRE no Primary
+    return this.db.transaction(async (tx) => { ... });
+  }
+}
+
+// queries/get-orders.handler.ts
+@QueryHandler(GetOrdersQuery)
+export class GetOrdersHandler {
+  constructor(@Inject("DB_READER") private db: NodePgDatabase) {}
+
+  async execute(query: GetOrdersQuery) {
+    // Leituras podem ir para Réplicas com estratégia RYOW
+    return this.db.select().from(orders)...;
+  }
+}
+```
+
+#### Conclusão
+
+As réplicas de leitura são essenciais para escalar, mas introduzem "consistência eventual". Um arquiteto sênior não teme a consistência eventual; ele a gerencia. Ao combinar Drizzle ORM com estratégias inteligentes de roteamento e CQRS, você pode construir sistemas massivamente escaláveis que parecem instantâneos para o usuário.

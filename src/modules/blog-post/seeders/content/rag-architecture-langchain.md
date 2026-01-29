@@ -1,148 +1,232 @@
 ### ESPAÑOL (ES)
 
-La Generación Aumentada por Recuperación (RAG) se ha convertido en el patrón arquitectónico por excelencia para dotar a los Modelos de Lenguaje (LLMs) de conocimiento específico, privado y actualizado. Sin embargo, pasar de una demo de "hola mundo" a un sistema RAG de grado producción requiere una ingeniería profunda en la recuperación, el procesamiento y la evaluación de los datos. En este artículo detallado, exploraremos cómo diseñar una arquitectura RAG avanzada utilizando LangChain, PGVector y DrizzleORM para construir aplicaciones de IA que sean precisas, rápidas y escalables a nivel Enterprise.
+El patrón RAG (Retrieval-Augmented Generation) básico —hacer embedding de un PDF, guardarlo en una DB vectorial y buscar los top-k chunks— es suficiente para demos, pero falla estrepitosamente en producción. Alucinaciones, recuperación de contexto irrelevante y falta de "razonamiento" sobre los datos son problemas comunes.
 
-#### 1. Arquitectura del Pipeline de Ingesta
+En este artículo, exploraremos arquitecturas avanzadas de RAG utilizando **LangChain** y **PostgreSQL (pgvector)** para construir sistemas de IA generativa que realmente funcionen a escala.
 
-Un sistema RAG es tan bueno como los datos que recupera. El éxito se gesta en la ingesta.
+#### 1. Más allá del "Naive RAG": Advanced Retrieval
 
-- **Estrategias de Chunking Semántico**: Olvida la fragmentación fija de 500 caracteres. Un senior utiliza fragmentadores recursivos que respetan la estructura del documento (encabezados, párrafos) y añade un "overlap" inteligente para asegurar que el contexto no se pierda entre fragmentos.
-- **Limpieza de Datos Proactiva**: Usamos expresiones regulares y modelos de IA menores para normalizar el texto, eliminar ruidos (headers de PDF, números de página) y resolver anáforas antes de generar los embeddings.
+![Advanced RAG Architecture](./images/rag-architecture-langchain/advanced-rag.png)
 
-#### 2. Almacenamiento Vectorial Optimizado con PGVector
+El problema del RAG simple es que fragmenta la información. Un chunk de 500 caracteres puede perder el contexto global del documento.
 
-PostgreSQL con `pgvector` ofrece una versatilidad inigualable.
-
-- **Diseño del Esquema con Drizzle**: Definimos tablas que almacenan el vector (`vector(1536)` para OpenAI), el contenido original y metadatos enriquecidos (autor, fecha, sección).
-- **Índices HNSW (Hierarchical Navigable Small World)**: Configuramos estos índices para permitir búsquedas de "vecinos más cercanos" en milisegundos sobre millones de registros. Ajustamos el parámetro `m` y `ef_construction` con Drizzle para equilibrar velocidad e incremento de precisión.
+**Estrategia: Parent Document Retriever**
+Indexamos chunks pequeños (e.g., 200 caracteres) para una búsqueda vectorial precisa, pero recuperamos el "Parent Document" completo (o un chunk mucho más grande) para pasárselo al LLM.
 
 ```typescript
-// Esquema de Drizzle para RAG con pgvector
-export const embeddings = pgTable(
-  "embeddings",
+import { ParentDocumentRetriever } from "langchain/retrievers/parent_document";
+import { ScoreThresholdRetriever } from "langchain/retrievers/score_threshold";
+
+// Indexamos chunks pequeños, pero recuperamos el contexto grande
+const retriever = new ParentDocumentRetriever({
+  vectorstore: vectorStore,
+  byteStore: docStore, // Almacena el documento original
+  childSplitter: new RecursiveCharacterTextSplitter({ chunkSize: 200 }),
+  parentSplitter: new RecursiveCharacterTextSplitter({ chunkSize: 2000 }),
+});
+```
+
+#### 2. Multi-Query Retriever y Reranking
+
+A veces la pregunta del usuario es ambigua. "Dame los reportes de ventas" puede significar "¿Ventas de este mes?", "¿Ventas globales?".
+El **Multi-Query Retriever** usa un LLM para generar 3-4 variaciones de la pregunta original y busca todas en paralelo.
+
+**Reranking (El toque secreto)**
+El vector search es rápido pero no siempre ordena por relevancia semántica profunda. Usamos un modelo "Cross-Encoder" (como Cohere Rerank) para reordenar los 50 documentos recuperados y quedarnos con los 5 mejores.
+
+#### 3. Self-RAG y Flujos Correctivos (CRAG)
+
+¿Y si la base de datos no tiene la respuesta? Un RAG normal alucina.
+**Self-RAG** entrena al modelo para emitir tokens de reflexión:
+
+- `retrieve`: ¿Necesito buscar información externa?
+- `is_relevant`: ¿Lo que encontré sirve?
+- `is_supported`: ¿Mi respuesta está respaldada por la evidencia?
+
+Si el sistema detecta que los documentos recuperados son irrelevantes, activamos **Corrective RAG (CRAG)**: un fallback que busca en la web (usando **Tavily** o Google Search) para obtener información fresca.
+
+#### 4. Implementación con LCEL (LangChain Expression Language)
+
+LCEL nos permite construir pipelines declarativos y observables.
+
+```typescript
+const ragChain = RunnableSequence.from([
   {
-    id: uuid("id").primaryKey().defaultRandom(),
-    content: text("content").notNull(),
-    embedding: vector("embedding", { dimensions: 1536 }),
-    metadata: jsonb("metadata"),
+    context: retriever.pipe(formatDocumentsAsString),
+    question: new RunnablePassthrough(),
   },
-  (table) => ({
-    hnswIdx: index("hnsw_idx").using(
-      "hnsw",
-      table.embedding.op("vector_cosine_ops"),
-    ),
-  }),
+  promptTemplate,
+  model,
+  new StringOutputParser(),
+]);
+
+const result = await ragChain.invoke(
+  "¿Cuáles son los requisitos de compliance?",
 );
 ```
 
-#### 3. Recuperación Avanzada: Más allá del Coseno
+#### 5. Evaluación con RAGAS
 
-- **Búsqueda Híbrida (Hybrid Search)**: Combinamos la búsqueda semántica vectorial con la búsqueda de texto completo (tsvector) de Postgres. Esto es vital para encontrar términos técnicos exactos que un modelo de embeddings podría generalizar demasiado.
-- **Re-Ranking con Cross-Encoders**: Recuperamos los Top 50 resultados rápidos con PGVector y luego usamos un modelo de Re-Ranking (como Cohere o BGE-Reranker) para seleccionar los Top 5 más pertinentes. Esto mejora drásticamente la precisión final de la respuesta.
+No puedes mejorar lo que no mides. **RAGAS** (RAG Assessment) es un framework que utiliza otro LLM (GPT-4) para evaluar tu RAG en tres métricas:
 
-#### 4. Orquestación con LangGraph
+1.  **Faithfulness**: ¿La respuesta es fiel al contexto recuperado?
+2.  **Answer Relevance**: ¿Responde a la pregunta del usuario?
+3.  **Context Precision**: ¿Hay mucha "paja" en el contexto recuperado?
 
-Para flujos complejos donde la IA debe decidir si necesita más información, usamos **LangGraph**.
-
-- **Self-RAG**: El agente genera una respuesta, evalúa si es suficiente basándose en los documentos, y si no, realiza una nueva búsqueda con términos refinados.
-- **Multi-Step Reasoning**: Desglosamos preguntas complejas en sub-tareas, recuperamos información para cada una y luego sintetizamos la respuesta final.
-
-#### 5. Evaluación de Producción: RAGAS y LangSmith
-
-No adivinamos si el sistema funciona; lo medimos.
-
-- **Métricas RAGAS**: Medimos la `Faithfulness` (fidelidad a los documentos para evitar alucinaciones) y la `Answer Relevance`.
-- **LangSmith Tracing**: Auditamos cada paso del pipeline para identificar dónde ocurre la latencia o el fallo de recuperación.
-
-[Expansión MASIVA adicional de 3000+ caracteres incluyendo: Implementación de GraphRAG para conectar conceptos entre documentos, estrategias de Pre-filtering con Drizzle para entornos multi-tenant seguros, optimización de latencia mediante Streaming de tokens en Express, y guías sobre cómo desplegar modelos de embeddings locales con Ollama para máxima privacidad de datos corporativos, garantizando una infraestructura cognitiva inexpugnable...]
-
-Diseñar una arquitectura RAG senior es un ejercicio de equilibrio entre ruido y contexto. Al utilizar LangChain como orquestador y la potencia relacional de Postgres con Drizzle, creamos sistemas que no solo responden, sino que razonan sobre la base de conocimiento de tu organización con una precisión milimétrica.
+El futuro del RAG no es solo buscar mejor, es construir agentes que sepan cuándo buscar, cuándo leer y cuándo preguntar.
 
 ---
 
 ### ENGLISH (EN)
 
-Retrieval-Augmented Generation (RAG) has become the quintessential architectural pattern for providing Large Language Models (LLMs) with specific, private, and up-to-date knowledge. However, moving from a "hello world" demo to a production-grade RAG system requires deep engineering in data retrieval, processing, and evaluation. In this detailed article, we will explore how to design an advanced RAG architecture using LangChain, PGVector, and DrizzleORM to build accurate, fast, and scalable Enterprise-level AI applications.
+Basic RAG (Retrieval-Augmented Generation)—embedding a PDF, saving it to a vector DB, and searching top-k chunks—is fine for demos, but fails miserably in production. Hallucinations, retrieval of irrelevant context, and lack of "reasoning" about data are common issues.
 
-#### 1. Ingestion Pipeline Architecture
+In this article, we'll explore advanced RAG architectures using **LangChain** and **PostgreSQL (pgvector)** to build generative AI systems that actually work at scale.
 
-A RAG system is only as good as the data it retrieves. Success is brewed in the ingestion phase.
+#### 1. Beyond "Naive RAG": Advanced Retrieval
 
-- **Semantic Chunking Strategies**: Forget fixed 500-character splitting. A senior uses recursive splitters that respect document structure (headers, paragraphs) and adds intelligent overlap to ensure context isn't lost between chunks.
-- **Proactive Data Cleaning**: We use regular expressions and smaller AI models to normalize text, remove noise (PDF headers, page numbers), and resolve anaphora before generating embeddings.
+![Advanced RAG Architecture](./images/rag-architecture-langchain/advanced-rag.png)
 
-(Detailed technical guide on chunking algorithms, metadata enrichment, and data versioning continue here...)
+The problem with simple RAG is that it fragments information. A 500-character chunk can lose the global context of the document.
 
-#### 2. Optimized Vector Storage with PGVector
+**Strategy: Parent Document Retriever**
+We index small chunks (e.g., 200 chars) for precise vector search, but retrieve the full "Parent Document" (or a much larger chunk) to pass to the LLM.
 
-PostgreSQL with `pgvector` offers unmatched versatility.
+```typescript
+import { ParentDocumentRetriever } from "langchain/retrievers/parent_document";
+import { ScoreThresholdRetriever } from "langchain/retrievers/score_threshold";
 
-- **Schema Design with Drizzle**: We define tables storing the vector (`vector(1536)` for OpenAI), original content, and enriched metadata (author, date, section).
-- **HNSW Indices (Hierarchical Navigable Small World)**: We configure these indices to allow "nearest neighbor" searches in milliseconds over millions of records. We adjust `m` and `ef_construction` parameters with Drizzle to balance speed and precision.
+// Index small chunks, but retrieve large context
+const retriever = new ParentDocumentRetriever({
+  vectorstore: vectorStore,
+  byteStore: docStore, // Stores original document
+  childSplitter: new RecursiveCharacterTextSplitter({ chunkSize: 200 }),
+  parentSplitter: new RecursiveCharacterTextSplitter({ chunkSize: 2000 }),
+});
+```
 
-(Technical focus on PGVector indexing and Drizzle integration continue here...)
+#### 2. Multi-Query Retriever and Reranking
 
-#### 3. Advanced Retrieval: Beyond Cosine
+Sometimes the user query is ambiguous. "Give me sales reports" could mean "Sales for this month?", "Global sales?".
+The **Multi-Query Retriever** uses an LLM to generate 3-4 variations of the original question and searches for all of them in parallel.
 
-- **Hybrid Search**: We combine vector semantic search with Postgres full-text search (tsvector). This is vital for finding exact technical terms that an embedding model might over-generalize.
-- **Re-Ranking with Cross-Encoders**: WE retrieve the fast Top 50 results with PGVector and then use a Re-Ranking model (like Cohere or BGE-Reranker) to select the most pertinent Top 5. This drastically improves final response accuracy.
+**Reranking (The Secret Sauce)**
+Vector search is fast but doesn't always sort by deep semantic relevance. We use a "Cross-Encoder" model (like Cohere Rerank) to re-order the 50 retrieved documents and keep the top 5.
 
-#### 4. Orchestration with LangGraph
+#### 3. Self-RAG and Corrective Flows (CRAG)
 
-For complex flows where the AI must decide if it needs more info, we use **LangGraph**.
+What if the database doesn't have the answer? A normal RAG hallucinates.
+**Self-RAG** trains the model to emit reflection tokens:
 
-- **Self-RAG**: The agent generates a response, evaluates if it's sufficient based on documents, and if not, performs a new search with refined terms.
-- **Multi-Step Reasoning**: We break down complex questions into sub-tasks, retrieve info for each, and then synthesize the final answer.
+- `retrieve`: Do I need to search external info?
+- `is_relevant`: Is what I found useful?
+- `is_supported`: Is my answer backed by evidence?
 
-#### 5. Production Evaluation: RAGAS and LangSmith
+If the system detects retrieved documents are irrelevant, we trigger **Corrective RAG (CRAG)**: a fallback that searches the web (using **Tavily** or Google Search) to get fresh information.
 
-We don't guess if the system works; we measure it.
+#### 4. Implementation with LCEL (LangChain Expression Language)
 
-- **RAGAS Metrics**: We measure `Faithfulness` (to avoid hallucinations) and `Answer Relevance`.
-- **LangSmith Tracing**: We audit every pipeline step to identify where latency or retrieval failure occurs.
+LCEL allows us to build declarative and observable pipelines.
 
-[MASSIVE additional expansion of 3500+ characters including: GraphRAG implementation for connecting concepts across documents, Pre-filtering strategies with Drizzle for secure multi-tenant environments, latency optimization via Express token streaming, and guides for local embedding models with Ollama...]
+```typescript
+const ragChain = RunnableSequence.from([
+  {
+    context: retriever.pipe(formatDocumentsAsString),
+    question: new RunnablePassthrough(),
+  },
+  promptTemplate,
+  model,
+  new StringOutputParser(),
+]);
 
-Designing a senior RAG architecture is a balancing act between noise and context. By using LangChain as an orchestrator and the relational power of Postgres with Drizzle, we create systems that don't just answer but reason over your organization's knowledge base.
+const result = await ragChain.invoke("What are the compliance requirements?");
+```
+
+#### 5. Evaluation with RAGAS
+
+You can't improve what you don't measure. **RAGAS** (RAG Assessment) is a framework that uses another LLM (GPT-4) to evaluate your RAG on three metrics:
+
+1.  **Faithfulness**: Is the answer faithful to the retrieved context?
+2.  **Answer Relevance**: Does it answer the user's question?
+3.  **Context Precision**: Is there too much "noise" in the retrieved context?
+
+The future of RAG isn't just searching better; it's building agents that know when to search, when to read, and when to ask.
 
 ---
 
 ### PORTUGUÊS (PT)
 
-A Geração Aumentada de Recuperação (RAG) tornou-se o padrão arquitetônico por excelência para fornecer aos Modelos de Linguagem (LLMs) conhecimento específico, privado e atualizado. No entanto, passar de uma demonstração de "olá mundo" para um sistema RAG de nível de produção exige engenharia profunda na recuperação, processamento e avaliação de dados. Neste artigo detalhado, exploraremos como projetar uma arquitetura RAG avançada usando LangChain, PGVector e DrizzleORM para construir aplicações de IA que sejam precisas, rápidas e escaláveis.
+O padrão RAG (Retrieval-Augmented Generation) básico — fazer o embedding de um PDF, salvá-lo em um DB vetorial e buscar os top-k chunks — é suficiente para demos, mas falha miseravelmente em produção. Alucinações, recuperação de contexto irrelevante e falta de "raciocínio" sobre os dados são problemas comuns.
 
-#### 1. Arquitetura do Pipeline de Ingestão
+Neste artigo, exploraremos arquiteturas avançadas de RAG usando **LangChain** e **PostgreSQL (pgvector)** para construir sistemas de IA generativa que realmente funcionam em escala.
 
-Um sistema RAG é tão bom quanto os dados que recupera.
+#### 1. Além do "Naive RAG": Advanced Retrieval
 
-- **Estratégias de Chunking Semântico**: Usamos fragmentadores recursivos que respeitam a estrutura do documento e adicionam "overlap" inteligente.
-- **Limpeza de Dados**: Normalizamos o texto e removemos ruídos antes de gerar os embeddings.
+![Advanced RAG Architecture](./images/rag-architecture-langchain/advanced-rag.png)
 
-(Guia técnico detalhado sobre algoritmos de fragmentação e enriquecimento de metadados...)
+O problema do RAG simples é que ele fragmenta as informações. Um pedaço de 500 caracteres pode perder o contexto global do documento.
 
-#### 2. Armazenamento Vetorial Otimizado com PGVector
+**Estratégia: Parent Document Retriever**
+Indexamos pedaços pequenos (e.g., 200 caracteres) para uma busca vetorial precisa, mas recuperamos o "Documento Pai" completo (ou um pedaço muito maior) para passar ao LLM.
 
-O PostgreSQL com `pgvector` oferece versatilidade incomparável.
+```typescript
+import { ParentDocumentRetriever } from "langchain/retrievers/parent_document";
+import { ScoreThresholdRetriever } from "langchain/retrievers/score_threshold";
 
-- **Design de Esquema com Drizzle**: Definimos tabelas que armazenam o vetor e metadados enriquecidos.
-- **Índices HNSW**: Configuramos esses índices para permitir buscas de "vizinhos mais próximos" em milissegundos.
+// Indexamos pedaços pequenos, mas recuperamos contexto grande
+const retriever = new ParentDocumentRetriever({
+  vectorstore: vectorStore,
+  byteStore: docStore, // Armazena o documento original
+  childSplitter: new RecursiveCharacterTextSplitter({ chunkSize: 200 }),
+  parentSplitter: new RecursiveCharacterTextSplitter({ chunkSize: 2000 }),
+});
+```
 
-#### 3. Recuperação Avançada: Além do Cosseno
+#### 2. Multi-Query Retriever e Reranking
 
-- **Busca Híbrida**: Combinamos a busca semântica vetorial com a busca de texto completo do Postgres.
-- **Re-Ranking**: Usamos modelos de Re-Ranking para selecionar os fragmentos mais pertinentes.
+Às vezes, a consulta do usuário é ambígua. "Dê-me os relatórios de vendas" pode significar "Vendas deste mês?", "Vendas globais?".
+O **Multi-Query Retriever** usa um LLM para gerar 3-4 variações da pergunta original e busca todas em paralelo.
 
-#### 4. Orquestração com LangGraph
+**Reranking (O Ingrediente Secreto)**
+A busca vetorial é rápida, mas nem sempre ordena por relevância semântica profunda. Usamos um modelo "Cross-Encoder" (como Cohere Rerank) para reordenar os 50 documentos recuperados e manter os 5 melhores.
 
-Para fluxos complexos, usamos o **LangGraph**.
+#### 3. Self-RAG e Fluxos Corretivos (CRAG)
 
-- **Self-RAG**: O agente avalia se a resposta é suficiente e refina a busca se necessário.
-- **Raciocínio de Várias Etapas**: Dividimos perguntas complexas em submissões menores.
+E se o banco de dados não tiver a resposta? Um RAG normal alucina.
+**Self-RAG** treina o modelo para emitir tokens de reflexão:
 
-#### 5. Avaliação de Produção: RAGAS e LangSmith
+- `retrieve`: Preciso buscar informações externas?
+- `is_relevant`: O que encontrei serve?
+- `is_supported`: Minha resposta é apoiada pelas evidências?
 
-Medimos a fidelidade e a relevância da resposta usando o framework RAGAS e auditamos cada etapa com LangSmith.
+Se o sistema detectar que os documentos recuperados são irrelevantes, ativamos o **Corrective RAG (CRAG)**: um fallback que pesquisa na web (usando **Tavily** ou Google Search) para obter informações frescas.
 
-[Expansão MASSIVA adicional de 3500+ caracteres incluindo: Implementação do GraphRAG, estratégias de pré-filtragem com Drizzle, otimização de latência e modelos de embeddings locais com Ollama...]
+#### 4. Implementação com LCEL (LangChain Expression Language)
 
-Projetar uma arquitetura RAG sênior é um equilíbrio entre ruído e contexto. Ao usar o LangChain como orquestrador e a potência do Postgres com o Drizzle, criamos sistemas que realmente entendem e raciocinam sobre o conhecimento da sua organização.
+LCEL nos permite construir pipelines declarativos e observáveis.
+
+```typescript
+const ragChain = RunnableSequence.from([
+  {
+    context: retriever.pipe(formatDocumentsAsString),
+    question: new RunnablePassthrough(),
+  },
+  promptTemplate,
+  model,
+  new StringOutputParser(),
+]);
+
+const result = await ragChain.invoke(
+  "Quais são os requisitos de conformidade?",
+);
+```
+
+#### 5. Avaliação com RAGAS
+
+Você não pode melhorar o que não mede. **RAGAS** (RAG Assessment) é um framework que usa outro LLM (GPT-4) para avaliar seu RAG em três métricas:
+
+1.  **Faithfulness**: A resposta é fiel ao contexto recuperado?
+2.  **Answer Relevance**: Responde à pergunta do usuário?
+3.  **Context Precision**: Há muita "palha" no contexto recuperado?
+
+O futuro do RAG não é apenas buscar melhor; é construir agentes que saibam quando buscar, quando ler e quando perguntar.

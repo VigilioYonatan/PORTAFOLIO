@@ -1,149 +1,408 @@
 ### ESPAÑOL (ES)
 
-En el desarrollo de software a gran escala, la complejidad es el mayor enemigo del progreso. A medida que una aplicación crece, la lógica de negocio suele mezclarse inextricablemente con los detalles de implementación de la base de datos, el framework web o los servicios de terceros, creando lo que conocemos como un "Big Ball of Mud". Clean Architecture y Domain-Driven Design (DDD) son metodologías que proponen un camino hacia la claridad, el desacoplamiento y la mantenibilidad a largo plazo. En este artículo detallado, exploraremos cómo aplicar estos principios utilizando NestJS y DrizzleORM para construir sistemas que no solo funcionen hoy, sino que sean fáciles de evolucionar durante años.
+Clean Architecture no es sobre tener carpetas bonitas. Es sobre **independencia**: del framework, de la UI, de la base de datos y de cualquier agente externo. El objetivo es que la lógica de negocio (Use Cases) sea pura, testeable y estable. Si mañana decides cambiar Drizzle por Prisma, tu lógica de negocio no debería tocarse. En este artículo, implementaremos una arquitectura hexagonal estricta en TypeScript, separando las capas de Dominio, Aplicación e Infraestructura.
 
-#### 1. Los Pilares de Clean Architecture
+#### 1. La Regla de Dependencia: Hacia Adentro
 
-Clean Architecture, popularizada por Robert C. Martin ("Uncle Bob"), divide el sistema en capas concéntricas. La regla inquebrantable de dependencia es que el código solo puede apuntar hacia adentro, hacia el núcleo del negocio.
+El código fuente solo puede apuntar hacia adentro. El **Dominio** no sabe nada de la base de datos. La **Aplicación** orquesta el Dominio pero no sabe de controladores HTTP.
 
-- **Entidades (El Núcleo)**: Representan las reglas de negocio críticas. Son clases puras de TypeScript que no conocen la existencia de NestJS, Drizzle o Postgres. Aquí reside la lógica que hace que tu negocio sea único.
-- **Casos de Uso (Aplicación)**: Orquestan el flujo de datos. Si un usuario crea un pedido, el caso de uso recupera el cliente del repositorio, valida las reglas con la entidad y guarda el resultado.
-- **Adaptadores de Infraestructura**: Son los puentes con el mundo exterior. Un controlador de NestJS es un adaptador de entrada; un repositorio de Drizzle es un adaptador de salida (persistencia).
+![Clean Architecture Layers](./images/clean-architecture-ddd/layers.png)
 
-#### 2. Domain-Driven Design (DDD): El Lenguaje Ubicuo
+1.  **Dominio (Core)**: Entidades, Value Objects, Domain Services, Domain Events.
+2.  **Aplicación**: Use Cases (Interactors), Puertos (Interfaces de Repositorios, Servicios Externos).
+3.  **Infraestructura**: Implementaciones de Repositorios (Drizzle, etc.), Adaptadores de Servicios (Stripe, AWS SES).
+4.  **Presentación**: Controladores REST, Resolvers GraphQL.
 
-DDD se enfoca en que el código debe ser un reflejo semántico del negocio.
+#### 2. Modelando el Dominio Rico (DDD)
 
-- **Bounded Contexts**: Dividimos el sistema en sub-dominios (Ventas, Logística, Usuarios). Un senior evita que los modelos de un contexto "contaminen" a otro.
-- **Aggregate Roots**: Son el punto de entrada a un grupo de objetos relacionados. Por ejemplo, un `Pedido` es un agregado que contiene `Items`. Nunca modificamos un item directamente; lo hacemos a través del Pedido para asegurar que el total siempre sea consistente.
-- **Value Objects**: Objetos sin identidad definidos por sus valores (ej: un `Dinero`, una `Dirección`, un `Email`). Son inmutables.
-
-#### 3. Implementación Práctica: NestJS + Drizzle
-
-¿Cómo convertimos teoría en código? Usamos interfaces para invertir las dependencias.
-
-- **IPedidoRepository**: Definimos una interfaz en la capa de Aplicación.
-- **DrizzlePedidoRepository**: Implementamos esta interfaz en la capa de Infraestructura usando Drizzle. El caso de uso solo conoce la interfaz, por lo que podrías cambiar Postgres por MongoDB sin tocar una sola coma de tu lógica de negocio de pedidos.
+Evitamos el "Anemic Domain Model" (entidades que son solo bolsas de datos `get/set`).
+Nuestras entidades encapsulan reglas de negocio invariantas.
 
 ```typescript
-// Entidad rica de dominio
-export class Pedido {
-  private constructor(
-    private readonly id: string,
-    private total: number,
+// domain/user/user.entity.ts
+export class User {
+  constructor(
+    private readonly _id: UserId,
+    private _email: Email,
+    private _status: UserStatus,
   ) {}
 
-  static crear(id: string): Pedido {
-    return new Pedido(id, 0);
-  }
-
-  agregarItem(precio: number) {
-    if (precio <= 0) throw new DomainException("El precio debe ser positivo");
-    this.total += precio;
+  public activate(): void {
+    if (this._status === UserStatus.BANNED) {
+      throw new DomainError("Cannot activate a banned user.");
+    }
+    this._status = UserStatus.ACTIVE;
+    // Domain Events son cruciales para desacoplar efectos secundarios
+    this.addDomainEvent(new UserActivatedEvent(this._id));
   }
 }
 ```
 
-#### 4. Ventajas del Desacoplamiento Tecnológico
+#### 3. Inversión de Dependencias en NestJS
 
-- **Testabilidad Extrema**: Puedes testear tus entidades y casos de uso en milisegundos con Jest o Vitest, sin levantar Docker ni bases de Datos.
-- **Independencia del Framework**: Si NestJS deja de ser el estándar, tu lógica de negocio (el 80% del valor de tu software) permanece intacta.
-- **Evolución Segura**: Refactorizar una entidad es seguro porque no tiene dependencias externas que puedan romperse lateralmente.
+Esta es la clave de la arquitectura hexagonal. El Use Case necesita un repositorio, pero no puede depender de la clase concreta `DrizzleUserRepository` (porque eso violaría la regla de dependencia).
 
-#### 5. Desafíos y Pragmatismo Senior
+**La Solución**: Definir una interfaz en la capa de **Aplicación**.
 
-Clean Architecture no es "gratis". Requiere más archivos y más capas de "mapeo". Un senior reconoce cuándo usarla (sistemas complejos) y cuándo evitarla (CRUDs simples), manteniendo siempre el equilibrio entre pureza arquitectónica y agilidad de entrega.
+```typescript
+// application/ports/user.repository.port.ts
+export abstract class UserRepositoryPort {
+  abstract save(user: User): Promise<void>;
+  abstract findById(id: string): Promise<User | null>;
+}
+```
 
-[Expansión MASIVA adicional de 3000+ caracteres incluyendo: Gestión de Domain Events para comunicación asíncrona entre agregados, patrones de Factory para orquestar la creación de entidades complejas, implementación de transacciones atómicas a nivel de repositorio con Drizzle, estrategias de mapeo de datos entre capas (Mappers), y guías sobre cómo estructurar el sistema de carpetas en un monorepo para forzar las reglas de dependencia mediante linting, garantizando una arquitectura de clase mundial...]
+Luego, en el módulo de NestJS, "pegamos" la interfaz con la implementación concreta usando `providers`:
 
-Dominar Clean Architecture y DDD eleva tu perfil de un desarrollador que escribe funciones a un ingeniero que diseña sistemas. Con la ligereza de Drizzle y la modularidad de NestJS, tienes el stack perfecto para implementar estas prácticas y construir software que soporte el paso del tiempo y el crecimiento masivo con elegancia.
+```typescript
+// infrastructure/ioc/user.module.ts
+@Module({
+  providers: [
+    CreateUserUseCase,
+    {
+      provide: UserRepositoryPort, // El token es la clase abstracta
+      useClass: DrizzleUserRepository, // La implementación real
+    },
+  ],
+})
+export class UserModule {}
+```
+
+#### 4. Use Cases: Orquestadores Puros
+
+Un Use Case es una función que representa una intención del usuario. Solo debe coordinar.
+
+```typescript
+// application/use-cases/create-user.interactor.ts
+export class CreateUserUseCase {
+  constructor(private readonly userRepo: UserRepositoryPort) {}
+
+  async execute(dto: CreateUserDto): Promise<void> {
+    const email = new Email(dto.email);
+
+    // Validar unicidad (regla de aplicación)
+    const exists = await this.userRepo.findByEmail(email);
+    if (exists) throw new ConflictException("Email taken");
+
+    // Crear agregado
+    const user = User.create(email, dto.password);
+
+    // Persistir
+    await this.userRepo.save(user);
+
+    // Despachar eventos de dominio (opcional, para side-effects)
+    DomainEvents.dispatch(user);
+  }
+}
+```
+
+#### 5. Mappers: El Pegamento Invisible
+
+Para que esto funcione, necesitamos traducir entre el mundo de la base de datos y el mundo del dominio. Nunca uses tus entidades de TypeORM/Drizzle en el dominio.
+
+```typescript
+// infrastructure/persistence/mappers/user.mapper.ts
+export class UserMapper {
+  static toDomain(raw: UserSqlModel): User {
+    // Reconstruir la entidad desde datos crudos sin ejecutar validaciones de creación
+    return new User(new UserId(raw.id), ...);
+  }
+
+  static toPersistence(user: User): UserSqlModel {
+    return {
+      id: user.id.value,
+      status: user.status.value, // Value Object a primitivo
+      // ...
+    };
+  }
+}
+```
+
+#### 6. Testing Unitario Real
+
+Gracias a esta separación, probar el `CreateUserUseCase` es trivial y ultrarrápido. No necesitas Docker ni una base de datos real.
+
+```typescript
+// create-user.spec.ts
+const mockRepo = new InMemoryUserRepository(); // Fake en memoria
+const useCase = new CreateUserUseCase(mockRepo);
+
+await useCase.execute({ email: "test@test.com" });
+expect(mockRepo.users).toHaveLength(1);
+```
+
+Clean Architecture tiene un costo inicial de boilerplate (más clases, mappers), pero se paga con creces en mantenimiento a largo plazo. Tu base de datos es un detalle. Tu framework web es un detalle. Tu negocio es lo único que importa.
 
 ---
 
 ### ENGLISH (EN)
 
-In large-scale software development, complexity is the greatest enemy of progress. As an application grows, business logic often becomes inextricably mixed with the implementation details of the database, the web framework, or third-party services, creating what we know as a "Big Ball of Mud." Clean Architecture and Domain-Driven Design (DDD) are methodologies that propose a path toward clarity, decoupling, and long-term maintainability. In this detailed article, we will explore how to apply these principles using NestJS and DrizzleORM to build systems that not only work today but are easy to evolve for years.
+Clean Architecture is not about pretty folders. It is about **independence**: from the framework, the UI, the database, and any external agent. The goal is for business logic (Use Cases) to be pure, testable, and stable. If tomorrow you decide to switch from Drizzle to Prisma, your business logic should remain untouched. In this article, we will implement strict hexagonal architecture in TypeScript, separating Domain, Application, and Infrastructure layers.
 
-#### 1. The Pillars of Clean Architecture
+#### 1. The Dependency Rule: Pointing Inwards
 
-Clean Architecture, popularized by Robert C. Martin ("Uncle Bob"), divides the system into concentric layers. The unbreakable dependency rule is that code can only point inward, toward the business core.
+Source code can only point inwards. The **Domain** knows nothing about the database. The **Application** orchestrates the Domain but knows nothing about HTTP controllers.
 
-- **Entities (The Core)**: Represent critical business rules. They are pure TypeScript classes that are unaware of the existence of NestJS, Drizzle, or Postgres.
-- **Use Cases (Application)**: Orchestrate the flow of data. If a user creates an order, the use case retrieves the customer from the repository, validates rules with the entity, and saves the result.
-- **Infrastructure Adapters**: Are the bridges to the outside world. A NestJS controller is an input adapter; a Drizzle repository is an output adapter (persistence).
+![Clean Architecture Layers](./images/clean-architecture-ddd/layers.png)
 
-(Detailed guide on dependency inversion, port/adapter patterns, and layer isolation continue here...)
+1.  **Domain (Core)**: Entities, Value Objects, Domain Services, Domain Events.
+2.  **Application**: Use Cases (Interactors), Ports (Repository Interfaces, External Services).
+3.  **Infrastructure**: Repository Implementations (Drizzle, etc.), Service Adapters (Stripe, AWS SES).
+4.  **Presentation**: REST Controllers, GraphQL Resolvers.
 
-#### 2. Domain-Driven Design (DDD): The Ubiquitous Language
+#### 2. Modeling the Rich Domain (DDD)
 
-DDD focuses on ensuring that the code is a semantic reflection of the business.
+We avoid the "Anemic Domain Model" (entities that are just `get/set` data bags).
+Our entities encapsulate invariant business rules.
 
-- **Bounded Contexts**: We divide the system into sub-domains (Sales, Logistics, Users). A senior prevents one context's models from "contaminating" another.
-- **Aggregate Roots**: The entry point to a group of related objects. For example, an `Order` is an aggregate containing `Items`. We never modify an item directly; we do it through the Order to ensure the total is always consistent.
-- **Value Objects**: Objects without identity defined by their values (e.g., `Money`, `Address`, `Email`). They are immutable.
+```typescript
+// domain/user/user.entity.ts
+export class User {
+  constructor(
+    private readonly _id: UserId,
+    private _email: Email,
+    private _status: UserStatus,
+  ) {}
 
-(In-depth look at DDD modeling, ubiquitous language, and context mapping continue here...)
+  public activate(): void {
+    if (this._status === UserStatus.BANNED) {
+      throw new DomainError("Cannot activate a banned user.");
+    }
+    this._status = UserStatus.ACTIVE;
+    // Domain Events are crucial for decoupling side effects
+    this.addDomainEvent(new UserActivatedEvent(this._id));
+  }
+}
+```
 
-#### 3. Practical Implementation: NestJS + Drizzle
+#### 3. Inversion of Control (IoC) in NestJS
 
-How do we turn theory into code? We use interfaces to invert dependencies.
+This is the key to hexagonal architecture. The Use Case needs a repository, but it cannot depend on the concrete class `DrizzleUserRepository` (because that would violate the dependency rule).
 
-- **IOrderRepository**: We define an interface in the Application layer.
-- **DrizzleOrderRepository**: We implement this interface in the Infrastructure layer using Drizzle. The use case only knows the interface.
+**The Solution**: Define an interface in the **Application** layer.
 
-(Technical focus on repository patterns and Drizzle schema mapping continue here...)
+```typescript
+// application/ports/user.repository.port.ts
+export abstract class UserRepositoryPort {
+  abstract save(user: User): Promise<void>;
+  abstract findById(id: string): Promise<User | null>;
+}
+```
 
-#### 4. Benefits of Technological Decoupling
+Then, in the NestJS module, we "glue" the interface to the concrete implementation using `providers`:
 
-- **Extreme Testability**: You can test your entities and use cases in milliseconds without Docker or databases.
-- **Framework Independence**: If NestJS is no longer the standard, your business logic remains intact.
-- **Safe Evolution**: Refactoring an entity is safe because it has no external dependencies.
+```typescript
+// infrastructure/ioc/user.module.ts
+@Module({
+  providers: [
+    CreateUserUseCase,
+    {
+      provide: UserRepositoryPort, // The token is the abstract class
+      useClass: DrizzleUserRepository, // The real implementation
+    },
+  ],
+})
+export class UserModule {}
+```
 
-#### 5. Challenges and Senior Pragmatism
+#### 4. Use Cases: Pure Orchestrators
 
-Clean Architecture is not "free." It requires more files and "mapping" layers. A senior recognizes when to use it (complex systems) and when to avoid it (simple CRUDs).
+A Use Case is a function representing a user intent. It should only coordinate.
 
-[MASSIVE additional expansion of 3500+ characters including: Domain Events management for asynchronous communication between aggregates, Factory patterns for complex entity orchestration, implementation of atomic repository transactions with Drizzle, data mapping strategies between layers (Mappers), and guides on structuring folder systems in a monorepo...]
+```typescript
+// application/use-cases/create-user.interactor.ts
+export class CreateUserUseCase {
+  constructor(private readonly userRepo: UserRepositoryPort) {}
 
-Mastering Clean Architecture and DDD elevates your profile from a developer who writes functions to an engineer who designs systems. With Drizzle's lightness and NestJS's modularity, you have the perfect stack to implement these practices and build software that stands the test of time.
+  async execute(dto: CreateUserDto): Promise<void> {
+    const email = new Email(dto.email);
+
+    // Validate uniqueness (application rule)
+    const exists = await this.userRepo.findByEmail(email);
+    if (exists) throw new ConflictException("Email taken");
+
+    // Create aggregate
+    const user = User.create(email, dto.password);
+
+    // Persist
+    await this.userRepo.save(user);
+
+    // Dispatch domain events (optional, for side-effects)
+    DomainEvents.dispatch(user);
+  }
+}
+```
+
+#### 5. Mappers: The Invisible Glue
+
+For this to work, we need to translate between the database world and the domain world. Never use your TypeORM/Drizzle entities in the domain.
+
+```typescript
+// infrastructure/persistence/mappers/user.mapper.ts
+export class UserMapper {
+  static toDomain(raw: UserSqlModel): User {
+    // Reconstruct the entity from raw data without running creation validations
+    return new User(new UserId(raw.id), ...);
+  }
+
+  static toPersistence(user: User): UserSqlModel {
+    return {
+      id: user.id.value,
+      status: user.status.value, // Value Object to primitive
+      // ...
+    };
+  }
+}
+```
+
+#### 6. Real Unit Testing
+
+Thanks to this separation, testing the `CreateUserUseCase` is trivial and ultra-fast. You don't need Docker or a real database.
+
+```typescript
+// create-user.spec.ts
+const mockRepo = new InMemoryUserRepository(); // In-memory fake
+const useCase = new CreateUserUseCase(mockRepo);
+
+await useCase.execute({ email: "test@test.com" });
+expect(mockRepo.users).toHaveLength(1);
+```
+
+Clean Architecture has an initial boilerplate cost (more classes, mappers), but it pays off handsomely in long-term maintenance. Your database is a detail. Your web framework is a detail. Your business is the only thing that matters.
 
 ---
 
 ### PORTUGUÊS (PT)
 
-No desenvolvimento de software em larga escala, a complexidade é o maior inimigo do progresso. Clean Architecture e Domain-Driven Design (DDD) são metodologias que propõem um caminho para a clareza, o desacoplamento e a manutenibilidade a longo prazo. Neste artigo detalhado, exploraremos como aplicar esses princípios usando NestJS e DrizzleORM para construir sistemas que não apenas funcionem hoje, mas sejam fáceis de evoluir por anos.
+Clean Architecture não é sobre ter pastas bonitas. É sobre **independência**: do framework, da UI, do banco de dados e de qualquer agente externo. O objetivo é que a lógica de negócios (Use Cases) seja pura, testável e estável. Se amanhã você decidir mudar do Drizzle para o Prisma, sua lógica de negócios deve permanecer intocada. Neste artigo, implementaremos uma arquitetura hexagonal estrita em TypeScript, separando as camadas de Domínio, Aplicação e Infraestrutura.
 
-#### 1. Os Pilares da Clean Architecture
+#### 1. A Regra de Dependência: Apontando para Dentro
 
-A Clean Architecture divide o sistema em camadas concêntricas. A regra de dependência é que o código só pode apontar para dentro.
+O código-fonte só pode apontar para dentro. O **Domínio** não sabe nada sobre o banco de dados. A **Aplicação** orquestra o Domínio, mas não sabe nada sobre controladores HTTP.
 
-- **Entidades**: O núcleo do negócio, classes puras TypeScript.
-- **Casos de Uso**: Orquestram o fluxo de dados e aplicam as regras da aplicação.
-- **Adaptadores**: Pontes com a web (NestJS) e o banco de dados (Drizzle).
+![Clean Architecture Layers](./images/clean-architecture-ddd/layers.png)
 
-(Guia técnico sobre inversão de dependência e isolamento de camadas...)
+1.  **Domínio (Core)**: Entidades, Value Objects, Domain Services, Domain Events.
+2.  **Aplicação**: Use Cases (Interactores), Portas (Interfaces de Repositórios, Serviços Externos).
+3.  **Infraestrutura**: Implementações de Repositórios (Drizzle, etc.), Adaptadores de Serviços (Stripe, AWS SES).
+4.  **Apresentação**: Controladores REST, Resolvers GraphQL.
 
-#### 2. Domain-Driven Design (DDD)
+#### 2. Modelando o Domínio Rico (DDD)
 
-DDD foca em garantir que o código reflita o negócio.
+Evitamos o "Modelo de Domínio Anêmico" (entidades que são apenas sacos de dados `get/set`).
+Nossas entidades encapsulam regras de negócios invariantes.
 
-- **Bounded Contexts**: Divisão lógica em subdomínios como Vendas e Logística.
-- **Aggregate Roots**: Pontos de entrada para grupos de objetos relacionados, como Pedido e Itens.
-- **Value Objects**: Objetos imutáveis como Dinheiro ou Endereço.
+```typescript
+// domain/user/user.entity.ts
+export class User {
+  constructor(
+    private readonly _id: UserId,
+    private _email: Email,
+    private _status: UserStatus,
+  ) {}
 
-#### 3. Implementação Prática: NestJS + Drizzle
+  public activate(): void {
+    if (this._status === UserStatus.BANNED) {
+      throw new DomainError("Cannot activate a banned user.");
+    }
+    this._status = UserStatus.ACTIVE;
+    // Eventos de Domínio são cruciais para desacoplar efeitos colaterais
+    this.addDomainEvent(new UserActivatedEvent(this._id));
+  }
+}
+```
 
-Usamos interfaces para inverter as dependências. O Casos de Uso depende de uma interface de repositório, enquanto a implementação concreta utiliza o Drizzle.
+#### 3. Inversão de Controle (IoC) no NestJS
 
-#### 4. Vantagens do Desacoplamento
+Esta é a chave da arquitetura hexagonal. O Use Case precisa de um repositório, mas não pode depender da classe concreta `DrizzleUserRepository` (porque isso violaria a regra de dependência).
 
-- **Testabilidade**: Testes de unidade rápidos sem necessidade de banco de dados.
-- **Independência de Ferramentas**: Flexibilidade para trocar de framework ou banco de dados sem afetar a lógica central.
+**A Solução**: Definir uma interface na camada de **Aplicação**.
 
-#### 5. Pragmatismo Sênior
+```typescript
+// application/ports/user.repository.port.ts
+export abstract class UserRepositoryPort {
+  abstract save(user: User): Promise<void>;
+  abstract findById(id: string): Promise<User | null>;
+}
+```
 
-Equilibramos a pureza arquitetônica com a agilidade necessária para o projeto, evitando o over-engineering em sistemas simples.
+Então, no módulo NestJS, "colamos" a interface à implementação concreta usando `providers`:
 
-[Expansão MASSIVA adicional de 3500+ caracteres incluindo: Gerenciamento de Domain Events, padrões de Factory, transações atômicas com Drizzle, Mappers de dados e estruturação de Monorepos...]
+```typescript
+// infrastructure/ioc/user.module.ts
+@Module({
+  providers: [
+    CreateUserUseCase,
+    {
+      provide: UserRepositoryPort, // O token é a classe abstrata
+      useClass: DrizzleUserRepository, // A implementação real
+    },
+  ],
+})
+export class UserModule {}
+```
 
-Dominar a Clean Architecture e o DDD transforma você em um engenheiro capaz de projetar sistemas resilientes e escaláveis. Com Drizzle e NestJS, você tem as ferramentas ideais para criar software de classe mundial.
+#### 4. Use Cases: Orquestradores Puros
+
+Um Use Case é uma função que representa uma intenção do usuário. Deve apenas coordenar.
+
+```typescript
+// application/use-cases/create-user.interactor.ts
+export class CreateUserUseCase {
+  constructor(private readonly userRepo: UserRepositoryPort) {}
+
+  async execute(dto: CreateUserDto): Promise<void> {
+    const email = new Email(dto.email);
+
+    // Validar unicidade (regra de aplicação)
+    const exists = await this.userRepo.findByEmail(email);
+    if (exists) throw new ConflictException("Email taken");
+
+    // Criar agregado
+    const user = User.create(email, dto.password);
+
+    // Persistir
+    await this.userRepo.save(user);
+
+    // Despachar eventos de domínio (opcional, para efeitos colaterais)
+    DomainEvents.dispatch(user);
+  }
+}
+```
+
+#### 5. Mappers: A Cola Invisível
+
+Para que isso funcione, precisamos traduzir entre o mundo do banco de dados e o mundo do domínio. Nunca use suas entidades TypeORM/Drizzle no domínio.
+
+```typescript
+// infrastructure/persistence/mappers/user.mapper.ts
+export class UserMapper {
+  static toDomain(raw: UserSqlModel): User {
+    // Reconstruir a entidade a partir de dados brutos sem executar validações de criação
+    return new User(new UserId(raw.id), ...);
+  }
+
+  static toPersistence(user: User): UserSqlModel {
+    return {
+      id: user.id.value,
+      status: user.status.value, // Value Object para primitivo
+      // ...
+    };
+  }
+}
+```
+
+#### 6. Testes Unitários Reais
+
+Graças a essa separação, testar o `CreateUserUseCase` é trivial e ultrarrápido. Você não precisa do Docker ou de um banco de dados real.
+
+```typescript
+// create-user.spec.ts
+const mockRepo = new InMemoryUserRepository(); // Fake em memória
+const useCase = new CreateUserUseCase(mockRepo);
+
+await useCase.execute({ email: "test@test.com" });
+expect(mockRepo.users).toHaveLength(1);
+```
+
+Clean Architecture tem um custo inicial de boilerplate (mais classes, mappers), mas compensa muito na manutenção de longo prazo. Seu banco de dados é um detalhe. Seu framework web é um detalhe. Seu negócio é a única coisa que importa.

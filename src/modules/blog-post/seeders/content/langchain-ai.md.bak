@@ -4,8 +4,6 @@ La integración de Modelos de Lenguaje Grande (LLMs) en aplicaciones empresarial
 
 #### 1. Arquitectura de Orquestación con LCEL
 
-![LangChain Architecture](./images/langchain-ai/architecture.png)
-
 LangChain Expression Language (LCEL) es el nuevo estándar. Proporciona una sintaxis declarativa y "pipeable" para componer cadenas.
 A diferencia de las clases `Chain` heredadas, LCEL ofrece streaming nativo y soporte asíncrono de primer nivel.
 
@@ -122,8 +120,6 @@ Integrating Large Language Models (LLMs) into enterprise applications has shifte
 
 #### 1. Orchestration Architecture with LCEL
 
-![LangChain Architecture](./images/langchain-ai/architecture.png)
-
 LangChain Expression Language (LCEL) is the new standard. It provides a declarative and "pipeable" syntax for composing chains.
 Unlike legacy `Chain` classes, LCEL offers native streaming and first-class async support.
 
@@ -239,8 +235,6 @@ Building robust AI systems is traditional software engineering applied to a new 
 A integração de Grandes Modelos de Linguagem (LLMs) em aplicações empresariais passou de novidade a necessidade estratégica. O LangChain posicionou-se como o framework orquestrador por excelência, mas o seu uso em produção exige padrões de projeto robustos que vão muito além dos tutoriais básicos de "Hello Custom Prompt". Nesta análise técnica profunda, detalharemos como construir, implantar e escalar sistemas de IA generativa utilizando LangChain v0.1+ (LCEL) em um ambiente TypeScript estrito, integrado com Express e Drizzle ORM.
 
 #### 1. Arquitetura de Orquestração com LCEL
-
-![LangChain Architecture](./images/langchain-ai/architecture.png)
 
 LangChain Expression Language (LCEL) é o novo padrão. Fornece uma sintaxe declarativa e "pipeable" para compor cadeias.
 Ao contrário das classes `Chain` herdadas, o LCEL oferece streaming nativo e suporte assíncrono de primeira classe.

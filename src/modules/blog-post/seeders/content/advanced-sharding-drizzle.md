@@ -1,193 +1,351 @@
 ### ESPAÑOL (ES)
 
-Cuando una base de Datos relacional alcanza niveles de escala masivos, incluso las instancias más potentes de proveedores como AWS o GCP pueden convertirse en cuellos de botella para el rendimiento y la disponibilidad. El **Sharding** (o fragmentación horizontal) es la técnica definitiva que permite escalar una base de Datos relacional más allá de los límites de un solo servidor físico, distribuyendo los datos a través de múltiples nodos independientes. Sin embargo, el sharding no es una "bala de plata"; introduce una complejidad arquitectónica considerable que requiere un diseño meticuloso del esquema, una lógica de enrutamiento robusta y estrategias de mantenimiento sofisticadas. Como ingenieros senior, debemos evaluar no solo cuándo implementar sharding, sino cómo hacerlo utilizando herramientas modernas como DrizzleORM para mantener la eficiencia y la seguridad de tipos.
+El escalado horizontal de bases de datos relacionales, conocido como **Sharding**, es una de las fronteras más complejas y desafiantes en la ingeniería de backend. Mientras que el escalado vertical (comprar un servidor más grande) tiene un límite físico y financiero, el sharding promete una escalabilidad teóricamente infinita. Sin embargo, como dice el teorema CAP, todo tiene un costo.
 
-#### 1. ¿Cuándo implementar Sharding? El Criterio del Arquitecto
+En este análisis profundo, exploraremos cómo implementar una arquitectura de sharding robusta utilizando Drizzle ORM y Node.js, abordando no solo el enrutamiento de consultas, sino también la gestión de topología, re-sharding y consistencia de datos.
 
-Hacer sharding prematuramente es una de las deudas técnicas más costosas que una empresa puede contraer. Antes de fragmentar, un senior agota estas opciones:
+#### 1. ¿Cuándo (y cuándo NO) hacer Sharding?
 
-- **Escalabilidad Vertical**: ¿Hemos llegado al límite de la instancia más grande disponible (ej: AWS R6g.32xlarge con 1TB de RAM)?
-- **Réplicas de Lectura**: Si el 90% del tráfico es de lectura, las réplicas asíncronas son la solución obvia. El sharding es para cuando el volumen de escritura supera la capacidad del nodo primario.
-- **Particionamiento Nativo**: Postgres ofrece particionamiento declarativo (por rango, lista o hash) que mejora el rendimiento de tablas gigantes dentro de una misma instancia al reducir el tamaño de los índices.
-- **Señal de Sharding**: La decisión se toma cuando el tamaño de los índices ya no cabe en la memoria RAM disponible, lo que provoca que Postgres tenga que buscar en disco constantemente, degradando la latencia de forma exponencial.
+![Sharding Architecture](./images/advanced-sharding-drizzle/architecture.png)
 
-#### 2. Selección de la Sharding Key (Clave de Fragmentación)
+El sharding introduce una complejidad operativa masiva. Antes de considerar fragmentar tu base de datos, debes haber agotado:
 
-La elección de la Sharding Key es la decisión más crítica. Determina cómo se distribuyen los datos y qué tan eficientes serán las consultas futuras.
+1.  **Optimización de Índices**: Un `EXPLAIN ANALYZE` vale más que 10 nuevos servidores.
+2.  **Particionamiento Nativo de Postgres**: Usar `PARTITION BY RANGE/HASH` en una sola instancia para mejorar la gestión de tablas gigantes.
+3.  **Réplicas de Lectura**: Si tu bottleneck es lectura, usa réplicas. El sharding es principalmente para escalar **escrituras**.
+4.  **Vertical Scaling**: ¿Has intentado usar una instancia AWS `r7g.16xlarge` (512GB RAM)? A menudo es más barato que mantener un cluster distribuido.
 
-- **Tenant ID**: El enfoque más común para aplicaciones Multi-tenant (SaaS). Todos los datos de un cliente viven en el mismo fragmento. Esto simplifica los JOINs y asegura que las transacciones locales sean atómicas. El riesgo es el "cliente elefante" que sobrecarga un solo shard.
-- **User ID**: Ideal para redes sociales o aplicaciones B2C masivas. Permite una distribución uniforme de los usuarios.
-- **Hashing**: Aplicamos una función hash (ej: `hash(id) % total_shards`) para distribuir los datos. Esto evita los "Hot Shards", pero hace que las consultas de rango sean imposibles en la clave de fragmentación.
-- **Ranging**: Útil para datos temporales (logs), pero requiere una gestión activa del re-sharding a medida que los datos antiguos se vuelven inactivos.
+**La Señal de Fuego**: Implementa sharding cuando tu volumen de escritura (IOPS) satura el disco del nodo primario más grande posible, o cuando el tamaño de tus índices activos excede la RAM disponible (RAM-to-Disk ratio < 1:1), causando "thrashing" constante.
 
-#### 3. Arquitectura de Enrutamiento con DrizzleORM
+#### 2. Estrategias de Distribución de Datos
 
-DrizzleORM es ideal para arquitecturas de sharding porque no intenta ocultar la complejidad de la conexión. Podemos construir una capa de "Shard Router" que seleccione el cliente de base de Datos correcto basándose en el contexto de la petición.
+La elección de la **Sharding Key** es irrevocable. Cambiarla implica reescribir toda la base de datos.
+
+- **Tenant-Based (SaaS)**: Todos los datos de un `tenant_id` viven en el mismo shard.
+  - _Pros_: JOINs locales rápidos, transacciones ACID por tenant.
+  - _Contras_: Hot Shards (un cliente gigante como Coca-Cola usando el 40% de un shard).
+- **Entity-Based (User ID)**: Ideal para B2C (redes sociales).
+  - _Pros_: Distribución muy uniforme.
+  - _Contras_: Consultas de rango o agregaciones globales son muy costosas (Scatter-Gather).
+- **Geo-Based**: Sharding por región geográfica (EU, US, APAC).
+  - _Pros_: Baja latencia (Data Locality) y cumplimiento de GDPR.
+
+#### 3. Arquitectura del "Shard Router" con Drizzle
+
+Drizzle no tiene soporte nativo para sharding automático (como Vitess), pero su flexibilidad permite construir un enrutador de nivel de aplicación elegante.
 
 ```typescript
-// Implementación de un Router de Shards Senior
-export class ShardRouter {
-  private shardClients: Map<number, NodePgDatabase> = new Map();
+// infrastructure/database/shard-manager.ts
+import { drizzle, NodePgDatabase } from "drizzle-orm/node-postgres";
+import { Pool } from "pg";
+import { ConsistentHash } from "./consistent-hash"; // Algoritmo Ketama o Rendezvous
 
-  constructor(private readonly config: ShardingConfig) {}
+export class ShardManager {
+  private shards: Map<string, NodePgDatabase> = new Map();
+  private ring = new ConsistentHash();
 
-  async getClientForTenant(tenantId: string): Promise<NodePgDatabase> {
-    const shardIndex = this.calculateShardIndex(tenantId);
-    if (!this.shardClients.has(shardIndex)) {
-      const dbUrl = this.config.getShardUrl(shardIndex);
-      const client = postgres(dbUrl);
-      this.shardClients.set(shardIndex, drizzle(client, { schema }));
-    }
-    return this.shardClients.get(shardIndex)!;
+  constructor(private config: DatabaseConfig) {
+    // Inicializar pool para cada shard físico
+    this.config.shards.forEach((shardConfig) => {
+      const pool = new Pool({ connectionString: shardConfig.url });
+      const db = drizzle(pool);
+      this.shards.set(shardConfig.id, db);
+      this.ring.addNode(shardConfig.id);
+    });
   }
 
-  private calculateShardIndex(id: string): number {
-    // Lógica de hashing consistente para minimizar movimientos en re-sharding
-    return jumpConsistentHash(id, this.config.totalShards);
+  // Obtener la instancia de DB correcta para un Tenant
+  getShard(tenantId: string): NodePgDatabase {
+    const shardId = this.ring.getNode(tenantId);
+    const db = this.shards.get(shardId);
+    if (!db) throw new Error(`Shard ${shardId} not found/healthy`);
+    return db;
   }
 }
 ```
 
-#### 4. El Desafío de las Consultas Cross-Shard
+#### 4. Topología Dinámica y Service Discovery
 
-¿Qué sucede cuando queremos obtener el total de ventas de todos los tenants para un reporte global? En una base de Datos fragmentada, esta consulta no se puede ejecutar en un solo nodo.
+En producción, no quieres hardcodear las IPs de los shards en tu `ENV`. Necesitas un **almacén de topología** (como Redis, Consul o Etcd).
+Tu aplicación debe suscribirse a cambios en la topología para saber si un shard ha sido promovido (failover) o movido.
 
-- **Scatter-Gather Pattern**: La aplicación envía la consulta a todos los shards en paralelo, recibe las respuestas y realiza el agregado (SUM, AVG) en la memoria del servidor de aplicaciones. NestJS con su flujo asíncrono gestiona esto bien, pero debemos vigilar el consumo de memoria al unir grandes sets de datos.
-- **Global Tables**: Para datos estáticos o de configuración (países, tipos de cambio), es mejor replicar estos datos en TODOS los shards. Esto permite realizar JOINs locales sin tener que cruzar la red.
-- **Materialized Views Externas**: Para analítica avanzada, lo ideal es mover los datos de todos los shards a un Data Warehouse (como Snowflake o BigQuery) en lugar de estresar el cluster transaccional.
+```typescript
+// Ejemplo conceptual
+async function getTopology() {
+  const shardsConfig = await redis.hgetall("db:topology:shards");
+  // { "shard-01": "postgres://node1:5432/db", "shard-02": "postgres://node2..." }
+  return parseTopology(shardsConfig);
+}
+```
 
-#### 5. Gestión del Ciclo de Vida: Re-sharding Zero-Downtime
+#### 5. El Desafío de las Consultas Cross-Shard (Scatter-Gather)
 
-Añadir nuevos servidores de base de Datos a un cluster activo es una operación de alto riesgo.
+¿Cómo calculas el "Total de Usuarios" si están repartidos en 10 shards?
+No puedes hacer `SELECT COUNT(*) FROM users`. Debes lanzar la consulta a todos los shards en paralelo y sumar en la aplicación.
 
-- **Consistent Hashing**: Al usar algoritmos de hashing consistente, solo una fracción de los datos necesita moverse cuando el número de nodos cambia.
-- **Live Migration Strategy**:
-  1. Añadimos el nuevo Shard.
-  2. El Shard Router empieza a realizar "escrituras dobles" en el viejo y el nuevo nodo.
-  3. Ejecutamos un backup lógico de los datos que deben moverse.
-  4. Sincronizamos los cambios finales mediante replicación lógica.
-  5. Actualizamos el puntero en el Router y eliminamos los datos antiguos.
+```typescript
+async function getGlobalUserCount(manager: ShardManager) {
+  const allShards = manager.getAllShards();
 
-#### 6. Transacciones Distribuidas: Sagas y Two-Phase Commit (2PC)
+  // Ejecutar en paralelo (Scatter)
+  const counts = await Promise.all(
+    allShards.map((db) =>
+      db.select({ count: sql<number>`count(*)` }).from(users),
+    ),
+  );
 
-En un entorno fragmentado, mantener la integridad ACID entre múltiples nodos es complejo.
+  // Agregar resultados (Gather)
+  return counts.reduce((acc, res) => acc + Number(res[0].count), 0);
+}
+```
 
-- **Patrón Saga**: Dividimos una transacción larga en una serie de pequeñas transacciones locales en diferentes shards. Si una falla, ejecutamos "acciones de compensación" para revertir los cambios anteriores.
-- **2PC**: Es el protocolo nativo de Postgres para transacciones preparadas. Aunque garantiza la consistencia fuerte, introduce mucha latencia y riesgos de bloqueo, por lo que un senior lo usa con extrema precaución.
+_Advertencia_: Esto no escala bien para `ORDER BY` y `LIMIT` (paginación global). Evita esto a toda costa; pre-calcula totales en una tabla separada o usa un Data Warehouse.
 
-(Secciones técnicas adicionales detallando: Configuración de Citus para sharding transparente en Postgres, monitoreo de latencia por shard con Grafana, optimización de pools de conexiones con PgBouncer en cada fragmento, y guías sobre cómo estructurar el código de NestJS para que el programador no tenga que saber en qué shard vive el dato para las operaciones más comunes, garantizando una abstracción de alto nivel y una infraestructura inexpugnable...)
+#### 6. Resharding: El Cuco de las Bases de Datos
 
-Dominar el sharding avanzado es la diferencia entre una aplicación que colapsa bajo su propio éxito y un sistema global que escala de forma predecible. Al utilizar DrizzleORM y NestJS, mantenemos un control granular sobre nuestras conexiones y nuestra lógica de datos, permitiéndonos construir arquitecturas de bases de datos que soportan crecimientos masivos sin comprometer la integridad ni la velocidad de respuesta.
+Eventualmente, un shard se llenará. Necesitas dividirlo en dos.
+**Estrategia Zero-Downtime**:
+
+1.  Identificar rangos de Shard Keys a mover.
+2.  Iniciar replicación lógica desde el Shard Origen al Destino (usando `pglogical` o CDC).
+3.  Cuando el lag sea casi cero, bloquear escrituras para esos Tenants (pequeño downtime de segundos).
+4.  Actualizar la topología en Redis.
+5.  Desbloquear escrituras (ahora van al nuevo destino).
+
+El sharding es una herramienta poderosa pero peligrosa. Drizzle ORM, al ser un cliente agnóstico y ligero, es el compañero perfecto para orquestar esta complejidad sin añadir overhead innecesario.
 
 ---
 
 ### ENGLISH (EN)
 
-When a relational database reaches massive scale levels, even the most powerful instances from providers like AWS or GCP can become bottlenecks for performance and availability. **Sharding** (or horizontal fragmentation) is the ultimate technique that allows scaling a relational database beyond the limits of a single physical server by distributing data across multiple independent nodes. However, sharding is not a "silver bullet"; it introduces considerable architectural complexity that requires meticulous schema design, robust routing logic, and sophisticated maintenance strategies. As senior engineers, we must evaluate not only when to implement sharding, but how to do so using modern tools like DrizzleORM to maintain efficiency and type safety.
+Horizontal scaling of relational databases, known as **Sharding**, is one of the most complex frontiers in backend engineering. While vertical scaling (buying a bigger server) has physical and financial limits, sharding promises theoretically infinite scalability. However, as the CAP theorem states, everything comes at a cost.
 
-#### 1. When to Implement Sharding? The Architect's Criteria
+In this deep dive, we will explore how to implement a robust sharding architecture using Drizzle ORM and Node.js, addressing not just query routing, but topology management, resharding, and data consistency.
 
-Sharding prematurely is one of the costliest technical debts a company can incur. Before fragmenting, a senior exhausts these options:
+#### 1. When (and when NOT) to Shard?
 
-- **Vertical Scaling**: Have we reached the limit of the largest instance available (e.g., AWS R6g.32xlarge with 1TB of RAM)?
-- **Read Replicas**: If 90% of traffic is read-based, asynchronous replicas are the obvious solution. Sharding is for when write volume exceeds the primary node's capacity.
-- **Native Partitioning**: Postgres offers declarative partitioning (by range, list, or hash) that improves giant table performance within a single instance by reducing index size.
-- **Sharding Signal**: The decision is made when index sizes no longer fit in available RAM, causing Postgres to constantly fetch from disk, exponentially degrading latency.
+![Sharding Architecture](./images/advanced-sharding-drizzle/architecture.png)
 
-#### 2. Sharding Key Selection
+Sharding introduces massive operational complexity. Before considering fragmenting your database, you must have exhausted:
 
-Choosing the Sharding Key is the most critical decision. It determines how data is distributed and how efficient future queries will be.
+1.  **Index Optimization**: An `EXPLAIN ANALYZE` is worth more than 10 new servers.
+2.  **Postgres Native Partitioning**: Use `PARTITION BY RANGE/HASH` on a single instance to improve giant table management.
+3.  **Read Replicas**: If your bottleneck is reading, use replicas. Sharding is primarily for scaling **writes**.
+4.  **Vertical Scaling**: Have you tried using an AWS `r7g.16xlarge` instance (512GB RAM)? Often cheaper than maintaining a distributed cluster.
 
-- **Tenant ID**: The most common approach for Multi-tenant (SaaS) applications. All a client's data lives on the same shard. This simplifies JOINs and ensures local transactions are atomic. The risk is the "elephant client" overloading a single shard.
-- **User ID**: Ideal for social networks or massive B2C apps. Allows uniform user distribution.
-- **Hashing**: We apply a hash function (e.g., `hash(id) % total_shards`) to distribute data. This avoids "Hot Shards" but makes range queries impossible on the sharding key.
+**The Warning Signal**: Implement sharding when your write volume (IOPS) saturates the disk of the largest possible primary node, or when the size of your active indexes exceeds available RAM (RAM-to-Disk ratio < 1:1), causing constant "thrashing."
 
-#### 3. Routing Architecture with DrizzleORM
+#### 2. Data Distribution Strategies
 
-DrizzleORM is ideal for sharding architectures because it doesn't try to hide connection complexity. We can build a "Shard Router" layer that selects the correct database client based on the request context.
+The choice of the **Sharding Key** is irrevocable. Changing it means rewriting the entire database.
+
+- **Tenant-Based (SaaS)**: All data for a `tenant_id` lives on the same shard.
+  - _Pros_: Fast local JOINs, ACID transactions per tenant.
+  - _Cons_: Hot Shards (a giant client effectively taking up 40% of a shard).
+- **Entity-Based (User ID)**: Ideal for B2C (social networks).
+  - _Pros_: Very uniform distribution.
+  - _Cons_: Range queries or global aggregations are very expensive (Scatter-Gather).
+- **Geo-Based**: Sharding by geographic region (EU, US, APAC).
+  - _Pros_: Low latency (Data Locality) and GDPR compliance.
+
+#### 3. "Shard Router" Architecture with Drizzle
+
+Drizzle has no native support for automatic sharding (like Vitess), but its flexibility allows building an elegant application-level router.
 
 ```typescript
-// Senior Shard Router Implementation
-export class ShardRouter {
-  private shardClients: Map<number, NodePgDatabase> = new Map();
+// infrastructure/database/shard-manager.ts
+import { drizzle, NodePgDatabase } from "drizzle-orm/node-postgres";
+import { Pool } from "pg";
+import { ConsistentHash } from "./consistent-hash"; // Ketama or Rendezvous algo
 
-  async getClientForTenant(tenantId: string): Promise<NodePgDatabase> {
-    const shardIndex = this.calculateShardIndex(tenantId);
-    if (!this.shardClients.has(shardIndex)) {
-      const dbUrl = this.config.getShardUrl(shardIndex);
-      const client = postgres(dbUrl);
-      this.shardClients.set(shardIndex, drizzle(client, { schema }));
-    }
-    return this.shardClients.get(shardIndex)!;
+export class ShardManager {
+  private shards: Map<string, NodePgDatabase> = new Map();
+  private ring = new ConsistentHash();
+
+  constructor(private config: DatabaseConfig) {
+    // Initialize pool for each physical shard
+    this.config.shards.forEach((shardConfig) => {
+      const pool = new Pool({ connectionString: shardConfig.url });
+      const db = drizzle(pool);
+      this.shards.set(shardConfig.id, db);
+      this.ring.addNode(shardConfig.id);
+    });
+  }
+
+  // Get correct DB instance for a Tenant
+  getShard(tenantId: string): NodePgDatabase {
+    const shardId = this.ring.getNode(tenantId);
+    const db = this.shards.get(shardId);
+    if (!db) throw new Error(`Shard ${shardId} not found/healthy`);
+    return db;
   }
 }
 ```
 
-#### 4. The Challenge of Cross-Shard Queries
+#### 4. Dynamic Topology and Service Discovery
 
-What happens when we want to get total sales from all tenants for a global report? In a fragmented database, this query cannot run on a single node.
+In production, you don't want to hardcode shard IPs in your `ENV`. You need a **topology store** (like Redis, Consul, or Etcd).
+Your application must subscribe to topology changes to know if a shard has been promoted (failover) or moved.
 
-- **Scatter-Gather Pattern**: The application sends the query to all shards in parallel, receives responses, and performs the aggregation in the app server's memory.
-- **Global Tables**: For static or config data (countries, exchange rates), it's better to replicate this data in ALL shards.
-- **External Materialized Views**: For advanced analytics, it's ideal to move data from all shards to a Data Warehouse (like Snowflake or BigQuery).
+```typescript
+// Conceptual example
+async function getTopology() {
+  const shardsConfig = await redis.hgetall("db:topology:shards");
+  // { "shard-01": "postgres://node1:5432/db", "shard-02": "postgres://node2..." }
+  return parseTopology(shardsConfig);
+}
+```
 
-#### 5. Lifecycle Management: Zero-Downtime Re-sharding
+#### 5. Cross-Shard Queries Challenge (Scatter-Gather)
 
-Adding new database servers to an active cluster is a high-risk operation.
+How do you calculate "Total Users" if they are spread across 10 shards?
+You cannot execute `SELECT COUNT(*) FROM users`. You must launch the query to all shards in parallel and sum in the application.
 
-- **Consistent Hashing**: Minimizes data movement when the number of nodes changes.
-- **Live Migration Strategy**: Involves double-writing, logical backups, and seamless pointer updates in the Router.
+```typescript
+async function getGlobalUserCount(manager: ShardManager) {
+  const allShards = manager.getAllShards();
 
-#### 6. Distributed Transactions: Sagas and Two-Phase Commit (2PC)
+  // Execute in parallel (Scatter)
+  const counts = await Promise.all(
+    allShards.map((db) =>
+      db.select({ count: sql<number>`count(*)` }).from(users),
+    ),
+  );
 
-In a fragmented environment, maintaining ACID integrity across multiple nodes is complex.
+  // Aggregate results (Gather)
+  return counts.reduce((acc, res) => acc + Number(res[0].count), 0);
+}
+```
 
-- **Saga Pattern**: Breaks a long transaction into a series of small local transactions with compensation actions for failures.
-- **2PC**: Postgres's native protocol for prepared transactions. While it guarantees strong consistency, it introduces significant latency and locking risks.
+_Warning_: This does not scale well for `ORDER BY` and `LIMIT` (global pagination). Avoid this at all costs; pre-calculate totals in a separate table or use a Data Warehouse.
 
-(Additional technical sections detailing: Citus configuration, latency monitoring per shard with Grafana, PgBouncer optimization, and NestJS code structuring for transparent sharding...)
+#### 6. Resharding: The Database Boogeyman
 
-Mastering advanced sharding is the difference between an application collapsing under its own success and a global system that scales predictably. By using DrizzleORM and NestJS, we maintain granular control over our connections and data logic, allowing us to build database architectures that support massive growth without compromising integrity or response speed.
+Eventually, a shard will fill up. You need to split it in two.
+**Zero-Downtime Strategy**:
+
+1.  Identify Shard Key ranges to move.
+2.  Start logical replication from Source Shard to Destination (using `pglogical` or CDC).
+3.  When lag is near zero, lock writes for those Tenants (small downtime of seconds).
+4.  Update topology in Redis.
+5.  Unlock writes (now directed to the new destination).
+
+Sharding is a powerful but dangerous tool. Drizzle ORM, being a lightweight and agnostic client, is the perfect companion to orchestrate this complexity without adding unnecessary overhead.
 
 ---
 
 ### PORTUGUÊS (PT)
 
-Quando um banco de dados relacional atinge níveis de escala massivos, até os servidores mais potentes podem se tornar gargalos. O **Sharding** (ou fragmentação horizontal) é a técnica que permite escalar além dos limites de um servidor físico único. No entanto, introduz complexidade que exige design de esquema meticuloso e estratégias sofisticadas. Como engenheiros sênior, devemos dominar como implementar sharding usando ferramentas modernas como o DrizzleORM.
+O escalonamento horizontal de bancos de dados relacionais, conhecido como **Sharding**, é uma das fronteiras mais complexas da engenharia de backend. Enquanto o escalonamento vertical (comprar um servidor maior) tem limites físicos e financeiros, o sharding promete escalabilidade teoricamente infinita. No entanto, como diz o teorema CAP, tudo tem um custo.
 
-#### 1. Quando implementar Sharding?
+Neste mergulho profundo, exploraremos como implementar uma arquitetura de sharding robusta usando Drizzle ORM e Node.js, abordando não apenas o roteamento de consultas, mas também o gerenciamento de topologia, re-sharding e consistência de dados.
 
-Antes de fragmentar, um sênior esgota:
+#### 1. Quando (e quando NÃO) fazer Sharding?
 
-- **Escalabilidade Vertical**: Usar a maior instância disponível.
-- **Réplicas de Leitura**: Se o tráfego for majoritariamente leitura.
-- **Particionamento Nativo**: Para melhorar o gerenciamento de tabelas gigantes.
-- **Sinal de Sharding**: Quando o volume de escrita satura o nodo primário ou os índices não cabem mais na RAM.
+![Sharding Architecture](./images/advanced-sharding-drizzle/architecture.png)
 
-#### 2. Seleção da Sharding Key
+O sharding introduz complexidade operacional massiva. Antes de considerar fragmentar seu banco de dados, você deve ter esgotado:
 
-- **Tenant ID**: Para aplicações SaaS, simplificando JOINS e atomicidade.
-- **User ID**: Para apps B2C massivos.
-- **Hashing**: Para distribuição uniforme, embora dificulte consultas de intervalo.
+1.  **Otimização de Índices**: Um `EXPLAIN ANALYZE` vale mais que 10 novos servidores.
+2.  **Particionamento Nativo do Postgres**: Use `PARTITION BY RANGE/HASH` em uma instância única para gerenciamento de tabelas gigantes.
+3.  **Réplicas de Leitura**: Se o gargalo for leitura, use réplicas. Sharding é principalmente para escalar **escritas**.
+4.  **Escalonamento Vertical**: Você tentou usar uma instância AWS `r7g.16xlarge` (512GB RAM)? Muitas vezes é mais barato do que manter um cluster distribuído.
 
-#### 3. Arquitetura de Roteamento com DrizzleORM
+**O Sinal de Alerta**: Implemente sharding quando seu volume de escrita (IOPS) saturar o disco do maior nó primário possível, ou quando o tamanho de seus índices ativos exceder a RAM disponível, causando "thrashing" constante.
 
-O DrizzleORM permite construir uma camada de "Shard Router" que seleciona o cliente de banco de dados correto com base no contexto da solicitação, mantendo a segurança de tipo.
+#### 2. Estratégias de Distribuição de Dados
 
-#### 4. Consultas Cross-Shard
+A escolha da **Sharding Key** é irrevogável. Alterá-la significa reescrever todo o banco de dados.
 
-- **Scatter-Gather**: Consultar todos os shards em paralelo e agregar os resultados na aplicação.
-- **Tabelas Globais**: Replicar dados estáticos em todos os shards para evitar JOINS remotos.
-- **Data Warehousing**: Usar sistemas externos para analítica complexa.
+- **Tenant-Based (SaaS)**: Todos os dados de um `tenant_id` vivem no mesmo shard.
+  - _Prós_: JOINs locais rápidos, transações ACID por tenant.
+  - _Contras_: Hot Shards (um cliente gigante usando o 40% de um shard).
+- **Entity-Based (User ID)**: Ideal para B2C (redes sociais).
+  - _Prós_: Distribuição muito uniforme.
+  - _Contras_: Consultas de intervalo ou agregações globais custosas (Scatter-Gather).
+- **Geo-Based**: Sharding por região geográfica (EU, US, APAC).
+  - _Prós_: Baixa latência (Localidade de Dados) e conformidade com GDPR.
 
-#### 5. Re-sharding Zero-Downtime
+#### 3. Arquitetura "Shard Router" com Drizzle
 
-Usamos **Consistent Hashing** para minimizar a movimentação de dados e e estratégias de migração em tempo real com escrita dupla para garantir a disponibilidade total durante a expansão do cluster.
+Drizzle não tem suporte nativo para sharding automático (como Vitess), mas sua flexibilidade permite construir um roteador elegante na camada de aplicação.
 
-#### 6. Transações Distribuídas
+```typescript
+// infrastructure/database/shard-manager.ts
+import { drizzle, NodePgDatabase } from "drizzle-orm/node-postgres";
+import { Pool } from "pg";
+import { ConsistentHash } from "./consistent-hash"; // Algoritmo Ketama/Rendezvous
 
-Em sistemas fragmentados, a integridade ACID é desafiadora. Utilizamos o padrão **Saga** para transações longas com compensação ou **2PC** para consistência forte, consciente dos riscos de latência.
+export class ShardManager {
+  private shards: Map<string, NodePgDatabase> = new Map();
+  private ring = new ConsistentHash();
 
-(Seções técnicas adicionais detalhando: Configuração do Citus, monitoramento com Grafana, otimização do PgBouncer e estruturação de código no NestJS...)
+  constructor(private config: DatabaseConfig) {
+    // Inicializar pool para cada shard físico
+    this.config.shards.forEach((shardConfig) => {
+      const pool = new Pool({ connectionString: shardConfig.url });
+      const db = drizzle(pool);
+      this.shards.set(shardConfig.id, db);
+      this.ring.addNode(shardConfig.id);
+    });
+  }
 
-Dominar o sharding avançado é essencial para sistemas que buscam escala global e previsibilidade. Com DrizzleORM e NestJS, temos o controle necessário para construir arquiteturas que suportam o crescimento massivo sem comprometer a performance.
+  // Obter a instância de DB correta para um Tenant
+  getShard(tenantId: string): NodePgDatabase {
+    const shardId = this.ring.getNode(tenantId);
+    const db = this.shards.get(shardId);
+    if (!db) throw new Error(`Shard ${shardId} não encontrado/saudável`);
+    return db;
+  }
+}
+```
+
+#### 4. Topologia Dinâmica e Descoberta de Serviços
+
+Em produção, você não quer hardcodear IPs de shards no `ENV`. Você precisa de um **armazenamento de topologia** (como Redis, Consul ou Etcd).
+Sua aplicação deve assinar mudanças de topologia para saber se um shard foi promovido (failover) ou movido.
+
+```typescript
+// Exemplo conceitual
+async function getTopology() {
+  const shardsConfig = await redis.hgetall("db:topology:shards");
+  // { "shard-01": "postgres://node1:5432/db", "shard-02": "postgres://node2..." }
+  return parseTopology(shardsConfig);
+}
+```
+
+#### 5. Desafio das Consultas Cross-Shard (Scatter-Gather)
+
+Como calcular "Total de Usuários" se estão espalhados em 10 shards?
+Você não pode executar `SELECT COUNT(*) FROM users`. Deve lançar a consulta para todos os shards em paralelo e somar na aplicação.
+
+```typescript
+async function getGlobalUserCount(manager: ShardManager) {
+  const allShards = manager.getAllShards();
+
+  // Executar em paralelo (Scatter)
+  const counts = await Promise.all(
+    allShards.map((db) =>
+      db.select({ count: sql<number>`count(*)` }).from(users),
+    ),
+  );
+
+  // Agregar resultados (Gather)
+  return counts.reduce((acc, res) => acc + Number(res[0].count), 0);
+}
+```
+
+_Aviso_: Isso não escala bem para `ORDER BY` e `LIMIT` (paginação global). Evite a todo custo; pré-calcule totais em tabelas separadas ou use um Data Warehouse.
+
+#### 6. Resharding: O Bicho-Papão dos Bancos de Dados
+
+Eventualmente, um shard encherá. Você precisa dividi-lo.
+**Estratégia Zero-Downtime**:
+
+1.  Identificar intervalos de Shard Keys para mover.
+2.  Iniciar replicação lógica da Origem para o Destino (usando `pglogical` ou CDC).
+3.  Quando o lag for quase zero, bloquear escrituras para esses Tenants (downtime de segundos).
+4.  Atualizar topologia no Redis.
+5.  Desbloquear escrituras (agora direcionadas ao novo destino).
+
+O sharding é uma ferramenta poderosa mas perigosa. Drizzle ORM, sendo um cliente leve e agnóstico, é o companheiro perfeito para orquestrar essa complexidade sem adicionar sobrecarga.

@@ -6,42 +6,36 @@ En el panorama actual de sistemas distribuidos, pasar de una arquitectura monol�
 
 ![gRPC Architecture](./images/advanced-nestjs-microservices/grpc.png)
 
-gRPC se ha convertido en el estándar de oro para la comunicación interna entre microservicios debido a su uso de Protocol Buffers (binario) y HTTP/2. A diferencia de REST sobre JSON, gRPC ofrece una eficiencia de red inigualable y contratos estrictos que evitan errores de integración.
+gRPC se ha convertido en el estándar de oro para la comunicación interna entre microservicios debido a su uso de Protocol Buffers (binario) y HTTP/2. A diferencia de REST sobre JSON, gRPC ofrece una eficiencia de red inigualable y contratos estrictos.
 
-- **Serialización Binaria**: El formato binario de gRPC reduce drásticamente el tamaño del payload y el CPU necesario para la serialización/deserialización, lo cual es vital cuando manejas miles de peticiones por segundo.
-- **Contratos Fuertes**: Los archivos `.proto` definen la interfaz de forma independiente al lenguaje. En la etapa de build, generamos tipos de TypeScript que aseguran que el cliente y el servidor estén siempre en sintonía.
+- **Serialización Binaria**: El formato binario de gRPC reduce drásticamente el tamaño del payload.
+- **Contratos Fuertes**: Los archivos `.proto` definen la interfaz.
 
 ```proto
 syntax = "proto3";
-
 package orders;
-
 service OrdersService {
   rpc CreateOrder (CreateOrderRequest) returns (OrderResponse);
-  rpc GetOrderStatus (OrderStatusRequest) returns (OrderResponse);
 }
-
 message CreateOrderRequest {
   string user_id = 1;
   repeated string product_ids = 2;
 }
-
 message OrderResponse {
   string order_id = 1;
   string status = 2;
 }
 ```
 
-Configurar gRPC en NestJS implica definir el transporte en el `main.ts` del microservicio y usar el `ClientGrpc` en el servicio consumidor. Un senior siempre configura el balanceo de carga en el lado del cliente (Client-side Load Balancing) para evitar cuellos de botella en proxies intermedios.
+Implementamos **Client-Side Load Balancing** para que el cliente gRPC distribuya las peticiones entre réplicas sin pasar por un cuello de botella central.
 
 #### 2. NATS: El Sistema de Mensajería para la Nube Moderna
 
 ![NATS Cloud Mesh](./images/advanced-nestjs-microservices/nats.png)
 
-NATS es un sistema de mensajería ligero, escrito en Go, diseñado para la simplicidad y el rendimiento extremo. A diferencia de RabbitMQ o Kafka, NATS no requiere una gestión de cluster compleja y ofrece latencias extremadamente bajas.
+A diferencia de RabbitMQ, NATS es ultraligero y soporta patrones de "Fire and Forget" y Request-Response con latencia sub-milisegundo.
 
-- **Request-Response Dinámico**: NATS permite realizar llamadas síncronas entre servicios de forma transparente.
-- **Queue Groups**: Esta es una característica clave para el escalado horizontal. Al asignar microservicios al mismo "Queue Group", NATS distribuye las peticiones automáticamente entre todas las instancias activas, eliminando la necesidad de balanceadores de carga externos para mensajería interna.
+- **Queue Groups**: Para balancear carga entre microservicios consumers. Si levantas 10 réplicas del servicio `Payment`, NATS entrega el mensaje a solo una de ellas (Round Robin).
 
 ```typescript
 const app = await NestFactory.createMicroservice<MicroserviceOptions>(
@@ -50,48 +44,31 @@ const app = await NestFactory.createMicroservice<MicroserviceOptions>(
     transport: Transport.NATS,
     options: {
       servers: [process.env.NATS_URL],
-      queue: "orders_service_queue",
+      queue: "orders_service_queue", // Grupo de cola
     },
   },
 );
 ```
 
-#### 3. Redis como Orquestador de Estado y Streams
+#### 3. Circuit Breakers y Resiliencia
 
-![Redis Memory Grid](./images/advanced-nestjs-microservices/redis.png)
+Un sistema distribuido debe abrazar el fallo. Usamos la librería `opossum` o interceptores personalizados en NestJS para implementar Circuit Breakers.
 
-Redis no es solo para caché. En una arquitectura de microservicios, lo usamos como un "Event Bus" ligero o para gestionar flujos de datos en tiempo real mediante Redis Streams.
+Si el servicio de Inventario falla el 50% de las veces, el Circuit Breaker "salta" (Open State) y devuelve un error inmediato al servicio de Pedidos, evitando que los hilos se queden bloqueados esperando timeout y protegiendo al servicio de Inventario para que pueda recuperarse.
 
-- **Caching Distribuido**: Usamos Redis para compartir sesiones de usuario o tokens de autenticación entre microservicios, evitando consultas repetitivas a la base de Datos (Drizzle).
-- **Streams**: Para procesos asíncronos que requieren confirmación (ACK) y persistencia temporal, Redis Streams ofrece una alternativa más ligera que Kafka pero más robusta que un simple Pub/Sub.
+#### 4. Consistencia Eventual con Saga Pattern
 
-#### 4. Resiliencia: Circuit Breakers y Backoff
+Sin transacciones distribuidas ACID (Two-Phase Commit es lento y bloqueante), usamos **Sagas**.
 
-![Circuit Breaker Resilience](./images/advanced-nestjs-microservices/circuit-breaker.png)
+- **Coreografía**: Cada servicio escucha eventos y reacciona.
+  1. Order Service crea orden (`PENDING`) -> emite `OrderCreated`.
+  2. Payment Service escucha -> cobra tarjeta -> emite `PaymentProcessed`.
+  3. Order Service escucha -> actualiza a `CONFIRMED`.
+- **Compensación**: Si Payment falla -> emite `PaymentFailed`. Order Service escucha -> actualiza a `CANCELLED`.
 
-Un ingeniero senior asume que la red fallará. No diseñamos sistemas perfectos, sino sistemas resilientes.
+Para garantizar que los eventos se envíen incluso si la DB cae justo después del commit, usamos el patrón **Transactional Outbox**: Guardamos el evento en una tabla `outbox` en la misma transacción de negocio, y un proceso separado (CDC o Polling) lo publica a NATS.
 
-- **Circuit Breaker**: Implementamos el patrón de cortocircuito para evitar el efecto cascada. Si el servicio de inventario está caído, el servicio de órdenes debe "abrir" el circuito y responder con un error controlado o un fallback, en lugar de agotar sus hilos esperando una respuesta que no llegará.
-- **Retry con Backoff Exponencial**: Cuando una petición falla, no reintentamos inmediatamente. Usamos un retraso que crece exponencialmente (1s, 2s, 4s...) para no saturar al servicio fallido mientras intenta recuperarse.
-
-#### 5. Gestión de Consistencia Distribuida: El Patrón Saga
-
-![Saga Pattern Flow](./images/advanced-nestjs-microservices/saga.png)
-
-En microservicios, no tenemos transacciones ACID globales. Si falla el cargo en el servicio de pagos, debemos revertir la creación de la orden en el servicio de órdenes.
-
-- **Sagas basadas en Coreografía**: Cada servicio emite eventos a NATS y otros servicios reaccionan a ellos. Si ocurre un fallo, se emiten "Eventos de Compensación" para deshacer los cambios anteriores.
-- **Transmisión de Eventos Segura**: Usamos el "Transactional Outbox Pattern" con Drizzle. Guardamos el evento en la misma base de datos local que los datos de negocio bajo una sola transacción, y un worker independiente lo publica en NATS. Esto garantiza que nunca perdamos un evento.
-
-#### 6. Observabilidad con OpenTelemetry
-
-![OpenTelemetry Tracing](./images/advanced-nestjs-microservices/opentelemetry.png)
-
-Depurar microservicios es una pesadilla sin rastreo distribuido. Configuramos NestJS con OpenTelemetry para inyectar un `traceId` en cada petición gRPC o mensaje NATS. Esto permite visualizar en herramientas como Grafana Tempo o Jaeger cómo una petición del usuario atraviesa cinco servicios diferentes hasta completarse, identificando exactamente dónde ocurre un retraso.
-
-[Expansión MASIVA adicional de 3000+ caracteres incluyendo: Implementación profunda de mTLS para seguridad gRPC, estrategias de Sharding de datos por microservicio, manejo de WebSockets escalables con Redis Adapter, técnicas de despliegue progresivo (Canary) para microservicios NestJS en Kubernetes, y guías para optimizar el Garbage Collector de V8 en entornos de alto tráfico de mensajería, asegurando una arquitectura inquebrantable y de clase mundial...]
-
-Construir microservicios con NestJS es un viaje de complejidad creciente. Al dominar estas herramientas y patrones, no solo creas aplicaciones que funcionan, sino infraestructuras que pueden escalar hasta soportar millones de usuarios con una fiabilidad absoluta.
+Construir microservicios con NestJS es un viaje de complejidad creciente. Al dominar gRPC, NATS y patrones de resiliencia, creamos sistemas que sobreviven al caos de la producción.
 
 ---
 
@@ -103,66 +80,69 @@ In today's landscape of distributed systems, moving from a monolithic architectu
 
 ![gRPC Architecture](./images/advanced-nestjs-microservices/grpc.png)
 
-gRPC has become the gold standard for internal communication between microservices due to its use of Protocol Buffers (binary) and HTTP/2. Unlike REST over JSON, gRPC offers unmatched network efficiency and strict contracts that prevent integration errors.
+gRPC has become the gold standard for internal communication between microservices due to its use of Protocol Buffers (binary) and HTTP/2. Unlike REST over JSON, gRPC offers unmatched network efficiency and strict contracts.
 
-- **Binary Serialization**: gRPC's binary format drastically reduces payload size and the CPU needed for serialization/deserialization, which is vital when handling thousands of requests per second.
-- **Strong Contracts**: `.proto` files define the interface independently of the language. In the build stage, we generate TypeScript types that ensure the client and server are always in sync.
+- **Binary Serialization**: gRPC's binary format drastically reduces payload size.
+- **Strong Contracts**: `.proto` files define the interface.
 
-(Detailed technical guide on gRPC setup, proto definition, and client-side load balancing continue here...)
+```proto
+syntax = "proto3";
+package orders;
+service OrdersService {
+  rpc CreateOrder (CreateOrderRequest) returns (OrderResponse);
+}
+message CreateOrderRequest {
+  string user_id = 1;
+  repeated string product_ids = 2;
+}
+message OrderResponse {
+  string order_id = 1;
+  string status = 2;
+}
+```
+
+We implement **Client-Side Load Balancing** so the gRPC client distributes requests among replicas without going through a central bottleneck.
 
 #### 2. NATS: The Messaging System for the Modern Cloud
 
 ![NATS Cloud Mesh](./images/advanced-nestjs-microservices/nats.png)
 
-NATS is a lightweight messaging system, written in Go, designed for simplicity and extreme performance. Unlike RabbitMQ or Kafka, NATS does not require complex cluster management and offers extremely low latencies.
+Unlike RabbitMQ, NATS is ultra-lightweight and supports "Fire and Forget" and Request-Response patterns with sub-millisecond latency.
 
-- **Dynamic Request-Response**: NATS allows for seamless synchronous calls between services.
-- **Queue Groups**: This is a key feature for horizontal scaling. By assigning microservices to the same "Queue Group," NATS automatically distributes requests among all active instances, eliminating the need for external load balancers for internal messaging.
+- **Queue Groups**: To load balance between consumer microservices. If you spin up 10 replicas of the `Payment` service, NATS delivers the message to only one of them (Round Robin).
 
-(In-depth analysis of NATS transport configuration and scalable messaging patterns...)
+```typescript
+const app = await NestFactory.createMicroservice<MicroserviceOptions>(
+  AppModule,
+  {
+    transport: Transport.NATS,
+    options: {
+      servers: [process.env.NATS_URL],
+      queue: "orders_service_queue", // Queue Group
+    },
+  },
+);
+```
 
-#### 3. Redis as a State Orchestrator and Streams
+#### 3. Circuit Breakers and Resilience
 
-![Redis Memory Grid](./images/advanced-nestjs-microservices/redis.png)
+A distributed system must embrace failure. We use the `opossum` library or custom interceptors in NestJS to implement Circuit Breakers.
 
-Redis is not just for caching. In a microservices architecture, we use it as a lightweight "Event Bus" or to manage real-time data flows via Redis Streams.
+If the Inventory service fails 50% of the time, the Circuit Breaker "trips" (Open State) and returns an immediate error to the Order service, preventing threads from blocking on timeouts and protecting the Inventory service so it can recover.
 
-- **Distributed Caching**: We use Redis to share user sessions or authentication tokens between microservices, avoiding repetitive database queries (Drizzle).
-- **Streams**: For asynchronous processes requiring acknowledgment (ACK) and temporary persistence, Redis Streams offers a lighter alternative to Kafka but more robust than simple Pub/Sub.
+#### 4. Eventual Consistency with Saga Pattern
 
-(Technical focus on Redis Streams vs Pub/Sub for inter-service coordination...)
+Without distributed ACID transactions (Two-Phase Commit is slow and blocking), we use **Sagas**.
 
-#### 4. Resilience: Circuit Breakers and Backoff
+- **Choreography**: Each service listens for events and reacts.
+  1. Order Service creates order (`PENDING`) -> emits `OrderCreated`.
+  2. Payment Service listens -> charges card -> emits `PaymentProcessed`.
+  3. Order Service listens -> updates to `CONFIRMED`.
+- **Compensation**: If Payment fails -> emits `PaymentFailed`. Order Service listens -> updates to `CANCELLED`.
 
-![Circuit Breaker Resilience](./images/advanced-nestjs-microservices/circuit-breaker.png)
+To ensure events are sent even if the DB crashes right after commit, we use the **Transactional Outbox** pattern: We save the event in an `outbox` table within the same business transaction, and a separate process (CDC or Polling) publishes it to NATS.
 
-A senior engineer assumes the network will fail. We do not design perfect systems; we design resilient ones.
-
-- **Circuit Breaker**: We implement the short-circuit pattern to prevent cascading failures. If the inventory service is down, the order service should "open" the circuit and respond with a controlled error or fallback, instead of exhausting its threads waiting for a response that will not arrive.
-- **Exponential Backoff Retry**: When a request fails, we do not retry immediately. We use a delay that grows exponentially (1s, 2s, 4s...) to avoid saturating the failing service while it tries to recover.
-
-(Strategic advice on error handling and fault tolerance patterns...)
-
-#### 5. Distributed Consistency Management: The Saga Pattern
-
-![Saga Pattern Flow](./images/advanced-nestjs-microservices/saga.png)
-
-In microservices, we lack global ACID transactions. If a payment service charge fails, we must revert the order creation in the order service.
-
-- **Choreography-based Sagas**: Each service emits events to NATS, and other services react to them. If a failure occurs, "Compensation Events" are emitted to undo previous changes.
-- **Secure Event Transmission**: We use the "Transactional Outbox Pattern" with Drizzle. We save the event in the same local database as the business data under a single transaction, and an independent worker publishes it to NATS. This ensures we never lose an event.
-
-(Detailed implementation of the Outbox pattern with Drizzle and NATS...)
-
-#### 6. Observability with OpenTelemetry
-
-![OpenTelemetry Tracing](./images/advanced-nestjs-microservices/opentelemetry.png)
-
-Debugging microservices is a nightmare without distributed tracing. We configure NestJS with OpenTelemetry to inject a `traceId` into every gRPC request or NATS message. This allows visualizing in tools like Grafana Tempo or Jaeger how a user request traverses five different services until completion, identifying exactly where a delay occurs.
-
-[MASSIVE additional expansion of 3500+ characters including: Deep mTLS implementation for gRPC security, per-microservice data sharding strategies, scalable WebSocket handling with Redis Adapter, progressive deployment techniques (Canary) for NestJS microservices in Kubernetes, and guides for optimizing the V8 Garbage Collector in high-traffic messaging environments...]
-
-Building microservices with NestJS is a journey of increasing complexity. By mastering these tools and patterns, you not only create applications that work but infrastructures that can scale to support millions of users with absolute reliability.
+Building microservices with NestJS is a journey of increasing complexity. By mastering gRPC, NATS, and resilience patterns, we create systems that survive the chaos of production.
 
 ---
 
@@ -174,57 +154,66 @@ No cenário atual de sistemas distribuídos, a transição de uma arquitetura mo
 
 ![gRPC Architecture](./images/advanced-nestjs-microservices/grpc.png)
 
-O gRPC tornou-se o padrão-ouro para a comunicação interna entre microsserviços devido ao seu uso de Protocol Buffers (binário) e HTTP/2. Ao contrário do REST sobre JSON, o gRPC oferece uma eficiência de rede inigualável e contratos rígidos que evitam erros de integração.
+O gRPC tornou-se o padrão-ouro para a comunicação interna entre microsserviços devido ao seu uso de Protocol Buffers (binário) e HTTP/2. Ao contrário do REST sobre JSON, o gRPC oferece uma eficiência de rede inigualável e contratos rígidos.
 
-- **Serialização Binária**: O formato binário do gRPC reduz drasticamente o tamanho do payload e a CPU necessária para serialização/desserialização, o que é vital quando você lida com milhares de solicitações por segundo.
-- **Contratos Fortes**: Arquivos `.proto` definem a interface independentemente da linguagem. Na etapa de build, geramos tipos TypeScript que garantem que o cliente e o servidor estejam sempre em sincronia.
+- **Serialização Binária**: O formato binário do gRPC reduz drasticamente o tamanho do payload.
+- **Contratos Fortes**: Arquivos `.proto` definem a interface.
 
-(O guia técnico detalhado sobre configuração do gRPC, definição de proto e balanceamento de carga no lado do cliente continua aqui...)
+```proto
+syntax = "proto3";
+package orders;
+service OrdersService {
+  rpc CreateOrder (CreateOrderRequest) returns (OrderResponse);
+}
+message CreateOrderRequest {
+  string user_id = 1;
+  repeated string product_ids = 2;
+}
+message OrderResponse {
+  string order_id = 1;
+  string status = 2;
+}
+```
+
+Implementamos **Client-Side Load Balancing** para que o cliente gRPC distribua as solicitações entre réplicas sem passar por um gargalo central.
 
 #### 2. NATS: O Sistema de Mensagens para a Nuvem Moderna
 
 ![NATS Cloud Mesh](./images/advanced-nestjs-microservices/nats.png)
 
-O NATS é um sistema de mensagens leve, escrito em Go, projetado para simplicidade e desempenho extremo. Ao contrário do RabbitMQ ou Kafka, o NATS não requer gerenciamento complexo de cluster e oferece latências extremamente baixas.
+Ao contrário do RabbitMQ, o NATS é ultraleve e suporta padrões de "Fire and Forget" e Request-Response com latência submilisegundo.
 
-- **Request-Response Dinâmico**: O NATS permite chamadas síncronas entre serviços de forma transparente.
-- **Queue Groups**: Este é um recurso fundamental para o escalonamento horizontal. Ao atribuir microsserviços ao mesmo "Queue Group", o NATS distribui automaticamente as solicitações entre todas as instâncias ativas.
+- **Queue Groups**: Para balancear a carga entre microsserviços consumidores. Se você subir 10 réplicas do serviço `Payment`, o NATS entrega a mensagem para apenas uma delas (Round Robin).
 
-(Análise detalhada da configuração do transporte NATS e padrões de mensagens escalonáveis...)
+```typescript
+const app = await NestFactory.createMicroservice<MicroserviceOptions>(
+  AppModule,
+  {
+    transport: Transport.NATS,
+    options: {
+      servers: [process.env.NATS_URL],
+      queue: "orders_service_queue", // Grupo de fila
+    },
+  },
+);
+```
 
-#### 3. Redis como Orquestrador de Estado e Streams
+#### 3. Circuit Breakers e Resiliência
 
-![Redis Memory Grid](./images/advanced-nestjs-microservices/redis.png)
+Um sistema distribuído deve abraçar a falha. Usamos a biblioteca `opossum` ou interceptores personalizados no NestJS para implementar Circuit Breakers.
 
-O Redis não serve apenas para cache. Em uma arquitetura de microsserviços, nós o usamos como um "Barramento de Eventos" leve ou para gerenciar fluxos de dados em tempo real por meio do Redis Streams.
+Se o serviço de Inventário falhar 50% das vezes, o Circuit Breaker "dispara" (Estado Aberto) e retorna um erro imediato ao serviço de Pedidos, evitando que os threads fiquem bloqueados esperando timeout e protegendo o serviço de Inventário para que ele possa se recuperar.
 
-- **Caching Distribuído**: Usamos o Redis para compartilhar sessões de usuário ou tokens de autenticação entre microsserviços, evitando consultas repetitivas ao banco de dados (Drizzle).
-- **Streams**: Para processos assíncronos que exigem confirmação (ACK) e persistência temporária, o Redis Streams oferece uma alternativa mais robusta que o simples Pub/Sub.
+#### 4. Consistência Eventual com Saga Pattern
 
-#### 4. Resiliência: Circuit Breakers e Backoff
+Sem transações ACID distribuídas (Two-Phase Commit é lento e bloqueante), usamos **Sagas**.
 
-![Circuit Breaker Resilience](./images/advanced-nestjs-microservices/circuit-breaker.png)
+- **Coreografia**: Cada serviço escuta eventos e reage.
+  1. Order Service cria pedido (`PENDING`) -> emite `OrderCreated`.
+  2. Payment Service escuta -> cobra cartão -> emite `PaymentProcessed`.
+  3. Order Service escuta -> atualiza para `CONFIRMED`.
+- **Compensação**: Se o Pagamento falhar -> emite `PaymentFailed`. O Order Service escuta -> atualiza para `CANCELLED`.
 
-Um engenheiro sênior assume que a rede falhará. Não projetamos sistemas perfeitos; projetamos sistemas resilientes.
+Para garantir que os eventos sejam enviados mesmo se o DB cair logo após o commit, usamos o padrão **Transactional Outbox**: Salvamos o evento em uma tabela `outbox` na mesma transação de negócio, e um processo separado (CDC ou Polling) o publica no NATS.
 
-- **Circuit Breaker**: Implementamos o padrão de curto-circuito para evitar falhas em cascata. Se o serviço de inventário estiver inoperante, o serviço de pedidos deve "abrir" o circuito e responder com um erro controlado.
-- **Backoff Exponencial**: Quando uma solicitação falha, não tentamos novamente imediatamente. Usamos um atraso que cresce exponencialmente (1s, 2s, 4s...) para não saturar o serviço com falha.
-
-#### 5. Gerenciamento de Consistência Distribuída: O Padrão Saga
-
-![Saga Pattern Flow](./images/advanced-nestjs-microservices/saga.png)
-
-Em microsserviços, não temos transações ACID globais. Se a cobrança no serviço de pagamento falhar, devemos reverter a criação do pedido no serviço de pedidos.
-
-- **Sagas Baseadas em Coreografia**: Cada serviço emite eventos para o NATS e outros serviços reagem a eles. Se ocorrer uma falha, "Eventos de Compensação" são emitidos para desfazer as alterações anteriores.
-- **Transactional Outbox Pattern**: Usamos este padrão com o Drizzle para garantir que um evento seja salvo na mesma transação que os dados de negócio antes de ser publicado.
-
-#### 6. Observabilidade com OpenTelemetry
-
-![OpenTelemetry Tracing](./images/advanced-nestjs-microservices/opentelemetry.png)
-
-Depurar microsserviços é um pesadelo sem rastreamento distribuído. Configuramos o NestJS com OpenTelemetry para injetar um `traceId` em cada solicitação. Isso permite visualizar em ferramentas como Grafana Tempo ou Jaeger como uma solicitação atravessa vários serviços.
-
-[Expansão MASSIVA adicional de 3500+ caracteres incluindo: Implementação profunda de mTLS, estratégias de Sharding de dados, tratamento de WebSockets escalonáveis com Redis Adapter, técnicas de implantação Canary e guias para otimizar o V8 Garbage Collector...]
-
-Construir microsserviços com o NestJS é uma jornada de complexidade crescente. Ao dominar essas ferramentas e padrões, você cria infraestruturas capazes de suportar milhões de usuários com confiabilidade absoluta.
+Construir microsserviços com o NestJS é uma jornada de complexidade crescente. Ao dominar gRPC, NATS e padrões de resiliência, criamos sistemas que sobrevivem ao caos da produção.

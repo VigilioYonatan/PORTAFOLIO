@@ -1,97 +1,447 @@
 ### ESPAÑOL (ES)
 
-En el panorama actual de ciberamenazas, la seguridad no puede ser un "añadido" posterior al desarrollo; debe estar integrada en el ADN de la aplicación. Para un ingeniero senior, diseñar un sistema de autenticación y autorización robusto implica mucho más que implementar un login con JWT. Se requiere una comprensión profunda de estándares como OAuth2 y OpenID Connect, la gestión segura de sesiones, la protección contra ataques de identidad y un modelado de permisos granular y eficiente. En este artículo técnico, exploraremos patrones avanzados de seguridad utilizando NestJS, DrizzleORM y las mejores prácticas de la industria.
+"La seguridad no es una característica funcional, es un estado mental". En aplicaciones modernas, confiar solo en HTTPS y contraseñas fuertes es negligente. Debemos operar bajo el modelo **Zero Trust**: asumir que la red es hostil, que los perímetros van a fallar y que el atacante podría ya estar dentro de tu VPC.
 
-#### 1. Autenticación Moderna: JWT vs Sesiones Opacas
+En este artículo, cubriremos autenticación moderna (OIDC), autorización granular (ABAC), gestión de secretos y auditoría en un entorno Node.js/NestJS de alto nivel.
 
-La elección entre JWT (JSON Web Tokens) y sesiones en el servidor es un debate clásico.
+#### 1. OAuth 2.0 y OIDC: El Estándar de Oro
 
-- **JWT (Stateless)**: Ideal para escalabilidad horizontal y microservicios. Sin embargo, un senior sabe que los JWT son difíciles de invalidar antes de que expiren. Implementamos una "Blacklist" en Redis o utilizamos "Refresh Tokens" con rotación para mitigar este riesgo.
-- **Sesiones Opacas (Stateful)**: Proporcionan un control total sobre la revocación inmediata. Usamos Redis para almacenar las sesiones y asegurar que la latencia de verificación sea mínima.
-- **Hibridación**: A veces usamos JWT para la comunicación interna entre microservicios y sesiones opacas para el frontend, obteniendo lo mejor de ambos mundos.
+![OAuth2 Authorization Code Flow](./images/advanced-security-auth/oauth-flow.png)
 
-#### 2. Autorización Granular: RBAC y ABAC
+Nunca implementes tu propio sistema de login desde cero si puedes evitarlo. Gestionar contraseñas, rotación de claves, MFA y recuperación de cuentas es un campo minado. Usa **OpenID Connect (OIDC)** delegando en proveedores como Auth0, Cognito o Keycloak.
 
-- **RBAC (Role-Based Access Control)**: Es el punto de partida. Definimos roles (Admin, Editor, User) y asignamos permisos a esos roles. En NestJS, usamos decoradores personalizados y Guards para proteger las rutas de forma declarativa.
-- **ABAC (Attribute-Based Access Control)**: Para casos complejos (ej: "Un usuario solo puede editar un post si es el autor Y el post está en estado borrador"). Un senior utiliza librerías como `CASL` o `AccessControl` integradas con Drizzle para realizar estas validaciones tanto en la aplicación como en las consultas de base de datos.
+Para SPAs (Single Page Apps) y Aplicaciones Móviles, el único flujo seguro es **Authorization Code Flow con PKCE** (Proof Key for Code Exchange).
 
-#### 3. Protección de Datos y Criptografía
+**¿Por qué PKCE?**
+El flujo "Implicit" antiguo devolvía el Access Token en la URL (`#access_token=...`), exponiéndolo en el historial del navegador y logs de proxy.
+PKCE mitiga esto:
 
-- **Hashing de Contraseñas**: Nunca guardamos contraseñas en texto plano. Usamos `Argon2` o `bcrypt` con un factor de coste adecuado. Argon2 es la recomendación actual de OWASP por su resistencia a ataques de GPU.
-- **Cifrado en Reposo**: Para datos sensibles (como claves de API de usuarios), usamos cifrado simétrico (AES-256-GCM) antes de guardar en la DB vía Drizzle. Un senior gestiona estas claves de cifrado usando servicios como AWS KMS.
-- **Variables de Entorno Seguras**: Nunca inyectamos secretos directamente. Usamos el gestor de secretos de la nube y los rotamos periódicamente.
+1.  Cliente genera un secreto aleatorio (`code_verifier`) y su hash (`code_challenge`).
+2.  Cliente envía el hash al iniciar el login.
+3.  Cliente intercambia el Authorization Code + `code_verifier` original por el token.
+4.  El servidor verifica que `hash(verifier) === challenge`. Esto asegura que solo quien inició el flujo puede terminarlo.
 
-#### 4. Hardening de APIs y OWASP Top 10
+#### 2. Estrategia de Tokens: Cookies HttpOnly vs Bearer
 
-- **Prevención de Inyección**: DrizzleORM, al usar consultas parametrizadas por defecto, nos protege del SQL Injection. Sin embargo, un senior debe estar atento a la inyección en JSON o NoSQL si usa otros motores.
-- **Rate Limiting**: Protegemos nuestros endpoints de login y registro contra ataques de fuerza bruta usando `express-rate-limit` con almacenamiento en Redis para coordinar entre múltiples instancias.
-- **Cabeceras de Seguridad**: Usamos `Helmet` para configurar cabeceras como `Content-Security-Policy`, `X-Frame-Options` y `Strict-Transport-Security`, mitigando ataques de XSS y Clickjacking.
+Un JWT (JSON Web Token) es como dinero en efectivo. Quien lo tiene, lo gasta. Si lo guardas en `localStorage`, cualquier librería de terceros comprometida (`npm install malicious-lib`) puede leerlo (XSS) y exfiltrarlo.
 
-#### 5. Auditoría y Trazabilidad de Seguridad
+**Mejores Prácticas**:
 
-- **Logs de Auditoría**: Cada acción sensible (cambio de password, acceso administrativo, exportación de datos) debe quedar registrada. Usamos Drizzle para escribir en una tabla de auditoría inmutable.
-- **Alertas Proactivas**: Configuramos alertas para comportamientos sospechosos, como múltiples intentos fallidos de login desde la misma IP o accesos desde geografías inusuales.
-- **Escaneo de Vulnerabilidades**: Snyk o GitHub Advanced Security se integran en nuestro CI/CD para detectar librerías con fallos conocidos (CVEs) antes de que lleguen a producción.
+1.  **Frontend**: Nunca ve el Access Token.
+2.  **Backend (BFF)**: Recibe el token del Provider y lo establece como **Cookie HttpOnly**.
+3.  **Cookie Flags**: `HttpOnly; Secure; SameSite=Strict`.
 
-[Expansión MASIVA con más de 2500 palabras adicionales sobre la implementación de Multi-Factor Authentication (MFA) con WebAuthn/FIDO2, seguridad en microservicios mediante mTLS, patrones de BFF (Backend for Frontend) para mitigar riesgos de tokens en el navegador, y guías sobre cómo realizar auditorías de seguridad en bases de Datos Postgres gestionadas con Drizzle, garantizando los 5000+ caracteres por idioma...]
-La seguridad es un proceso, no un destino. Un ingeniero senior cultiva una mentalidad de "confianza cero" (Zero Trust), asumiendo que cualquier parte del sistema podría verse comprometida. Al construir sobre la base sólida de NestJS y Drizzle, y aplicar estos patrones avanzados de seguridad, creamos aplicaciones que no solo son funcionales, sino que protegen el activo más valioso de cualquier empresa: sus datos y la confianza de sus usuarios.
+```typescript
+// NestJS: AuthController.ts
+@Get('callback')
+async callback(@Query('code') code: string, @Res() res: Response) {
+  const tokens = await this.authService.exchangeCode(code);
+
+  res.cookie("access_token", tokens.access_token, {
+    httpOnly: true, // JS no puede leerla
+    secure: process.env.NODE_ENV === 'production', // Solo HTTPS
+    sameSite: "strict", // Previene CSRF
+    maxAge: 3600 * 1000,
+  });
+
+  res.redirect('/dashboard');
+}
+```
+
+#### 3. ABAC: Autorización Basada en Atributos (Más allá de Roles)
+
+**RBAC (Role-Based Access Control)** es insuficiente para casos reales.
+
+- _RBAC_: "¿Es un Manager? Sí. Entra."
+- _Caso Real_: "Un Manager solo puede editar contratos de SU departamento y que sumen menos de $10k."
+
+Para esto usamos **ABAC** con la librería **CASL**. Define permisos basados en atributos del Usuario (Subject), el Recurso (Object) y el Entorno (Environment).
+
+```typescript
+// abilities.factory.ts
+import { AbilityBuilder, createMongoAbility } from "@casl/ability";
+
+export function createForUser(user: User) {
+  const { can, cannot, build } = new AbilityBuilder(createMongoAbility);
+
+  if (user.isAdmin) {
+    can("manage", "all");
+  } else {
+    can("read", "Contract");
+    // Regla compleja: Update si es del mismo depto Y monto < 10k
+    can("update", "Contract", {
+      departmentId: user.departmentId,
+      amount: { $lt: 10000 },
+    });
+  }
+
+  return build();
+}
+```
+
+**Guard Genérico en NestJS**:
+
+```typescript
+@Injectable()
+export class PoliciesGuard implements CanActivate {
+  constructor(
+    private reflector: Reflector,
+    private caslFactory: CaslAbilityFactory,
+  ) {}
+
+  async canActivate(context: ExecutionContext): Promise<boolean> {
+    const rules =
+      this.reflector.get<PolicyRule[]>(
+        CHECK_POLICIES_KEY,
+        context.getHandler(),
+      ) || [];
+    const { user } = context.switchToHttp().getRequest();
+    const ability = this.caslFactory.createForUser(user);
+
+    return rules.every((rule) => rule(ability));
+  }
+}
+```
+
+#### 4. Audit Logging: ¿Quién hizo qué y cuándo?
+
+En sistemas regulados (Fintech, Salud), no basta con bloquear accesos no autorizados. Debes registrar **inmutablemente** cada acción crítica.
+Un simple `console.log` no sirve (se pierde, se puede borrar). Usa un patrón de **Interceptor**.
+
+```typescript
+// audit.interceptor.ts
+@Injectable()
+export class AuditInterceptor implements NestInterceptor {
+  constructor(@Inject("AUDIT_QUEUE") private auditQueue: Queue) {}
+
+  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+    const req = context.switchToHttp().getRequest();
+    const user = req.user;
+    const method = req.method;
+    const url = req.url;
+
+    return next.handle().pipe(
+      tap((response) => {
+        // Enviamos a una cola asíncrona (SQS/RabbitMQ) para no bloquear
+        this.auditQueue.add("audit_log", {
+          userId: user.id,
+          action: `${method} ${url}`,
+          resourceId: req.params.id,
+          payload: req.body, // ¡Cuidado con PII!
+          status: "SUCCESS",
+          timestamp: new Date(),
+          ip: req.ip,
+        });
+      }),
+    );
+  }
+}
+```
+
+#### 5. Gestión de Secretos: Adiós .env
+
+En producción, los archivos `.env` son un riesgo (se copian por error, quedan en imágenes Docker).
+Usa gestores de secretos dedicados como **AWS Secrets Manager** o **HashiCorp Vault**.
+La aplicación, al arrancar, pide sus secretos a la API segura en memoria, nunca los escribe en disco.
+
+La seguridad es una carrera armamentista constante. Mantén tus dependencias actualizadas (`npm audit`), rota tus claves criptográficas regularmente y educa a tu equipo.
 
 ---
 
 ### ENGLISH (EN)
 
-In today's cyber threat landscape, security cannot be an "add-on" after development; it must be integrated into the application's DNA. For a senior engineer, designing a robust authentication and authorization system involves much more than implementing a JWT login. It requires a deep understanding of standards like OAuth2 and OpenID Connect, secure session management, protection against identity attacks, and granular, efficient permission modeling. In this technical article, we will explore advanced security patterns using NestJS, DrizzleORM, and industry best practices.
+"Security is not a functional feature, it's a state of mind." In modern applications, relying only on HTTPS and strong passwords is negligent. We must operate under the **Zero Trust** model: assume the network is hostile, perimeters will fail, and the attacker might already be inside your VPC.
 
-#### 1. Modern Authentication: JWT vs. Opaque Sessions
+In this article, we'll cover modern authentication (OIDC), granular authorization (ABAC), secret management, and auditing in a high-level Node.js/NestJS environment.
 
-The choice between JWT (JSON Web Tokens) and server-side sessions is a classic debate.
-(...) [Massive technical expansion continues here, mirroring the depth of the Spanish section. Focus on security protocols, cryptography, and RBAC/ABAC...]
+#### 1. OAuth 2.0 and OIDC: The Gold Standard
 
-#### 2. Granular Authorization: RBAC and ABAC
+![OAuth2 Authorization Code Flow](./images/advanced-security-auth/oauth-flow.png)
 
-(...) [In-depth analysis of role-based and attribute-based access control, using CASL and NestJS Guards...]
+Never implement your own login system from scratch if you can avoid it. Managing passwords, key rotation, MFA, and account recovery is a minefield. Use **OpenID Connect (OIDC)** delegating to providers like Auth0, Cognito, or Keycloak.
 
-#### 3. Data Protection and Cryptography
+For SPAs (Single Page Apps) and Mobile Apps, the only secure flow is **Authorization Code Flow with PKCE** (Proof Key for Code Exchange).
 
-(...) [Technical guides on password hashing with Argon2, AES-256-GCM encryption at rest, and secure KMS key management...]
+**Why PKCE?**
+The old "Implicit" flow returned the Access Token in the URL (`#access_token=...`), exposing it in browser history and proxy logs.
+PKCE mitigates this:
 
-#### 4. API Hardening and OWASP Top 10
+1.  Client generates a random secret (`code_verifier`) and its hash (`code_challenge`).
+2.  Client sends the hash when starting login.
+3.  Client exchanges the Authorization Code + original `code_verifier` for the token.
+4.  Server verifies that `hash(verifier) === challenge`. This ensures only the initiator can complete the flow.
 
-(...) [Strategic advice on preventing injection, rate limiting strategies, and mandatory security headers with Helmet...]
+#### 2. Token Strategy: HttpOnly Cookies vs Bearer
 
-#### 5. Security Auditing and Traceability
+A JWT (JSON Web Token) is like cash. Whoever holds it, spends it. If you store it in `localStorage`, any compromised third-party library (`npm install malicious-lib`) can read it (XSS) and exfiltrate it.
 
-(...) [Detailed analysis of audit logs, proactive alerting, and vulnerability scanning in the CI/CD pipeline...]
+**Best Practices**:
 
-[Final sections on MFA/WebAuthn, mTLS for microservices, BFF patterns, and database security auditing with Drizzle...]
-Security is a process, not a destination. A senior engineer cultivates a "Zero Trust" mindset, assuming any part of the system could be compromised. By building on the solid foundation of NestJS and Drizzle and applying these advanced security patterns, we create applications that are not only functional but also protect a company's most valuable asset: its data and its users' trust.
+1.  **Frontend**: Never sees the Access Token.
+2.  **Backend (BFF)**: Receives token from Provider and sets it as **HttpOnly Cookie**.
+3.  **Cookie Flags**: `HttpOnly; Secure; SameSite=Strict`.
+
+```typescript
+// NestJS: AuthController.ts
+@Get('callback')
+async callback(@Query('code') code: string, @Res() res: Response) {
+  const tokens = await this.authService.exchangeCode(code);
+
+  res.cookie("access_token", tokens.access_token, {
+    httpOnly: true, // JS cannot read it
+    secure: process.env.NODE_ENV === 'production', // HTTPS only
+    sameSite: "strict", // Prevents CSRF
+    maxAge: 3600 * 1000,
+  });
+
+  res.redirect('/dashboard');
+}
+```
+
+#### 3. ABAC: Attribute-Based Access Control (Beyond Roles)
+
+**RBAC (Role-Based Access Control)** is insufficient for real cases.
+
+- _RBAC_: "Is he a Manager? Yes. Enter."
+- _Real Case_: "A Manager can only edit contracts from WITHIN their department AND totaling less than $10k."
+
+For this, we use **ABAC** with the **CASL** library. It defines permissions based on attributes of the User (Subject), the Resource (Object), and the Environment.
+
+```typescript
+// abilities.factory.ts
+import { AbilityBuilder, createMongoAbility } from "@casl/ability";
+
+export function createForUser(user: User) {
+  const { can, cannot, build } = new AbilityBuilder(createMongoAbility);
+
+  if (user.isAdmin) {
+    can("manage", "all");
+  } else {
+    can("read", "Contract");
+    // Complex rule: Update if same dept AND amount < 10k
+    can("update", "Contract", {
+      departmentId: user.departmentId,
+      amount: { $lt: 10000 },
+    });
+  }
+
+  return build();
+}
+```
+
+**Generic Guard in NestJS**:
+
+```typescript
+@Injectable()
+export class PoliciesGuard implements CanActivate {
+  constructor(
+    private reflector: Reflector,
+    private caslFactory: CaslAbilityFactory,
+  ) {}
+
+  async canActivate(context: ExecutionContext): Promise<boolean> {
+    const rules =
+      this.reflector.get<PolicyRule[]>(
+        CHECK_POLICIES_KEY,
+        context.getHandler(),
+      ) || [];
+    const { user } = context.switchToHttp().getRequest();
+    const ability = this.caslFactory.createForUser(user);
+
+    return rules.every((rule) => rule(ability));
+  }
+}
+```
+
+#### 4. Audit Logging: Who did what and when?
+
+In regulated systems (Fintech, Health), blocking unauthorized access isn't enough. You must **immutably** record every critical action.
+A simple `console.log` won't cut it (it gets lost, can be deleted). Use an **Interceptor** pattern.
+
+```typescript
+// audit.interceptor.ts
+@Injectable()
+export class AuditInterceptor implements NestInterceptor {
+  constructor(@Inject("AUDIT_QUEUE") private auditQueue: Queue) {}
+
+  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+    const req = context.switchToHttp().getRequest();
+    const user = req.user;
+    const method = req.method;
+    const url = req.url;
+
+    return next.handle().pipe(
+      tap((response) => {
+        // Send to async queue (SQS/RabbitMQ) to avoid blocking
+        this.auditQueue.add("audit_log", {
+          userId: user.id,
+          action: `${method} ${url}`,
+          resourceId: req.params.id,
+          payload: req.body, // Careful with PII!
+          status: "SUCCESS",
+          timestamp: new Date(),
+          ip: req.ip,
+        });
+      }),
+    );
+  }
+}
+```
+
+#### 5. Secret Management: Goodbye .env
+
+In production, `.env` files are a risk (accidentally committed, left in Docker images).
+Use dedicated secret managers like **AWS Secrets Manager** or **HashiCorp Vault**.
+The application, upon startup, requests its secrets from the secure API into memory, never writing them to disk.
+
+Security is a constant arms race. Keep dependencies updated (`npm audit`), rotate cryptographic keys regularly, and educate your team.
 
 ---
 
 ### PORTUGUÊS (PT)
 
-No cenário atual de ciberameaças, a segurança não pode ser um "adicional" após o desenvolvimento; ela deve estar integrada ao DNA da aplicação. Para um engenheiro sênior, projetar um sistema robusto de autenticação e autorização envolve muito mais do que implementar um login com JWT. Exige uma compreensão profunda de padrões como OAuth2 e OpenID Connect, gerenciamento seguro de sessões, proteção contra ataques de identidade e modelagem de permissões granular e eficiente. Neste artigo técnico, exploraremos padrões avançados de segurança usando NestJS, DrizzleORM e as melhores práticas do setor.
+"Segurança não é uma funcionalidade, é um estado mental". Em aplicações modernas, confiar apenas em HTTPS e senhas fortes é negligência. Devemos operar sob o modelo **Zero Trust**: assumir que a rede é hostil, que os perímetros falharão e que o atacante pode já estar dentro de sua VPC.
 
-#### 1. Autenticação Moderna: JWT vs. Sessões Opacas
+Neste artigo, cobriremos autenticação moderna (OIDC), autorização granular (ABAC), gerenciamento de segredos e auditoria em um ambiente Node.js/NestJS de alto nível.
 
-A escolha entre JWT (JSON Web Tokens) e sessões no servidor é um debate clássico.
-(...) [Expansão técnica massiva contínua aqui, espelhando a profundidade das seções em espanhol e inglês. Foco em protocolos de segurança e criptografia...]
+#### 1. OAuth 2.0 e OIDC: O Padrão Ouro
 
-#### 2. Autorização Granular: RBAC e ABAC
+![OAuth2 Authorization Code Flow](./images/advanced-security-auth/oauth-flow.png)
 
-(...) [Visão aprofundada sobre controle de acesso baseado em funções e atributos, usando CASL e Guards do NestJS...]
+Nunca implemente seu próprio sistema de login do zero se puder evitar. Gerenciar senhas, rotação de chaves, MFA e recuperação de contas é um campo minado. Use **OpenID Connect (OIDC)** delegando a provedores como Auth0, Cognito ou Keycloak.
 
-#### 3. Proteção de Dados e Criptografia
+Para SPAs (Single Page Apps) e Aplicativos Móveis, o único fluxo seguro é **Authorization Code Flow com PKCE** (Proof Key for Code Exchange).
 
-(...) [Implementação técnica de hashing de senhas com Argon2, criptografia AES-256-GCM e gerenciamento de chaves...]
+**Por que PKCE?**
+O antigo fluxo "Implícito" retornava o Access Token na URL (`#access_token=...`), expondo-o no histórico do navegador e logs de proxy.
+O PKCE mitiga isso:
 
-#### 4. Hardening de APIs e OWASP Top 10
+1.  Cliente gera um segredo aleatório (`code_verifier`) e seu hash (`code_challenge`).
+2.  Cliente envia o hash ao iniciar o login.
+3.  Cliente troca o Authorization Code + `code_verifier` original pelo token.
+4.  O servidor verifica se `hash(verifier) === challenge`. Isso garante que apenas quem iniciou o fluxo possa terminá-lo.
 
-(...) [Conselhos sênior sobre prevenção de injeção, estratégias de rate limiting e cabeçalhos de segurança obrigatórios...]
+#### 2. Estratégia de Tokens: Cookies HttpOnly vs Bearer
 
-#### 5. Auditoria de Segurança e Rastreabilidade
+Um JWT (JSON Web Token) é como dinheiro vivo. Quem tem, gasta. Se você guardá-lo no `localStorage`, qualquer biblioteca de terceiros comprometida (`npm install malicious-lib`) pode lê-lo (XSS) e exfiltrá-lo.
 
-(...) [Guia técnico sobre logs de auditoria, alertas proativos e escaneamento de vulnerabilidades no pipeline de CI/CD...]
+**Melhores Práticas**:
 
-[Seções finais sobre MFA/WebAuthn, mTLS para microsserviços, padrões BFF e auditoria de banco de dados...]
-A segurança é um processo, não um destino. Um engenheiro sênior cultiva uma mentalidade de "confiança zero" (Zero Trust), assumindo que qualquer parte do sistema pode ser comprometida. Ao construir sobre a base sólida do NestJS e do Drizzle e aplicar esses padrões avançados de segurança, criamos aplicações que não são apenas funcionais, mas protegem o ativo mais valioso de qualquer empresa: os seus dados e a confiança dos seus usuários.
+1.  **Frontend**: Nunca vê o Access Token.
+2.  **Backend (BFF)**: Recebe o token do Provider e o define como **Cookie HttpOnly**.
+3.  **Flags de Cookie**: `HttpOnly; Secure; SameSite=Strict`.
+
+```typescript
+// NestJS: AuthController.ts
+@Get('callback')
+async callback(@Query('code') code: string, @Res() res: Response) {
+  const tokens = await this.authService.exchangeCode(code);
+
+  res.cookie("access_token", tokens.access_token, {
+    httpOnly: true, // JS não pode ler
+    secure: process.env.NODE_ENV === 'production', // Apenas HTTPS
+    sameSite: "strict", // Previne CSRF
+    maxAge: 3600 * 1000,
+  });
+
+  res.redirect('/dashboard');
+}
+```
+
+#### 3. ABAC: Autorização Baseada em Atributos (Além de Roles)
+
+**RBAC (Role-Based Access Control)** é insuficiente para casos reais.
+
+- _RBAC_: "Ele é Gerente? Sim. Entre."
+- _Caso Real_: "Um Gerente só pode editar contratos do SEU departamento E que somem menos de $10k."
+
+Para isso usamos **ABAC** com a biblioteca **CASL**. Define permissões baseadas em atributos do Usuário (Subject), do Recurso (Object) e do Ambiente.
+
+```typescript
+// abilities.factory.ts
+import { AbilityBuilder, createMongoAbility } from "@casl/ability";
+
+export function createForUser(user: User) {
+  const { can, cannot, build } = new AbilityBuilder(createMongoAbility);
+
+  if (user.isAdmin) {
+    can("manage", "all");
+  } else {
+    can("read", "Contract");
+    // Regra complexa: Atualizar se for do mesmo depto E valor < 10k
+    can("update", "Contract", {
+      departmentId: user.departmentId,
+      amount: { $lt: 10000 },
+    });
+  }
+
+  return build();
+}
+```
+
+**Guard Genérico em NestJS**:
+
+```typescript
+@Injectable()
+export class PoliciesGuard implements CanActivate {
+  constructor(
+    private reflector: Reflector,
+    private caslFactory: CaslAbilityFactory,
+  ) {}
+
+  async canActivate(context: ExecutionContext): Promise<boolean> {
+    const rules =
+      this.reflector.get<PolicyRule[]>(
+        CHECK_POLICIES_KEY,
+        context.getHandler(),
+      ) || [];
+    const { user } = context.switchToHttp().getRequest();
+    const ability = this.caslFactory.createForUser(user);
+
+    return rules.every((rule) => rule(ability));
+  }
+}
+```
+
+#### 4. Audit Logging: Quem fez o quê e quando?
+
+Em sistemas regulamentados (Fintech, Saúde), não basta bloquear acessos não autorizados. Você deve registrar **imutavelmente** cada ação crítica.
+Um simples `console.log` não serve (ele se perde, pode ser apagado). Use um padrão de **Interceptor**.
+
+```typescript
+// audit.interceptor.ts
+@Injectable()
+export class AuditInterceptor implements NestInterceptor {
+  constructor(@Inject("AUDIT_QUEUE") private auditQueue: Queue) {}
+
+  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+    const req = context.switchToHttp().getRequest();
+    const user = req.user;
+    const method = req.method;
+    const url = req.url;
+
+    return next.handle().pipe(
+      tap((response) => {
+        // Envia para fila assíncrona (SQS/RabbitMQ) para não bloquear
+        this.auditQueue.add("audit_log", {
+          userId: user.id,
+          action: `${method} ${url}`,
+          resourceId: req.params.id,
+          payload: req.body, // Cuidado com PII!
+          status: "SUCCESS",
+          timestamp: new Date(),
+          ip: req.ip,
+        });
+      }),
+    );
+  }
+}
+```
+
+#### 5. Gerenciamento de Segredos: Adeus .env
+
+Em produção, arquivos `.env` são um risco (copiados por erro, deixados em imagens Docker).
+Use gerenciadores de segredos dedicados como **AWS Secrets Manager** ou **HashiCorp Vault**.
+A aplicação, ao iniciar, pede seus segredos à API segura em memória, nunca os escrevendo em disco.
+
+A segurança é uma corrida armamentista constante. Mantenha suas dependências atualizadas (`npm audit`), alterne suas chaves criptográficas regularmente e eduque sua equipe.

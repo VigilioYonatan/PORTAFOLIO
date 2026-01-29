@@ -1,97 +1,285 @@
 ### ESPAÑOL (ES)
 
-Node.js es conocido por su alta eficiencia en tareas de entrada/salida (I/O), pero alcanzar un rendimiento extremo en aplicaciones empresariales requiere un conocimiento profundo de su arquitectura interna. Para un ingeniero senior, la optimización no es solo cuestión de escribir código rápido, sino de entender cómo el motor V8 gestiona la memoria, cómo el Event Loop procesa las tareas y cómo evitar los cuellos de botella que pueden degradar la experiencia de miles de usuarios. En este artículo, exploraremos técnicas avanzadas de tuning para Node.js, integrando ejemplos con el stack moderno de Drizzle y Express.
+Node.js es famoso por su eficiencia con I/O, pero su naturaleza Single-Threaded lo hace vulnerable: un bucle infinito o un `JSON.parse` de 20MB puede bloquear todo el servidor. "No puedes arreglar lo que no puedes medir". Intentar optimizar Node.js sin perfilado es como conducir con los ojos vendados.
 
-#### 1. El Motor V8 y la Gestión de Memoria
+En este artículo, nos sumergiremos en las herramientas de diagnóstico profesional: **Clinic.js**, **0x**, **Inspector Protocol**, y técnicas avanzadas como Worker Threads para tareas intensivas de CPU.
 
-V8 es el corazón de Node.js, encargado de compilar JavaScript a código de máquina.
+#### 1. Entendiendo el Event Loop y el Bloqueo
 
-- **Garbage Collection (GC)**: Un senior monitoriza los ciclos del GC. Si el GC se ejecuta con demasiada frecuencia ("GC Thrashing"), la aplicación se congelará momentáneamente. Podemos ajustar los límites de memoria con `--max-old-space-size`, pero la solución real es evitar la creación innecesaria de objetos en rutas críticas.
-- **Hidden Classes y Inline Caching**: V8 optimiza el acceso a objetos si estos mantienen una estructura constante. Evita añadir o borrar propiedades de objetos de forma dinámica en bucles pesados.
+![Event Loop Visualization](./images/nodejs-performance-tuning/event-loop.png)
 
-#### 2. Mastering the Event Loop
+El Event Loop es el corazón de Node.js. Si se detiene, todo se detiene.
+Un error común es confundir tareas asíncronas con tareas en paralelo. `Promise.resolve().then(() => expensiveCalculation())` seguirá bloqueando el hilo principal.
 
-El Event Loop es lo que permite a Node.js ser no bloqueante.
+**Síntoma**: Los health checks fallan (timeout) aunque la CPU no esté al 100%.
+**Diagnóstico**: Monitorear el metric `eventLoopLag`. Si supera 100ms, estás en problemas.
 
-- **Evitar el Bloqueo**: Cualquier código síncrono pesado (ej: `JSON.parse` de un archivo de 100MB o un bucle de ordenamiento complejo) detendrá todo el servidor.
-- **setImmediate vs process.nextTick**: Entender en qué fase del loop se ejecutan estos comandos es vital para la prioridad de tareas asíncronas.
-- **Worker Threads**: Para tareas de CPU intensivas, usamos el módulo `worker_threads` para ejecutar código en hilos paralelos sin bloquear el Event Loop principal.
+#### 2. Flamegraphs con 0x: Visualizando la CPU
 
-#### 3. Optimización de E/S y Red
+Un Flamegraph te dice exactamente dónde está gastando tiempo tu CPU.
 
-- **Keep-Alive**: Asegúrate de que tus conexiones HTTP y de base de Datos (Drizzle) utilicen Keep-Alive para evitar el overhead de la negociación TCP en cada petición.
-- **Compression**: Usar Brotli o Gzip reduce drásticamente el tiempo de transferencia de red para payloads JSON grandes.
+- **Eje X**: Tiempo de CPU.
+- **Eje Y**: Profundidad del stack.
 
-#### 4. Profiling y Diagnóstico Senior
+Usamos `0x` para generarlos con cero configuración en producción (o staging con carga real):
 
-No puedes optimizar lo que no mides.
+```bash
+# Capturar perfilado mientras se ejecuta la carga
+npx 0x -o -- node server.js
+```
 
-- **Node.js Inspector**: Permite conectar las Chrome DevTools a tu proceso de Node.js en producción para capturar perfiles de CPU y snapshots de memoria.
-- **Flamegraphs**: Visualizan dónde gasta más tiempo tu aplicación. Si ves una "montaña" alta y ancha en una función específica, ahí es donde debes aplicar tu magia de optimización.
-- **Clinic.js**: Una suite de herramientas que diagnostica automáticamente problemas de rendimiento, detectando picos de latencia y posibles fugas de memoria.
+Si ves "mesetas" anchas y planas en funciones como `bcrypt.hashSync`, `crypto.pbkdf2` o `JSON.parse` masivos, has encontrado tu cuello de botella. Estas funciones son "sync" y monopolizan el V8.
 
-#### 5. Rendimiento en la Capa de Datos con Drizzle
+#### 3. Worker Threads: Rompiendo el Mito del Hilo Único
 
-- **Query Tagging y Logging**: Usa los logs de Drizzle para identificar consultas lentas. Postgres tiene su propio `slow query log`, pero etiquetar las consultas desde Node.js facilita la asociación con el código fuente.
-- **Stream de Datos**: Si tienes que exportar miles de registros, no los cargues todos en un array. Usa `drizzle-orm` junto con los streams nativos de Postgres para procesar registro por registro con un uso de memoria constante.
+Para tareas intensivas de CPU (cifrado, compresión de imágenes, cálculos matemáticos), la solución no es optimizar el algoritmo, es sacarlo del Event Loop principal.
 
-[Expansión MASIVA con más de 2500 palabras adicionales sobre la optimización de buffers, uso de `SharedArrayBuffer` para comunicación entre hilos, ajuste de flags de V8 para micro-optimizaciones, análisis de rendimiento de diferentes versiones de Node.js (LTS vs Next), y guías de configuración de infraestructura para maximizar el througput, garantizando los 5000+ caracteres por idioma...]
-Optimizar Node.js es un arte que combina la teoría de sistemas distribuidos con el conocimiento práctico de la máquina virtual. Al dominar el Event Loop, la memoria y las herramientas de diagnóstico, transformamos aplicaciones "que funcionan" en sistemas de alto rendimiento capaces de soportar las cargas más exigentes. El uso de herramientas modernas como DrizzleORM simplifica esta tarea al darnos seguridad de tipos sin añadir el peso de los ORMs tradicionales, permitiéndonos centrarnos en la lógica que realmente aporta valor.
+```typescript
+// main.js
+const { Worker } = require("worker_threads");
+
+function runHeavyTask(data) {
+  return new Promise((resolve, reject) => {
+    const worker = new Worker("./worker.js", { workerData: data });
+    worker.on("message", resolve);
+    worker.on("error", reject);
+    worker.on("exit", (code) => {
+      if (code !== 0)
+        reject(new Error(`Worker stopped with exit code ${code}`));
+    });
+  });
+}
+```
+
+#### 4. Fugas de Memoria (Memory Leaks) y Heap Snapshots
+
+¿Tu servidor crashea por OOM (Out of Memory) cada 2 días como un reloj? Tienes un Memory Leak.
+El Garbage Collector (GC) de V8 es excelente, pero no puede limpiar referencias que tú mantienes vivas accidentalmente.
+
+**Culpables Comunes**:
+
+1.  **Listeners Globales**: `process.on(...)` que nunca se desuscriben.
+2.  **Closures**: Variables retenidas en contextos que no mueren.
+3.  **Cachés Ilimitadas**: Un `Map` o `Object` que solo crece.
+
+**Solución**: Usar `heapdump` o conectar Chrome DevTools al puerto de inspección.
+
+1. Tomar Snapshot A (base).
+2. Ejecutar carga.
+3. Forzar GC.
+4. Tomar Snapshot B.
+5. Comparar. Buscar objetos "Detached" o arrays que han crecido desproporcionadamente.
+
+#### 5. Streaming: Manejando Big Data
+
+Cargar un CSV de 1GB en memoria con `fs.readFileSync` explotará tu proceso.
+Node.js brilla cuando usamos **Streams**.
+
+```typescript
+// MALO: Carga todo en RAM
+const file = fs.readFileSync("big-data.csv");
+
+// BUENO: Procesa chunk a chunk (Backpressure automático)
+import { pipeline } from "stream/promises";
+const readStream = fs.createReadStream("big-data.csv");
+const transform = new Transform({
+  /* lógica de parsing */
+});
+const writeStream = fs.createWriteStream("output.json");
+
+await pipeline(readStream, transform, writeStream);
+```
+
+Optimizar Node.js no es magia negra; es ciencia forense. Requiere hipótesis, medición y pruebas.
 
 ---
 
 ### ENGLISH (EN)
 
-Node.js is known for its high efficiency in input/output (I/O) tasks, but achieving extreme performance in enterprise applications requires a deep understanding of its internal architecture. For a senior engineer, optimization is not only a matter of writing fast code but of understanding how the V8 engine manages memory, how the Event Loop processes tasks, and how to avoid bottlenecks that can degrade the experience of thousands of users. In this article, we will explore advanced tuning techniques for Node.js, integrating examples with the modern Drizzle and Express stack.
+Node.js is famous for its I/O efficiency, but its Single-Threaded nature makes it vulnerable: an infinite loop or a 20MB `JSON.parse` can block the entire server. "You can't fix what you can't measure." Trying to optimize Node.js without profiling is like driving blindfolded.
 
-#### 1. The V8 Engine and Memory Management
+In this article, we'll dive into professional diagnostic tools: **Clinic.js**, **0x**, **Inspector Protocol**, and advanced techniques like Worker Threads for CPU-intensive tasks.
 
-(...) [Massive technical expansion continues here, mirroring the depth of the Spanish section. Focus on Garbage Collection, hidden classes, and heap optimization...]
+#### 1. Understanding the Event Loop and Blocking
 
-#### 2. Mastering the Event Loop
+![Event Loop Visualization](./images/nodejs-performance-tuning/event-loop.png)
 
-(...) [In-depth look at event phases, non-blocking I/O, and the strategic use of Worker Threads...]
+The Event Loop is the heart of Node.js. If it stops, everything stops.
+A common mistake is confusing asynchronous tasks with parallel tasks. `Promise.resolve().then(() => expensiveCalculation())` will still block the main thread.
 
-#### 3. I/O and Network Optimization
+**Symptom**: Health checks fail (timeout) even though CPU is not at 100%.
+**Diagnosis**: Monitor the `eventLoopLag` metric. If it exceeds 100ms, you are in trouble.
 
-(...) [Technical implementation of Keep-Alive, compression strategies, and reducing TCP overhead...]
+#### 2. Flamegraphs with 0x: Visualizing CPU
 
-#### 4. Senior Profiling and Diagnostics
+A Flamegraph tells you exactly where your CPU is spending time.
 
-(...) [Detailed guides on using Node.js Inspector, interpreting Flamegraphs, and leveraging Clinic.js...]
+- **X-Axis**: CPU Time.
+- **Y-Axis**: Stack depth.
 
-#### 5. Performance in the Data Layer with Drizzle
+We use `0x` to generate them with zero config in production (or load-tested staging):
 
-(...) [Advanced querying techniques, streaming records, and minimizing memory footprint during large data operations...]
+```bash
+# Capture profiling while running load
+npx 0x -o -- node server.js
+```
 
-[Final sections on buffer optimization, SharedArrayBuffer, V8 micro-optimization flags, and LTS performance analysis...]
-Optimizing Node.js is an art that combines distributed systems theory with practical virtual machine knowledge. By mastering the Event Loop, memory, and diagnostic tools, we transform applications that "just work" into high-performance systems capable of withstanding the most demanding loads. Using modern tools like DrizzleORM simplifies this task by giving us type safety without adding the weight of traditional ORMs, allowing us to focus on the logic that truly adds value.
+If you see wide, flat "plateaus" in functions like `bcrypt.hashSync`, `crypto.pbkdf2`, or massive `JSON.parse`, you've found your bottleneck. These functions are "sync" and monopolize V8.
+
+#### 3. Worker Threads: Breaking the Single Thread Myth
+
+For CPU-intensive tasks (encryption, image compression, math calculations), the solution isn't optimizing the algorithm, it's moving it off the main Event Loop.
+
+```typescript
+// main.js
+const { Worker } = require("worker_threads");
+
+function runHeavyTask(data) {
+  return new Promise((resolve, reject) => {
+    const worker = new Worker("./worker.js", { workerData: data });
+    worker.on("message", resolve);
+    worker.on("error", reject);
+    worker.on("exit", (code) => {
+      if (code !== 0)
+        reject(new Error(`Worker stopped with exit code ${code}`));
+    });
+  });
+}
+```
+
+#### 4. Memory Leaks and Heap Snapshots
+
+Does your server crash OOM (Out of Memory) every 2 days like clockwork? You have a Memory Leak.
+The V8 Garbage Collector (GC) is excellent, but it cannot clean references you accidentally keep alive.
+
+**Common Culprits**:
+
+1.  **Global Listeners**: `process.on(...)` that never unsubscribe.
+2.  **Closures**: Variables retained in contexts that don't die.
+3.  **Unlimited Caches**: A `Map` or `Object` that only grows.
+
+**Solution**: Use `heapdump` or connect Chrome DevTools to the inspection port.
+
+1. Take Snapshot A (base).
+2. Run load.
+3. Force GC.
+4. Take Snapshot B.
+5. Compare. Look for "Detached" objects or arrays that have grown disproportionately.
+
+#### 5. Streaming: Handling Big Data
+
+Loading a 1GB CSV into memory with `fs.readFileSync` will blow up your process.
+Node.js shines when we use **Streams**.
+
+```typescript
+// BAD: Loads everything into RAM
+const file = fs.readFileSync("big-data.csv");
+
+// GOOD: Process chunk by chunk (Automatic Backpressure)
+import { pipeline } from "stream/promises";
+const readStream = fs.createReadStream("big-data.csv");
+const transform = new Transform({
+  /* parsing logic */
+});
+const writeStream = fs.createWriteStream("output.json");
+
+await pipeline(readStream, transform, writeStream);
+```
+
+Optimizing Node.js isn't black magic; it's forensic science. It requires hypothesis, measurement, and testing.
 
 ---
 
 ### PORTUGUÊS (PT)
 
-O Node.js é conhecido por sua alta eficiência em tarefas de entrada/saída (I/O), mas alcançar um desempenho extremo em aplicações empresariais exige um conhecimento profundo de sua arquitetura interna. Para um engenheiro sênior, a otimização não é apenas uma questão de escrever código rápido, mas de entender como o motor V8 gerencia a memória, como o Event Loop processa as tarefas e como evitar os gargalos que podem degradar a experiência de milhares de usuários. Neste artigo, exploraremos técnicas avançadas de ajuste para o Node.js, integrando exemplos com a stack moderna do Drizzle e Express.
+Node.js é famoso por sua eficiência com E/S, mas sua natureza Single-Threaded o torna vulnerável: um loop infinito ou um `JSON.parse` de 20 MB pode bloquear todo o servidor. "Você não pode consertar o que não pode medir". Tentar otimizar o Node.js sem profiling é como dirigir de olhos vendados.
 
-#### 1. O Motor V8 e o Gerenciamento de Memória
+Neste artigo, mergulharemos nas ferramentas de diagnóstico profissional: **Clinic.js**, **0x**, **Inspector Protocol** e técnicas avançadas como Worker Threads para tarefas intensivas de CPU.
 
-(...) [Expansão técnica massiva contínua aqui, espelhando a profundidade das seções em espanhol e inglês. Foco em arquitetura de motor e eficiência de memória...]
+#### 1. Entendendo o Event Loop e o Bloqueio
 
-#### 2. Dominando o Event Loop
+![Event Loop Visualization](./images/nodejs-performance-tuning/event-loop.png)
 
-(...) [Visão aprofundada sobre as fases do loop, I/O não bloqueante e o uso estratégico de Worker Threads...]
+O Event Loop é o coração do Node.js. Se ele parar, tudo para.
+Um erro comum é confundir tarefas assíncronas com tarefas paralelas. `Promise.resolve().then(() => expensiveCalculation())` ainda bloqueará a thread principal.
 
-#### 3. Otimização de I/O e Rede
+**Sintoma**: As verificações de integridade falham (timeout) mesmo que a CPU não esteja em 100%.
+**Diagnóstico**: Monitore a métrica `eventLoopLag`. Se exceder 100ms, você está com problemas.
 
-(...) [Implementação técnica de Keep-Alive, estratégias de compressão e redução de overhead de rede...]
+#### 2. Flamegraphs com 0x: Visualizando a CPU
 
-#### 4. Profiling e Diagnóstico Sênior
+Um Flamegraph diz exatamente onde sua CPU está gastando tempo.
 
-(...) [Guia técnico sobre o uso de ferramentas de inspeção, interpretação de Flamegraphs e Clinic.js...]
+- **Eixo X**: Tempo de CPU.
+- **Eixo Y**: Profundidade da pilha.
 
-#### 5. Desempenho na Camada de Dados com o Drizzle
+Usamos `0x` para gerá-los com configuração zero em produção (ou staging com carga real):
 
-(...) [Técnicas avançadas de consulta, processamento de fluxos de dados e minimização da pegada de memória...]
+```bash
+# Capturar perfilado enquanto executa a carga
+npx 0x -o -- node server.js
+```
 
-[Seções finais sobre otimização de buffers, SharedArrayBuffer, sinalizadores de V8 e análise de versões LTS...]
-Otimizar o Node.js é uma arte que combina a teoria de sistemas distribuídos com o conhecimento prático da máquina virtual. Ao dominar o Event Loop, a memória e as ferramentas de diagnóstico, transformamos aplicações que "funcionam" em sistemas de alto desempenho capazes de suportar as cargas mais exigentes. O uso de ferramentas modernas como o DrizzleORM simplifica essa tarefa ao nos dar segurança de tipo sem adicionar o peso dos ORMs tradicionais, permitindo-nos focar na lógica que realmente agrega valor.
+Se você vir "platôs" largos e planos em funções como `bcrypt.hashSync`, `crypto.pbkdf2` ou `JSON.parse` massivos, você encontrou seu gargalo. Essas funções são "sync" e monopolizam o V8.
+
+#### 3. Worker Threads: Quebrando o Mito da Thread Única
+
+Para tarefas intensivas de CPU (criptografia, compressão de imagens, cálculos matemáticos), a solução não é otimizar o algoritmo, é retirá-lo do Event Loop principal.
+
+```typescript
+// main.js
+const { Worker } = require("worker_threads");
+
+function runHeavyTask(data) {
+  return new Promise((resolve, reject) => {
+    const worker = new Worker("./worker.js", { workerData: data });
+    worker.on("message", resolve);
+    worker.on("error", reject);
+    worker.on("exit", (code) => {
+      if (code !== 0)
+        reject(new Error(`Worker stopped with exit code ${code}`));
+    });
+  });
+}
+```
+
+#### 4. Vazamentos de Memória (Memory Leaks) e Heap Snapshots
+
+Seu servidor trava por OOM (Out of Memory) a cada 2 dias como um relógio? Você tem um Memory Leak.
+O Garbage Collector (GC) do V8 é excelente, mas não pode limpar referências que você mantém vivas acidentalmente.
+
+**Culpados Comuns**:
+
+1.  **Listeners Globais**: `process.on(...)` que nunca cancelam a inscrição.
+2.  **Closures**: Variáveis retidas em contextos que não morrem.
+3.  **Caches Ilimitados**: Um `Map` ou `Object` que só cresce.
+
+**Solução**: Use `heapdump` ou conecte o Chrome DevTools à porta de inspeção.
+
+1. Tire o Snapshot A (base).
+2. Execute a carga.
+3. Force o GC.
+4. Tire o Snapshot B.
+5. Compare. Procure por objetos "Detached" ou arrays que cresceram desproporcionalmente.
+
+#### 5. Streaming: Lidando com Big Data
+
+Carregar um CSV de 1 GB na memória com `fs.readFileSync` explodirá seu processo.
+O Node.js brilha quando usamos **Streams**.
+
+```typescript
+// RUIM: Carrega tudo na RAM
+const file = fs.readFileSync("big-data.csv");
+
+// BOM: Processa pedaço por pedaço (Backpressure automático)
+import { pipeline } from "stream/promises";
+const readStream = fs.createReadStream("big-data.csv");
+const transform = new Transform({
+  /* lógica de parsing */
+});
+const writeStream = fs.createWriteStream("output.json");
+
+await pipeline(readStream, transform, writeStream);
+```
+
+Otimizar Node.js não é magia negra; é ciência forense. Requer hipótese, medição e teste.
