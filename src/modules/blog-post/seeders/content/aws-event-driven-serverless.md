@@ -1,95 +1,399 @@
 ### ESPAÑOL (ES)
 
-La computación Serverless en AWS ha evolucionado de simples Lambdas aisladas a complejas arquitecturas orientadas a eventos que pueden escalar de forma casi infinita con una gestión mínima de infraestructura. Un arquitecto senior entiende que el verdadero poder de Serverless no reside solo en el código de la función, sino en la coreografía de eventos entre servicios. AWS EventBridge, SQS, SNS y Step Functions son las piezas clave para construir sistemas desacoplados, resilientes y rentables. En este artículo, exploraremos patrones avanzados de diseño serverless utilizando TypeScript y Drizzle.
+El paradigma "Serverless" a menudo se malinterpreta como simplemente "FaaS" (Function as a Service) o Lambda. Sin embargo, la verdadera arquitectura Serverless en AWS es una filosofía de integración agnóstica de transporte, coreografiada por eventos y gobernada por definiciones de infraestructura estricta. Este artículo explora cómo construir sistemas distribuidos resilientes, desacoplados y escalables utilizando EventBridge, SQS, Step Functions y AWS CDK con TypeScript.
 
-#### 1. Coreografía con EventBridge: El Bus de Datos Moderno
+#### 1. Arquitectura Basada en Eventos (EDA) con EventBridge
 
-EventBridge es el sucesor espiritual de CloudWatch Events y se ha convertido en el sistema nervioso central de las aplicaciones en AWS.
+![EventBridge Architecture](./images/aws-event-driven-serverless/architecture.png)
 
-- **Diseño de Event Schema**: Definir esquemas claros para tus eventos es vital. Usar el "EventBridge Schema Registry" asegura que todos los microservicios hablen el mismo idioma.
-- **Content-based Routing**: EventBridge permite filtrar y enrutar eventos basándose en su contenido JSON sin necesidad de una Lambda intermedia. Esto reduce la latencia y los costes significativamente.
+En una arquitectura monolítica, los componentes están fuertemente acoplados. En EDA, los productores de eventos no conocen a los consumidores. AWS EventBridge es el sistema nervioso central que permite este desacoplamiento.
 
-#### 2. Orquestación con AWS Step Functions
+**EventBridge Pipes** es una característica avanzada que permite conectar fuentes de eventos (como DynamoDB Streams, Kinesis o SQS) directamente a destinos (como Step Functions o API Destinations) sin escribir una sola línea de código Lambda "pegamento", reduciendo la latencia y el costo.
 
-Para procesos de negocio que requieren una secuencia estricta de pasos, reintentos y manejo de errores complejo, Step Functions es la herramienta adecuada.
+**Ejemplo de Infraestructura como Código (CDK/TypeScript):**
 
-- **Saga Pattern**: Implementar transacciones distribuidas en serverless es un reto. Con Step Functions, podemos orquestar una serie de Lambdas y, si una falla, ejecutar "compensaciones" para revertir los cambios realizados en pasos anteriores.
-- **Direct Service Integrations**: Un senior sabe que a veces el mejor código es el que no se escribe. Step Functions puede interactuar directamente con DynamoDB, SQS o incluso llamar a APIs externas a través de API Gateway sin invocar una Lambda.
+```typescript
+// lib/order-service-stack.ts
+import * as cdk from "aws-cdk-lib";
+import * as events from "aws-cdk-lib/aws-events";
+import * as targets from "aws-cdk-lib/aws-events-targets";
+import * as lambda from "aws-cdk-lib/aws-lambda";
 
-#### 3. Persistencia Serverless con Drizzle y Aurora Serverless v2
+export class OrderServiceStack extends cdk.Stack {
+  constructor(scope: cdk.App, id: string, props?: cdk.StackProps) {
+    super(scope, id, props);
 
-El mayor desafío de las Lambdas es la gestión de conexiones a la base de datos (Database connections exhaustion).
+    const eventBus = new events.EventBus(this, "OrderBus", {
+      eventBusName: "com.mycompany.orders",
+    });
 
-- **RDS Proxy**: Es obligatorio cuando usamos Postgres con Lambdas de alto tráfico. Actúa como un pull de conexiones compartido que sobrevive a los reinicios de los contenedores de Lambda.
-- **SQL-first con Drizzle**: Usar Drizzle en Lambda es ideal por su ínfimo tiempo de "Cold Start". A diferencia de otros ORMs pesados, Drizzle es una capa ligera que no retrasa la ejecución inicial de tu función.
+    const inventoryFunction = new lambda.Function(this, "InventoryHandler", {
+      runtime: lambda.Runtime.NODEJS_20_X,
+      handler: "index.handler",
+      code: lambda.Code.fromAsset("lambdas/inventory"),
+    });
 
-#### 4. Resiliencia y Manejo de Errores
+    // Regla: Solo procesar eventos donde el estado del pedido sea "CREATED"
+    new events.Rule(this, "OrderCreatedRule", {
+      eventBus: eventBus,
+      eventPattern: {
+        source: ["com.mycompany.orders"],
+        detailType: ["OrderCreated"],
+        detail: {
+          status: ["CREATED"],
+          totalAmount: [{ numeric: [">", 100] }], // Filtrado de contenido
+        },
+      },
+      targets: [new targets.LambdaFunction(inventoryFunction)],
+    });
+  }
+}
+```
 
-- **Dead Letter Queues (DLQ)**: Configurar colas de error para Lambdas asíncronas y EventBridge es fundamental para no perder datos críticos.
-- **Idempotencia**: Dado que AWS garantiza la entrega de eventos "al menos una vez", tu lógica de Drizzle debe ser capaz de manejar eventos duplicados sin causar inconsistencias. Usamos claves de idempotencia en nuestras tablas para verificar si un evento ya fue procesado.
+#### 2. Patrón SQS + Lambda + DLQ para Resiliencia
 
-#### 5. Optimización de Costes y Rendimiento
+El fallo es inevitable. Las redes tienen jitter, las bases de datos tienen timeouts. Un sistema robusto no es aquel que nunca falla, sino aquel que maneja el fallo con gracia.
 
-- **Power Tuning**: No todas las Lambdas necesitan 10GB de RAM. Usamos herramientas como "AWS Lambda Power Tuning" para encontrar el equilibrio perfecto entre coste y tiempo de ejecución.
-- **Provisioned Concurrency**: Para funciones críticas que no pueden permitirse latencia de cold start, reservamos capacidad de ejecución.
+El patrón **SQS Batch Processing** con **ReportBatchItemFailures** es crucial. Si una Lambda procesa un lote de 10 mensajes y falla el mensaje #7, no quieres reprocesar los 10 mensajes (y potencialmente duplicar transacciones de los mensajes 1-6).
 
-[Expansión MASIVA con más de 2500 palabras adicionales sobre el uso de AWS CDK para infraestructura como código, patrones de "Claim Check" para mover grandes payloads a S3, monitoreo con AWS X-Ray para trazabilidad distribuida y comparativas de rendimiento entre arquitecturas asíncronas de colas frente a buses de eventos...]
-La arquitectura serverless requiere un cambio de mentalidad: de "servidores que corren código" a "servicios que reaccionan a eventos". Un ingeniero senior domina esta transición, optimizando cada interacción para ser lo más desacoplada posible. Con TypeScript y Drizzle, elevamos la seguridad de tipos desde la base de datos hasta el bus de eventos, creando sistemas que no solo son escalables, sino también mantenibles y predecibles bajo cualquier carga.
+**Implementación de Manejo de Errores Parciales (TypeScript):**
+
+```typescript
+import { SQSBatchResponse, SQSBatchItemFailure, SQSEvent } from "aws-lambda";
+
+export const handler = async (event: SQSEvent): Promise<SQSBatchResponse> => {
+  const batchItemFailures: SQSBatchItemFailure[] = [];
+
+  for (const record of event.Records) {
+    try {
+      await processOrder(JSON.parse(record.body));
+    } catch (error) {
+      console.error(`Error processing message ${record.messageId}`, error);
+      // Marcamos solo este mensaje como fallido para que SQS lo reintente
+      batchItemFailures.push({ itemIdentifier: record.messageId });
+    }
+  }
+
+  return { batchItemFailures };
+};
+```
+
+#### 3. Idempotencia y Observabilidad con Lambda Powertools
+
+En sistemas distribuidos, "Exactly-once delivery" es casi imposible. Lo que tenemos es "At-least-once delivery". Esto significa que tu Lambda _será_ invocada múltiples veces con el mismo evento en caso de reintentos. Tu código **debe** ser idempotente.
+
+**AWS Lambda Powertools para TypeScript** ofrece utilidades decorativas para manejar esto sin ensuciar la lógica de negocio.
+
+```typescript
+import { Logger } from "@aws-lambda-powertools/logger";
+import { Metrics } from "@aws-lambda-powertools/metrics";
+import { Tracer } from "@aws-lambda-powertools/tracer";
+import { makeIdempotent } from "@aws-lambda-powertools/idempotency";
+import { DynamoDBPersistenceLayer } from "@aws-lambda-powertools/idempotency/dynamodb";
+import middy from "@middy/core";
+
+const logger = new Logger({ serviceName: "orderService" });
+const tracer = new Tracer({ serviceName: "orderService" });
+const metrics = new Metrics({ namespace: "MyCompany/Orders" });
+
+const persistenceStore = new DynamoDBPersistenceLayer({
+  tableName: "IdempotencyTable",
+});
+
+const lambdaHandler = async (event: any, context: any) => {
+  logger.info("Procesando pedido", { orderId: event.detail.orderId });
+
+  // Lógica de negocio crítica (pago, actualización de inventario)
+  // Si este evento ya se procesó con éxito en los últimos X minutos,
+  // esta función retornará el resultado anterior sin ejecutar la lógica de nuevo.
+  return await processPayment(event.detail);
+};
+
+// Pipeline de Middleware: Tracing -> Logging -> Idempotencia
+export const handler = middy(lambdaHandler)
+  .use(tracer.captureLambdaHandler())
+  .use(
+    makeIdempotent({
+      persistenceStore,
+      key: (event) => event.detail.orderId, // Clave de idempotencia única
+    }),
+  );
+```
+
+#### 4. Orquestación de Estados con Step Functions
+
+Para flujos de larga duración (por ejemplo, un proceso de aprobación de préstamo que toma días), Lambda es inadecuado debido a su límite de tiempo de 15 minutos. **AWS Step Functions** actúa como una máquina de estados finitos que persiste el progreso de cada ejecución.
+
+Con **Workflow Studio**, puedes diseñar visualmente el flujo, pero como ingenieros, preferimos definirlo en CDK para control de versiones y reproducibilidad. Step Functions se integra nativamente con más de 200 servicios de AWS, permitiendo llamadas directas a DynamoDB `PutItem` o SNS `Publish` sin necesidad de una función Lambda intermediaria, reduciendo costos y puntos de falla.
+
+### Conclusión
+
+Construir en AWS Serverless requiere un cambio de mentalidad: de "escribir código para todo" a "configurar servicios para la mayoría de las cosas y escribir código solo para la lógica de dominio única". Al dominar EventBridge, patrones de SQS y herramientas como Powertools y CDK, elevamos nuestros sistemas de simples scripts en la nube a arquitecturas empresariales resilientes.
 
 ---
 
 ### ENGLISH (EN)
 
-Serverless computing on AWS has evolved from simple isolated Lambdas to complex event-driven architectures that can scale almost infinitely with minimal infrastructure management. A senior architect understands that the true power of Serverless lies not just in the function code, but in the choreography of events between services. AWS EventBridge, SQS, SNS, and Step Functions are the key pieces for building decoupled, resilient, and cost-effective systems. In this article, we will explore advanced serverless design patterns using TypeScript and Drizzle.
+The "Serverless" paradigm is often misunderstood as simply "FaaS" (Function as a Service) or Lambda. However, true Serverless architecture on AWS is a philosophy of transport-agnostic integration, choreographed by events, and governed by strict infrastructure definitions. This article explores how to build resilient, decoupled, and scalable distributed systems using EventBridge, SQS, Step Functions, and AWS CDK with TypeScript.
 
-#### 1. Choreography with EventBridge: The Modern Data Bus
+#### 1. Event-Driven Architecture (EDA) with EventBridge
 
-(...) [Massive technical expansion continues here, mirroring the depth of the Spanish section. Focus on event routing, schema management, and cost optimization...]
+![EventBridge Architecture](./images/aws-event-driven-serverless/architecture.png)
 
-#### 2. Orchestration with AWS Step Functions
+In a monolithic architecture, components are tightly coupled. In EDA, event producers do not know about consumers. AWS EventBridge is the central nervous system that enables this decoupling.
 
-(...) [Detailed analysis of state machines, direct integrations, and the Saga pattern for distributed transactions...]
+**EventBridge Pipes** is an advanced feature that allows connecting event sources (like DynamoDB Streams, Kinesis, or SQS) directly to targets (like Step Functions or API Destinations) without writing a single line of "glue" Lambda code, reducing latency and cost.
 
-#### 3. Serverless Persistence with Drizzle and Aurora Serverless v2
+**Infrastructure as Code Example (CDK/TypeScript):**
 
-(...) [Technical implementation of RDS Proxy, connection pooling, and the benefits of Drizzle's low footprint in Lambdas...]
+```typescript
+// lib/order-service-stack.ts
+import * as cdk from "aws-cdk-lib";
+import * as events from "aws-cdk-lib/aws-events";
+import * as targets from "aws-cdk-lib/aws-events-targets";
+import * as lambda from "aws-cdk-lib/aws-lambda";
 
-#### 4. Resilience and Error Handling
+export class OrderServiceStack extends cdk.Stack {
+  constructor(scope: cdk.App, id: string, props?: cdk.StackProps) {
+    super(scope, id, props);
 
-(...) [Strategic advice on DLQs, idempotency patterns, and atomic operations with Drizzle...]
+    const eventBus = new events.EventBus(this, "OrderBus", {
+      eventBusName: "com.mycompany.orders",
+    });
 
-#### 5. Cost and Performance Optimization
+    const inventoryFunction = new lambda.Function(this, "InventoryHandler", {
+      runtime: lambda.Runtime.NODEJS_20_X,
+      handler: "index.handler",
+      code: lambda.Code.fromAsset("lambdas/inventory"),
+    });
 
-(...) [Technical guides for Power Tuning, Provisioned Concurrency, and choosing the right Lambda memory settings...]
+    // Rule: Only process events where order status is "CREATED"
+    new events.Rule(this, "OrderCreatedRule", {
+      eventBus: eventBus,
+      eventPattern: {
+        source: ["com.mycompany.orders"],
+        detailType: ["OrderCreated"],
+        detail: {
+          status: ["CREATED"],
+          totalAmount: [{ numeric: [">", 100] }], // Content filtering
+        },
+      },
+      targets: [new targets.LambdaFunction(inventoryFunction)],
+    });
+  }
+}
+```
 
-[Final sections on AWS CDK, Claim Check patterns, X-Ray tracing, and event bus vs queue comparisons...]
-Serverless architecture requires a shift in mindset: from "servers running code" to "services reacting to events." A senior engineer masters this transition, optimizing every interaction to be as decoupled as possible. With TypeScript and Drizzle, we elevate type safety from the database to the event bus, creating systems that are not only scalable but also maintainable and predictable under any load.
+#### 2. SQS + Lambda + DLQ Pattern for Resilience
+
+Failure is inevitable. Networks have jitter, databases have timeouts. A robust system is not one that never fails, but one that handles failure gracefully.
+
+The **SQS Batch Processing** pattern with **ReportBatchItemFailures** is crucial. If a Lambda processes a batch of 10 messages and message #7 fails, you don't want to reprocess all 10 messages (and potentially duplicate transactions from messages 1-6).
+
+**Partial Failure Handling Implementation (TypeScript):**
+
+```typescript
+import { SQSBatchResponse, SQSBatchItemFailure, SQSEvent } from "aws-lambda";
+
+export const handler = async (event: SQSEvent): Promise<SQSBatchResponse> => {
+  const batchItemFailures: SQSBatchItemFailure[] = [];
+
+  for (const record of event.Records) {
+    try {
+      await processOrder(JSON.parse(record.body));
+    } catch (error) {
+      console.error(`Error processing message ${record.messageId}`, error);
+      // Checkmark only this message as failed so SQS retries it specifically
+      batchItemFailures.push({ itemIdentifier: record.messageId });
+    }
+  }
+
+  return { batchItemFailures };
+};
+```
+
+#### 3. Idempotency and Observability with Lambda Powertools
+
+In distributed systems, "Exactly-once delivery" is nearly impossible. What we have is "At-least-once delivery". This means your Lambda _will_ be invoked multiple times with the same event in case of retries. Your code **must** be idempotent.
+
+**AWS Lambda Powertools for TypeScript** offers decorative utilities to handle this without cluttering business logic.
+
+```typescript
+import { Logger } from "@aws-lambda-powertools/logger";
+import { Metrics } from "@aws-lambda-powertools/metrics";
+import { Tracer } from "@aws-lambda-powertools/tracer";
+import { makeIdempotent } from "@aws-lambda-powertools/idempotency";
+import { DynamoDBPersistenceLayer } from "@aws-lambda-powertools/idempotency/dynamodb";
+import middy from "@middy/core";
+
+const logger = new Logger({ serviceName: "orderService" });
+const tracer = new Tracer({ serviceName: "orderService" });
+const metrics = new Metrics({ namespace: "MyCompany/Orders" });
+
+const persistenceStore = new DynamoDBPersistenceLayer({
+  tableName: "IdempotencyTable",
+});
+
+const lambdaHandler = async (event: any, context: any) => {
+  logger.info("Processing order", { orderId: event.detail.orderId });
+
+  // Critical business logic (payment, inventory update)
+  // If this event was already successfully processed in the last X minutes,
+  // this function will return the stored result without executing logic again.
+  return await processPayment(event.detail);
+};
+
+// Middleware Pipeline: Tracing -> Logging -> Idempotency
+export const handler = middy(lambdaHandler)
+  .use(tracer.captureLambdaHandler())
+  .use(
+    makeIdempotent({
+      persistenceStore,
+      key: (event) => event.detail.orderId, // Unique idempotency key
+    }),
+  );
+```
+
+#### 4. State Orchestration with Step Functions
+
+For long-running flows (e.g., a loan approval process taking days), Lambda is unsuitable due to its 15-minute timeout limit. **AWS Step Functions** acts as a finite state machine that persists the progress of each execution.
+
+With **Workflow Studio**, you can visually design the flow, but as engineers, we prefer defining it in CDK for version control and reproducibility. Step Functions natively integrates with over 200 AWS services, allowing direct calls to DynamoDB `PutItem` or SNS `Publish` without needing an intermediate Lambda function, reducing costs and failure points.
+
+### Conclusion
+
+Building on AWS Serverless requires a mindset shift: from "writing code for everything" to "configuring services for most things and writing code only for unique domain logic." By mastering EventBridge, SQS patterns, and tools like Powertools and CDK, we elevate our systems from simple cloud scripts to resilient enterprise architectures.
 
 ---
 
 ### PORTUGUÊS (PT)
 
-A computação Serverless na AWS evoluiu de simples Lambdas isoladas para arquiteturas complexas orientadas a eventos que podem escalar quase infinitamente com o mínimo de gerenciamento de infraestrutura. Um arquiteto sênior entende que o verdadeiro poder do Serverless reside não apenas no código da função, mas na coreografia de eventos entre os serviços. AWS EventBridge, SQS, SNS e Step Functions são as peças-chave para construir sistemas desacoplados, resilientes e econômicos. Neste artigo, exploraremos padrões avançados de design serverless usando TypeScript e Drizzle.
+O paradigma "Serverless" é frequentemente mal interpretado como simplesmente "FaaS" (Function as a Service) ou Lambda. No entanto, a verdadeira arquitetura Serverless na AWS é uma filosofia de integração agnóstica de transporte, coreografada por eventos e governada por definições de infraestrutura estrita. Este artigo explora como construir sistemas distribuídos resilientes, desacoplados e escaláveis usando EventBridge, SQS, Step Functions e AWS CDK com TypeScript.
 
-#### 1. Coreografia com o EventBridge: O Barramento de Dados Moderno
+#### 1. Arquitetura Baseada em Eventos (EDA) com EventBridge
 
-(...) [Expansão técnica massiva contínua aqui, espelhando a profundidade das seções em espanhol e inglês. Foco em arquitetura de eventos e orquestração de nuvem...]
+![EventBridge Architecture](./images/aws-event-driven-serverless/architecture.png)
 
-#### 2. Orquestração com AWS Step Functions
+Em uma arquitetura monolítica, os componentes são fortemente acoplados. Na EDA, os produtores de eventos não conhecem os consumidores. O AWS EventBridge é o sistema nervoso central que permite esse desacoplamento.
 
-(...) [Visão aprofundada sobre máquinas de estado, transações distribuídas e padrões de compensação...]
+**EventBridge Pipes** é um recurso avançado que permite conectar fontes de eventos (como DynamoDB Streams, Kinesis ou SQS) diretamente a destinos (como Step Functions ou API Destinations) sem escrever uma única linha de código Lambda "cola", reduzindo a latência e o custo.
 
-#### 3. Persistência Serverless com Drizzle e Aurora Serverless v2
+**Exemplo de Infraestrutura como Código (CDK/TypeScript):**
 
-(...) [Implementação técnica de RDS Proxy e por que o Drizzle é ideal para tempos de Cold Start reduzidos...]
+```typescript
+// lib/order-service-stack.ts
+import * as cdk from "aws-cdk-lib";
+import * as events from "aws-cdk-lib/aws-events";
+import * as targets from "aws-cdk-lib/aws-events-targets";
+import * as lambda from "aws-cdk-lib/aws-lambda";
 
-#### 4. Resiliência e Tratamento de Erros
+export class OrderServiceStack extends cdk.Stack {
+  constructor(scope: cdk.App, id: string, props?: cdk.StackProps) {
+    super(scope, id, props);
 
-(...) [Estratégias para Dead Letter Queues, idempotência de eventos e consistência de dados...]
+    const eventBus = new events.EventBus(this, "OrderBus", {
+      eventBusName: "com.mycompany.orders",
+    });
 
-#### 5. Otimização de Custos e Desempenho
+    const inventoryFunction = new lambda.Function(this, "InventoryHandler", {
+      runtime: lambda.Runtime.NODEJS_20_X,
+      handler: "index.handler",
+      code: lambda.Code.fromAsset("lambdas/inventory"),
+    });
 
-(...) [Guias para Power Tuning, concorrência provisionada e dimensionamento de Lambdas...]
+    // Regra: Processar apenas eventos onde o status do pedido é "CREATED"
+    new events.Rule(this, "OrderCreatedRule", {
+      eventBus: eventBus,
+      eventPattern: {
+        source: ["com.mycompany.orders"],
+        detailType: ["OrderCreated"],
+        detail: {
+          status: ["CREATED"],
+          totalAmount: [{ numeric: [">", 100] }], // Filtragem de conteúdo
+        },
+      },
+      targets: [new targets.LambdaFunction(inventoryFunction)],
+    });
+  }
+}
+```
 
-[Seções finais sobre AWS CDK, padrões de Claim Check, rastreabilidade com X-Ray e monitoramento...]
-A arquitetura serverless exige uma mudança de mentalidade: de "servidores que executam código" para "serviços que reagem a eventos". Um engenheiro sênior domina essa transição, otimizando cada interação para ser o mais desacoplada possível. Com o TypeScript e o Drizzle, elevamos a segurança de tipo do banco de dados ao barramento de eventos, criando sistemas que não são apenas escaláveis, mas também fáceis de manter e previsíveis sob qualquer carga.
+#### 2. Padrão SQS + Lambda + DLQ para Resiliência
+
+A falha é inevitável. As redes têm jitter, os bancos de dados têm timeouts. Um sistema robusto não é aquele que nunca falha, mas aquele que lida com a falha com elegância.
+
+O padrão **SQS Batch Processing** com **ReportBatchItemFailures** é crucial. Se uma Lambda processa um lote de 10 mensagens e a mensagem nº 7 falhar, você não quer reprocessar todas as 10 mensagens (e potencialmente duplicar transações das mensagens 1-6).
+
+**Implementação de Tratamento de Falhas Parciais (TypeScript):**
+
+```typescript
+import { SQSBatchResponse, SQSBatchItemFailure, SQSEvent } from "aws-lambda";
+
+export const handler = async (event: SQSEvent): Promise<SQSBatchResponse> => {
+  const batchItemFailures: SQSBatchItemFailure[] = [];
+
+  for (const record of event.Records) {
+    try {
+      await processOrder(JSON.parse(record.body));
+    } catch (error) {
+      console.error(`Erro processando mensagem ${record.messageId}`, error);
+      // Marcamos apenas esta mensagem como falha para o SQS tentar novamente
+      batchItemFailures.push({ itemIdentifier: record.messageId });
+    }
+  }
+
+  return { batchItemFailures };
+};
+```
+
+#### 3. Idempotência e Observabilidade com Lambda Powertools
+
+Em sistemas distribuídos, a entrega "Exatamente uma vez" (Exactly-once) é quase impossível. O que temos é "Pelo menos uma vez" (At-least-once). Isso significa que sua Lambda _será_ invocada várias vezes com o mesmo evento em caso de novas tentativas. Seu código **deve** ser idempotente.
+
+**AWS Lambda Powertools para TypeScript** oferece utilitários decorativos para lidar com isso sem sujar a lógica de negócios.
+
+```typescript
+import { Logger } from "@aws-lambda-powertools/logger";
+import { Metrics } from "@aws-lambda-powertools/metrics";
+import { Tracer } from "@aws-lambda-powertools/tracer";
+import { makeIdempotent } from "@aws-lambda-powertools/idempotency";
+import { DynamoDBPersistenceLayer } from "@aws-lambda-powertools/idempotency/dynamodb";
+import middy from "@middy/core";
+
+const logger = new Logger({ serviceName: "orderService" });
+const tracer = new Tracer({ serviceName: "orderService" });
+const metrics = new Metrics({ namespace: "MyCompany/Orders" });
+
+const persistenceStore = new DynamoDBPersistenceLayer({
+  tableName: "IdempotencyTable",
+});
+
+const lambdaHandler = async (event: any, context: any) => {
+  logger.info("Processando pedido", { orderId: event.detail.orderId });
+
+  // Lógica de negócios crítica (pagamento, atualização de estoque)
+  // Se este evento já foi processado com sucesso nos últimos X minutos,
+  // esta função retornará o resultado armazenado sem executar a lógica novamente.
+  return await processPayment(event.detail);
+};
+
+// Pipeline de Middleware: Tracing -> Logging -> Idempotência
+export const handler = middy(lambdaHandler)
+  .use(tracer.captureLambdaHandler())
+  .use(
+    makeIdempotent({
+      persistenceStore,
+      key: (event) => event.detail.orderId, // Chave única de idempotência
+    }),
+  );
+```
+
+#### 4. Orquestração de Estados com Step Functions
+
+Para fluxos de longa duração (por exemplo, um processo de aprovação de empréstimo que leva dias), o Lambda é inadequado devido ao seu limite de tempo de 15 minutos. **AWS Step Functions** atua como uma máquina de estados finitos que persiste o progresso de cada execução.
+
+Com o **Workflow Studio**, você pode projetar visualmente o fluxo, mas como engenheiros, preferimos defini-lo no CDK para controle de versão e reprodutibilidade. O Step Functions se integra nativamente com mais de 200 serviços da AWS, permitindo chamadas diretas ao DynamoDB `PutItem` ou SNS `Publish` sem a necessidade de uma função Lambda intermediária, reduzindo custos e pontos de falha.
+
+### Conclusão
+
+Construir no AWS Serverless requer uma mudança de mentalidade: de "escrever código para tudo" para "configurar serviços para a maioria das coisas e escrever código apenas para lógica de domínio única". Ao dominar EventBridge, padrões SQS e ferramentas como Powertools e CDK, elevamos nossos sistemas de simples scripts na nuvem para arquiteturas empresariais resilientes.

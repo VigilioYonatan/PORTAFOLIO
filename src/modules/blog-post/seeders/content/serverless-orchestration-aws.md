@@ -1,97 +1,355 @@
 ### ESPAÑOL (ES)
 
-El paradigma Serverless ha revolucionado la forma en que construimos aplicaciones, permitiendo a los desarrolladores centrarse exclusivamente en el código sin preocuparse por la gestión de servidores. Sin embargo, cuando una aplicación crece, la orquestación de múltiples funciones Lambda se vuelve un reto crítico. Un ingeniero senior sabe que encadenar Lambdas directamente es un antipatrón que genera acoplamiento y fragilidad. En este artículo técnico exhaustivo, exploraremos cómo orquestar arquitecturas serverless de alto rendimiento utilizando AWS Step Functions, EventBridge y DrizzleORM para construir sistemas resilientes y escalables.
+La promesa de Serverless es seductora: escalar a cero, pagar por uso y olvidarse de los parches de seguridad del sistema operativo. Sin embargo, para los ingenieros experimentados, Serverless presenta un nuevo conjunto de desafíos arquitectónicos. El problema más común es convertir una arquitectura limpia en un "Lambda Spaghetti", donde la función A llama a la B, que llama a la C, y nadie sabe qué pasa cuando la B falla.
 
-#### 1. Orquestación vs Coreografía: Step Functions y EventBridge
+La solución para sistemas empresariales robustos es el desacoplamiento mediante **EventBridge** y la orquestación mediante **AWS Step Functions**. En este artículo, elevaremos el nivel, integrando estas herramientas con **Drizzle ORM** y **AWS Lambda Powertools**.
 
-- **Coreografía (Event-Driven)**: Los microservicios se comunican mediante eventos a través de AWS EventBridge. Cada servicio es autónomo y reacciona a los cambios de estado en el sistema. Es ideal para desacoplamiento máximo.
-- **Orquestación (Workflows)**: Usamos AWS Step Functions para definir flujos de trabajo complejos y de larga duración. Step Functions gestiona el estado de la transacción, las reintentos automáticos y el manejo de errores complejos (Try/Catch/Finally a nivel de arquitectura).
+#### 1. Orquestación vs. Coreografía
 
-#### 2. Implementación de Workflows Senior con Step Functions
+![Step Functions Orchestration](./images/serverless-orchestration-aws/orchestration.png)
 
-- **State Machines**: Definimos máquinas de estado que coordinan múltiples Lambdas escritas en NestJS. Step Functions nos permite manejar la lógica de negocio de alto nivel (ej: flujo de pago -> reserva de inventario -> notificación de envío) fuera del código de la función.
-- **Error Handling y Retries**: Configuramos políticas de reintentos exponenciales con "jitter" para evitar saturar servicios externos o bases de datos durante fallos temporales.
-- **Wait States y Callbacks**: Step Functions permite pausar un flujo hasta que un humano lo apruebe o un sistema externo devuelva un callback, permitiendo flujos de trabajo que duran días o semanas de forma eficiente.
+Es el debate eterno. ¿Debemos usar un director central o dejar que los servicios reaccionen libremente?
 
-#### 3. El Rol de DrizzleORM en Arquitecturas Serverless
+- **Coreografía (EventBridge)**: Ideal para notificar a sistemas dispares. "El usuario se registró". El servicio de Email manda bienvenida, el de Analytics registra el evento. El productor no conoce a los consumidores.
+- **Orquestación (Step Functions)**: Obligatorio para procesos de negocio transaccionales. "Cobrar tarjeta -> Si éxito -> Generar factura -> Si fallo -> Reembolsar". Necesitas un estado centralizado y manejo de errores determinista.
 
-Trabajar con bases de Datos relacionales en Lambda tiene desafíos de conexión.
+#### 2. Pattern SAGA con Step Functions
 
-- **RDS Proxy**: Un senior siempre utiliza RDS Proxy para gestionar el pool de conexiones. Drizzle, al ser ligero y carecer de un pesado runtime de ORM tradicional, se conecta de forma instantánea al proxy, minimizando el Cold Start de la Lambda.
-- **Transacciones Híbridas**: Para flujos críticos, usamos Drizzle para asegurar que cada paso de la Lambda sea atómico antes de devolver el control a Step Functions.
+En microservicios distribuidos, las transacciones ACID no existen. Emulamos la atomicidad usando el patrón Saga con acciones compensatorias.
 
-#### 4. EventBridge: El Backbone de la Arquitectura Senior
+```json
+/* Definición ASL (Amazon States Language) simplificada */
+{
+  "StartAt": "ProcesarPago",
+  "States": {
+    "ProcesarPago": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:us-east-1:123:function:ChargeCard",
+      "Next": "ReservarInventario",
+      "Catch": [
+        { "ErrorEquals": ["PaymentDeclined"], "Next": "NotificarUsuario" }
+      ]
+    },
+    "ReservarInventario": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:us-east-1:123:function:ReserveItem",
+      "Next": "EnviarPedido",
+      "Catch": [
+        {
+          "ErrorEquals": ["OutOfStock", "States.Timeout"],
+          "Next": "ReembolsarPago" // <--- COMPENSACIÓN
+        }
+      ]
+    },
+    "ReembolsarPago": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:us-east-1:123:function:RefundCard",
+      "End": true
+    }
+  }
+}
+```
 
-- **Event Bus Personalizados**: No usamos solo el bus por defecto. Creamos buses específicos para diferentes dominios de negocio, mejorando la seguridad y la claridad.
-- **Reglas y Transformaciones de Entrada**: Un senior utiliza las reglas de EventBridge para filtrar eventos y transformar el payload antes de invocar a la Lambda destino, ahorrando cómputo innecesario dentro de la función.
-- **Schema Registry**: Documentamos automáticamente la estructura de nuestros eventos, permitiendo que otros equipos descubran y consuman nuestros eventos de forma segura.
+#### 3. Drizzle ORM en Entornos Lambda
 
-#### 5. Observabilidad y Monitoreo en el Pantano Serverless
+Conectar a una base de datos relacional desde Lambda es peligroso. Si tu Lambda escala a 1,000 ejecuciones concurrentes, abrirás 1,000 conexiones a Postgres, agotando la memoria del servidor DB.
 
-- **AWS X-Ray**: Vital para la trazabilidad distribuida. Nos permite visualizar cómo una petición viaja desde el API Gateway, pasa por Step Functions, invoca tres Lambdas y termina con una consulta de Drizzle en Postgres.
-- **CloudWatch ServiceLens**: Una vista holística de la salud de nuestra arquitectura serverless, uniendo logs, métricas y trazas en un solo lugar.
+**Estrategias de Mitigación**:
 
-[Expansión MASIVA con más de 2500 palabras adicionales sobre el uso de AWS CDK para definir workflows como código, estrategias de optimización de Cold Starts en Lambdas de NestJS, patrones de IDEMPOTENCIA vitales para reintentos en Step Functions, y guías sobre cómo realizar pruebas de integración de workflows completos usando LocalStack, garantizando los 5000+ caracteres por idioma...]
-Orquestar sistemas serverless es un ejercicio de diseño de flujos y gestión de estados distribuidos. Al combinar la potencia de Step Functions y EventBridge con la agilidad y seguridad de NestJS y DrizzleORM, podemos construir infraestructuras que sean no solo escalables al infinito, sino también fáciles de depurar y mantener. La madurez de un arquitecto se demuestra en cómo gestiona los fallos y la complejidad de la red, convirtiendo procesos frágiles en workflows de grado industrial.
+1.  **RDS Proxy**: Un intermediario gestionado por AWS que multiplexa conexiones. Tu Lambda habla con el Proxy, el Proxy habla con la DB.
+2.  **Serverless V2 + Data API**: Si usas Aurora Serverless v2, la Data API permite consultas vía HTTP (sin conexión persistente), lo cual Drizzle soporta nativamente con `drizzle-orm/aws-data-api/pg`.
+
+```typescript
+// Drizzle con AWS Data API (Zero Connection Management)
+import { drizzle } from "drizzle-orm/aws-data-api/pg";
+import { RDSDataClient } from "@aws-sdk/client-rds-data";
+
+const client = new RDSDataClient({ region: "us-east-1" });
+const db = drizzle(client, {
+  database: "app_db",
+  secretArn: "arn:aws:secretsmanager:...",
+  resourceArn: "arn:aws:rds:...",
+});
+
+// Esto es stateless y seguro para Lambdas masivas
+export const handler = async () => {
+  return await db.select().from(users).limit(10);
+};
+```
+
+#### 4. Observabilidad con Lambda Powertools
+
+`console.log` no escala. Necesitas logs estructurados (JSON), trazas distribuidas (X-Ray) y métricas personalizadas. **AWS Lambda Powertools for TypeScript** es la librería estándar de facto.
+
+```typescript
+import { Logger } from "@aws-lambda-powertools/logger";
+import { Tracer } from "@aws-lambda-powertools/tracer";
+
+const logger = new Logger({ serviceName: "orderService" });
+const tracer = new Tracer({ serviceName: "orderService" });
+
+export const handler = async (event: any, context: any) => {
+  // Logger inyecta automáticamente requestId, cold_start, y memory_limit
+  logger.info("Processing order", { orderId: event.id });
+
+  const segment = tracer.getSegment(); // Integración con X-Ray
+  // ... lógica ...
+};
+```
+
+#### 5. Integraciones Directas (SDK Integration)
+
+La mejor función Lambda es la que no escribes. Step Functions puede llamar directamente a DynamoDB, SNS, SQS o más de 200 servicios sin una sola línea de código Python/Node.js.
+
+- **Ventaja 1**: Menor costo (pagas por transición de estado, no por GB-segundo de Lambda).
+- **Ventaja 2**: Cero Cold Starts.
+- **Ventaja 3**: Retries y Backoff exponencial gestionados por la plataforma.
+
+**Ejemplo**: "Guardar en DynamoDB" puede ser un estado `DynamoDB:PutItem` directo en el State Machine.
+
+#### 6. Desarrollo Local: SST vs LocalStack
+
+Desarrollar Serverless localmente es doloroso.
+
+- **LocalStack**: Intenta emular AWS en tu laptop con Docker. Es pesado y a menudo incompleto.
+- **SST (Serverless Stack)**: El enfoque moderno. Despliega infraestructura real de desarrollo en tu cuenta AWS en segundos, y hace "Live Lambda Development", proxyando las peticiones de la Lambda real en la nube a tu código corriendo localmente en VS Code. Esto permite debuggear con breakpoints tráfico real de la nube.
+
+Dominar la orquestación Serverless significa dejar de pensar en "servidores que ejecutan funciones" y empezar a pensar en "flujos de eventos gestionados".
 
 ---
 
 ### ENGLISH (EN)
 
-The Serverless paradigm has revolutionized how we build applications, allowing developers to focus exclusively on code without worrying about server management. However, as an application grows, orchestrating multiple Lambda functions becomes a critical challenge. A senior engineer knows that chaining Lambdas directly is an anti-pattern that creates coupling and fragility. In this exhaustive technical article, we will explore how to orchestrate high-performance serverless architectures using AWS Step Functions, EventBridge, and DrizzleORM to build resilient and scalable systems.
+The Serverless promise is seductive: scale to zero, pay per use, and forget about OS security patches. However, for experienced engineers, Serverless presents a new set of architectural challenges. The most common problem is turning a clean architecture into "Lambda Spaghetti," where function A calls B, which calls C, and no one knows what happens when B fails.
 
-#### 1. Orchestration vs. Choreography: Step Functions and EventBridge
+The solution for robust enterprise systems is decoupling via **EventBridge** and orchestration via **AWS Step Functions**. In this article, we will raise the bar by integrating these tools with **Drizzle ORM** and **AWS Lambda Powertools**.
 
-- **Choreography (Event-Driven)**: Microservices communicate via events through AWS EventBridge. Each service is autonomous and reacts to state changes in the system. It is ideal for maximum decoupling.
-- **Orchestration (Workflows)**: We use AWS Step Functions to define complex, long-running workflows. Step Functions manages transaction state, automatic retries, and complex error handling (Try/Catch/Finally at the architectural level).
-  (...) [Massive technical expansion continues here, mirroring the depth of the Spanish section. Focus on state machines, EventBridge patterns, and serverless observability...]
+#### 1. Choreography vs. Orchestration
 
-#### 2. Implementing Senior Workflows with Step Functions
+![Step Functions Orchestration](./images/serverless-orchestration-aws/orchestration.png)
 
-(...) [In-depth analysis of state machine design, retry policies with exponential backoff and jitter, and handling long-running processes...]
+It is the eternal debate. Should we use a central director or let services react freely?
 
-#### 3. The Role of DrizzleORM in Serverless Architectures
+- **Choreography (EventBridge)**: Ideal for notifying disparate systems. "User registered." The Email service sends a welcome, Analytics logs the event. The producer does not know the consumers.
+- **Orchestration (Step Functions)**: Mandatory for transactional business processes. "Charge card -> If success -> Generate invoice -> If failure -> Refund". You need centralized state and deterministic error handling.
 
-(...) [Technical guides on using RDS Proxy to manage connection pools, minimizing Lambda cold starts, and ensuring atomicity with Drizzle...]
+#### 2. SAGA Pattern with Step Functions
 
-#### 4. EventBridge: The Backbone of Senior Architecture
+In distributed microservices, ACID transactions do not exist. We emulate atomicity using the Saga pattern with compensatory actions.
 
-(...) [Strategic advice on custom event buses, input transformations, and documentation with the EventBridge Schema Registry...]
+```json
+/* Simplified ASL (Amazon States Language) definition */
+{
+  "StartAt": "ProcessPayment",
+  "States": {
+    "ProcessPayment": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:us-east-1:123:function:ChargeCard",
+      "Next": "ReserveInventory",
+      "Catch": [{ "ErrorEquals": ["PaymentDeclined"], "Next": "NotifyUser" }]
+    },
+    "ReserveInventory": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:us-east-1:123:function:ReserveItem",
+      "Next": "ShipOrder",
+      "Catch": [
+        {
+          "ErrorEquals": ["OutOfStock", "States.Timeout"],
+          "Next": "RefundPayment" // <--- COMPENSATION
+        }
+      ]
+    },
+    "RefundPayment": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:us-east-1:123:function:RefundCard",
+      "End": true
+    }
+  }
+}
+```
 
-#### 5. Observability and Monitoring in the Serverless Swamp
+#### 3. Drizzle ORM in Lambda Environments
 
-(...) [Detailed analysis of AWS X-Ray distributed tracing and using CloudWatch ServiceLens for holistic monitoring...]
+Connecting to a relational database from Lambda is dangerous. If your Lambda scales to 1,000 concurrent executions, you will open 1,000 connections to Postgres, exhausting DB server memory.
 
-[Final sections on IaC with AWS CDK, cold start optimization for NestJS Lambdas, idempotency patterns, and LocalStack testing...]
-Orchestrating serverless systems is an exercise in flow design and distributed state management. By combining the power of Step Functions and EventBridge with the agility and security of NestJS and DrizzleORM, we can build infrastructures that are not only infinitely scalable but also easy to debug and maintain. An architect's maturity is shown in how they manage failure and network complexity, turning fragile processes into industrial-grade workflows.
+**Mitigation Strategies**:
+
+1.  **RDS Proxy**: An AWS-managed middleman that multiplexes connections. Your Lambda talks to the Proxy, the Proxy talks to the DB.
+2.  **Serverless V2 + Data API**: If using Aurora Serverless v2, the Data API allows queries via HTTP (no persistent connection), which Drizzle natively supports with `drizzle-orm/aws-data-api/pg`.
+
+```typescript
+// Drizzle with AWS Data API (Zero Connection Management)
+import { drizzle } from "drizzle-orm/aws-data-api/pg";
+import { RDSDataClient } from "@aws-sdk/client-rds-data";
+
+const client = new RDSDataClient({ region: "us-east-1" });
+const db = drizzle(client, {
+  database: "app_db",
+  secretArn: "arn:aws:secretsmanager:...",
+  resourceArn: "arn:aws:rds:...",
+});
+
+// This is stateless and safe for massive Lambdas
+export const handler = async () => {
+  return await db.select().from(users).limit(10);
+};
+```
+
+#### 4. Observability with Lambda Powertools
+
+`console.log` does not scale. You need structured logs (JSON), distributed tracing (X-Ray), and custom metrics. **AWS Lambda Powertools for TypeScript** is the de facto standard library.
+
+```typescript
+import { Logger } from "@aws-lambda-powertools/logger";
+import { Tracer } from "@aws-lambda-powertools/tracer";
+
+const logger = new Logger({ serviceName: "orderService" });
+const tracer = new Tracer({ serviceName: "orderService" });
+
+export const handler = async (event: any, context: any) => {
+  // Logger automatically injects requestId, cold_start, and memory_limit
+  logger.info("Processing order", { orderId: event.id });
+
+  const segment = tracer.getSegment(); // Integration with X-Ray
+  // ... logic ...
+};
+```
+
+#### 5. Direct Integrations (SDK Integration)
+
+The best Lambda function is the one you don't write. Step Functions can define tasks that call directly to DynamoDB, SNS, SQS, or over 200 services without a single line of Python/Node.js code.
+
+- **Advantage 1**: Lower cost (pay per state transition, not Lambda GB-second).
+- **Advantage 2**: Zero Cold Starts.
+- **Advantage 3**: Platform-managed Retries and exponential Backoff.
+
+**Example**: "Save to DynamoDB" can be a direct `DynamoDB:PutItem` state in the State Machine.
+
+#### 6. Local Development: SST vs. LocalStack
+
+Developing Serverless locally is painful.
+
+- **LocalStack**: Attempts to emulate AWS on your laptop using Docker. It is heavy and often incomplete.
+- **SST (Serverless Stack)**: The modern approach. It deploys real dev infrastructure to your AWS account in seconds and performs "Live Lambda Development," proxying requests from the real cloud Lambda to your code running locally in VS Code. This allows debugging real cloud traffic with breakpoints.
+
+Mastering Serverless orchestration means stopping thinking about "servers running functions" and starting to think about "managed event flows."
 
 ---
 
 ### PORTUGUÊS (PT)
 
-O paradigma Serverless revolucionou a forma como construímos aplicações, permitindo que os desenvolvedores se concentrem exclusivamente no código sem se preocuparem com o gerenciamento de servidores. No entanto, à medida que uma aplicação cresce, a orquestração de várias funções Lambda torna-se um desafio crítico. Um engenheiro sênior sabe que encadear Lambdas diretamente é um antipadrão que gera acoplamento e fragilidade. Neste artigo técnico abrangente, exploraremos como orquestrar arquiteturas serverless de alto desempenho usando AWS Step Functions, EventBridge e DrizzleORM para construir sistemas resilientes e escaláveis.
+A promessa do Serverless é sedutora: escalar para zero, pagar por uso e esquecer os patches de segurança do sistema operacional. No entanto, para engenheiros experientes, o Serverless apresenta um novo conjunto de desafios arquiteturais. O problema mais comum é transformar uma arquitetura limpa em um "Lambda Spaghetti", onde a função A chama B, que chama C, e ninguém sabe o que acontece quando B falha.
 
-#### 1. Orquestração vs. Coreografia: Step Functions e EventBridge
+A solução para sistemas empresariais robustos é o desacoplamento via **EventBridge** e a orquestração via **AWS Step Functions**. Neste artigo, elevaremos o nível, integrando essas ferramentas com **Drizzle ORM** e **AWS Lambda Powertools**.
 
-- **Coreografia (Event-Driven)**: Os microsserviços se comunicam por meio de eventos através do AWS EventBridge. Cada serviço é autônomo e reage às mudanças de estado no sistema. É ideal para o desacoplamento máximo.
-- **Orquestração (Workflows)**: Usamos o AWS Step Functions para definir fluxos de trabalho complexos e de longa duração. O Step Functions gerencia o estado da transação, as tentativas automáticas e o tratamento de erros complexos (Try/Catch/Finally em nível de arquitetura).
-  (...) [Expansão técnica massiva contínua aqui, espelhando a profundidade das seções em espanhol e inglês. Foco em arquiteturas orientadas a eventos e resiliência...]
+#### 1. Orquestração vs. Coreografia
 
-#### 2. Implementação de Workflows Sênior com Step Functions
+![Step Functions Orchestration](./images/serverless-orchestration-aws/orchestration.png)
 
-(...) [Visão aprofundada sobre design de máquinas de estado, políticas de re-tentativa e gerenciamento de processos de longa duração...]
+É o debate eterno. Devemos usar um diretor central ou deixar os serviços reagirem livremente?
 
-#### 3. O Papel do DrizzleORM em Arquiteturas Serverless
+- **Coreografia (EventBridge)**: Ideal para notificar sistemas díspares. "Usuário registrado". O serviço de Email envia boas-vindas, o Analytics registra o evento. O produtor não conhece os consumidores.
+- **Orquestração (Step Functions)**: Obrigatória para processos de negócios transacionais. "Cobrar cartão -> Se sucesso -> Gerar fatura -> Se falha -> Reembolsar". Você precisa de estado centralizado e tratamento de erros determinístico.
 
-(...) [Guia técnico sobre o uso do RDS Proxy para gerenciamento de pools de conexão e redução de Cold Starts...]
+#### 2. Padrão SAGA com Step Functions
 
-#### 4. EventBridge: A Espinha Dorsal da Arquitetura Sênior
+Em microsserviços distribuídos, transações ACID não existem. Emulamos atomicidade usando o padrão Saga com ações compensatórias.
 
-(...) [Conselhos sênior sobre barramentos de eventos personalizados, transformações de entrada e Schema Registry...]
+```json
+/* Definição simplificada ASL (Amazon States Language) */
+{
+  "StartAt": "ProcesarPago",
+  "States": {
+    "ProcesarPago": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:us-east-1:123:function:ChargeCard",
+      "Next": "ReservarInventario",
+      "Catch": [
+        { "ErrorEquals": ["PaymentDeclined"], "Next": "NotificarUsuario" }
+      ]
+    },
+    "ReservarInventario": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:us-east-1:123:function:ReserveItem",
+      "Next": "EnviarPedido",
+      "Catch": [
+        {
+          "ErrorEquals": ["OutOfStock", "States.Timeout"],
+          "Next": "ReembolsarPago" // <--- COMPENSAÇÃO
+        }
+      ]
+    },
+    "ReembolsarPago": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:us-east-1:123:function:RefundCard",
+      "End": true
+    }
+  }
+}
+```
 
-#### 5. Observabilidade e Monitoramento no "Pântano" Serverless
+#### 3. Drizzle ORM em Ambientes Lambda
 
-(...) [Análise detalhada de rastreamento distribuído com AWS X-Ray e monitoramento holístico com CloudWatch...]
+Conectar-se a um banco de dados relacional a partir do Lambda é perigoso. Se sua Lambda escalar para 1.000 execuções simultâneas, você abrirá 1.000 conexões com o Postgres, esgotando a memória do servidor DB.
 
-[Seções finais sobre IaC com AWS CDK, otimização de Cold Starts para NestJS e padrões de idempotência...]
-Orquestrar sistemas serverless é um exercício de design de fluxos e gerenciamento de estados distribuídos. Ao combinar a potência do Step Functions e do EventBridge com a agilidade e segurança do NestJS e do DrizzleORM, podemos construir infraestruturas que não apenas escalam ao infinito, mas também são fáceis de depurar e manter. A maturidade de um arquiteto se demonstra em como ele gerencia falhas e a complexidade da rede, transformando processos frágeis em fluxos de trabalho de nível industrial.
+**Estratégias de Mitigação**:
+
+1.  **RDS Proxy**: Um intermediário gerenciado pela AWS que multiplexa conexões. Sua Lambda fala com o Proxy, o Proxy fala com o DB.
+2.  **Serverless V2 + Data API**: Se usar Aurora Serverless v2, a Data API permite consultas via HTTP (sem conexão persistente), o que o Drizzle suporta nativamente com `drizzle-orm/aws-data-api/pg`.
+
+```typescript
+// Drizzle com AWS Data API (Gerenciamento Zero de Conexão)
+import { drizzle } from "drizzle-orm/aws-data-api/pg";
+import { RDSDataClient } from "@aws-sdk/client-rds-data";
+
+const client = new RDSDataClient({ region: "us-east-1" });
+const db = drizzle(client, {
+  database: "app_db",
+  secretArn: "arn:aws:secretsmanager:...",
+  resourceArn: "arn:aws:rds:...",
+});
+
+// Isso é stateless e seguro para Lambdas massivas
+export const handler = async () => {
+  return await db.select().from(users).limit(10);
+};
+```
+
+#### 4. Observabilidade com Lambda Powertools
+
+`console.log` não escala. Você precisa de logs estruturados (JSON), rastreamento distribuído (X-Ray) e métricas personalizadas. **AWS Lambda Powertools for TypeScript** é a biblioteca padrão de fato.
+
+```typescript
+import { Logger } from "@aws-lambda-powertools/logger";
+import { Tracer } from "@aws-lambda-powertools/tracer";
+
+const logger = new Logger({ serviceName: "orderService" });
+const tracer = new Tracer({ serviceName: "orderService" });
+
+export const handler = async (event: any, context: any) => {
+  // O logger injeta automaticamente requestId, cold_start e memory_limit
+  logger.info("Processing order", { orderId: event.id });
+
+  const segment = tracer.getSegment(); // Integração com X-Ray
+  // ... lógica ...
+};
+```
+
+#### 5. Integrações Diretas (SDK Integration)
+
+A melhor função Lambda é aquela que você não escreve. O Step Functions pode definir tarefas que chamam diretamente o DynamoDB, SNS, SQS ou mais de 200 serviços sem uma única linha de código Python/Node.js.
+
+- **Vantagem 1**: Menor custo (pague por transição de estado, não por GB-segundo da Lambda).
+- **Vantagem 2**: Zero Cold Starts.
+- **Vantagem 3**: Novas tentativas e Backoff exponencial gerenciados pela plataforma.
+
+**Exemplo**: "Salvar no DynamoDB" pode ser um estado direto `DynamoDB:PutItem` na Máquina de Estado.
+
+#### 6. Desenvolvimento Local: SST vs LocalStack
+
+Desenvolver Serverless localmente é doloroso.
+
+- **LocalStack**: Tenta emular a AWS no seu laptop usando Docker. É pesado e muitas vezes incompleto.
+- **SST (Serverless Stack)**: A abordagem moderna. Implanta infraestrutura real de desenvolvimento em sua conta AWS em segundos e faz "Live Lambda Development", roteando as solicitações da Lambda real na nuvem para seu código rodando localmente no VS Code. Isso permite depurar tráfego real da nuvem com breakpoints.
+
+Dominar a orquestração Serverless significa parar de pensar em "servidores executando funções" e começar a pensar em "fluxos de eventos gerenciados".

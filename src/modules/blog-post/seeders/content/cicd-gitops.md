@@ -1,113 +1,234 @@
 ### ESPAÑOL (ES)
 
-El ciclo de vida del desarrollo de software moderno exige una velocidad y una fiabilidad que solo se pueden conseguir mediante la automatización extrema. CI/CD (Integración Continua y Despliegue Continuo) ha evolucionado hacia el modelo **GitOps**, donde el estado deseado de nuestra infraestructura y aplicaciones está definido de forma declarativa en Git y se sincroniza automáticamente con el cluster de Kubernetes. Para un ingeniero senior, dominar estas tuberías de despliegue es tan crítico como escribir código eficiente. En este artículo exhaustivo, exploraremos cómo diseñar flujos de GitOps modernos para aplicaciones NestJS y DrizzleORM utilizando herramientas de nivel industrial.
+El modelo tradicional de CI/CD (Jenkins enviando comandos SSH o `kubectl apply` imperativo desde el pipeline) es frágil, inseguro y difícil de auditar. "ClickOps" y cambios manuales en el cluster llevan al temido **Configuration Drift**.
 
-#### 1. Integración Continua (CI) de Alta Fidelidad
+**GitOps** es el estándar moderno para Continuous Delivery en Kubernetes: **Git es la única fuente de la verdad**. Si no está en Git, no existe. Usamos un operador en el cluster (ArgoCD o Flux) para reconciliar el estado deseado con el estado real.
 
-La CI no es solo pasar tests; es el guardián de la calidad de producción.
+#### 1. Separación de Responsabilidades: CI vs CD
 
-- **Validación Estática Multicapa**: Usamos ESLint para el estilo, pero también herramientas como `tsc` para verificar tipos, `Husky` para pre-commit hooks, y escaneos de seguridad estáticos (SAST) para detectar patrones vulnerables.
-- **Builds de Docker Herméticos**: La CI genera imágenes inmutables y multi-stage. Un senior asegura que las imágenes sean lo más pequeñas posibles (usando distroless o alpine) y que se etiqueten con el hash del commit para garantizar la trazabilidad total.
+![GitOps Workflow](./images/cicd-gitops/gitops-workflow.png)
 
-#### 2. GitOps: La Verdad Única reside en Git
+- **Continuous Integration (CI)**: GitHub Actions / GitLab CI.
+  - Responsabilidad: Ejecutar tests, linting, compilar código y **construir un artefacto inmutable (Docker Image)**.
+  - Salida: Una imagen Docker tageada con el Commit SHA (NUNCA `latest`).
+- **Continuous Delivery (CD)**: ArgoCD.
+  - Responsabilidad: Monitorear el repo de infraestructura (`infra-repo`) y aplicar cambios al cluster K8s.
 
-- **Declaratividad total**: En lugar de ejecutar comandos manuales, definimos archivos YAML (Helm o Kustomize) que describen cómo debe ser el cluster.
-- **ArgoCD / Flux**: Estos operadores monitorizan el repositorio de configuración. Si alguien cambia manualmente un recurso en el cluster, GitOps lo revierte al estado original (drift correction). Esto garantiza que lo que ves en Git es exactamente lo que corre en producción.
+#### 2. El Loop de Retroalimentación
 
-#### 3. Gestión de Secretos en el Mundo GitOps
+No hacemos push directo al cluster. El CI hace un commit al repositorio de configuración:
 
-Guardar secretos en texto plano en Git es un pecado capital.
+```yaml
+# .github/workflows/deploy.yaml
+jobs:
+  update-manifest:
+    steps:
+      - name: Update Image Tag
+        run: |
+          yq e -i '.spec.template.spec.containers[0].image = "my-app:${{ github.sha }}"' k8s/deployment.yaml
+          git commit -am "Bump image version to ${{ github.sha }}"
+          git push
+```
 
-- **Sealed Secrets**: Los secretos se suben cifrados a Git y solo el controlador en el cluster tiene la clave para descifrarlos.
-- **External Secrets Operator**: Es la solución senior recomendada. El cluster se comunica con AWS Secrets Manager de forma segura para inyectar las credenciales de base de datos directamente en los pods sin que el desarrollador nunca toque el secreto real.
+ArgoCD detecta este cambio en Git y sincroniza el cluster automáticamente.
 
-#### 4. Estrategias de Despliegue Progresivo: El fin del "Pánico de Viernes"
+#### 3. ArgoCD: El Reconciliador y Self-Healing
 
-- **Canary Deployments**: Usamos Argo Rollouts para desplegar la nueva versión gradualmente (5%, 20%, 50%...). El sistema monitoriza automáticamente las métricas de error de NestJS y, ante la mínima anomalía, realiza un rollback automático.
-- **Blue-Green Deployments**: Ideal para cambios estructurales profundos, permitiendo tener dos entornos completos conviviendo antes de conmutar el tráfico de red mediante un balanceador de carga.
+ArgoCD no solo aplica cambios; protege el cluster. Si un desarrollador "cowboy" edita un recurso manualmente (`kubectl edit deployment`), ArgoCD detectará el estado "OutOfSync" y revertirá el cambio inmediatamente al estado definido en Git.
 
-#### 5. CI/CD para la Base de Datos con Drizzle Kit
+**Sincronización Avanzada con Sync Waves**:
+Podemos orquestar el orden de despliegue usando anotaciones:
 
-Las migraciones son el punto más delicado de cualquier pipeline.
+- `argocd.argoproj.io/sync-wave: "-1"` (Migración de BD)
+- `argocd.argoproj.io/sync-wave: "0"` (Deployment de App)
 
-- **Verification Step**: La CI valida que no haya "drift" entre tu código de Drizzle y el esquema actual antes de permitir el merge.
-- **Despliegue de Migraciones**: Usamos Jobs de Kubernetes que ejecutan `drizzle-kit push` o aplican el SQL generado en un contenedor efímero antes de que la nueva versión de la App intente arrancar.
+#### 4. Progressive Delivery: Argo Rollouts
 
-[Expansión MASIVA adicional de 3000+ caracteres incluyendo: Implementación de Trunk-Based Development para acelerar el feedback, configuración de ambientes volátiles (Preview Environments) por cada Pull Request, orquestación de despliegues globales multi-region utilizando AWS CodePipeline, monitoreo de la salud de la pipeline con métricas DORA, y guías sobre cómo automatizar la auditoría de costes de infraestructura dentro del flujo de CI/CD, garantizando un ecosistema DevOps inexpugnable...]
+Desplegar al 100% de los usuarios de golpe es arriesgado. Kubernetes nativo solo ofrece `RollingUpdate`. Con **Argo Rollouts**, implementamos Canary Releases inteligentes.
 
-GitOps no es solo un conjunto de herramientas; es un cambio cultural que devuelve el control y la responsabilidad de la infraestructura a los equipos de desarrollo. Al integrar NestJS y Drizzle en un flujo de GitOps robusto, eliminamos el factor humano del despliegue, permitiendo que el software fluya hacia los usuarios con una cadencia y seguridad que antes parecían imposibles.
+1.  Desplegar v2 al 5% del tráfico.
+2.  Esperar 5 minutos.
+3.  Consultar Prometheus: `sum(rate(http_requests_total{status=~"5.*"}[1m]))`.
+4.  Si la tasa de error < 1%, promover al 20%; si no, **Rollback Automático**.
+
+```yaml
+# rollout.yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+spec:
+  strategy:
+    canary:
+      steps:
+        - setWeight: 20
+        - pause: { duration: 1h }
+        - analysis:
+            templates:
+              - templateName: success-rate
+```
+
+#### 5. Gestión de Secretos en GitOps
+
+Nunca comiteamos secretos en texto plano.
+
+- **Sealed Secrets**: Cifrado asimétrico. Solo el controlador en el cluster puede descifrar.
+- **External Secrets Operator**: La mejor práctica empresarial. Los secretos viven en AWS Secrets Manager o HashiCorp Vault. El operador los sincroniza a `Secret` de K8s.
+
+GitOps transforma la operación de Kubernetes de una tarea manual propensa a errores a un proceso de software auditable, versionado y automatizado.
 
 ---
 
 ### ENGLISH (EN)
 
-The modern software development lifecycle demands a speed and reliability that can only be achieved through extreme automation. CI/CD (Continuous Integration and Continuous Deployment) has evolved toward the **GitOps** model, where the desired state of our infrastructure and applications is defined decoratively in Git and automatically synchronized with the Kubernetes cluster. For a senior engineer, mastering these deployment pipelines is as critical as writing efficient code. In this exhaustive article, we will explore how to design modern GitOps workflows for NestJS and DrizzleORM applications using industrial-grade tools.
+The traditional CI/CD model (Jenkins sending SSH commands or imperative `kubectl apply` from the pipeline) is fragile, insecure, and hard to audit. "ClickOps" and manual changes in the cluster lead to the dreaded **Configuration Drift**.
 
-#### 1. High-Fidelity Continuous Integration (CI)
+**GitOps** is the modern standard for Continuous Delivery in Kubernetes: **Git is the single source of truth**. If it's not in Git, it doesn't exist. We use an in-cluster operator (ArgoCD or Flux) to reconcile the desired state with the actual state.
 
-CI is not just about passing tests; it is the guardian of production quality.
+#### 1. Separation of Concerns: CI vs CD
 
-- **Multi-layer Static Validation**: We use ESLint for style, but also tools like `tsc` for type checking, `Husky` for pre-commit hooks, and static security scans (SAST) to detect vulnerable patterns.
-- **Hermetic Docker Builds**: CI generates immutable, multi-stage images. A senior ensures images are as small as possible (using distroless or alpine) and tagged with the commit hash to guarantee total traceability.
+![GitOps Workflow](./images/cicd-gitops/gitops-workflow.png)
 
-(Detailed technical guide on CI pipeline stages, security gate integration, and build optimization continue here...)
+- **Continuous Integration (CI)**: GitHub Actions / GitLab CI.
+  - Responsibility: Run tests, linting, compile code, and **build an immutable artifact (Docker Image)**.
+  - Output: A Docker image tagged with the Commit SHA (NEVER `latest`).
+- **Continuous Delivery (CD)**: ArgoCD.
+  - Responsibility: Monitor the infrastructure repo (`infra-repo`) and apply changes to the K8s cluster.
 
-#### 2. GitOps: The Single Source of Truth Resides in Git
+#### 2. The Feedback Loop
 
-- **Total Declarativity**: Instead of manual commands, we define YAML files (Helm or Kustomize) describing the cluster state.
-- **ArgoCD / Flux**: These operators monitor the config repository. If someone manually changes a resource, GitOps reverts it (drift correction). This ensures what you see in Git is exactly what runs in production.
+We don't push directly to the cluster. The CI pushes a commit to the configuration repository:
 
-(In-depth analysis of pull-based vs push-based systems and drift management continue here...)
+```yaml
+# .github/workflows/deploy.yaml
+jobs:
+  update-manifest:
+    steps:
+      - name: Update Image Tag
+        run: |
+          yq e -i '.spec.template.spec.containers[0].image = "my-app:${{ github.sha }}"' k8s/deployment.yaml
+          git commit -am "Bump image version to ${{ github.sha }}"
+          git push
+```
 
-#### 3. Secrets Management in the GitOps World
+ArgoCD detects this change in Git and automatically syncs the cluster.
 
-Storing secrets in plain text in Git is a capital sin.
+#### 3. ArgoCD: The Reconciler and Self-Healing
 
-- **Sealed Secrets**: Secrets are uploaded encrypted, and only the cluster controller has the key to decrypt them.
-- **External Secrets Operator**: The recommended senior solution. The cluster securely communicates with AWS Secrets Manager to inject database credentials into pods without the developer ever touching the real secret.
+ArgoCD doesn't just apply changes; it protects the cluster. If a "cowboy" developer edits a resource manually (`kubectl edit deployment`), ArgoCD will detect the "OutOfSync" state and immediately revert the change to the state defined in Git.
 
-#### 4. Progressive Deployment Strategies: Ending "Friday Panic"
+**Advanced Syncing with Sync Waves**:
+We can orchestrate deployment order using annotations:
 
-- **Canary Deployments**: We use Argo Rollouts to deploy the new version gradually (5%, 20%, 50%...). The system automatically monitors NestJS error metrics and performs an automatic rollback at the slightest anomaly.
-- **Blue-Green Deployments**: Ideal for deep structural changes, allowing two complete environments to coexist before switching network traffic.
+- `argocd.argoproj.io/sync-wave: "-1"` (DB Migration)
+- `argocd.argoproj.io/sync-wave: "0"` (App Deployment)
 
-#### 5. CI/CD for Databases with Drizzle Kit
+#### 4. Progressive Delivery: Argo Rollouts
 
-Migrations are the most delicate point of any pipeline.
+Deploying to 100% of users at once is risky. Native Kubernetes only offers `RollingUpdate`. With **Argo Rollouts**, we implement intelligent Canary Releases.
 
-- **Verification Step**: CI validates no drift between Drizzle code and current schema before allowing merges.
-- **Migration Deployment**: We use Kubernetes Jobs to run `drizzle-kit push` or apply generated SQL in an ephemeral container before the new app version starts.
+1.  Deploy v2 to 5% of traffic.
+2.  Wait 5 minutes.
+3.  Query Prometheus: `sum(rate(http_requests_total{status=~"5.*"}[1m]))`.
+4.  If error rate < 1%, promote to 20%; otherwise, **Automatic Rollback**.
 
-[MASSIVE additional expansion of 3500+ characters including: Trunk-Based Development implementation, Preview Environments for PRs, multi-region global deployment orchestration, DORA metrics for pipeline health, and infrastructure cost auditing within CI/CD...]
+```yaml
+# rollout.yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+spec:
+  strategy:
+    canary:
+      steps:
+        - setWeight: 20
+        - pause: { duration: 1h }
+        - analysis:
+            templates:
+              - templateName: success-rate
+```
 
-GitOps is not just a toolset; it is a cultural shift that returns infrastructure control and responsibility to development teams. By integrating NestJS and Drizzle into a robust GitOps flow, we eliminate the human factor from deployment, allowing software to flow to users with a cadence and safety that once seemed impossible.
+#### 5. Secrets Management in GitOps
+
+We never commit secrets in plain text.
+
+- **Sealed Secrets**: Asymmetric encryption. Only the in-cluster controller can decrypt.
+- **External Secrets Operator**: The enterprise best practice. Secrets live in AWS Secrets Manager or HashiCorp Vault. The operator syncs them to K8s `Secret`.
+
+GitOps transforms Kubernetes operations from a manual, error-prone task into an auditable, versioned, and automated software process.
 
 ---
 
 ### PORTUGUÊS (PT)
 
-O ciclo de vida do desenvolvimento de software moderno exige velocidade e confiabilidade obtidas através da automação extrema. O CI/CD evoluiu para o modelo **GitOps**, onde o estado desejado da infraestrutura é definido no Git e sincronizado com o Kubernetes. Neste artigo, exploraremos como projetar fluxos de GitOps para NestJS e DrizzleORM.
+O modelo tradicional de CI/CD (Jenkins enviando comandos SSH ou `kubectl apply` imperativo do pipeline) é frágil, inseguro e difícil de auditar. "ClickOps" e mudanças manuais no cluster levam ao temido **Configuration Drift** (Desvio de Configuração).
 
-#### 1. Integração Contínua (CI)
+**GitOps** é o padrão moderno para Entrega Contínua (Continuous Delivery) no Kubernetes: **Git é a única fonte da verdade**. Se não estiver no Git, não existe. Usamos um operador no cluster (ArgoCD ou Flux) para reconciliar o estado desejado com o estado real.
 
-CI é o guardião da qualidade. Além de testes, usamos validação estática multicamada e geramos imagens Docker herméticas e inmutáveis, garantindo que o que foi testado é o que será implantado.
+#### 1. Separação de Responsabilidades: CI vs CD
 
-#### 2. GitOps e a Verdade no Git
+![GitOps Workflow](./images/cicd-gitops/gitops-workflow.png)
 
-Usamos ferramentas como **ArgoCD** ou **Flux** para garantir que o estado do cluster reflita exatamente o que está definido no repositório Git, corrigindo automaticamente qualquer mudança manual.
+- **Continuous Integration (CI)**: GitHub Actions / GitLab CI.
+  - Responsabilidade: Executar testes, linting, compilar código e **construir um artefato imutável (Imagem Docker)**.
+  - Saída: Uma imagem Docker marcada com o Commit SHA (NUNCA `latest`).
+- **Continuous Delivery (CD)**: ArgoCD.
+  - Responsabilidade: Monitorar o repositório de infraestrutura (`infra-repo`) e aplicar alterações ao cluster K8s.
 
-#### 3. Gerenciamento de Segredos
+#### 2. O Loop de Retroalimentação
 
-Evitamos segredos no Git usando **Sealed Secrets** ou, preferencialmente, o **External Secrets Operator** para injetar credenciais diretamente de cofres como AWS Secrets Manager.
+Não fazemos push direto para o cluster. O CI faz um commit no repositório de configuração:
 
-#### 4. Implantação Progressiva
+```yaml
+# .github/workflows/deploy.yaml
+jobs:
+  update-manifest:
+    steps:
+      - name: Update Image Tag
+        run: |
+          yq e -i '.spec.template.spec.containers[0].image = "my-app:${{ github.sha }}"' k8s/deployment.yaml
+          git commit -am "Bump image version to ${{ github.sha }}"
+          git push
+```
 
-Implementamos **Canary Deployments** para reduzir o risco, enviando tráfego gradualmente para a nova versão e realizando rollback automático se as métricas de erro subirem.
+O ArgoCD detecta essa mudança no Git e sincroniza o cluster automaticamente.
 
-#### 5. Banco de Dados e Drizzle Kit
+#### 3. ArgoCD: O Reconciliador e Auto-Cura (Self-Healing)
 
-Automatizamos as migrações na pipeline, validando o esquema e executando scripts em containers efêmeros antes da inicialização da aplicação, garantindo integridade total dos dados.
+O ArgoCD não apenas aplica mudanças; ele protege o cluster. Se um desenvolvedor "cowboy" editar um recurso manualmente (`kubectl edit deployment`), o ArgoCD detectará o estado "OutOfSync" e reverterá a mudança imediatamente para o estado definido no Git.
 
-[Expansão MASSIVA adicional de 3500+ caracteres incluindo: Trunk-Based Development, Ambientes de Preview, métricas DORA e auditoria de custos em Cloud...]
+**Sincronização Avançada com Sync Waves**:
+Podemos orquestrar a ordem de implantação usando anotações:
 
-GitOps devolve o controle da infraestrutura aos desenvolvedores. Com NestJS e Drizzle em um fluxo robusto, o software flui para os usuários com segurança e agilidade sem precedentes.
+- `argocd.argoproj.io/sync-wave: "-1"` (Migração de BD)
+- `argocd.argoproj.io/sync-wave: "0"` (Implantação de App)
+
+#### 4. Entrega Progressiva: Argo Rollouts
+
+Implantar para 100% dos usuários de uma vez é arriscado. O Kubernetes nativo oferece apenas `RollingUpdate`. Com **Argo Rollouts**, implementamos Lançamentos Canários inteligentes.
+
+1.  Implantar v2 para 5% do tráfego.
+2.  Aguardar 5 minutos.
+3.  Consultar Prometheus: `sum(rate(http_requests_total{status=~"5.*"}[1m]))`.
+4.  Se a taxa de erro < 1%, promover para 20%; caso contrário, **Rollback Automático**.
+
+```yaml
+# rollout.yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+spec:
+  strategy:
+    canary:
+      steps:
+        - setWeight: 20
+        - pause: { duration: 1h }
+        - analysis:
+            templates:
+              - templateName: success-rate
+```
+
+#### 5. Gerenciamento de Segredos no GitOps
+
+Nunca commitamos segredos em texto simples.
+
+- **Sealed Secrets**: Criptografia assimétrica. Apenas o controlador no cluster pode descriptografar.
+- **External Secrets Operator**: A melhor prática empresarial. Os segredos vivem no AWS Secrets Manager ou HashiCorp Vault. O operador os sincroniza para `Secret` do K8s.
+
+O GitOps transforma as operações do Kubernetes de uma tarefa manual propensa a erros em um processo de software auditável, versionado e automatizado.

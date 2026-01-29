@@ -1,136 +1,318 @@
 ### ESPAÑOL (ES)
 
-En el ciclo de vida de una aplicación exitosa, los cambios en el esquema de la base de datos son tan inevitables como el crecimiento del tráfico. Sin embargo, para sistemas empresariales que operan 24/7 con millones de usuarios, detener el servicio para aplicar una migración no es una opción aceptable. Las migraciones **Zero-Downtime** son un arte de ingeniería que requiere una coordinación milimétrica entre el código de la aplicación y la estructura de la base de datos PostgreSQL. Como ingenieros senior, debemos dominar patrones que permitan evolucionar el esquema sin introducir un solo milisegundo de inactividad. En este artículo detallado, analizaremos estrategias avanzadas utilizando DrizzleORM y PostgreSQL para lograr estas transiciones invisibles.
+En el mundo de las startups en etapa inicial, poner un cartel de "Estamos en mantenimiento" a las 3 AM es aceptable. Pero para sistemas globales que operan 24/7 o aplicaciones financieras críticas, el tiempo de inactividad (downtime) no es una opción.
 
-#### 1. La Regla de Oro: Compatibilidad hacia Atrás y hacia Adelante
+El desafío es doble:
 
-La clave de cualquier migración sin tiempo de inactividad es el despliegue en fases. Durante el proceso de actualización (rolling update), tendrás dos versiones de tu aplicación corriendo simultáneamente: la versión vieja (V1) y la versión nueva (V2). Ambas deben poder operar sobre la misma base de datos sin fallar.
+1.  **Bloqueos de Base de Datos**: Operaciones como `ALTER TABLE` pueden adquirir bloqueos exclusivos (`ACCESS EXCLUSIVE LOCK`), deteniendo todas las lecturas y escrituras en una tabla durante horas si esta es muy grande.
+2.  **Despliegue de Código**: Durante un despliegue rodante (Rolling Update) en Kubernetes, tendrás pods ejecutando la versión antigua (v1) y la nueva (v2) simultáneamente. Si la v2 cambia el esquema de la base de datos de una manera incompatible, la v1 comenzará a fallar (500 Error) antes de que termine el despliegue.
 
-- **Evita cambios destructivos directos**: Nunca borres o renombres una columna de golpe. Si lo haces, la V1 de tu aplicación fallará instantáneamente al no encontrar el campo esperado en sus consultas SQL.
+Para resolver esto, los ingenieros senior utilizan el patrón **Expand-Contract** (o Parallel Change).
 
-#### 2. El Patrón "Expand and Contract": Renombrar con Seguridad
+#### 1. El Patrón Expand-Contract: Anatomía de un Cambio Seguro
 
-Si necesitas renombrar una columna, digamos de `name` a `full_name`, seguimos estos pasos rigurosos:
+![Expand-Contract Pattern](./images/zero-downtime-migrations/expand-contract.png)
 
-1. **Expandir**: Añadimos la columna `full_name` con Drizzle sin eliminar `name`.
-2. **Doble Escritura**: Desplegamos código que escribe en ambas columnas pero lee de `name`.
-3. **Migración de Datos**: En segundo plano, copiamos los datos de `name` a `full_name` para los registros antiguos (backfilling).
-4. **Cambio de Referencia**: Desplegamos código que lee y escribe solo en `full_name`.
-5. **Contraer**: Borramos la columna `name`, una vez confirmado que no quedan rastro de lecturas hacia ella.
+Tomemos un ejemplo clásico: Queremos renombrar la columna `name` a `full_name` en la tabla `users` (que tiene 100 millones de filas).
+Si ejecutas `ALTER TABLE users RENAME COLUMN name TO full_name`, la aplicación v1 fallará inmediatamente porque sus queries `SELECT name` ya no encontrarán la columna.
 
-#### 3. Añadiendo Índices de Forma Concurrentemente
+**Fase 1: Expand (Expansión)**
+El objetivo es hacer cambios aditivos.
 
-Crear un índice en una tabla con 100 millones de filas puede bloquear las escrituras durante horas. Un senior sabe que esto es inaceptable.
+1.  **Migración**: Añadir la columna `full_name` como `NULLABLE`.
+    ```sql
+    ALTER TABLE users ADD COLUMN full_name TEXT;
+    ```
+    _Nota_: En Postgres 11+, añadir una columna con valor por defecto es rápido, pero en versiones anteriores requería reescribir toda la tabla.
+2.  **Código v1.1**: Desplegar una versión que escribe en **ambos** lugares (Dual Write) pero sigue leyendo del viejo.
+    ```typescript
+    // Dual Write
+    await db.insert(users).values({
+      name: "Juan Perez", // Legacy
+      fullName: "Juan Perez", // New
+    });
+    ```
 
-- **CREATE INDEX CONCURRENTLY**: Postgres permite crear índices sin adquirir un bloqueo exclusivo (Access Exclusive Lock). Drizzle Kit permite configurar estas operaciones. Aunque tarda más en completarse, la tabla permanece disponible para la aplicación.
-- **Manejo de Índices Inválidos**: Si la creación concurrente falla, el índice queda en estado `INVALID`. Un senior tiene scripts de remediación para identificar y limpiar estos índices antes de reintentar.
+**Fase 2: Migrate (Migración de Datos)**
+Ahora tenemos datos nuevos en ambas columnas, pero los registros antiguos tienen `full_name` como NULL.
+Debemos hacer un "Backfill" sin bloquear la base de datos.
+_Estrategia_: Script en segundo plano que actualiza lotes de 1000 filas con pausas.
 
-#### 4. Constraints no Bloqueantes: NOT NULL y Foreign Keys
+```typescript
+async function backfill() {
+  let cursor = 0;
+  while (true) {
+    const batch = await db
+      .select()
+      .from(users)
+      .where(and(isNull(users.fullName), gt(users.id, cursor)))
+      .limit(1000); // Lotes pequeños para evitar bloqueos largos
 
-Añadir una restricción `NOT NULL` a una columna existente requiere que Postgres escanee toda la tabla, bloqueando las actualizaciones.
+    if (!batch.length) break;
 
-- **La Técnica Senior**: Añadimos una `CHECK CONSTRAINT` con la opción `NOT VALID`. Luego la validamos en segundo plano mediante `VALIDATE CONSTRAINT`. Esto minimiza el tiempo del bloqueo exclusivo a solo unos milisegundos.
+    for (const user of batch) {
+      await db
+        .update(users)
+        .set({ fullName: user.name })
+        .where(eq(users.id, user.id));
+    }
+    cursor = batch[batch.length - 1].id;
+    await sleep(50); // Dar respiro a la CPU de la DB
+  }
+}
+```
 
-#### 5. Gestión del Bloqueo (Locks) en Migraciones
+**Fase 3: Contract (Contracción)**
 
-Postgres usa diferentes niveles de bloqueos. Un simple `ALTER TABLE` puede quedarse esperando a que termine una consulta larga, y a su vez, todas las peticiones nuevas de los usuarios se quedarán esperando detrás de esa migración bloqueada, causando un parón total (Stall).
+1.  **Código v2**: Desplegar versión que ahora **lee** de `full_name` y escribe solo en `full_name` (o sigue escribiendo en ambos si necesitas rollback seguro).
+2.  Ahora la columna `name` es técnicamente "basura" o está deprecada.
 
-- **Lock Timeout**: Configuramos siempre un `lock_timeout` agresivo en nuestras migraciones. Si no puede obtener el bloqueo en 2 segundos, la migración falla y reintenta después, protegiendo así el tráfico real de los usuarios.
+**Fase 4: Cleanup (Limpieza)**
+Semanas después (cuando es seguro que no habrá rollback):
 
-[Expansión MASIVA adicional de 3000+ caracteres incluyendo: Uso de `pg_repack` para reconstrucción de tablas gigantes sin bloqueos, estrategias de replicación lógica para migraciones entre diferentes motores de base de datos, diseño de tablas transicionales, y guías sobre cómo orquestar estas migraciones en clústeres de Kubernetes usando Jobs de Helm que verifiquen el estado del cluster antes de proceder, garantizando una infraestructura global inexpugnable...]
+1.  **Migración**: Eliminar la columna `name`.
+    ```sql
+    ALTER TABLE users DROP COLUMN name;
+    ```
+2.  **Mantenimiento**: Ejecutar `pg_repack` (extensión externa) o `VACUUM FULL` para recuperar espacio físico en disco. _Cuidado_: `VACUUM FULL` bloquea la tabla; `pg_repack` no.
 
-Las migraciones sin downtime son la línea divisoria entre un desarrollador que solo escribe código y un ingeniero de sistemas experto. Requieren paciencia y una comprensión profunda de las entrañas de PostgreSQL. Con DrizzleORM, tenemos el control granular del SQL necesario para ejecutar estas maniobras de alta complejidad con total confianza.
+#### 2. Drizzle Kit en Arquitecturas Zero-Downtime
+
+Drizzle Kit es excelente, pero por defecto genera migraciones que pueden ser peligrosas.
+**Recomendación**: Nunca apliques migraciones automáticamente al iniciar la app (`migrate()`) en producción.
+Úsalo en un paso de CD (Continuous Delivery) separado antes del despliegue de los pods.
+
+#### 3. Tipos de Cambios y su Riesgo
+
+| Cambio                        | Riesgo  | Estrategia                                                                                         |
+| :---------------------------- | :------ | :------------------------------------------------------------------------------------------------- |
+| `ADD COLUMN` (nullable)       | Bajo    | Seguro.                                                                                            |
+| `Assuming COLUMN` (not null)  | Alto    | Requiere valor default. Puede bloquear. Hazlo nullable primero, llena datos, luego `SET NOT NULL`. |
+| `DROP COLUMN`                 | Crítico | Rompe código viejo. Usar Expand-Contract.                                                          |
+| `RENAME COLUMN`               | Crítico | Rompe código viejo. Nunca uses rename directo. Crea nueva, copia datos, borra vieja.               |
+| `CHANGE TYPE` (int -> bigint) | Medio   | Requiere reescritura de tabla entera. Usar nueva columna.                                          |
+
+#### 4. Bloqueos y Timeouts
+
+Configura siempre `lock_timeout` en tus migraciones para evitar que una migración espere eternamente por un bloqueo, deteniendo otras transacciones.
+
+```sql
+SET lock_timeout = '2s';
+ALTER TABLE items ADD COLUMN category_id INT;
+```
+
+Si no puede adquirir el bloqueo en 2 segundos, fallará. Es mejor fallar rápido y reintentar que detener la producción.
 
 ---
 
 ### ENGLISH (EN)
 
-In the lifecycle of a successful application, database schema changes are as inevitable as traffic growth. However, for enterprise systems operating 24/7 with millions of users, stopping the service to apply a migration is not an acceptable option. **Zero-Downtime** migrations are an engineering art that requires precise coordination between application code and the PostgreSQL database structure. As senior engineers, we must master patterns that allow the schema to evolve without introducing a single millisecond of downtime. In this detailed article, we will analyze advanced strategies using DrizzleORM and PostgreSQL to achieve these invisible transitions.
+In the early-stage startup world, putting up a "We are under maintenance" sign at 3 AM is acceptable. But for global systems operating 24/7 or critical financial applications, downtime is not an option.
 
-#### 1. The Golden Rule: Backward and Forward Compatibility
+The challenge is twofold:
 
-The key to any zero-downtime migration is phase-based deployment. During the update process (rolling update), you will have two versions of your application running simultaneously: the old version (V1) and the new version (V2). Both must be able to operate on the same database without failing.
+1.  **Database Locks**: Operations like `ALTER TABLE` can acquire exclusive locks (`ACCESS EXCLUSIVE LOCK`), halting all reads and writes on a table for hours if it is very large.
+2.  **Code Deployment**: During a rolling update in Kubernetes, you will have pods running the old version (v1) and the new version (v2) simultaneously. If v2 changes the database schema in an incompatible way, v1 will start failing (500 Error) before the deployment finishes.
 
-- **Avoid direct destructive changes**: Never delete or rename a column at once. If you do, the V1 of your application will fail instantly upon not finding the expected field in its SQL queries.
+To solve this, senior engineers use the **Expand-Contract** (or Parallel Change) pattern.
 
-(Detailed technical guide on phase-based deployments, rolling update strategies, and error handling continue here...)
+#### 1. The Expand-Contract Pattern: Anatomy of a Safe Change
 
-#### 2. The "Expand and Contract" Pattern: Safety First
+![Expand-Contract Pattern](./images/zero-downtime-migrations/expand-contract.png)
 
-If you need to rename a column, for example from `name` to `full_name`, we follow these rigorous steps:
+Let's take a classic example: We want to rename the `name` column to `full_name` in the `users` table (which has 100 million rows).
+If you execute `ALTER TABLE users RENAME COLUMN name TO full_name`, the v1 application will fail immediately because its `SELECT name` queries will no longer find the column.
 
-1. **Expand**: Add the `full_name` column with Drizzle without deleting `name`.
-2. **Double Writing**: Deploy code that writes to both columns but reads from `name`.
-3. **Data Migration**: In the background, copy data from `name` to `full_name` for old records (backfilling).
-4. **Reference Change**: Deploy code that reads and writes only to `full_name`.
-5. **Contract**: Delete the `name` column after confirming no trace of reads remains.
+**Phase 1: Expand**
+The goal is to make additive changes.
 
-(Technical deep dive into Drizzle transactions and double writing patterns continue here...)
+1.  **Migration**: Add the `full_name` column as `NULLABLE`.
+    ```sql
+    ALTER TABLE users ADD COLUMN full_name TEXT;
+    ```
+    _Note_: In Postgres 11+, adding a column with a default value is fast, but in earlier versions, it required rewriting the entire table.
+2.  **Code v1.1**: Deploy a version that writes to **both** places (Dual Write) but continues reading from the old one.
+    ```typescript
+    // Dual Write
+    await db.insert(users).values({
+      name: "Juan Perez", // Legacy
+      fullName: "Juan Perez", // New
+    });
+    ```
 
-#### 3. Adding Indices Concurrently
+**Phase 2: Migrate (Data Backfill)**
+Now we have correct new data, but old records have `full_name` as NULL.
+We must run a "Backfill" without locking the database.
+_Strategy_: Background script updating batches of 1000 rows with pauses.
 
-Creating an index on a table with 100 million rows can block writes for hours. A senior knows this is unacceptable.
+```typescript
+async function backfill() {
+  let cursor = 0;
+  while (true) {
+    const batch = await db
+      .select()
+      .from(users)
+      .where(and(isNull(users.fullName), gt(users.id, cursor)))
+      .limit(1000); // Small batches to avoid long locks
 
-- **CREATE INDEX CONCURRENTLY**: Postgres allows creating indices without acquiring an exclusive lock (Access Exclusive Lock). Drizzle Kit allows configuring these operations. Although it takes longer to complete, the table remains available for the application.
-- **Invalid Index Handling**: If concurrent creation fails, the index remains in an `INVALID` state. A senior has remediation scripts to identify and clean these indices before retrying.
+    if (!batch.length) break;
 
-#### 4. Non-Blocking Constraints: NOT NULL and Foreign Keys
+    for (const user of batch) {
+      await db
+        .update(users)
+        .set({ fullName: user.name })
+        .where(eq(users.id, user.id));
+    }
+    cursor = batch[batch.length - 1].id;
+    await sleep(50); // Give DB CPU a breather
+  }
+}
+```
 
-Adding a `NOT NULL` constraint to an existing column requires Postgres to scan the entire table, blocking updates.
+**Phase 3: Contract**
 
-- **The Senior Technique**: We add a `CHECK CONSTRAINT` with the `NOT VALID` option. Then we validate it in the background using `VALIDATE CONSTRAINT`. This minimizes the exclusive lock time to just a few milliseconds.
+1.  **Code v2**: Deploy version that now **reads** from `full_name` and writes only to `full_name` (or keeps writing to both if you need safe rollback).
+2.  Now the `name` column is technically "garbage" or deprecated.
 
-#### 5. Lock Management in Migrations
+**Phase 4: Cleanup**
+Weeks later (when it is certain there will be no rollback):
 
-Postgres uses different levels of locks. A simple `ALTER TABLE` can end up waiting for a long query to finish, and in turn, all new user requests will wait behind that blocked migration, causing a total stall.
+1.  **Migration**: Remove the `name` column.
+    ```sql
+    ALTER TABLE users DROP COLUMN name;
+    ```
+2.  **Maintenance**: Run `pg_repack` (external extension) or `VACUUM FULL` to reclaim physical disk space. _Warning_: `VACUUM FULL` locks the table; `pg_repack` does not.
 
-- **Lock Timeout**: We always set an aggressive `lock_timeout` in our migrations. If it cannot get the lock in 2 seconds, the migration fails and retries later, thus protecting real user traffic.
+#### 2. Drizzle Kit in Zero-Downtime Architectures
 
-[MASSIVE additional expansion of 3500+ characters including: Using `pg_repack` for lockless table reconstruction, logical replication strategies for cross-engine migrations, designing transitional tables, and guides on orchestrating migrations in Kubernetes clusters...]
+Drizzle Kit is excellent, but by default, it generates migrations that can be dangerous.
+**Recommendation**: Never apply migrations automatically on app start (`migrate()`) in production.
+Use it in a separate CD (Continuous Delivery) step before pod deployment.
 
-Zero-downtime migrations are the dividing line between a developer who just writes code and an expert systems engineer. They require patience and a deep understanding of PostgreSQL internals. With DrizzleORM, we have the granular SQL control needed to execute these high-complexity maneuvers with total confidence.
+#### 3. Types of Changes and Their Risk
+
+| Change                        | Risk     | Strategy                                                                              |
+| :---------------------------- | :------- | :------------------------------------------------------------------------------------ |
+| `ADD COLUMN` (nullable)       | Low      | Safe.                                                                                 |
+| `ADD COLUMN` (not null)       | High     | Requires default value. Can lock. Make nullable first, backfill, then `SET NOT NULL`. |
+| `DROP COLUMN`                 | Critical | Breaks old code. Use Expand-Contract.                                                 |
+| `RENAME COLUMN`               | Critical | Breaks old code. Never use direct rename. Create new, copy data, delete old.          |
+| `CHANGE TYPE` (int -> bigint) | Medium   | Requires rewriting the entire table. Use new column approach.                         |
+
+#### 4. Locks and Timeouts
+
+Always configure `lock_timeout` in your migrations to prevent a migration from waiting eternally for a lock, halting other transactions.
+
+```sql
+SET lock_timeout = '2s';
+ALTER TABLE items ADD COLUMN category_id INT;
+```
+
+If it cannot acquire the lock in 2 seconds, it will fail. It is better to fail fast and retry than to halt production.
 
 ---
 
 ### PORTUGUÊS (PT)
 
-No ciclo de vida de uma aplicação bem-sucedida, as mudanças no esquema do banco de dados são tão inevitáveis quanto o crescimento do tráfego. No entanto, para sistemas empresariais que operam 24/7 com milhões de usuários, interromper o serviço para aplicar uma migração não é uma opção aceitável. As migrações **Zero-Downtime** são uma arte de engenharia que exige coordenação milimétrica entre o código da aplicação e a estrutura do banco de dados PostgreSQL. Neste artigo detalhado, analisaremos estratégias avançadas usando o DrizzleORM e o PostgreSQL para alcançar essas transições invisíveis.
+No mundo das startups em estágio inicial, colocar uma placa de "Estamos em manutenção" às 3 da manhã é aceitável. Mas para sistemas globais operando 24/7 ou aplicações financeiras críticas, o tempo de inatividade (downtime) não é uma opção.
 
-#### 1. A Regra de Ouro: Compatibilidade
+O desafio é duplo:
 
-A chave para qualquer migração sem tempo de inatividade é a implantação em fases. Durante o processo de atualização, duas versões do seu aplicativo serão executadas simultaneamente (V1 e V2). Ambos devem ser capazes de operar no mesmo banco de dados sem falhar.
+1.  **Bloqueios de Banco de Dados**: Operações como `ALTER TABLE` podem adquirir bloqueios exclusivos (`ACCESS EXCLUSIVE LOCK`), interrompendo todas as leituras e gravações em uma tabela por horas se ela for muito grande.
+2.  **Implantação de Código**: Durante uma atualização gradual (Rolling Update) no Kubernetes, você terá pods executando a versão antiga (v1) e a nova (v2) simultaneamente. Se a v2 alterar o esquema do banco de dados de maneira incompatível, a v1 começará a falhar (Erro 500) antes que a implantação termine.
 
-- **Evite mudanças destrutivas**: Nunca exclua ou renomeie uma coluna de uma vez. A V1 do seu aplicativo falharia instantaneamente.
+Para resolver isso, engenheiros seniores usam o padrão **Expand-Contract** (ou Parallel Change).
 
-(Guia técnico detalhado sobre implantação em fases e estratégias de atualização contínua...)
+#### 1. O Padrão Expand-Contract: Anatomia de uma Mudança Segura
 
-#### 2. O Padrão "Expand and Contract"
+![Expand-Contract Pattern](./images/zero-downtime-migrations/expand-contract.png)
 
-Para renomear uma coluna com segurança:
+Vamos pegar um exemplo clássico: Queremos renomear a coluna `name` para `full_name` na tabela `users` (que tem 100 milhões de linhas).
+Se você executar `ALTER TABLE users RENAME COLUMN name TO full_name`, a aplicação v1 falhará imediatamente porque suas consultas `SELECT name` não encontrarão mais a coluna.
 
-1. **Expandir**: Adicione a nova coluna sem excluir a antiga.
-2. **Escrita Dupla**: Grave em ambas as colunas, mas continue lendo da antiga.
-3. **Migração de Dados**: Copie os dados da coluna antiga para a nova em segundo plano.
-4. **Mudança de Referência**: Passe a ler e gravar apenas na nova coluna.
-5. **Contrair**: Exclua a coluna antiga.
+**Fase 1: Expand (Expandir)**
+O objetivo é fazer alterações aditivas.
 
-#### 3. Adicionando Índices Concorrentemente
+1.  **Migração**: Adicionar a coluna `full_name` como `NULLABLE`.
+    ```sql
+    ALTER TABLE users ADD COLUMN full_name TEXT;
+    ```
+    _Nota_: No Postgres 11+, adicionar uma coluna com valor padrão é rápido, mas em versões anteriores, exigia reescrever a tabela inteira.
+2.  **Código v1.1**: Implantar uma versão que escreve em **ambos** os lugares (Dual Write), mas continua lendo do antigo.
+    ```typescript
+    // Dual Write
+    await db.insert(users).values({
+      name: "Juan Perez", // Legado
+      fullName: "Juan Perez", // Novo
+    });
+    ```
 
-Criar um índice em uma tabela massiva pode travar gravações por horas.
+**Fase 2: Migrate (Migração de Dados)**
+Agora temos novos dados corretos, mas registros antigos têm `full_name` como NULL.
+Devemos executar um "Backfill" sem bloquear o banco de dados.
+_Estratégia_: Script em segundo plano atualizando lotes de 1000 linhas com pausas.
 
-- **CREATE INDEX CONCURRENTLY**: O Postgres permite criar índices sem bloqueios exclusivos. O Drizzle Kit permite configurar essas operações, mantendo a tabela disponível.
-- **Índices Inválidos**: Se falhar, o índice fica como `INVALID`. Temos scripts para limpar esses resíduos antes de tentar novamente.
+```typescript
+async function backfill() {
+  let cursor = 0;
+  while (true) {
+    const batch = await db
+      .select()
+      .from(users)
+      .where(and(isNull(users.fullName), gt(users.id, cursor)))
+      .limit(1000); // Lotes pequenos para evitar bloqueos longos
 
-#### 4. Restrições não Bloqueantes: NOT NULL e Foreign Keys
+    if (!batch.length) break;
 
-Adicionar `NOT NULL` exige um escaneamento total da tabela.
+    for (const user of batch) {
+      await db
+        .update(users)
+        .set({ fullName: user.name })
+        .where(eq(users.id, user.id));
+    }
+    cursor = batch[batch.length - 1].id;
+    await sleep(50); // Dar um respiro à CPU do DB
+  }
+}
+```
 
-- **Técnica Sênior**: Adicionamos uma `CHECK CONSTRAINT` como `NOT VALID` e a validamos depois. Isso reduz o tempo de bloqueio para milissegundos.
+**Fase 3: Contract (Contrair)**
 
-#### 5. Gerenciamento de Bloqueios (Locks)
+1.  **Código v2**: Implantar versão que agora **lê** de `full_name` e escreve apenas em `full_name` (ou continua escrevendo em ambos se precisar de rollback seguro).
+2.  Agora a coluna `name` é tecnicamente "lixo" ou depreciada.
 
-Configuramos sempre um `lock_timeout` agressivo em nossas migrações para evitar que uma alteração de esquema bloqueie todas as novas solicitações de usuários.
+**Fase 4: Cleanup (Limpeza)**
+Semanas depois (quando tiver certeza de que não haverá rollback):
 
-[Expansão MASSIVA adicional de 3500+ caracteres incluindo: Uso do `pg_repack`, estratégias de replicação lógica, arquitetura de tabelas transicionais e orquestração de migrações no Kubernetes...]
+1.  **Migração**: Remover a coluna `name`.
+    ```sql
+    ALTER TABLE users DROP COLUMN name;
+    ```
+2.  **Manutenção**: Executar `pg_repack` (extensão externa) ou `VACUUM FULL` para recuperar espaço físico em disco. _Aviso_: `VACUUM FULL` bloqueia a tabela; `pg_repack` não.
 
-Migrações sem tempo de inatividade exigem paciência e um entendimento profundo das engrenagens do PostgreSQL. Com o DrizzleORM, temos o controle granular do SQL necessário para executar essas operações complexas com confiança total.
+#### 2. Drizzle Kit em Arquiteturas Zero-Downtime
+
+O Drizzle Kit é excelente, mas por padrão, gera migrações que podem ser perigosas.
+**Recomendação**: Nunca aplique migrações automaticamente na inicialização do app (`migrate()`) em produção.
+Use-o em uma etapa separada de CD (Entrega Contínua) antes da implantação dos pods.
+
+#### 3. Tipos de Alterações e seus Riscos
+
+| Alteração                     | Risco   | Estratégia                                                                                   |
+| :---------------------------- | :------ | :------------------------------------------------------------------------------------------- |
+| `ADD COLUMN` (nullable)       | Baixo   | Seguro.                                                                                      |
+| `ADD COLUMN` (not null)       | Alto    | Requer valor padrão. Pode bloquear. Faça nullable primeiro, backfill, depois `SET NOT NULL`. |
+| `DROP COLUMN`                 | Crítico | Quebra código antigo. Use Expand-Contract.                                                   |
+| `RENAME COLUMN`               | Crítico | Quebra código antigo. Nunca use renomeação direta. Crie nova, copie dados, delete antiga.    |
+| `CHANGE TYPE` (int -> bigint) | Médio   | Requer reescrita da tabela inteira. Use abordagem de nova coluna.                            |
+
+#### 4. Bloqueios e Timeouts
+
+Sempre configure `lock_timeout` em suas migrações para evitar que uma migração espere eternamente por um bloqueio, interrompendo outras transações.
+
+```sql
+SET lock_timeout = '2s';
+ALTER TABLE items ADD COLUMN category_id INT;
+```
+
+Se não conseguir adquirir o bloqueio em 2 segundos, falhará. É melhor falhar rápido e tentar novamente do que parar a produção.

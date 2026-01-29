@@ -1,129 +1,246 @@
 ### ESPAÑOL (ES)
 
-TypeScript ha transformado el desarrollo en el ecosistema de Node.js, elevando el lenguaje de un script ligero a una herramienta de ingeniería de primer nivel para aplicaciones empresariales. Sin embargo, usar TypeScript no es solo poner tipos a las variables; se trata de utilizar su potente sistema de tipos para diseñar sistemas que sean autocomprobables, robustos y fáciles de refactorizar. En este artículo técnico detallado, exploraremos patrones de diseño empresariales utilizando TypeScript, NestJS y DrizzleORM, enfocándonos en cómo un ingeniero senior aprovecha estas herramientas para construir software de alta fidelidad.
+TypeScript ha conquistado el desarrollo empresarial, pero usarlo como "JavaScript con tipos" es desperdiciar su potencial. En sistemas de gran escala, TypeScript es la primera línea de defensa contra la deuda técnica. Este artículo explora patrones de diseño avanzados, tipos condicionales y técnicas de metaprogramación que separan a un desarrollador junior de un arquitecto de software.
 
-#### 1. Tipado Nominal y Modelado de Dominio (Domain Driven Design)
+#### 1. Tipado Nominal vs Estructural en IDs de Dominio
 
-TypeScript usa un sistema de tipos estructural (duck typing). Si dos objetos tienen la misma forma, son del mismo tipo. En entornos enterprise, esto puede ser un problema grave: ¿un `UserId` y un `OrderId` deberían ser intercambiables solo porque ambos son strings?
+![TypeScript Type System](./images/typescript-enterprise-patterns/types.png)
 
-- **Branded Types (Opaque Types)**: Un senior utiliza "marcas" para simular tipado nominal. Definimos tipos que son strings en tiempo de ejecución pero que el compilador trata como únicos. Esto evita errores accidentales donde pasamos un ID de usuario a una función que espera un ID de pedido.
-- **Value Objects**: Implementamos clases que encapsulan validación y lógica de dominio. Un `Email` no es solo un string; es un objeto que garantiza su propia validez desde el momento de su instanciación.
+Por defecto, TypeScript es estructuralmente tipado (duck typing). Esto es peligroso para los IDs: `UserId` y `OrderId` son ambos `strings`, y es fácil pasarlos erróneamente a una función.
+
+Implementamos **Branded Types** para simular tipado nominal:
 
 ```typescript
-// Patrón Branded Type
-type Brand<K, T> = K & { __brand: T };
+declare const __brand: unique symbol;
+type Brand<K, T> = K & { readonly [__brand]: T };
+
 export type UserId = Brand<string, "UserId">;
 export type OrderId = Brand<string, "OrderId">;
 
-// Uso seguro en servicios
-function processOrder(userId: UserId, orderId: OrderId) {
-  // El compilador impedirá que los intercambies
+function cancelOrder(id: OrderId) {
+  /* ... */
 }
+
+const uid = "user_123" as UserId;
+const oid = "order_123" as OrderId;
+
+cancelOrder(oid); // ✅ OK
+cancelOrder(uid); // ❌ Error de compilación: Type 'UserId' is not assignable to type 'OrderId'.
 ```
 
-#### 2. Discriminated Unions: El Fin de los Booleanos del Infierno
+#### 2. Inyección de Dependencias (DI) Segura
 
-Manejar estados complejos con múltiples booleanos (`isLoading`, `isError`, `hasData`) es una receta para el desastre. Un senior utiliza **Discriminated Unions** para representar estados de forma que sean mutuamente excluyentes. Esto elimina estados imposibles y permite que el compilador de TypeScript nos guíe en el manejo exhaustivo de cada caso.
+En NestJS, la DI es mágica. Pero en lógica de dominio puro (Clean Architecture), preferimos una DI explícita y agnóstica del framework.
 
-#### 3. Tipos Mapeados y Transformaciones con Drizzle
+Usamos el patrón **Reader Monad** o simplemente funciones de alto orden para inyectar repositorios sin decoradores `@Inject()`, facilitando tests unitarios aislados.
 
-DrizzleORM nos da los tipos de la base de datos, pero a menudo necesitamos transformar esos datos para el mundo exterior.
+#### 3. Mapeo de Tipos Avanzado para Drizzle y DTOs
 
-- **Utility Types**: Usamos `Pick`, `Omit` y tipos mapeados personalizados para crear DTOs (Data Transfer Objects) que cambian automáticamente cuando el esquema de la base de Datos evoluciona, manteniendo una única fuente de verdad.
-- **Zod for Runtime Safety**: TypeScript desaparece en tiempo de ejecución. Combinamos los tipos de Drizzle con esquemas de Zod para asegurar que los datos que entran por la API sean exactamente lo que esperamos, cerrando la brecha entre el tipado estático y los datos dinámicos.
+No dupliques definiciones. Usa **Utility Types** para derivar DTOs de tu esquema de base de datos.
+Si tienes un esquema Drizzle, deriva el tipo de inserción y selección automáticamente:
 
-#### 4. Programación Funcional y el Tipo Result (Either)
+```typescript
+import { InferSelectModel, InferInsertModel } from "drizzle-orm";
+import { users } from "./schema";
 
-Lanzar excepciones (`throw`) hace que el flujo del programa sea impredecible. Un senior prefiere devolver errores como valores.
+type User = InferSelectModel<typeof users>;
+type NewUser = InferInsertModel<typeof users>;
 
-- **Pattern Matching imitado**: Implementamos un tipo `Result<T, E>` que obliga al consumidor a verificar si la operación fue exitosa o fallida. Esto hace que el manejo de errores sea explícito y reduce drásticamente los cuelgues inesperados en producción.
+// Omitir campos de auditoría en el DTO de creación
+type CreateUserDto = Omit<NewUser, "createdAt" | "updatedAt">;
+```
 
-#### 5. Abstracción de Infraestructura: Interfaces y NestJS
+#### 4. Result Pattern en lugar de Try-Catch
 
-Inyectamos interfaces, no implementaciones.
+El manejo de errores con `try-catch` rompe el flujo de control y hace que los errores sean invisibles en la firma de la función. Adoptamos el patrón **Result** (inspirado en Rust/Go).
 
-- **Dependency Inversion**: Al definir una interfaz para nuestros repositorios, podemos cambiar de una base de datos Postgres con Drizzle a un mock en memoria para tests, o incluso a una base de datos NoSQL, sin cambiar ni una sola línea de nuestra lógica de negocio (Domain Layer).
+```typescript
+type Result<T, E = Error> = { ok: true; value: T } | { ok: false; error: E };
 
-[Expansión MASIVA adicional de 3000+ caracteres incluyendo: Implementación profunda de Decoradores para auditoría automática, uso de Mixins para composición de comportamiento en clases de NestJS, patrones de Mediator para desacoplar la comunicación entre microservicios, estrategias de tipado para Monorepos compartidos con `nx` o `turborepo`, y guías sobre cómo optimizar la compilación de TypeScript en proyectos de gran escala mediante el uso de Project References, garantizando un código inexpugnable...]
+async function findUser(id: UserId): Promise<Result<User, UserNotFoundError>> {
+  const user = await db.query.users.findFirst({ where: eq(users.id, id) });
+  if (!user) {
+    return { ok: false, error: new UserNotFoundError(id) };
+  }
+  return { ok: true, value: user };
+}
 
-Escribir TypeScript a nivel enterprise es un ejercicio de arquitectura mental. Al aplicar estos patrones, transformamos el código de una simple lista de instrucciones en un sistema de ingeniería sólido, predecible y preparado para los retos del futuro.
+// El consumidor ESTÁ OBLIGADO a manejar el error
+const result = await findUser(id);
+if (!result.ok) {
+  return handleFailure(result.error);
+}
+console.log(result.value.email);
+```
+
+#### 5. Exhaustiveness Checking con Never
+
+Al usar `switch` sobre uniones discriminadas (e.g., estados de un pedido), usamos el tipo `never` para asegurar que manejamos _todos_ los casos posibles. Si agregamos un nuevo estado `REFUNDED` y olvidamos actualizar el switch, TypeScript detendrá la compilación.
+
+Dominar estas técnicas convierte al compilador en tu compañero de pair programming más estricto, eliminando categorías enteras de bugs antes de que lleguen a producción.
 
 ---
 
 ### ENGLISH (EN)
 
-TypeScript has transformed development in the Node.js ecosystem, elevating the language from a light script to a first-class engineering tool for enterprise applications. However, using TypeScript is not just about putting types on variables; it's about using its powerful type system to design systems that are self-checking, robust, and easy to refactor. In this detailed technical article, we will explore enterprise design patterns using TypeScript, NestJS, and DrizzleORM, focusing on how a senior engineer leverages these tools to build high-fidelity software.
+TypeScript has conquered enterprise development, but using it as "JavaScript with types" is wasting its potential. In large-scale systems, TypeScript is the first line of defense against technical debt. This article explores advanced design patterns, conditional types, and metaprogramming techniques that separate a junior developer from a software architect.
 
-#### 1. Nominal Typing and Domain Modeling (Domain Driven Design)
+#### 1. Nominal vs Structural Typing in Domain IDs
 
-TypeScript uses a structural type system (duck typing). If two objects have the same shape, they are of the same type. In enterprise environments, this can be a serious problem: should a `UserId` and an `OrderId` be interchangeable just because they are both strings?
+![TypeScript Type System](./images/typescript-enterprise-patterns/types.png)
 
-- **Branded Types (Opaque Types)**: A senior uses "brands" to simulate nominal typing. We define types that are strings at runtime but that the compiler treats as unique. This prevents accidental errors where we pass a user ID to a function expecting an order ID.
-- **Value Objects**: We implement classes that encapsulate validation and domain logic. An `Email` is not just a string; it is an object that guarantees its own validity from the moment of instantiation.
+By default, TypeScript is structurally typed (duck typing). This is dangerous for IDs: `UserId` and `OrderId` are both `strings`, and it is easy to pass them wrongly to a function.
 
-(Detailed examples of DDD patterns, Value Objects, and compile-time isolation continue here...)
+We implement **Branded Types** to simulate nominal typing:
 
-#### 2. Discriminated Unions: The End of Boolean Hell
+```typescript
+declare const __brand: unique symbol;
+type Brand<K, T> = K & { readonly [__brand]: T };
 
-Managing complex states with multiple booleans (`isLoading`, `isError`, `hasData`) is a recipe for disaster. A senior uses **Discriminated Unions** to represent states in a mutually exclusive way. This eliminates impossible states and allows the TypeScript compiler to guide us in exhaustive handling of each case.
+export type UserId = Brand<string, "UserId">;
+export type OrderId = Brand<string, "OrderId">;
 
-(Technical deep dive into state machine patterns with TypeScript continue here...)
+function cancelOrder(id: OrderId) {
+  /* ... */
+}
 
-#### 3. Mapped Types and Drizzle Transformations
+const uid = "user_123" as UserId;
+const oid = "order_123" as OrderId;
 
-DrizzleORM gives us the database types, but we often need to transform that data for the outside world.
+cancelOrder(oid); // ✅ OK
+cancelOrder(uid); // ❌ Compilation Error: Type 'UserId' is not assignable to type 'OrderId'.
+```
 
-- **Utility Types**: We use `Pick`, `Omit`, and custom mapped types to create DTOs (Data Transfer Objects) that automatically change when the database schema evolves, maintaining a single source of truth.
-- **Zod for Runtime Safety**: TypeScript disappears at runtime. We combine Drizzle types with Zod schemas to ensure API data is exactly what we expect, bridging the gap between static typing and dynamic data.
+#### 2. Safe Dependency Injection (DI)
 
-#### 4. Functional Programming and the Result Type (Either)
+In NestJS, DI is standard. But in pure domain logic (Clean Architecture), we prefer explicit and framework-agnostic DI.
 
-Throwing exceptions makes program flow unpredictable. A senior prefers returning errors as values.
+We use the **Reader Monad** pattern or simply higher-order functions to inject repositories without `@Inject()` decorators, facilitating isolated unit tests.
 
-- **Mimicked Pattern Matching**: We implement a `Result<T, E>` type that forces consumers to check if the operation was successful or failed. This makes error handling explicit and drastically reduces unexpected production crashes.
+#### 3. Advanced Type Mapping for Drizzle and DTOs
 
-#### 5. Infrastructure Abstraction: Interfaces and NestJS
+Do not duplicate definitions. Use **Utility Types** to derive DTOs from your database schema.
+If you have a Drizzle schema, derive the insertion and selection type automatically:
 
-We inject interfaces, not implementations.
+```typescript
+import { InferSelectModel, InferInsertModel } from "drizzle-orm";
+import { users } from "./schema";
 
-- **Dependency Inversion**: By defining an interface for our repositories, we can switch from a Postgres database with Drizzle to an in-memory mock for tests, or even a NoSQL database, without changing a single line of our business logic (Domain Layer).
+type User = InferSelectModel<typeof users>;
+type NewUser = InferInsertModel<typeof users>;
 
-[MASSIVE additional expansion of 3500+ characters including: Deep Decorator implementation for auto-auditing, using Mixins for behavior composition in NestJS classes, Mediator patterns for decoupling microservice communication, typing strategies for Shared Monorepos, and guides on optimizing TypeScript compilation in large-scale projects...]
+// Omit audit fields in creation DTO
+type CreateUserDto = Omit<NewUser, "createdAt" | "updatedAt">;
+```
 
-Writing enterprise-level TypeScript is an exercise in mental architecture. By applying these patterns, we transform code from a simple list of instructions into a solid, predictable engineering system ready for future challenges.
+#### 4. Result Pattern instead of Try-Catch
+
+Error handling with `try-catch` breaks control flow and makes errors invisible in the function signature. We adopt the **Result** pattern (inspired by Rust/Go).
+
+```typescript
+type Result<T, E = Error> = { ok: true; value: T } | { ok: false; error: E };
+
+async function findUser(id: UserId): Promise<Result<User, UserNotFoundError>> {
+  const user = await db.query.users.findFirst({ where: eq(users.id, id) });
+  if (!user) {
+    return { ok: false, error: new UserNotFoundError(id) };
+  }
+  return { ok: true, value: user };
+}
+
+// The consumer IS FORCED to handle the error
+const result = await findUser(id);
+if (!result.ok) {
+  return handleFailure(result.error);
+}
+console.log(result.value.email);
+```
+
+#### 5. Exhaustiveness Checking with Never
+
+When using `switch` on discriminated unions (e.g., order states), we use the `never` type to ensure we handle _all_ possible cases. If we add a new state `REFUNDED` and forget to update the switch, TypeScript will stop compilation.
+
+Mastering these techniques turns the compiler into your strictest pair programming partner, eliminating entire categories of bugs before they reach production.
 
 ---
 
 ### PORTUGUÊS (PT)
 
-O TypeScript transformou o desenvolvimento no ecossistema Node.js, elevando a linguagem de um script leve para uma ferramenta de engenharia de primeira classe para aplicações empresariais. No entanto, usar o TypeScript não é apenas colocar tipos em variáveis; trata-se de usar seu poderoso sistema de tipos para projetar sistemas que sejam autoverificáveis, robustos e fáceis de refactorar. Neste artigo técnico detalhado, exploraremos padrões de design empresariais usando TypeScript, NestJS e DrizzleORM, focando em como um engenheiro sênior aproveita essas ferramentas para construir software de alta fidelidade.
+o TypeScript conquistou o desenvolvimento empresarial, mas usá-lo como "JavaScript com tipos" é desperdiçar seu potencial. Em sistemas de grande escala, o TypeScript é a primeira linha de defesa contra a dívida técnica. Este artigo explora padrões de design avançados, tipos condicionais e técnicas de metaprogramação que separam um desenvolvedor júnior de um arquiteto de software.
 
-#### 1. Tipagem Nominal e Modelagem de Domínio (DDD)
+#### 1. Tipagem Nominal vs Estrutural em IDs de Domínio
 
-O TypeScript usa um sistema de tipos estrutural. Se dois objetos têm a mesma forma, são do mesmo tipo. Em ambientes enterprise, isso é um problema: um `UserId` e um `OrderId` não devem ser intercambiáveis.
+![TypeScript Type System](./images/typescript-enterprise-patterns/types.png)
 
-- **Branded Types**: Usamos "marcas" para simular tipagem nominal. Isso evita erros onde passamos um ID de usuário para uma função que espera um ID de pedido.
-- **Value Objects**: Implementamos classes que encapsulam validação. Um `Email` garante sua própria validade desde a criação.
+Por padrão, o TypeScript é estruturalmente tipado (duck typing). Isso é perigoso para IDs: `UserId` e `OrderId` são ambos `strings`, e é fácil passá-los erroneamente para uma função.
 
-(Exemplos detalhados de padrões DDD e isolamento em tempo de compilação...)
+Implementamos **Branded Types** para simular tipagem nominal:
 
-#### 2. Discriminated Unions: O Fim do Inferno dos Booleanos
+```typescript
+declare const __brand: unique symbol;
+type Brand<K, T> = K & { readonly [__brand]: T };
 
-Gerenciar estados com múltiplos booleanos é perigoso. Um sênior usa **Discriminated Unions** para representar estados mutuamente exclusivos, eliminando estados impossíveis.
+export type UserId = Brand<string, "UserId">;
+export type OrderId = Brand<string, "OrderId">;
 
-#### 3. Tipos Mapeados e Transformações com Drizzle
+function cancelOrder(id: OrderId) {
+  /* ... */
+}
 
-- **Utility Types**: Usamos `Pick`, `Omit` e tipos mapeados para criar DTOs que evoluem com o banco de dados.
-- **Zod**: Combinamos tipos do Drizzle com esquemas Zod para segurança em tempo de execução.
+const uid = "user_123" as UserId;
+const oid = "order_123" as OrderId;
 
-#### 4. Programação Funcional e o Tipo Result
+cancelOrder(oid); // ✅ OK
+cancelOrder(uid); // ❌ Erro de compilação: Type 'UserId' is not assignable to type 'OrderId'.
+```
 
-Lançar exceções torna o fluxo imprevisível. Preferimos retornar erros como valores usando o padrão `Result<T, E>`, tornando o tratamento de erros explícito.
+#### 2. Injeção de Dependência (DI) Segura
 
-#### 5. Abstração de Infraestrutura: Interfaces e NestJS
+No NestJS, DI é padrão. Mas na lógica de domínio puro (Clean Architecture), preferimos uma DI explícita e agnóstica de framework.
 
-Injetamos interfaces, não implementações concretas. Isso nos permite trocar o banco de dados Postgres/Drizzle por mocks em testes sem alterar a lógica de negócio.
+Usamos o padrão **Reader Monad** ou simplesmente funções de ordem superior para injetar repositórios sem decoradores `@Inject()`, facilitando testes unitários isolados.
 
-[Expansão MASSIVA adicional de 3500+ caracteres incluindo: Decoradores para auditoria, Mixins para composição de comportamento, padrões Mediator e estratégias de tipagem para Monorepos...]
+#### 3. Mapeamento de Tipos Avançado para Drizzle e DTOs
 
-Escrever TypeScript em nível enterprise é um exercício de arquitetura. Ao aplicar esses padrões, transformamos o código em um sistema de engenharia sólido e previsível.
+Não duplique definições. Use **Utility Types** para derivar DTOs do esquema do seu banco de dados.
+Se você tiver um esquema Drizzle, derive o tipo de inserção e seleção automaticamente:
+
+```typescript
+import { InferSelectModel, InferInsertModel } from "drizzle-orm";
+import { users } from "./schema";
+
+type User = InferSelectModel<typeof users>;
+type NewUser = InferInsertModel<typeof users>;
+
+// Omitir campos de auditoria no DTO de criação
+type CreateUserDto = Omit<NewUser, "createdAt" | "updatedAt">;
+```
+
+#### 4. Result Pattern em vez de Try-Catch
+
+O tratamento de erros com `try-catch` quebra o fluxo de controle e torna os erros invisíveis na assinatura da função. Adotamos o padrão **Result** (inspirado em Rust/Go).
+
+```typescript
+type Result<T, E = Error> = { ok: true; value: T } | { ok: false; error: E };
+
+async function findUser(id: UserId): Promise<Result<User, UserNotFoundError>> {
+  const user = await db.query.users.findFirst({ where: eq(users.id, id) });
+  if (!user) {
+    return { ok: false, error: new UserNotFoundError(id) };
+  }
+  return { ok: true, value: user };
+}
+
+// O consumidor É OBRIGADO a lidar com o erro
+const result = await findUser(id);
+if (!result.ok) {
+  return handleFailure(result.error);
+}
+console.log(result.value.email);
+```
+
+#### 5. Verificação de Exaustividade com Never
+
+Ao usar `switch` em uniões discriminadas (e.g., estados de um pedido), usamos o tipo `never` para garantir que tratamos _todos_ os casos possíveis. Se adicionarmos um novo estado `REFUNDED` e esquecermos de atualizar o switch, o TypeScript interromperá a compilação.
+
+Dominar essas técnicas transforma o compilador em seu parceiro de pair programming mais rigoroso, eliminando categorias inteiras de bugs antes que cheguem à produção.

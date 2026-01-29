@@ -551,20 +551,39 @@ export class BlogPostSeeder {
 
 		const createdPosts: any[] = [];
 
-		for (const postInfo of posts) {
+		// Create a lookup map for existing metadata
+		const metadataMap = new Map(posts.map((p) => [p.file, p]));
+
+		// Get all markdown files from the directory
+		const files = fs
+			.readdirSync(contentDir)
+			.filter((file) => file.endsWith(".md"));
+
+		for (const file of files) {
+			const filePath = path.join(contentDir, file);
 			// biome-ignore lint/suspicious/noConsole: Seeder debug
-			console.log(`Processing post: ${postInfo.slug}`);
-			const filePath = path.join(contentDir, postInfo.file);
-			if (!fs.existsSync(filePath)) {
-				// biome-ignore lint/suspicious/noConsole: Seeder log
-				console.warn(`⚠️ Content file not found: ${filePath}`);
-				continue;
-			}
+			console.log(`Processing file: ${file}`);
+
+			const slug = file.replace(".md", "");
+			const defaultTitle = slug
+				.split("-")
+				.map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+				.join(" ");
+
+			// Use metadata if available, otherwise generate defaults
+			const metadata = metadataMap.get(file) || {
+				slug,
+				file,
+				category: "Backend", // Not used currently but kept for consistency
+				es: { title: defaultTitle },
+				en: { title: defaultTitle },
+				pt: { title: defaultTitle },
+			};
 
 			const fullContent = fs.readFileSync(filePath, "utf-8");
 			// biome-ignore lint/suspicious/noConsole: Seeder debug
 			console.log(
-				`Found content for ${postInfo.file}, length: ${fullContent.length}`,
+				`Found content for ${file}, length: ${fullContent.length}`,
 			);
 			const sections = fullContent.split("---");
 
@@ -584,8 +603,8 @@ export class BlogPostSeeder {
 				.insert(schema.blogPostEntity)
 				.values({
 					tenant_id,
-					title: postInfo.es.title,
-					slug: postInfo.slug,
+					title: metadata.es.title,
+					slug: metadata.slug,
 					content: contentMap.es || "Contenido en desarrollo...",
 					extract:
 						contentMap.es?.substring(0, 160).replace(/[#*`]/g, "") + "...",
@@ -606,8 +625,8 @@ export class BlogPostSeeder {
 			if (contentMap.en) {
 				await this.db.insert(schema.blogPostEntity).values({
 					tenant_id,
-					title: postInfo.en.title,
-					slug: `${postInfo.slug}-en`,
+					title: metadata.en.title,
+					slug: `${metadata.slug}-en`,
 					content: contentMap.en,
 					extract:
 						contentMap.en?.substring(0, 160).replace(/[#*`]/g, "") + "...",
@@ -629,8 +648,8 @@ export class BlogPostSeeder {
 			if (contentMap.pt) {
 				await this.db.insert(schema.blogPostEntity).values({
 					tenant_id,
-					title: postInfo.pt.title,
-					slug: `${postInfo.slug}-pt`,
+					title: metadata.pt.title,
+					slug: `${metadata.slug}-pt`,
 					content: contentMap.pt,
 					extract:
 						contentMap.pt?.substring(0, 160).replace(/[#*`]/g, "") + "...",
@@ -649,7 +668,7 @@ export class BlogPostSeeder {
 			}
 
 			// biome-ignore lint/suspicious/noConsole: Seeder debug
-			console.log(`Created post ${postInfo.slug} with ID ${esPost.id}`);
+			console.log(`Created post ${metadata.slug} with ID ${esPost.id}`);
 			createdPosts.push(esPost);
 		}
 

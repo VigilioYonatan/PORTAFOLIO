@@ -91,7 +91,7 @@ describe("NeuroPlayer Component", () => {
 	it("calls setVolume when volume button is clicked (mute logic)", async () => {
 		const { audioStore } = await import("@stores/audio.store");
 		render(<NeuroPlayer />);
-		const muteButton = screen.getByLabelText("Mute");
+		const muteButton = screen.getByLabelText("Toggle Mute");
 		fireEvent.click(muteButton);
 		expect(audioStore.methods.setVolume).toHaveBeenCalledWith(0);
 	});

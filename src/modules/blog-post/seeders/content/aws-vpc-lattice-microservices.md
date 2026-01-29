@@ -1,121 +1,306 @@
 ### ESPAÑOL (ES)
 
-La conectividad en microservicios ha pasado por varias etapas: desde la gestión manual de IPs y balanceadores, pasando por Service Meshes complejos como Istio o Linkerd, hasta llegar a soluciones "Cloud Native" más integradas. **AWS VPC Lattice** es la última evolución, ofreciendo una capa de red de aplicación que simplifica radicalmente el service-to-service communication sin necesidad de gestionar sidecars o infraestructuras de red complejas. En este artículo, analizaremos cómo un ingeniero senior puede aprovechar VPC Lattice para construir una arquitectura de microservicios en NestJS que sea segura por defecto, altamente escalable y fácil de observar.
+La conectividad de microservicios en AWS ha sido históricamente un rompecabezas de infraestructura. VPC Peering no escala más allá de unas pocas docenas de VPCs, Transit Gateway añade latencia y complejidad de enrutamiento, y PrivateLink requiere endpoints específicos por servicio. Además, el modelo de seguridad basado en IPs (Security Groups) se rompe en entornos dinámicos como Kubernetes.
 
-#### 1. ¿Por qué VPC Lattice frente a otras soluciones?
+**AWS VPC Lattice** es la respuesta de AWS para modernizar esta capa. No es solo un "load balancer"; es una red de superposición a nivel de aplicación (L7) que abstrae la topología de red subyacente. En este artículo, analizaremos cómo Lattice elimina la necesidad de sidecars (como Istio) y simplifica drásticamente la conectividad Multi-Cuenta.
 
-Tradicionalmente, comunicar dos servicios en VPCs diferentes requería VPC Peering o Transit Gateways, además de configurar Security Groups y rutas. VPC Lattice abstrae esto mediante el concepto de **Service Network**. Un servicio simplemente se registra en la red y es accesible mediante un nombre DNS consistente, independientemente de en qué VPC o cuenta de AWS se encuentre.
+#### 1. Service Network: El Nuevo Bus de Servicios
 
-Para una arquitectura NestJS, esto significa que podemos desplegar componentes en diferentes clusters de EKS, Fargate o incluso instancias EC2 legacy, y todos se verán entre sí como si estuvieran en la misma red local, pero con un control de acceso mucho más fino.
+![AWS VPC Lattice Architecture](./images/aws-vpc-lattice-microservices/architecture.png)
 
-#### 2. Seguridad "Zero-Trust" con IAM Auth
+Lattice introduce el concepto de **Service Network**, un dominio lógico administrativo.
 
-VPC Lattice permite implementar una arquitectura **Zero-Trust**. No confiamos en la IP de origen, sino en la identidad del servicio. Lattice utiliza **AWS IAM** para la autenticación y autorización entre servicios.
+- **Topología Plana**: Servicios en diferentes VPCs y diferentes Cuentas AWS pueden comunicarse como si estuvieran en la misma red local, siempre que estén asociados a la misma Service Network.
+- **DNS Global**: Lattice asigna nombres DNS únicos y gestionados.
+  - `https://payment-service.0123456789abcdef.lattice-1.us-east-1.on.aws`
+  - También soporta **CNAMEs personalizados** (ej: `https://payments.internal`), manejando automáticamente los certificados SSL/TLS.
 
-Un microservicio NestJS que actúa como cliente utiliza las credenciales de su rol de ejecución (Execution Role) para firmar peticiones SigV4. El microservicio destino tiene una **Service Policy** que especifica qué roles de IAM tienen permiso para invocar qué endpoints.
+#### 2. Integración con EKS (Kubernetes Gateway API)
 
-```typescript
-// lattice-client.interceptor.ts
-import { aws4 } from "aws4"; // Utilidad para firmar peticiones
+Lattice no requiere que cambies tu código, pero brilla cuando se integra con EKS mediante el **AWS Gateway API Controller**.
+En lugar de crear `Ingress` objetos (ALB), defines `HTTPRoute` y `Gateway`.
 
-@Injectable()
-export class LatticeAuthInterceptor implements NestInterceptor {
-  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
-    const request = context.switchToHttp().getRequest();
-    // Lógica para firmar la petición saliente con SigV4 usando el rol de la instancia
-    return next.handle();
-  }
+```yaml
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: HTTPRoute
+metadata:
+  name: checkout-route
+  annotations:
+    application-networking.k8s.aws/lattice-target-group-name: checkout-tg
+spec:
+  parentRefs:
+    - name: my-hotel-gateway
+      sectionName: http
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /checkout
+      backendRefs:
+        - name: checkout-service
+          port: 8080
+```
+
+Esta configuración crea automáticamente el Servicio Lattice, los Target Groups y asocia los Pods de Kubernetes directamente como targets (IP mode), eliminando saltos innecesarios (NodePort).
+
+#### 3. Autenticación Zero Trust con IAM (SigV4)
+
+Olvídate de mTLS y la pesadilla de rotar certificados. Lattice utiliza **AWS IAM** para autenticación servicio-a-servicio.
+El "caller" (ej. una Lambda o un Pod con IAM Role) firma la petición HTTP usando Signature Version 4 (SigV4).
+
+**Política de Autenticación Granular**:
+Puedes definir políticas que parecen reglas de firewall, pero operan sobre identidades y rutas HTTP.
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "AllowReportsService",
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": "arn:aws:iam::123456789012:role/ReportsServiceRole"
+      },
+      "Action": "vpc-lattice-svcs:Invoke",
+      "Resource": "*",
+      "Condition": {
+        "StringEquals": { "vpc-lattice-svcs:RequestMethod": "GET" }
+      }
+    }
+  ]
 }
 ```
 
-#### 3. Gestión de Tráfico Avanzada: Canary y Blue-Green
+Si un servicio no autorizado intenta un `POST`, Lattice rechaza la conexión en el borde (**403 Forbidden**), protegiendo tus recursos computacionales de ataques DDoS internos.
 
-Una de las funcionalidades más potentes de Lattice es su capacidad nativa para realizar traffic shifting. Podemos definir reglas que envíen el 90% del tráfico a la versión "stable" de un microservicio y el 10% a una versión "canary". Esto se configura a nivel de infraestructura, pero impacta directamente en cómo diseñamos nuestros despliegues en NestJS.
+#### 4. Compartición Multi-Cuenta con AWS RAM
 
-#### 4. Service Discovery sin Complicaciones
+En empresas grandes, los servicios viven en cuentas AWS separadas.
+Lattice se integra con **AWS Resource Access Manager (RAM)**.
 
-Con VPC Lattice, el Service Discovery es automático. No necesitamos mantener un servidor Consul o Eureka. Cada servicio tiene un nombre DNS autogenerado o personalizado. En nuestra configuración de NestJS, simplemente apuntamos las URLs de los microservicios a estos nombres de Lattice.
+1.  La cuenta de "Plataforma" crea la Service Network.
+2.  Comparte la red con la Organización AWS o OUs específicas.
+3.  Las cuentas "Producto" asocian sus VPCs y Servicios a esa red compartida.
+    **Resultado**: Conectividad instantánea cross-account sin tocar tablas de rutas, VPC Peering ni complejas configuraciones de Transit Gateway.
 
-#### 5. Observabilidad Profunda con CloudWatch y X-Ray
+#### 5. Costos y Consideraciones
 
-Lattice se integra perfectamente con AWS X-Ray. Cada salto entre servicios queda registrado, permitiendo detectar cuellos de botella en la red o fallos en servicios aguas abajo (downstream). Un senior configura el Gateway de Lattice para exportar logs de acceso detallados que incluyen no solo la IP, sino el ID de IAM del llamador, facilitando auditorías de seguridad exhaustivas.
+Lattice no es barato.
 
-[Expansión MASIVA de 3000+ caracteres incluyendo: Guía paso a paso para configurar un Service Network, creación de Service Policies granulares, integración con Drizzle para persistencia de configuraciones de red dinámicas, comparación de costes entre Service Mesh y Lattice, y estrategias para migrar infraestructuras híbridas a VPC Lattice sin interrupción del servicio...]
+- **Cargo por servicio**: ~$0.025/hora por servicio provisionado.
+- **Cargo por tráfico**: ~$0.025/GB procesado.
 
-VPC Lattice representa un cambio de paradigma en cómo entendemos la red en la nube. Al delegar la complejidad de la conectividad y la seguridad a AWS, los ingenieros senior pueden centrarse en lo que realmente importa: la lógica de negocio y la resiliencia de la aplicación. Es la herramienta definitiva para equipos que buscan la máxima agilidad en arquitecturas distribuidas.
+**Comparativa**:
+
+- **VPC Peering**: Gratis (solo transferencia de datos). Complejo de gestionar a escala.
+- **PrivateLink**: Caro por endpoint. Unidireccional.
+- **Transit Gateway**: Caro por attachment + tráfico. Latencia añadida.
+- **Lattice**: Costo medio-alto, pero ahorro masivo en horas de ingeniería y mantenimiento de Service Mesh (Istio/Linkerd).
+
+Para arquitecturas modernas serverless o basadas en contenedores distribuidos, el ahorro en complejidad operativa justifica la inversión en Lattice.
 
 ---
 
 ### ENGLISH (EN)
 
-Microservices connectivity has gone through several stages: from manual management of IPs and balancers, through complex Service Meshes like Istio or Linkerd, to more integrated "Cloud Native" solutions. **AWS VPC Lattice** is the latest evolution, offering an application-layer network that radically simplifies service-to-service communication without the need to manage sidecars or complex network infrastructures. In this article, we will analyze how a senior engineer can leverage VPC Lattice to build a NestJS microservices architecture that is secure by default, highly scalable, and easy to observe.
+Connecting microservices in AWS has historically been an infrastructure puzzle. VPC Peering doesn't scale beyond a few dozen VPCs, Transit Gateway adds latency and routing complexity, and PrivateLink requires specific endpoints per service. Furthermore, the IP-based security model (Security Groups) breaks down in dynamic environments like Kubernetes.
 
-#### 1. Why VPC Lattice over other solutions?
+**AWS VPC Lattice** is AWS's answer to modernizing this layer. It is not just a "load balancer"; it is an application-layer (L7) overlay network that abstracts the underlying network topology. In this article, we will analyze how Lattice eliminates the need for sidecars (like Istio) and drastically simplifies Multi-Account connectivity.
 
-Traditionally, communicating two services in different VPCs required VPC Peering or Transit Gateways, along with configuring Security Groups and routes. VPC Lattice abstracts this through the **Service Network** concept. A service simply registers with the network and is accessible via a consistent DNS name, regardless of which VPC or AWS account it resides in.
+#### 1. Service Network: The New Service Bus
 
-(Technical deep dive into Lattice advantages for NestJS architectures continue here...)
+![AWS VPC Lattice Architecture](./images/aws-vpc-lattice-microservices/architecture.png)
 
-#### 2. "Zero-Trust" Security with IAM Auth
+Lattice introduces the concept of **Service Network**, a logical administrative domain.
 
-VPC Lattice allows implementing a **Zero-Trust** architecture. We do not trust the source IP; we trust the identity of the service. Lattice uses **AWS IAM** for authentication and authorization between services.
+- **Flat Topology**: Services in different VPCs and different AWS Accounts can communicate as if they were on the same local network, providing they are associated with the same Service Network.
+- **Global DNS**: Lattice assigns unique, managed DNS names.
+  - `https://payment-service.0123456789abcdef.lattice-1.us-east-1.on.aws`
+  - It also supports **Custom CNAMEs** (e.g., `https://payments.internal`), automatically handling SSL/TLS certificates.
 
-(Detailed guide on SigV4 signing in NestJS, role-based access control, and Service Policy configuration...)
+#### 2. EKS Integration (Kubernetes Gateway API)
 
-#### 3. Advanced Traffic Management: Canary and Blue-Green
+Lattice doesn't require you to change your code, but it shines when integrated with EKS via the **AWS Gateway API Controller**.
+Instead of creating `Ingress` objects (ALB), you define `HTTPRoute` and `Gateway`.
 
-One of Lattice's most powerful features is its native ability to perform traffic shifting. We can define rules that send 90% of traffic to the "stable" version of a microservice and 10% to a "canary" version. This is configured at the infrastructure level but directly impacts how we design our NestJS deployments.
+```yaml
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: HTTPRoute
+metadata:
+  name: checkout-route
+  annotations:
+    application-networking.k8s.aws/lattice-target-group-name: checkout-tg
+spec:
+  parentRefs:
+    - name: my-hotel-gateway
+      sectionName: http
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /checkout
+      backendRefs:
+        - name: checkout-service
+          port: 8080
+```
 
-(In-depth analysis of deployment strategies and infrastructure-as-code integration...)
+This configuration automatically creates the Lattice Service, Target Groups, and associates Kubernetes Pods directly as targets (IP mode), eliminating unnecessary hops (NodePort).
 
-#### 4. Seamless Service Discovery
+#### 3. Zero Trust Authentication with IAM (SigV4)
 
-With VPC Lattice, Service Discovery is automatic. We don't need to maintain a Consul or Eureka server. Each service has an auto-generated or custom DNS name. In our NestJS configuration, we simply point microservice URLs to these Lattice names.
+Forget mTLS and the nightmare of rotating certificates. Lattice uses **AWS IAM** for service-to-service authentication.
+The "caller" (e.g., a Lambda or a Pod with an IAM Role) signs the HTTP request using Signature Version 4 (SigV4).
 
-(Technical details on DNS resolution and configuration management...)
+**Granular Auth Policy**:
+You can define policies that look like firewall rules but operate on identities and HTTP routes.
 
-#### 5. Deep Observability with CloudWatch and X-Ray
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "AllowReportsService",
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": "arn:aws:iam::123456789012:role/ReportsServiceRole"
+      },
+      "Action": "vpc-lattice-svcs:Invoke",
+      "Resource": "*",
+      "Condition": {
+        "StringEquals": { "vpc-lattice-svcs:RequestMethod": "GET" }
+      }
+    }
+  ]
+}
+```
 
-Lattice integrates perfectly with AWS X-Ray. Each hop between services is recorded, allowing for the detection of network bottlenecks or failures in downstream services. A senior configures the Lattice Gateway to export detailed access logs including not only the IP but the caller's IAM ID, facilitating exhaustive security audits.
+If an unauthorized service attempts a `POST`, Lattice rejects the connection at the edge (**403 Forbidden**), protecting your compute resources from internal DDoS attacks.
 
-[MASSIVE expansion of 3500+ characters including: Step-by-step guide to setting up a Service Network, creating granular Service Policies, integration with Drizzle for dynamic network config persistence, cost comparison between Service Mesh and Lattice, and strategies for migrating hybrid infrastructures to VPC Lattice...]
+#### 4. Multi-Account Sharing with AWS RAM
 
-VPC Lattice represents a paradigm shift in how we understand cloud networking. By delegating the complexity of connectivity and security to AWS, senior engineers can focus on what truly matters: business logic and application resilience. It is the ultimate tool for teams seeking maximum agility in distributed architectures.
+In large enterprises, services live in separate AWS accounts.
+Lattice integrates with **AWS Resource Access Manager (RAM)**.
+
+1.  The "Platform" account creates the Service Network.
+2.  Shares the network with the AWS Organization or specific OUs.
+3.  "Product" accounts associate their VPCs and Services with that shared network.
+    **Result**: Instant cross-account connectivity without touching route tables, VPC Peering, or complex Transit Gateway configurations.
+
+#### 5. Costs and Considerations
+
+Lattice is not cheap.
+
+- **Service Charge**: ~$0.025/hour per provisioned service.
+- **Traffic Charge**: ~$0.025/GB processed.
+
+**Comparison**:
+
+- **VPC Peering**: Free (data transfer only). Complex to manage at scale.
+- **PrivateLink**: Expensive per endpoint. Unidirectional.
+- **Transit Gateway**: Expensive per attachment + traffic. Added latency.
+- **Lattice**: Medium-High cost, but massive savings in engineering hours and Service Mesh maintenance (Istio/Linkerd).
+
+For modern serverless or distributed container architectures, the savings in operational complexity justify the investment in Lattice.
 
 ---
 
 ### PORTUGUÊS (PT)
 
-A conectividade de microsserviços passou por várias etapas: desde o gerenciamento manual de IPs e balanceadores, passando por Service Meshes complexos como Istio ou Linkerd, até chegar a soluções "Cloud Native" mais integradas. O **AWS VPC Lattice** é a última evolução, oferecendo uma camada de rede de aplicação que simplifica radicalmente a comunicação service-to-service sem a necessidade de gerenciar sidecars ou infraestruturas de rede complexas. Neste artigo, analisaremos como um engenheiro sênior pode aproveitar o VPC Lattice para construir uma arquitetura de microsserviços no NestJS que seja segura por padrão, altamente escalável e fácil de observar.
+A conectividade de microsserviços na AWS historicamente tem sido um quebra-cabeça de infraestrutura. VPC Peering não escala além de algumas dezenas de VPCs, Transit Gateway adiciona latência e complexidade de roteamento, e PrivateLink requer endpoints específicos por serviço. Além disso, o modelo de segurança baseado em IPs (Security Groups) quebra em ambientes dinâmicos como Kubernetes.
 
-#### 1. Por que VPC Lattice em vez de outras soluções?
+**AWS VPC Lattice** é a resposta da AWS para modernizar essa camada. Não é apenas um "balanceador de carga"; é uma rede de sobreposição de nível de aplicação (L7) que abstrai a topologia de rede subjacente. Neste artigo, analisaremos como o Lattice elimina a necessidade de sidecars (como Istio) e simplifica drasticamente a conectividade Multi-Conta.
 
-Tradicionalmente, comunicar dois serviços em VPCs diferentes exigia VPC Peering ou Transit Gateways, além de configurar Security Groups e rotas. O VPC Lattice abstrai isso por meio do conceito de **Service Network**. Um serviço simplesmente se registra na rede e fica acessível por meio de um nome DNS consistente, independentemente de em qual VPC ou conta da AWS ele esteja.
+#### 1. Service Network: O Novo Barramento de Serviços
 
-(Aprofundamento técnico sobre as vantagens do Lattice para arquiteturas NestJS continua aqui...)
+![AWS VPC Lattice Architecture](./images/aws-vpc-lattice-microservices/architecture.png)
 
-#### 2. Segurança "Zero-Trust" com IAM Auth
+O Lattice introduz o conceito de **Service Network**, um domínio administrativo lógico.
 
-O VPC Lattice permite implementar uma arquitetura **Zero-Trust**. Não confiamos no IP de origem; confiamos na identidade do serviço. O Lattice usa o **AWS IAM** para autenticação e autorização entre serviços.
+- **Topologia Plana**: Serviços em diferentes VPCs e diferentes Contas AWS podem se comunicar como se estivessem na mesma rede local, desde que estejam associados à mesma Service Network.
+- **DNS Global**: O Lattice atribui nomes DNS únicos e gerenciados.
+  - `https://payment-service.0123456789abcdef.lattice-1.us-east-1.on.aws`
+  - Também suporta **CNAMEs personalizados** (ex: `https://payments.internal`), lidando automaticamente com certificados SSL/TLS.
 
-(Guia detalhado sobre assinatura SigV4 no NestJS, controle de acesso baseado em função e configuração de Service Policy...)
+#### 2. Integração com EKS (Kubernetes Gateway API)
 
-#### 3. Gerenciamento de Tráfego Avançado: Canary e Blue-Green
+O Lattice não exige que você altere seu código, mas brilha quando integrado com EKS via **AWS Gateway API Controller**.
+Em vez de criar objetos `Ingress` (ALB), você define `HTTPRoute` e `Gateway`.
 
-Uma das funcionalidades mais poderosas do Lattice é sua capacidade nativa de realizar o deslocamento de tráfego. Podemos definir regras que enviem 90% do tráfego para a versão "stable" de um microsserviço e 10% para uma versão "canary". Isso é configurado no nível da infraestrutura, mas afeta diretamente como projetamos nossas implantações no NestJS.
+```yaml
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: HTTPRoute
+metadata:
+  name: checkout-route
+  annotations:
+    application-networking.k8s.aws/lattice-target-group-name: checkout-tg
+spec:
+  parentRefs:
+    - name: my-hotel-gateway
+      sectionName: http
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /checkout
+      backendRefs:
+        - name: checkout-service
+          port: 8080
+```
 
-(Análise aprofundada de estratégias de implantação e integração de infraestrutura como código...)
+Essa configuração cria automaticamente o Serviço Lattice, Target Groups e associa os Pods do Kubernetes diretamente como alvos (modo IP), eliminando saltos desnecessários (NodePort).
 
-#### 4. Service Discovery Sem Complicações
+#### 3. Autenticação Zero Trust com IAM (SigV4)
 
-Com o VPC Lattice, o Service Discovery é automático. Não precisamos manter um servidor Consul ou Eureka. Cada serviço tem um nome DNS gerado automaticamente ou personalizado. Em nossa configuração do NestJS, simplesmente apontamos as URLs dos microsserviços para esses nomes do Lattice.
+Esqueça o mTLS e o pesadelo de rotacionar certificados. O Lattice usa **AWS IAM** para autenticação serviço-a-serviço.
+O "chamador" (ex: uma Lambda ou um Pod com IAM Role) assina a requisição HTTP usando Signature Version 4 (SigV4).
 
-(Detalhes técnicos sobre resolução de DNS e gerenciamento de configuração...)
+**Política de Autenticação Granular**:
+Você pode definir políticas que parecem regras de firewall, mas operam sobre identidades e rotas HTTP.
 
-#### 5. Observabilidade Profunda com CloudWatch e X-Ray
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "AllowReportsService",
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": "arn:aws:iam::123456789012:role/ReportsServiceRole"
+      },
+      "Action": "vpc-lattice-svcs:Invoke",
+      "Resource": "*",
+      "Condition": {
+        "StringEquals": { "vpc-lattice-svcs:RequestMethod": "GET" }
+      }
+    }
+  ]
+}
+```
 
-O Lattice se integra perfeitamente ao AWS X-Ray. Cada salto entre serviços é registrado, permitindo detectar gargalos de rede ou falhas em serviços downstream. Um sênior configura o Gateway do Lattice para exportar logs de acesso detalhados, facilitando auditorias de segurança abrangentes.
+Se um serviço não autorizado tentar um `POST`, o Lattice rejeita a conexão na borda (**403 Forbidden**), protegendo seus recursos computacionais de ataques DDoS internos.
 
-[Expansão MASSIVA de 3500+ caracteres incluindo: Guia passo a passo para configurar uma Service Network, criação de Service Policies granulares, integração com Drizzle para persistência de configurações de rede dinâmicas, comparação de custos entre Service Mesh e Lattice e estratégias de migração...]
+#### 4. Compartilhamento Multi-Conta com AWS RAM
 
-O VPC Lattice representa uma mudança de paradigma em como entendemos a rede na nuvem. Ao delegar a complexidade da conectividade e da segurança à AWS, os engenheiros sênior podem se concentrar no que realmente importa: a lógica de negócios e a resiliência da aplicação.
+Em grandes empresas, os serviços vivem em contas AWS separadas.
+O Lattice se integra com **AWS Resource Access Manager (RAM)**.
+
+1.  A conta "Plataforma" cria a Service Network.
+2.  Compartilha a rede com a Organização AWS ou OUs específicas.
+3.  As contas "Produto" associam suas VPCs e Serviços a essa rede compartilhada.
+    **Resultado**: Conectividade instantânea cross-account sem tocar em tabelas de rotas, VPC Peering ou configurações complexas de Transit Gateway.
+
+#### 5. Custos e Considerações
+
+O Lattice não é barato.
+
+- **Cobrança por serviço**: ~$0.025/hora por serviço provisionado.
+- **Cobrança por tráfego**: ~$0.025/GB processado.
+
+**Comparação**:
+
+- **VPC Peering**: Gratuito (apenas transferência de dados). Complexo de gerenciar em escala.
+- **PrivateLink**: Caro por endpoint. Unidirecional.
+- **Transit Gateway**: Caro por anexo + tráfego. Latência adicionada.
+- **Lattice**: Custo médio-alto, mas economia massiva em horas de engenharia e manutenção de Service Mesh (Istio/Linkerd).
+
+Para arquiteturas modernas serverless ou baseadas em contêineres distribuídos, a economia em complexidade operacional justifica o investimento no Lattice.

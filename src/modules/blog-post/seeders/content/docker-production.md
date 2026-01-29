@@ -1,218 +1,396 @@
 ### ESPAÑOL (ES)
 
-Desplegar una aplicación Node.js en un contenedor Docker es sencillo; hacerlo de forma segura, eficiente y preparada para entornos de producción masivos es un reto de ingeniería que separa a los juniors de los ingenieros senior. Un senior no se limita a usar la imagen oficial de Node; optimiza el tamaño de la imagen para acelerar los despliegues, endurece la seguridad para mitigar ataques y configura la gestión de recursos para evitar que un contenedor hunda al resto del nodo. En este artículo, analizaremos las mejores prácticas senior para llevar tus contenedores de Node.js, Express y Drizzle a producción con total confianza.
+Docker ha democratizado los despliegues, pero la brecha entre un `Dockerfile` que "funciona" y uno listo para producción en un banco o una startup de alto crecimiento es abismal. La mayoría de los tutoriales enseñan a copiar `node_modules` y ejecutar `npm start`. En producción, esto es una receta para vulnerabilidades de seguridad, imágenes de 1GB y tiempos de arranque lentos.
 
-#### 1. Estrategia de Imágenes: Multi-stage Builds y Distroless
+En este artículo para ingenieros senior, deconstruiremos el arte de crear contenedores Node.js/NestJS inmutables, seguros y performantes.
 
-![Multi-stage Builds](./images/docker-production/multistage-builds.png)
+#### 1. Multi-Stage Builds: El Estándar de Oro
 
-El tamaño de la imagen importa, no solo por el almacenamiento, sino por el "cold start" en servicios como AWS Fargate o Google Cloud Run. Una imagen pesada tarda más en descargarse y desempaquetarse, lo que retrasa la escala automática.
+![Docker Multi-Stage Build](./images/docker-production/build-stages.png)
 
-- **Multistage Builds**: Dividimos el proceso en una etapa de construcción (build) y otra de ejecución (runtime). En la etapa de build instalamos todas las dependencias (incluyendo las de desarrollo para compilar TypeScript); en la de runtime, solo incluimos los binarios compilados y las `dependencies` de producción.
-- **PNPM Fetch**: Una técnica senior es usar `pnpm fetch` para descargar las dependencias basándose solo en el lockfile, permitiendo que Docker cachee las dependencias de forma mucho más eficiente.
-- **Imágenes Base**: Preferimos imágenes minimalistas como `node:lts-alpine` o, para máxima seguridad, imágenes `distroless` de Google. Las imágenes distroless no contienen shells (como sh o bash), gestores de paquetes ni utilidades innecesarias, reduciendo drásticamente la superficie de ataque.
+El objetivo es separar el entorno de construcción (que necesita compiladores, Python, `devDependencies`) del entorno de ejecución (que solo necesita el runtime de Node.js).
 
 ```dockerfile
-# Etapa 1: Build
-FROM node:20-alpine AS builder
-WORKDIR /app
-RUN npm install -g pnpm
-COPY pnpm-lock.yaml ./
-RUN pnpm fetch
-COPY . .
-RUN pnpm install --offline
-RUN pnpm build
+# ------------------------------------------------------------------------------
+# Stage 1: Builder
+# Usamos una imagen completa para compilar (python, build-essentials, etc)
+# ------------------------------------------------------------------------------
+FROM node:20-bookworm AS builder
 
-# Etapa 2: Runtime
-FROM node:20-alpine
-WORKDIR /app
-COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/node_modules ./node_modules
-COPY package.json ./
-USER node
-CMD ["node", "dist/main.js"]
+WORKDIR /usr/src/app
+
+COPY package*.json ./
+
+# 'npm ci' es más rápido y estricto que 'npm install'
+RUN npm ci
+
+COPY . .
+
+# Compilar TypeScript a JavaScript (dist/)
+RUN npm run build
+
+# Poda de dependencias: Solo dejar 'dependencies', borrar 'devDependencies'
+RUN npm prune --production
+
+# ------------------------------------------------------------------------------
+# Stage 2: Runner
+# Imagen minimalista para producción
+# ------------------------------------------------------------------------------
+FROM gcr.io/distroless/nodejs20-debian12 AS runner
+
+WORKDIR /usr/src/app
+
+# Copiar solo lo necesario desde el Stage 1
+COPY --from=builder /usr/src/app/dist ./dist
+COPY --from=builder /usr/src/app/node_modules ./node_modules
+COPY --from=builder /usr/src/app/package.json ./package.json
+
+# Seguridad: Ejecutar como usuario no-root (distroless usa uid 65532)
+USER nonroot:nonroot
+
+CMD ["dist/main.js"]
 ```
 
-#### 2. Seguridad del Contenedor: El Usuario No-Root y Hardening
+#### 2. Distroless vs Alpine: El Debate de Seguridad
 
-![Container Security](./images/docker-production/container-security.png)
+Durante años, **Alpine Linux** fue el rey por su tamaño pequeño (5MB). Sin embargo, Alpine usa `musl libc` en lugar de `glibc`, lo que puede causar problemas de rendimiento o compatibilidad con ciertas librerías de Node.js (como gRPC o librerías de criptografía).
 
-Por defecto, los procesos dentro de un contenedor corren como `root`. Esto es una vulnerabilidad crítica. Si un atacante logra escapar del proceso de la aplicación, tendrá privilegios de root en el contenedor y, potencialmente, en el host.
+**Distroless** (de Google) es la recomendación moderna:
 
-- **USER node**: La imagen oficial de Node incluye un usuario llamado `node`. Un senior siempre añade la instrucción `USER node` en su Dockerfile para asegurar que el proceso corra con privilegios mínimos.
-- **Sistemas de Archivos de Solo Lectura**: Siempre que sea posible, configura tu orquestador para montar el sistema de archivos de la aplicación como solo lectura. Esto evita que un atacante inyecte scripts maliciosos o modifique el código en tiempo de ejecución.
-- **Escaneo de Vulnerabilidades**: Integra herramientas como **Trivy** o **Snyk** en tu pipeline de CI/CD para escanear las capas de la imagen en busca de CVEs conocidos antes de subirla al registro.
+- **Sin Shell**: No hay `/bin/sh` ni `/bin/bash`. Si alguien logra un RCE (Remote Code Execution), no puede hacer `wget http://malware.com`.
+- **Sin Gestor de Paquetes**: No hay `apt` ni `apk`. Inmutable por diseño.
+- **Basado en Debian**: Usa `glibc` estándar, garantizando compatibilidad 100%.
 
-#### 3. Optimización de Capas y Gestión de Dependencias
+#### 3. El Problema del PID 1 y los Procesos Zombis
 
-![Layer Caching](./images/docker-production/layer-caching.png)
+En Linux, el proceso con PID 1 tiene responsabilidades especiales: debe adoptar procesos huérfanos y manejar señales del sistema. Node.js no está diseñado para ser PID 1.
+Si ejecutas `CMD ["node", "main.js"]`, Node será PID 1.
 
-- **Cache de Capas**: Docker cachea cada instrucción. Copiar el `package.json` y el `pnpm-lock.yaml` ANTES que el resto del código asegura que, si cambias una línea de lógica de negocio, Docker no tenga que volver a ejecutar `pnpm install`, ahorrando minutos valiosos en cada despliegue.
-- **Eliminación de archivos innecesarios**: Usamos `.dockerignore` para evitar que archivos como `node_modules` locales, logs, o archivos de configuración de IDE entren en la imagen, reduciendo el tamaño y mejorando la seguridad.
+**Consecuencia**: Al matar el contenedor, Node puede no recibir `SIGTERM`, obligando a Docker a usar `SIGKILL` (apagado forzado), interrumpiendo transacciones de base de datos o requests HTTP en vuelo.
 
-#### 4. Observabilidad, Health Checks y Ciclo de Vida
+**Solución**:
+Si usas Distroless, Node.js se ejecuta directamente. En imágenes estándar (Debian/Alpine), utiliza **Tini** (`--init` flag en docker run) o `dumb-init`.
+Distroless NodeJS ya maneja esto correctamente envolviendo el runtime.
 
-![Health Checks](./images/docker-production/health-checks.png)
+#### 4. Graceful Shutdown (Apagado Elegante)
 
-Un contenedor que corre no siempre es un contenedor sano.
+Kubernetes es brutal. Cuando escala hacia abajo, envía `SIGTERM` y espera (por defecto 30s) antes de enviar `SIGKILL`. Tu aplicación debe aprovechar ese tiempo para:
 
-- **Health Checks**: Configuramos instrucciones `HEALTHCHECK` que no solo miren si el puerto 3000 está abierto, sino que verifiquen puntos críticos como la conectividad con la base de datos Postgres (usando una consulta sencilla vía Drizzle).
-- **Graceful Shutdown**: Docker envía `SIGTERM` al detener un contenedor. Tu aplicación Express debe estar preparada para capturar esta señal, dejar de aceptar nuevas peticiones, cerrar las conexiones activas de base de datos y terminar procesos pendientes antes de que Docker fuerce el cierre con `SIGKILL` tras 10 segundos.
+1.  Dejar de aceptar nuevas conexiones HTTP.
+2.  Esperar a que terminen las peticiones activas.
+3.  Cerrar conexiones a DB y Redis.
 
 ```typescript
-process.on("SIGTERM", async () => {
-  console.log("SIGTERM recibido: cerrando servidor de forma graciosa");
-  server.close(async () => {
-    await db.closeConnections(); // Lógica de Drizzle
-    process.exit(0);
-  });
-});
+// main.ts
+import { NestFactory } from "@nestjs/core";
+import { AppModule } from "./app.module";
+
+async function bootstrap() {
+  const app = await NestFactory.create(AppModule);
+
+  // Activa los hooks de ciclo de vida de NestJS
+  // Esto escucha SIGTERM y llama a onModuleDestroy() en tus servicios
+  app.enableShutdownHooks();
+
+  const server = await app.listen(3000);
+
+  // Configuración avanzada de Keep-Alive para evitar errores 502 en Load Balancers
+  server.keepAliveTimeout = 65000; // Mayor que el timeout del ALB (60s)
+  server.headersTimeout = 66000;
+}
+bootstrap();
 ```
 
-#### 5. Gestión de Recursos: CPU y Memoria (OOM Killer)
+#### 5. Escaneo de Vulnerabilidades en CI
 
-![Resource Management](./images/docker-production/resource-management.png)
+No confíes en que tu imagen base es segura hoy y lo será mañana. Nuevas CVEs se descubren a diario.
+Integra **Trivy** o **Snyk** en tu pipeline de CI/CD.
 
-Uno de los fallos más comunes en producción es que un contenedor consuma toda la memoria del nodo, provocando que el Kernel de Linux lo mate (OOM Killer).
+```yaml
+# .github/workflows/security.yaml
+- name: Run Trivy vulnerability scanner
+  uses: aquasecurity/trivy-action@master
+  with:
+    image-ref: "mi-empresa/mi-api:latest"
+    format: "table"
+    exit-code: "1" # Fallar el build si hay vulnerabilidades críticas
+    ignore-unfixed: true
+    vuln-type: "os,library"
+    severity: "CRITICAL,HIGH"
+```
 
-- **Resource Limits**: Define siempre límites de CPU y Memoria en tu orquestador (Kubernetes o Docker Compose). Para Node.js, es vital establecer `--max-old-space-size` en los argumentos de ejecución de Node para que coincida aproximadamente con el límite de memoria del contenedor, permitiendo que el Garbage Collector actúe antes de que el sistema operativo mate el proceso.
+#### 6. Health Checks: Liveness vs Readiness
 
-#### 6. Redes y Docker Compose para Desarrollo
+Docker tiene la instrucción `HEALTHCHECK`, pero en Kubernetes, definimos esto en el YAML del pod.
+Diferencia crítica:
 
-![Docker Networking](./images/docker-production/docker-networking.png)
+- **Liveness Probe**: "¿Estoy vivo?". Si falla, K8s reinicia el pod. (Endpoint: `/health/liveness`). Solo verifica que el proceso Node responde.
+- **Readiness Probe**: "¿Puedo recibir tráfico?". Si falla, K8s saca el pod del Load Balancer. (Endpoint: `/health/readiness`). Verifica conexión a DB, Redis, etc.
 
-Un senior utiliza Docker Compose no solo para correr la app, sino para replicar con exactitud el entorno de producción (bases de datos, Redis, proxies).
-
-- **Networks**: Separa tus contenedores en redes internas. Tu base de datos no debe estar expuesta al mundo; solo el API Gateway debería estar en una red pública.
-
-[Expansión MASIVA adicional: Profundización en técnicas de "Image Flattening", uso de BuildKit para compilaciones ultra-rápidas, despliegue de microservicios con Docker Swarm vs Kubernetes, estrategias de logging centralizado con Fluentd, y guías para asegurar los secretos inyectados en runtime a través de AWS Secrets Manager o HashiCorp Vault, garantizando una infraestructura inexpugnable y altamente eficiente...]
-
-Dominar Docker es fundamental en la carrera de cualquier ingeniero backend senior. No se trata solo de empaquetar software, sino de crear una unidad de ejecución predecible, segura y capaz de escalar ante las demandas más exigentes del mercado global.
+Usa `@nestjs/terminus` para implementar estos endpoints robustamente.
 
 ---
 
 ### ENGLISH (EN)
 
-Deploying a Node.js application in a Docker container is simple; doing it securely, efficiently, and prepared for massive production environments is an engineering challenge that separates juniors from senior engineers. A senior doesn't just use the official Node image; they optimize image size to speed up deployments, harden security to mitigate attacks, and configure resource management to prevent one container from sinking the rest of the node. In this article, we will analyze senior best practices for taking your Node.js, Express, and Drizzle containers to production with total confidence.
+Docker has democratized deployments, but the gap between a `Dockerfile` that "works" and one ready for production in a bank or high-growth startup is abysmal. Most tutorials teach you to copy `node_modules` and run `npm start`. In production, this is a recipe for security vulnerabilities, 1GB images, and slow boot times.
 
-#### 1. Image Strategy: Multi-stage Builds and Distroless
+In this article for senior engineers, we will deconstruct the art of creating immutable, secure, and performant Node.js/NestJS containers.
 
-![Multi-stage Builds](./images/docker-production/multistage-builds.png)
+#### 1. Multi-Stage Builds: The Gold Standard
 
-Image size matters, not just for storage, but for "cold start" in services like AWS Fargate or Google Cloud Run. A heavy image takes longer to download and unpack, delaying automatic scaling.
+![Docker Multi-Stage Build](./images/docker-production/build-stages.png)
 
-- **Multistage Builds**: We divide the process into a build stage and a runtime stage. In the build stage, we install all dependencies (including development ones to compile TypeScript); in the runtime stage, we only include the compiled binaries and production `dependencies`.
-- **PNPM Fetch**: A senior technique is using `pnpm fetch` to download dependencies based only on the lockfile, allowing Docker to cache dependencies much more efficiently.
-- **Base Images**: We prefer minimalist images like `node:lts-alpine` or, for maximum security, Google's `distroless` images. Distroless images contain no shells (like sh or bash), package managers, or unnecessary utilities, drastically reducing the attack surface.
+The goal is to separate the build environment (which needs compilers, Python, `devDependencies`) from the runtime environment (which only needs the Node.js runtime).
 
-(Extensive code examples and specialized Dockerfile configurations continue here...)
+```dockerfile
+# ------------------------------------------------------------------------------
+# Stage 1: Builder
+# We use a full image for building (python, build-essentials, etc)
+# ------------------------------------------------------------------------------
+FROM node:20-bookworm AS builder
 
-#### 2. Container Security: The Non-Root User and Hardening
+WORKDIR /usr/src/app
 
-![Container Security](./images/docker-production/container-security.png)
+COPY package*.json ./
 
-By default, processes inside a container run as `root`. This is a critical vulnerability. If an attacker manages to escape the application process, they will have root privileges in the container and, potentially, on the host.
+# 'npm ci' is faster and stricter than 'npm install'
+RUN npm ci
 
-- **USER node**: The official Node image includes a user named `node`. A senior always adds the `USER node` instruction in their Dockerfile to ensure the process runs with minimal privileges.
-- **Read-Only Filesystems**: Whenever possible, configure your orchestrator to mount the application's filesystem as read-only. This prevents an attacker from injecting malicious scripts or modifying code at runtime.
-- **Vulnerability Scanning**: Integrate tools like **Trivy** or **Snyk** into your CI/CD pipeline to scan image layers for known CVEs before pushing to the registry.
+COPY . .
 
-#### 3. Layer Optimization and Dependency Management
+# Compile TypeScript to JavaScript (dist/)
+RUN npm run build
 
-![Layer Caching](./images/docker-production/layer-caching.png)
+# Dependency Pruning: Only keep 'dependencies', remove 'devDependencies'
+RUN npm prune --production
 
-- **Layer Caching**: Docker caches each instruction. Copying the `package.json` and `pnpm-lock.yaml` BEFORE the rest of the code ensures that if you change a line of business logic, Docker doesn't have to re-run `pnpm install`, saving valuable minutes in each deployment.
-- **Removing Unnecessary Files**: We use `.dockerignore` to prevent local `node_modules`, logs, or IDE configuration files from entering the image, reducing size and improving security.
+# ------------------------------------------------------------------------------
+# Stage 2: Runner
+# Minimalist image for production
+# ------------------------------------------------------------------------------
+FROM gcr.io/distroless/nodejs20-debian12 AS runner
 
-#### 4. Observability, Health Checks, and Lifecycle
+WORKDIR /usr/src/app
 
-![Health Checks](./images/docker-production/health-checks.png)
+# Copy only what is necessary from Stage 1
+COPY --from=builder /usr/src/app/dist ./dist
+COPY --from=builder /usr/src/app/node_modules ./node_modules
+COPY --from=builder /usr/src/app/package.json ./package.json
 
-A running container is not always a healthy container.
+# Security: Run as non-root user (distroless uses uid 65532)
+USER nonroot:nonroot
 
-- **Health Checks**: We configure `HEALTHCHECK` instructions that not only check if port 3000 is open but verify critical points like connectivity with the Postgres database (using a simple query via Drizzle).
-- **Graceful Shutdown**: Docker sends `SIGTERM` when stopping a container. Your Express application must be prepared to capture this signal, stop accepting new requests, close active database connections, and terminate pending processes before Docker forces closure with `SIGKILL` after 10 seconds.
+CMD ["dist/main.js"]
+```
 
-#### 5. Resource Management: CPU and Memory (OOM Killer)
+#### 2. Distroless vs. Alpine: The Security Debate
 
-![Resource Management](./images/docker-production/resource-management.png)
+For years, **Alpine Linux** was king due to its small size (5MB). However, Alpine uses `musl libc` instead of `glibc`, which can cause performance or compatibility issues with certain Node.js libraries (like gRPC or crypto libs).
 
-One of the most common failures in production is a container consuming all the node's memory, causing the Linux Kernel to kill it (OOM Killer).
+**Distroless** (from Google) is the modern recommendation:
 
-- **Resource Limits**: Always define CPU and memory limits in your orchestrator (Kubernetes or Docker Compose). For Node.js, it is vital to set `--max-old-space-size` in Node's execution arguments to roughly match the container's memory limit, allowing the Garbage Collector to act before the OS kills the process.
+- **No Shell**: No `/bin/sh` or `/bin/bash`. If someone achieves RCE (Remote Code Execution), they cannot `wget http://malware.com`.
+- **No Package Manager**: No `apt` or `apk`. Immutable by design.
+- **Debian Based**: Uses standard `glibc`, guaranteeing 100% compatibility.
 
-#### 6. Networking and Docker Compose for Development
+#### 3. The PID 1 Problem and Zombie Processes
 
-![Docker Networking](./images/docker-production/docker-networking.png)
+In Linux, the PID 1 process has special responsibilities: it must adopt orphaned processes and handle system signals. Node.js is not designed to be PID 1.
+If you run `CMD ["node", "main.js"]`, Node will be PID 1.
 
-A senior uses Docker Compose not just to run the app, but to accurately replicate the production environment (databases, Redis, proxies).
+**Consequence**: When killing the container, Node might not receive `SIGTERM`, forcing Docker to use `SIGKILL` (forced shutdown), interrupting database transactions or in-flight HTTP requests.
 
-- **Networks**: Separate your containers into internal networks. Your database should not be exposed to the world; only the API Gateway should be on a public network.
+**Solution**:
+If using Distroless, Node.js is run directly. In standard images (Debian/Alpine), use **Tini** (`--init` flag in docker run) or `dumb-init`.
+Distroless NodeJS already handles this correctly by wrapping the runtime.
 
-[Additional MASSIVE expansion: Deep dive into "Image Flattening" techniques, using BuildKit for ultra-fast builds, microservices deployment with Docker Swarm vs. Kubernetes, centralized logging strategies with Fluentd, and guides for securing runtime-injected secrets via AWS Secrets Manager or HashiCorp Vault...]
+#### 4. Graceful Shutdown
 
-Mastering Docker is fundamental in any senior backend engineer's career. It's not just about packaging software, but about creating a predictable, secure unit of execution capable of scaling to the most demanding global market requirements.
+Kubernetes is brutal. When scaling down, it sends `SIGTERM` and waits (default 30s) before sending `SIGKILL`. Your app must use that time to:
+
+1.  Stop accepting new HTTP connections.
+2.  Wait for active requests to finish.
+3.  Close DB and Redis connections.
+
+```typescript
+// main.ts
+import { NestFactory } from "@nestjs/core";
+import { AppModule } from "./app.module";
+
+async function bootstrap() {
+  const app = await NestFactory.create(AppModule);
+
+  // Enable NestJS lifecycle hooks
+  // This listens for SIGTERM and calls onModuleDestroy() in your services
+  app.enableShutdownHooks();
+
+  const server = await app.listen(3000);
+
+  // Advanced Keep-Alive config to avoid 502 errors in Load Balancers
+  server.keepAliveTimeout = 65000; // Higher than ALB timeout (60s)
+  server.headersTimeout = 66000;
+}
+bootstrap();
+```
+
+#### 5. Vulnerability Scanning in CI
+
+Don't trust that your base image is secure today and will remain so tomorrow. New CVEs are discovered daily.
+Integrate **Trivy** or **Snyk** into your CI/CD pipeline.
+
+```yaml
+# .github/workflows/security.yaml
+- name: Run Trivy vulnerability scanner
+  uses: aquasecurity/trivy-action@master
+  with:
+    image-ref: "my-company/my-api:latest"
+    format: "table"
+    exit-code: "1" # Fail build if critical vulnerabilities found
+    ignore-unfixed: true
+    vuln-type: "os,library"
+    severity: "CRITICAL,HIGH"
+```
+
+#### 6. Health Checks: Liveness vs. Readiness
+
+Docker has the `HEALTHCHECK` instruction, but in Kubernetes, we define this in the pod YAML.
+Critical difference:
+
+- **Liveness Probe**: "Am I alive?". If it fails, K8s restarts the pod. (Endpoint: `/health/liveness`). Only checks that the Node process responds.
+- **Readiness Probe**: "Can I receive traffic?". If it fails, K8s removes the pod from the Load Balancer. (Endpoint: `/health/readiness`). Checks connection to DB, Redis, etc.
+
+Use `@nestjs/terminus` to implement these endpoints robustly.
 
 ---
 
 ### PORTUGUÊS (PT)
 
-Implantar um aplicativo Node.js em um contêiner Docker é simples; fazê-lo de forma segura, eficiente e preparada para ambientes de produção massivos é um desafio de engenharia que separa os juniores dos engenheiros sênior. Um sênior não se limita a usar a imagem oficial do Node; ele otimiza o tamanho da imagem para acelerar os deploys, endurece a segurança para mitigar ataques e configura o gerenciamento de recursos para evitar que um contêiner derrube o restante do nó. Neste artigo, analisaremos as melhores práticas sênior para levar seus contêineres Node.js, Express e Drizzle para a produção com total confiança.
+O Docker democratizou as implantações, mas a lacuna entre um `Dockerfile` que "funciona" e um pronto para produção em um banco ou startup de alto crescimento é abismal. A maioria dos tutoriais ensina a copiar `node_modules` e executar `npm start`. Em produção, isso é uma receita para vulnerabilidades de segurança, imagens de 1GB e tempos de inicialização lentos.
 
-#### 1. Estratégia de Imagem: Multi-stage Builds e Distroless
+Neste artigo para engenheiros seniores, desconstruiremos a arte de criar contêineres Node.js/NestJS imutáveis, seguros e performáticos.
 
-![Multi-stage Builds](./images/docker-production/multistage-builds.png)
+#### 1. Multi-Stage Builds: O Padrão Ouro
 
-O tamanho da imagem importa, não apenas pelo armazenamento, mas pelo "cold start" em serviços como AWS Fargate ou Google Cloud Run. Uma imagem pesada demora mais para ser baixada e descompactada, atrasando o escalonamento automático.
+![Docker Multi-Stage Build](./images/docker-production/build-stages.png)
 
-- **Multistage Builds**: Dividimos o processo em uma etapa de build e outra de execução (runtime). Na etapa de build, instalamos todas as dependências (incluindo as de desenvolvimento para compilar TypeScript); na etapa de runtime, incluímos apenas os binários compilados e as `dependencies` de produção.
-- **PNPM Fetch**: Uma técnica sênior é usar `pnpm fetch` para baixar dependências baseadas apenas no lockfile, permitindo que o Docker armazene as dependências em cache de forma muito mais eficiente.
-- **Imagens Base**: Preferimos imagens minimalistas como `node:lts-alpine` ou, para segurança máxima, imagens `distroless` do Google. As imagens distroless não contêm shells (como sh ou bash), gerenciadores de pacotes ou utilitários desnecessários, reduzindo drasticamente a superfície de ataque.
+O objetivo é separar o ambiente de construção (que precisa de compiladores, Python, `devDependencies`) do ambiente de execução (que só precisa do runtime do Node.js).
 
-(Exemplos de código extensivos e configurações especializadas de Dockerfile continuam aqui...)
+```dockerfile
+# ------------------------------------------------------------------------------
+# Stage 1: Builder
+# Usamos uma imagem completa para compilar (python, build-essentials, etc)
+# ------------------------------------------------------------------------------
+FROM node:20-bookworm AS builder
 
-#### 2. Segurança do Contêiner: O Usuário Não-Root e Hardening
+WORKDIR /usr/src/app
 
-![Container Security](./images/docker-production/container-security.png)
+COPY package*.json ./
 
-Por padrão, os processos dentro de um contêiner são executados como `root`. Esta é uma vulnerabilidade crítica. Se um invasor conseguir escapar do processo do aplicativo, ele terá privilégios de root no contêiner e, potencialmente, no host.
+# 'npm ci' é mais rápido e estrito que 'npm install'
+RUN npm ci
 
-- **USER node**: A imagem oficial do Node inclui um usuário chamado `node`. Um sênior sempre adiciona a instrução `USER node` em seu Dockerfile para garantir que o processo seja executado com privilégios mínimos.
-- **Sistemas de Arquivos Somente Leitura**: Sempre que possível, configure seu orquestrador para montar o sistema de arquivos do aplicativo como somente leitura. Isso evita que um invasor injete scripts maliciosos ou modifique o código em tempo de execução.
-- **Escaneamento de Vulnerabilidades**: Integre ferramentas como **Trivy** ou **Snyk** em seu pipeline de CI/CD para escanear as camadas da imagem em busca de CVEs conhecidos antes de enviá-la para o registro.
+COPY . .
 
-#### 3. Otimização de Camadas e Gerenciamento de Dependências
+# Compilar TypeScript para JavaScript (dist/)
+RUN npm run build
 
-![Layer Caching](./images/docker-production/layer-caching.png)
+# Poda de dependências: Manter apenas 'dependencies', remover 'devDependencies'
+RUN npm prune --production
 
-- **Cache de Camadas**: O Docker armazena cada instrução em cache. Copiar o `package.json` e o `pnpm-lock.yaml` ANTES do restante do código garante que, se você alterar uma linha da lógica de negócios, o Docker não precise executar novamente o `pnpm install`, economizando minutos valiosos em cada implantação.
-- **Remoção de Arquivos Desnecessários**: Usamos `.dockerignore` para evitar que `node_modules` locais, logs ou arquivos de configuração de IDE entrem na imagem, reduzindo o tamanho e melhorando a segurança.
+# ------------------------------------------------------------------------------
+# Stage 2: Runner
+# Imagem minimalista para produção
+# ------------------------------------------------------------------------------
+FROM gcr.io/distroless/nodejs20-debian12 AS runner
 
-#### 4. Observabilidade, Health Checks e Ciclo de Vida
+WORKDIR /usr/src/app
 
-![Health Checks](./images/docker-production/health-checks.png)
+# Copiar apenas o necessário do Stage 1
+COPY --from=builder /usr/src/app/dist ./dist
+COPY --from=builder /usr/src/app/node_modules ./node_modules
+COPY --from=builder /usr/src/app/package.json ./package.json
 
-Um contêiner em execução nem sempre é um contêiner íntegro.
+# Segurança: Executar como usuário não-root (distroless usa uid 65532)
+USER nonroot:nonroot
 
-- **Health Checks**: Configuramos instruções `HEALTHCHECK` que não apenas verificam se a porta 3000 está aberta, mas também verificam pontos críticos como a conectividade com o banco de dados Postgres (usando uma consulta simples via Drizzle).
-- **Graceful Shutdown**: O Docker envia `SIGTERM` ao interromper um contêiner. Seu aplicativo Express deve estar preparado para capturar esse sinal, parar de aceitar novas solicitações, fechar as conexões ativas com o banco de dados e encerrar os processos pendentes antes que o Docker force o fechamento com `SIGKILL` após 10 segundos.
+CMD ["dist/main.js"]
+```
 
-#### 5. Gerenciamento de Recursos: CPU e Memória (OOM Killer)
+#### 2. Distroless vs Alpine: O Debate de Segurança
 
-![Resource Management](./images/docker-production/resource-management.png)
+Por anos, o **Alpine Linux** foi rei devido ao seu tamanho pequeno (5MB). No entanto, o Alpine usa `musl libc` em vez de `glibc`, o que pode causar problemas de desempenho ou compatibilidade com certas bibliotecas Node.js (como gRPC ou libs de criptografia).
 
-Uma das falhas mais comuns em produção é um contêiner consumir toda a memória do nó, fazendo com que o Kernel do Linux o encerre (OOM Killer).
+**Distroless** (do Google) é a recomendação moderna:
 
-- **Resource Limits**: Sempre defina limites de CPU e memória em seu orquestrador (Kubernetes ou Docker Compose). Para o Node.js, é vital definir `--max-old-space-size` nos argumentos de execução do Node para corresponder aproximadamente ao limite de memória do contêiner.
+- **Sem Shell**: Não há `/bin/sh` nem `/bin/bash`. Se alguém conseguir um RCE (Execução Remota de Código), não poderá fazer `wget http://malware.com`.
+- **Sem Gerenciador de Pacotes**: Não há `apt` nem `apk`. Imutável por design.
+- **Baseado em Debian**: Usa `glibc` padrão, garantindo 100% de compatibilidade.
 
-#### 6. Redes e Docker Compose para Desenvolvimento
+#### 3. O Problema do PID 1 e Processos Zumbis
 
-![Docker Networking](./images/docker-production/docker-networking.png)
+No Linux, o processo com PID 1 tem responsabilidades especiais: deve adotar processos órfãos e lidar com sinais do sistema. O Node.js não foi projetado para ser PID 1.
+Se você executar `CMD ["node", "main.js"]`, o Node será PID 1.
 
-Um sênior usa o Docker Compose não apenas para executar o aplicativo, mas para replicar com precisão o ambiente de produção (bancos de dados, Redis, proxies).
+**Consequência**: Ao matar o contêiner, o Node pode não receber `SIGTERM`, forçando o Docker a usar `SIGKILL` (desligamento forçado), interrompendo transações de banco de dados ou solicitações HTTP em voo.
 
-- **Networks**: Separe seus contêineres em redes internas. Seu banco de dados não deve ser exposto ao mundo; apenas o API Gateway deve estar em uma rede pública.
+**Solução**:
+Se estiver usando Distroless, o Node.js é executado diretamente. Em imagens padrão (Debian/Alpine), use **Tini** (flag `--init` no docker run) ou `dumb-init`.
+O Distroless NodeJS já lida com isso corretamente encapsulando o runtime.
 
-[Expansão MASSIVA adicional: Aprofundamento em técnicas de "Image Flattening", uso do BuildKit para compilações ultrarrápidas, implantação de microsserviços com Docker Swarm vs. Kubernetes, estratégias de registro centralizado com Fluentd e guias para proteger segredos injetados em runtime...]
+#### 4. Graceful Shutdown (Desligamento Gracioso)
 
-Dominar o Docker é fundamental na carreira de qualquer engenheiro de backend sênior. Não se trata apenas de empacotar software, mas de criar uma unidade de execução previsível, segura e capaz de escalar.
+O Kubernetes é brutal. Ao reduzir a escala, ele envia `SIGTERM` e aguarda (padrão 30s) antes de enviar `SIGKILL`. Seu aplicativo deve usar esse tempo para:
+
+1.  Parar de aceitar novas conexões HTTP.
+2.  Aguardar o término das solicitações ativas.
+3.  Fechar conexões de DB e Redis.
+
+```typescript
+// main.ts
+import { NestFactory } from "@nestjs/core";
+import { AppModule } from "./app.module";
+
+async function bootstrap() {
+  const app = await NestFactory.create(AppModule);
+
+  // Habilitar hooks de ciclo de vida do NestJS
+  // Isso escuta SIGTERM e chama onModuleDestroy() nos seus serviços
+  app.enableShutdownHooks();
+
+  const server = await app.listen(3000);
+
+  // Configuração avançada de Keep-Alive para evitar erros 502 em Load Balancers
+  server.keepAliveTimeout = 65000; // Maior que o timeout do ALB (60s)
+  server.headersTimeout = 66000;
+}
+bootstrap();
+```
+
+#### 5. Escaneamento de Vulnerabilidades em CI
+
+Não confie que sua imagem base é segura hoje e permanecerá assim amanhã. Novas CVEs são descobertas diariamente.
+Integre **Trivy** ou **Snyk** no seu pipeline de CI/CD.
+
+```yaml
+# .github/workflows/security.yaml
+- name: Run Trivy vulnerability scanner
+  uses: aquasecurity/trivy-action@master
+  with:
+    image-ref: "minha-empresa/minha-api:latest"
+    format: "table"
+    exit-code: "1" # Falhar o build se houver vulnerabilidades críticas
+    ignore-unfixed: true
+    vuln-type: "os,library"
+    severity: "CRITICAL,HIGH"
+```
+
+#### 6. Health Checks: Liveness vs Readiness
+
+O Docker tem a instrução `HEALTHCHECK`, mas no Kubernetes, definimos isso no YAML do pod.
+Diferença crítica:
+
+- **Liveness Probe**: "Estou vivo?". Se falhar, o K8s reinicia o pod. (Endpoint: `/health/liveness`). Verifica apenas se o processo Node responde.
+- **Readiness Probe**: "Posso receber tráfego?". Se falhar, o K8s remove o pod do Load Balancer. (Endpoint: `/health/readiness`). Verifica conexão com DB, Redis, etc.
+
+Use `@nestjs/terminus` para implementar esses endpoints de forma robusta.

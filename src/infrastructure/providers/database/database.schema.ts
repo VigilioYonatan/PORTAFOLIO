@@ -40,6 +40,7 @@ import {
 	notificationEntity,
 	notificationRelations,
 } from "@modules/notification/entities/notification.entity";
+import { subscriptionEntity } from "@modules/notification/entities/subscription.entity";
 // Portfolio Config
 import {
 	portfolioConfigEntity,
@@ -181,6 +182,7 @@ export interface Schema {
 	// Notifications
 	notificationEntity: typeof notificationEntity;
 	notificationRelations: typeof notificationRelations;
+	subscriptionEntity: typeof subscriptionEntity;
 	aiInsightEntity: typeof aiInsightEntity;
 	aiInsightRelations: typeof aiInsightRelations;
 
@@ -265,6 +267,7 @@ export const schema: Schema = {
 	// Notifications
 	notificationEntity,
 	notificationRelations,
+	subscriptionEntity,
 	// Work Milestones
 	workMilestoneEntity,
 	workMilestoneEntityRelations,

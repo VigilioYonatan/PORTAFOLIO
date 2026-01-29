@@ -1,119 +1,198 @@
 ### ESPAÑOL (ES)
 
-La Generación Aumentada por Recuperación (RAG) ha pasado de ser un experimento interesante a ser el estándar de oro para reducir las alucinaciones en modelos de lenguaje y permitir que las IAs interactúen con datos privados y actualizados. Sin embargo, llevar un sistema RAG a producción requiere mucho más que una simple búsqueda vectorial. Un ingeniero senior debe enfrentarse a desafíos como la calidad de los fragmentos (chunks), la latencia de recuperación y la precisión semántica. En este artículo, exploraremos cómo construir un pipeline RAG robusto utilizando LangChain, PGVector y DrizzleORM.
+El patrón RAG (Retrieval-Augmented Generation) ha democratizado el acceso a información propietaria para los LLMs, pero llevar un sistema RAG del prototipo a la producción revela desafíos complejos como la alucinación, la latencia de recuperación y la degradación de la calidad del contexto. En este artículo, exploraremos estrategias avanzadas para construir pipelines RAG resilientes y precisos utilizando LangChain, PostgreSQL (pgvector) y técnicas de re-ranking.
 
-#### 1. Ingesta de Datos y Estrategias de Chunking
+#### 1. Estrategias Avanzadas de Chunking
 
-La calidad del RAG empieza en la ingesta. Si los fragmentos de texto son demasiado pequeños, pierden contexto; si son demasiado grandes, introducen "ruido" que confunde al LLM.
+![RAG Chunking Strategies](./images/langchain-production-rag/chunking.png)
 
-- **Recursive Character Splitting**: Es la estrategia preferida por defecto. Intenta mantener juntos los párrafos y oraciones, cortando en los límites más lógicos.
-- **Semantic Chunking**: Una técnica avanzada que utiliza embeddings para identificar cuándo cambia el significado de un texto y realizar el corte ahí mismo, asegurando que cada fragmento sea una unidad semántica completa.
-- **Metadatos Enriquecidos**: Al guardar cada fragmento en Postgres vía Drizzle, adjuntamos metadatos como el ID del documento original, el número de página y la fecha de creación. Esto permite un filtrado previo (Pre-filtering) que acelera drásticamente la búsqueda.
+El "Chunking" ingenuo (separar texto cada 500 caracteres) destruye el contexto semántico. En producción, implementamos estrategias conscientes de la estructura:
 
-#### 2. Almacenamiento Vectorial con PGVector y Drizzle
-
-PostgreSQL, gracias a la extensión `pgvector`, se ha convertido en una alternativa extremadamente competitiva frente a bases de datos vectoriales dedicadas como Pinecone.
-
-- **Drizzle Integration**: Usamos la capacidad de Drizzle para manejar extensiones y tipos personalizados para definir columnas de tipo `vector`.
-- **HNSW Indexes**: Para búsquedas en milisegundos sobre millones de vectores, configuramos índices HNSW (Hierarchical Navigable Small World), ajustando parámetros como `m` y `ef_construction` para equilibrar la velocidad de búsqueda con la precisión.
+- **Recursive Character Splitting**: Respetamos la jerarquía del documento (párrafos, encabezados, listas) para mantener unidades de significado completas.
+- **Parent Document Retriever**: Indexamos fragmentos pequeños para una búsqueda vectorial precisa, pero recuperamos el "bloque padre" completo para dar más contexto al LLM. Esto equilibra la precisión de búsqueda con la riqueza de contenido.
 
 ```typescript
-// Definición de tabla con soporte para vectores en Drizzle
-export const embeddingsTable = pgTable(
-  "embeddings",
-  {
-    id: serial("id").primaryKey(),
-    content: text("content").notNull(),
-    embedding: vector("embedding", { dimensions: 1536 }).notNull(),
-    metadata: jsonb("metadata"),
-  },
-  (table) => ({
-    embeddingIndex: index("embedding_idx").using(
-      "hnsw",
-      table.embedding.op("vector_cosine_ops"),
-    ),
-  }),
-);
+import { ParentDocumentRetriever } from "langchain/retrievers/parent_document";
+import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
+import { IVectorStore } from "@langchain/core/vectorstores";
+import { BaseStore } from "@langchain/core/stores";
+
+export const createRetriever = (
+  vectorstore: IVectorStore,
+  docstore: BaseStore<string, Document>,
+) => {
+  const splitter = new RecursiveCharacterTextSplitter({
+    chunkSize: 400,
+    chunkOverlap: 50,
+  });
+
+  return new ParentDocumentRetriever({
+    vectorstore,
+    docstore,
+    childSplitter: splitter,
+    // Los chunks pequeños se usan para buscar, pero se devuelve el documento padre
+  });
+};
 ```
 
-#### 3. Recuperación Avanzada: Retreival Strategies
+#### 2. Self-Querying: Más que Similitud Vectorial
 
-La simple búsqueda por similitud de coseno a menudo no es suficiente.
+La búsqueda vectorial falla con preguntas cuantitativas o filtros exactos (e.g., "documentos de 2023 sobre finanzas"). Implementamos **Self-Querying**, donde el LLM primero traduce la pregunta del usuario en un filtro de metadatos estructurado y una query de búsqueda.
 
-- **Self-Query Retriever**: Permite que el LLM transforme una consulta en lenguaje natural en una consulta estructurada que incluya filtros de metadatos (ej: "Busca informes de ventas de 2023 sobre el producto X").
-- **Multi-Vector Retriever**: Guardamos múltiples vectores por cada documento (pueden ser resúmenes, preguntas generadas o fragmentos de diferentes tamaños) para aumentar las posibilidades de recuperación exitosa.
-- **Parent Document Retrieval**: Recuperamos fragmentos pequeños para la búsqueda semántica, pero pasamos el documento completo (o un contexto mayor) al LLM para la generación.
+- **Query**: "Artículos de finanzas publicados después de mayo 2023"
+- **Filtro Generado**: `{ category: { $eq: "finance" }, date: { $gt: "2023-05-01" } }`
 
-#### 4. Re-ranking: El Toque Final de Precisión
+Esto reduce drásticamente el espacio de búsqueda y aumenta la precisión.
 
-Incluso si recuperamos los 10 fragmentos más "similares", no todos son igualmente relevantes.
+#### 3. Re-ranking: La Capa de Calidad
 
-- **Cross-Encoders**: Utilizamos un modelo de Re-ranking (como los de Cohere o modelos locales de HuggingFace) para volver a puntuar los resultados recuperados por la base de datos vectorial. Esto asegura que solo la información más pertinente llegue a la ventana de contexto del LLM.
+Los embeddings (como `text-embedding-3-small` de OpenAI) son excelentes para capturar similitud semántica general, pero a veces fallan en matices específicos de dominio.
 
-#### 5. Evaluación y Observabilidad con LangSmith
+Integramos una etapa de **Cross-Encoder Re-ranking** (usando modelos como Cohere o BGE-Reranker) después de la recuperación inicial. Si recuperamos 50 documentos candidatos con búsqueda vectorial rápida, el re-ranker (que es más lento pero más preciso) analiza esos 50 pares (pregunta, documento) y selecciona los 5 mejores verdaderos.
 
-Un sistema RAG sin evaluación es una caja negra peligrosa.
+#### 4. Evaluación Continua (RAGAS)
 
-- **RAGAS Framework**: Implementamos métricas como "Faithfulness" (¿La respuesta está basada en los fragmentos recuperados?), "Answer Relevance" y "Context Precision".
-- **Tracing con LangSmith**: Monitoreamos cada paso del pipeline para identificar si el fallo está en la recuperación de datos o en la generación del lenguaje.
+No se puede mejorar lo que no se mide. Implementamos el framework **RAGAS** (Retrieval Augmented Generation Assessment) para evaluar métricas clave:
 
-[Expansión MASIVA con más de 2500 palabras adicionales sobre la optimización de prompts para RAG, manejo de ventanas de contexto gigantes (Long Context models), integración con grafos de conocimiento (GraphRAG), y guías detalladas para el despliegue de estos sistemas en AWS ECS usando Docker, garantizando los 5000+ caracteres por idioma...]
-Construir un RAG que funcione para una demo es fácil; construir uno que sea fiable para una empresa Fortune 500 es un reto de ingeniería. Con las herramientas adecuadas como LangChain y PGVector, y una gestión de datos disciplinada vía Drizzle, podemos crear sistemas de IA que no solo sean inteligentes, sino también precisos, transparentes y escalables.
+- **Context Precision**: ¿La información relevante está en los documentos recuperados?
+- **Context Recall**: ¿Se recuperó _toda_ la información relevante?
+- **Faithfulness**: ¿La respuesta del LLM se basa _únicamente_ en el contexto proporcionado (sin alucinaciones)?
+- **Answer Relevance**: ¿Responde realmente a la pregunta del usuario?
+
+Estas métricas se calculan automáticamente en nuestro pipeline de CI/CD para evitar regresiones de conocimiento.
+
+Llevar RAG a producción no es solo conectar una base de datos vectorial a un LLM; es ingeniería de precisión sobre cómo se procesan, recuperan y presentan los datos.
 
 ---
 
 ### ENGLISH (EN)
 
-Retrieval-Augmented Generation (RAG) has moved from being an interesting experiment to the gold standard for reducing hallucinations in language models and allowing AIs to interact with private and up-to-date data. However, taking a RAG system to production requires much more than a simple vector search. A senior engineer must face challenges such as chunk quality, retrieval latency, and semantic precision. In this article, we will explore how to build a robust RAG pipeline using LangChain, PGVector, and DrizzleORM.
+The RAG (Retrieval-Augmented Generation) pattern has democratized access to proprietary information for LLMs, but taking a RAG system from prototype to production reveals complex challenges such as hallucination, retrieval latency, and context quality degradation. In this article, we will explore advanced strategies for building resilient and accurate RAG pipelines using LangChain, PostgreSQL (pgvector), and re-ranking techniques.
 
-#### 1. Data Ingestion and Chunking Strategies
+#### 1. Advanced Chunking Strategies
 
-(...) [Massive technical expansion continues here, mirroring the depth of the Spanish section. Focus on chunking, embedding models, and metadata injection...]
+![RAG Chunking Strategies](./images/langchain-production-rag/chunking.png)
 
-#### 2. Vector Storage with PGVector and Drizzle
+Naive "Chunking" (splitting text every 500 characters) destroys semantic context. In production, we implement structure-aware strategies:
 
-(...) [Technical setup for Postgres vectors, HNSW index optimization, and Drizzle schema definition...]
+- **Recursive Character Splitting**: We respect document hierarchy (paragraphs, headers, lists) to maintain complete units of meaning.
+- **Parent Document Retriever**: We index small fragments for precise vector search but retrieve the full "parent block" to provide more context to the LLM. This balances search precision with content richness.
 
-#### 3. Advanced Retrieval Strategies
+```typescript
+import { ParentDocumentRetriever } from "langchain/retrievers/parent_document";
+import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
+import { IVectorStore } from "@langchain/core/vectorstores";
+import { BaseStore } from "@langchain/core/stores";
 
-(...) [In-depth look at Self-Query, Multi-Vector, and Parent Document Retrieval patterns...]
+export const createRetriever = (
+  vectorstore: IVectorStore,
+  docstore: BaseStore<string, Document>,
+) => {
+  const splitter = new RecursiveCharacterTextSplitter({
+    chunkSize: 400,
+    chunkOverlap: 50,
+  });
 
-#### 4. Re-ranking: The Final Precision Touch
+  return new ParentDocumentRetriever({
+    vectorstore,
+    docstore,
+    childSplitter: splitter,
+    // Small chunks are used for searching, but the parent document is returned
+  });
+};
+```
 
-(...) [Implementation of Cross-Encoders and relevance scoring to optimize the context window...]
+#### 2. Self-Querying: More Than Vector Similarity
 
-#### 5. Evaluation and Observability with LangSmith
+Vector search fails with quantitative questions or exact filters (e.g., "finance documents from 2023"). We implement **Self-Querying**, where the LLM first translates the user's question into a structured metadata filter and a search query.
 
-(...) [Detailed metrics for RAG performance and tracing complex LLM interactions...]
+- **Query**: "Finance articles published after May 2023"
+- **Generated Filter**: `{ category: { $eq: "finance" }, date: { $gt: "2023-05-01" } }`
 
-[Final sections on Prompt Engineering for RAG, GraphRAG, and enterprise-grade deployment on AWS...]
-Building a RAG that works for a demo is easy; building one that is reliable for a Fortune 500 company is an engineering challenge. With the right tools like LangChain and PGVector, and disciplined data management via Drizzle, we can create AI systems that are not only intelligent but also accurate, transparent, and scalable.
+This drastically reduces the search space and increases accuracy.
+
+#### 3. Re-ranking: The Quality Layer
+
+Embeddings (like OpenAI's `text-embedding-3-small`) are excellent for capturing general semantic similarity but sometimes fail on specific domain nuances.
+
+We integrate a **Cross-Encoder Re-ranking** stage (using models like Cohere or BGE-Reranker) after the initial retrieval. If we retrieve 50 candidate documents with fast vector search, the re-ranker (which is slower but more precise) analyzes those 50 pairs (question, document) and selects the true top 5.
+
+#### 4. Continuous Evaluation (RAGAS)
+
+You cannot improve what you do not measure. We implement the **RAGAS** (Retrieval Augmented Generation Assessment) framework to evaluate key metrics:
+
+- **Context Precision**: Is the relevant information in the retrieved documents?
+- **Context Recall**: Was _all_ relevant information retrieved?
+- **Faithfulness**: Is the LLM's answer based _solely_ on the provided context (no hallucinations)?
+- **Answer Relevance**: Does it actually answer the user's question?
+
+These metrics are automatically calculated in our CI/CD pipeline to prevent knowledge regressions.
+
+Taking RAG to production isn't just connecting a vector database to an LLM; it's precision engineering on how data is processed, retrieved, and presented.
 
 ---
 
 ### PORTUGUÊS (PT)
 
-A Geração Aumentada de Recuperação (RAG) passou de um experimento interessante para o padrão-ouro para reduzir alucinações em modelos de linguagem e permitir que as IAs interajam com dados privados e atualizados. No entanto, levar um sistema RAG para produção exige muito mais do que uma simples busca vetorial. Um engenheiro sênior deve enfrentar desafios como a qualidade dos fragmentos (chunks), a latência de recuperação e a precisão semântica. Neste artigo, exploraremos como construir um pipeline RAG robusto usando LangChain, PGVector e DrizzleORM.
+O padrão RAG (Retrieval-Augmented Generation) democratizou o acesso a informações proprietárias para LLMs, mas levar um sistema RAG do protótipo para a produção revela desafios complexos como alucinação, latência de recuperação e degradação da qualidade do contexto. Neste artigo, exploraremos estratégias avançadas para construir pipelines RAG resilientes e precisos usando LangChain, PostgreSQL (pgvector) e técnicas de re-ranking.
 
-#### 1. Ingestão de Dados e Estratégias de Chunking
+#### 1. Estratégias Avançadas de Chunking
 
-(...) [Expansão técnica massiva contínua aqui, espelhando a profundidade das seções em espanhol e inglês. Foco em arquitetura de dados para IA e recuperação semântica...]
+![RAG Chunking Strategies](./images/langchain-production-rag/chunking.png)
 
-#### 2. Armazenamento Vetorial com PGVector e Drizzle
+O "Chunking" ingênuo (separar texto a cada 500 caracteres) destrói o contexto semântico. Em produção, implementamos estratégias conscientes da estrutura:
 
-(...) [Visão aprofundada sobre configuração de vetores no Postgres, otimização de índices HNSW e Drizzle...]
+- **Recursive Character Splitting**: Respeitamos a hierarquia do documento (parágrafos, cabeçalhos, listas) para manter unidades de significado completas.
+- **Parent Document Retriever**: Indexamos fragmentos pequenos para uma busca vetorial precisa, mas recuperamos o "bloco pai" completo para dar mais contexto ao LLM. Isso equilibra a precisão da busca com a riqueza de conteúdo.
 
-#### 3. Estratégias Avançadas de Recuperação
+```typescript
+import { ParentDocumentRetriever } from "langchain/retrievers/parent_document";
+import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
+import { IVectorStore } from "@langchain/core/vectorstores";
+import { BaseStore } from "@langchain/core/stores";
 
-(...) [Exploração de padrões como Self-Query, Multi-Vector e Parent Document Retrieval...]
+export const createRetriever = (
+  vectorstore: IVectorStore,
+  docstore: BaseStore<string, Document>,
+) => {
+  const splitter = new RecursiveCharacterTextSplitter({
+    chunkSize: 400,
+    chunkOverlap: 50,
+  });
 
-#### 4. Re-ranking: O Toque Final de Precisão
+  return new ParentDocumentRetriever({
+    vectorstore,
+    docstore,
+    childSplitter: splitter,
+    // Fragmentos pequenos são usados para busca, mas o documento pai é retornado
+  });
+};
+```
 
-(...) [Implementação de modelos de Cross-Encoder e pontuação de relevância...]
+#### 2. Self-Querying: Mais que Similaridade Vetorial
 
-#### 5. Avaliação e Observabilidade com o LangSmith
+A busca vetorial falha com perguntas quantitativas ou filtros exatos (e.g., "documentos de finanças de 2023"). Implementamos **Self-Querying**, onde o LLM primeiro traduz a pergunta do usuário em um filtro de metadatos estruturado e uma query de busca.
 
-(...) [Métricas detalhadas para desempenho de RAG e rastreabilidade de interações complexas de LLM...]
+- **Query**: "Artigos de finanças publicados após maio de 2023"
+- **Filtro Gerado**: `{ category: { $eq: "finance" }, date: { $gt: "2023-05-01" } }`
 
-[Seções finais sobre Engenharia de Prompts para RAG, GraphRAG e implantação corporativa na AWS...]
-Construir um RAG que funcione para uma demo é fácil; construir um que seja confiável para uma empresa Fortune 500 é um desafio de engenharia. Com as ferramentas certas como LangChain e PGVector, e um gerenciamento de dados disciplinado via Drizzle, podemos criar sistemas de IA que não sejam apenas inteligentes, mas também precisos, transparentes e escaláveis.
+Isso reduz drasticamente o espaço de busca e aumenta a precisão.
+
+#### 3. Re-ranking: A Camada de Qualidade
+
+Embeddings (como `text-embedding-3-small` da OpenAI) são excelentes para capturar similaridade semântica geral, mas às vezes falham em nuances específicas de domínio.
+
+Integramos uma etapa de **Cross-Encoder Re-ranking** (usando modelos como Cohere ou BGE-Reranker) após a recuperação inicial. Se recuperarmos 50 documentos candidatos com busca vetorial rápida, o re-ranker (que é mais lento, mas mais preciso) analisa esses 50 pares (pergunta, documento) e seleciona os 5 melhores verdadeiros.
+
+#### 4. Avaliação Contínua (RAGAS)
+
+Não se pode melhorar o que não se mede. Implementamos o framework **RAGAS** (Retrieval Augmented Generation Assessment) para avaliar métricas chave:
+
+- **Context Precision**: A informação relevante está nos documentos recuperados?
+- **Context Recall**: _Toda_ a informação relevante foi recuperada?
+- **Faithfulness**: A resposta do LLM baseia-se _unicamente_ no contexto fornecido (sem alucinações)?
+- **Answer Relevance**: Ela realmente responde à pergunta do usuário?
+
+Essas métricas são calculadas automaticamente em nosso pipeline de CI/CD para evitar regressões de conhecimento.
+
+Levar RAG para produção não é apenas conectar um banco de dados vetorial a um LLM; é engenharia de precisão sobre como os dados são processados, recuperados e apresentados.
