@@ -20,7 +20,8 @@ async function bootstrap() {
 	const configService = app.get(ConfigService);
 	const corsOrigins = configService.getOrThrow<string>("CORS_ORIGINS");
 	const port = configService.getOrThrow<number>("PORT");
-
+	const publicDir = path.join(__dirname, "..", "public");
+	app.use(express.static(publicDir));
 	// Logger
 	app.useLogger(app.get(Logger));
 
@@ -58,9 +59,7 @@ async function bootstrap() {
 	const sessionConfig = app.get(SessionConfigService);
 	sessionConfig.setup(app);
 	app.use(express.static(path.join(process.cwd(), "dist/client")));
-	const publicDir = path.join(__dirname, "..", "public");
-	console.log({publicDir});
-	app.use(express.static(publicDir));
+	
 	// Start on port
 
 	const server = await app.listen(port);
