@@ -1,6 +1,5 @@
 import crypto from "node:crypto";
 import { createReadStream } from "node:fs";
-import fs from "node:fs/promises";
 import path from "node:path";
 import { MediaProcessorService } from "@infrastructure/providers/storage/services/media-processor.service";
 import { StorageFactory } from "@infrastructure/providers/storage/storage.factory";
@@ -135,7 +134,7 @@ export class UploadService {
 
 		await Promise.all(
 			files.map(async (file) => {
-				let tempFilePathToDelete: string | null = null;
+				const tempFilePathToDelete: string | null = null;
 				try {
 					const finalFilename = filename || crypto.randomUUID();
 					let originalExt = path
@@ -174,31 +173,31 @@ export class UploadService {
 					}
 
 					// --- VIDEOS ---
-					if (file.mimetype?.startsWith("video/")) {
-						const videoResult = await this.mediaProcessor.processVideo(
-							file,
-							finalFilename,
-						);
-						tempFilePathToDelete = videoResult.path;
+					// if (file.mimetype?.startsWith("video/")) {
+					// 	const videoResult = await this.mediaProcessor.processVideo(
+					// 		file,
+					// 		finalFilename,
+					// 	);
+					// 	tempFilePathToDelete = videoResult.path;
 
-						const stats = await fs.stat(videoResult.path);
-						const fileStream = createReadStream(videoResult.path);
-						const uploadResult = await this.storage.uploadFile(
-							`${keyBase}.mp4`,
-							fileStream,
-							"video/mp4",
-						);
+					// 	const stats = await fs.stat(videoResult.path);
+					// 	const fileStream = createReadStream(videoResult.path);
+					// 	const uploadResult = await this.storage.uploadFile(
+					// 		`${keyBase}.mp4`,
+					// 		fileStream,
+					// 		"video/mp4",
+					// 	);
 
-						results.push({
-							key: uploadResult.key,
-							mimetype: "video/mp4",
-							size: stats.size,
-							name: finalFilename,
-							original_name: file.originalFilename || finalFilename,
-							created_at: now().toDate(),
-						});
-						return;
-					}
+					// 	results.push({
+					// 		key: uploadResult.key,
+					// 		mimetype: "video/mp4",
+					// 		size: stats.size,
+					// 		name: finalFilename,
+					// 		original_name: file.originalFilename || finalFilename,
+					// 		created_at: now().toDate(),
+					// 	});
+					// 	return;
+					// }
 
 					// --- GENERIC FILES ---
 					const fileStream = createReadStream(file.filepath);
