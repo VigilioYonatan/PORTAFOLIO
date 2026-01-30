@@ -1,4 +1,4 @@
-import type { UserAuth } from "@modules/user/schemas/user.schema";
+import type { UserAuth } from "@modules/user/schemas/user.schema.js";
 import { signal } from "@preact/signals";
 
 const user = signal<UserAuth | null>(

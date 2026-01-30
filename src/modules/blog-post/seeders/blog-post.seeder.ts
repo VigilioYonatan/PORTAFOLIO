@@ -1,6 +1,5 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
-import { faker } from "@faker-js/faker";
 import { schema } from "@infrastructure/providers/database/database.schema";
 import { DRIZZLE } from "@infrastructure/providers/database/database.service";
 import { now } from "@infrastructure/utils/hybrid";
@@ -15,6 +14,8 @@ export class BlogPostSeeder {
 	) {}
 
 	async run(tenant_id: number, author_id: number, category_id?: number) {
+		const {faker} = await import("@faker-js/faker");
+
 		const contentDir = path.join(
 			process.cwd(),
 			"src/modules/blog-post/seeders/content",

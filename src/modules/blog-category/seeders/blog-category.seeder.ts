@@ -1,4 +1,3 @@
-import { faker } from "@faker-js/faker";
 import { schema } from "@infrastructure/providers/database/database.schema";
 import { DRIZZLE } from "@infrastructure/providers/database/database.service";
 import { now } from "@infrastructure/utils/hybrid";
@@ -15,6 +14,7 @@ export class BlogCategorySeeder {
 	) {}
 
 	async run(tenantId: number) {
+		const {faker} = await import("@faker-js/faker");
 		const categoriesSeed: Omit<BlogCategorySchema, "id">[] = Array.from({
 			length: 8,
 		}).map(() => {

@@ -1,6 +1,6 @@
-import { printFileWithDimension } from "@infrastructure/utils/hybrid";
-import { musicTrackIndexFetch } from "@modules/music/apis/music.index.api";
-import { DIMENSION_IMAGE } from "@modules/uploads/const/upload.const";
+import { printFileWithDimension } from "@infrastructure/utils/hybrid/index.js";
+import { musicTrackIndexFetch } from "@modules/music/apis/music.index.api.js";
+import { DIMENSION_IMAGE } from "@modules/uploads/const/upload.const.js";
 import { computed, signal } from "@preact/signals";
 
 export interface MusicTrack {

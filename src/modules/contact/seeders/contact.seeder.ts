@@ -1,4 +1,3 @@
-import { faker } from "@faker-js/faker";
 import { schema } from "@infrastructure/providers/database/database.schema";
 import { DRIZZLE } from "@infrastructure/providers/database/database.service";
 import { now } from "@infrastructure/utils/hybrid";
@@ -14,6 +13,8 @@ export class ContactSeeder {
 	) {}
 
 	async run(tenant_id: number) {
+		const {faker} = await import("@faker-js/faker");
+
 		const contactMessagesSeed: Omit<ContactMessageSchema, "id">[] = Array.from({
 			length: 50,
 		}).map(() => ({

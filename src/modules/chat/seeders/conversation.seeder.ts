@@ -1,4 +1,3 @@
-import { faker } from "@faker-js/faker";
 import { schema } from "@infrastructure/providers/database/database.schema";
 import { DRIZZLE } from "@infrastructure/providers/database/database.service";
 import { now } from "@infrastructure/utils/hybrid";
@@ -14,6 +13,8 @@ export class ConversationSeeder {
 	) {}
 
 	async run(tenant_id: number): Promise<ConversationSchema[]> {
+		const {faker} = await import("@faker-js/faker");
+
 		// Crear conversaciones de ejemplo
 		const conversationsSeed: Omit<ConversationSchema, "id">[] = Array.from({
 			length: 20,

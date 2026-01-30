@@ -1,4 +1,4 @@
-import type { TenantSchema } from "@modules/tenant/schemas/tenant.schema";
+import type { TenantSchema } from "@modules/tenant/schemas/tenant.schema.js";
 import { signal } from "@preact/signals";
 
 const tenant = signal<TenantSchema | null>(

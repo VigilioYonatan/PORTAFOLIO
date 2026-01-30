@@ -1,4 +1,3 @@
-import { faker } from "@faker-js/faker";
 import { schema } from "@infrastructure/providers/database/database.schema";
 import { DRIZZLE } from "@infrastructure/providers/database/database.service";
 import { Inject, Injectable } from "@nestjs/common";
@@ -14,6 +13,8 @@ export class UserSeeder {
 	) {}
 
 	async run() {
+		const {faker} = await import("@faker-js/faker");
+
 		const saltRounds = 10;
 		const usersSeed: InferInsertModel<typeof userEntity>[] = [
 			{

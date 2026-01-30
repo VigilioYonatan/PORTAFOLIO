@@ -1,4 +1,3 @@
-import { faker } from "@faker-js/faker";
 import { schema } from "@infrastructure/providers/database/database.schema";
 import { DRIZZLE } from "@infrastructure/providers/database/database.service";
 import { now } from "@infrastructure/utils/hybrid";
@@ -17,6 +16,8 @@ export class TenantSeeder {
 	) {}
 
 	async run() {
+		const {faker} = await import("@faker-js/faker");
+
 		const tenantsSeed: Omit<TenantSchema, "id">[] = Array.from({
 			length: 10,
 		}).map((_, i) => {

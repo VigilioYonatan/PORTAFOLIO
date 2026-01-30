@@ -1,4 +1,3 @@
-import { faker } from "@faker-js/faker";
 import { E2EApp } from "@infrastructure/config/server/e2e-app";
 import { userEntity } from "@modules/user/entities/user.entity";
 import { JwtService } from "@nestjs/jwt";
@@ -46,6 +45,8 @@ describe("User Module (E2E)", () => {
 		});
 
 		it("should create a new user (POST /users)", async () => {
+			const {faker} = await import("@faker-js/faker");
+
 			const newUser = {
 				username: faker.internet.username(),
 				email: faker.internet.email(),
