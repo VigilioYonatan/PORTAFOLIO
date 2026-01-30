@@ -10,7 +10,7 @@ if (typeof window !== "undefined" && !window.requestAnimationFrame) {
 	window.cancelAnimationFrame = (id) => clearTimeout(id);
 }
 
-// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+
 type GlobalWithRAF = typeof global & {
 	requestAnimationFrame: (callback: FrameRequestCallback) => number;
 	cancelAnimationFrame: (handle: number) => void;
@@ -101,23 +101,39 @@ if (typeof global.ResizeObserver === "undefined") {
 }
 
 // Mock Environment Variables
+process.env.PUBLIC_NAME_APP = "PORTAFOLIO_TEST";
 process.env.PUBLIC_URL = "http://localhost:3000";
 process.env.PUBLIC_PORT = "3000";
+process.env.PORT = "3000";
 process.env.DB_HOST = "localhost";
+process.env.DB_PORT = "5432";
 process.env.DB_NAME = "test_db";
 process.env.DB_USER = "test_user";
 process.env.DB_PASS = "test_pass";
 process.env.DATABASE_URL =
 	"postgres://test_user:test_pass@localhost:5432/test_db";
+process.env.REDIS_HOST = "localhost";
+process.env.REDIS_PORT = "6379";
 process.env.JWT_KEY = "test_jwt_key_must_be_long_enough_32_chars";
+process.env.JWT_EXPIRES_IN = "1h";
+process.env.JWT_REFRESH_KEY = "test_refresh_key_must_be_long_enough_32_chars";
+process.env.JWT_REFRESH_EXPIRES_IN = "7d";
 process.env.PUBLIC_HMAC_KEY = "test_hmac_key_16";
+process.env.STORAGE_PROVIDER = "LOCAL";
 process.env.RUSTFS_ENDPOINT = "http://localhost:9000";
+process.env.RUSTFS_PORT = "9000";
 process.env.RUSTFS_ROOT_USER = "minio";
 process.env.RUSTFS_ROOT_PASSWORD = "minio_password";
 process.env.RUSTFS_BUCKET_NAME = "test-bucket";
+process.env.RUSTFS_REGION = "us-east-1";
 process.env.MAIL_HOST = "smtp.test.com";
+process.env.MAIL_PORT = "587";
 process.env.MAIL_USER = "mail_user";
 process.env.MAIL_PASS = "mail_pass";
+process.env.CORS_ORIGINS = "*";
+process.env.THROTTLE_TTL = "60";
+process.env.THROTTLE_LIMIT = "1000";
+process.env.OPENROUTER_API_KEY = "test_openrouter_key";
 process.env.NODE_ENV = "TEST";
 process.env.LOG_LEVEL = "ERROR";
 

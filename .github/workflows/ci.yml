@@ -29,6 +29,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Setup test environment
+        run: cp .env.test.example .env.test
+
       - name: Run Biome check
         run: pnpm biome
 
