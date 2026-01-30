@@ -30,7 +30,8 @@ RUN pnpm run build:serve && \
 # Production stage
 FROM base AS production
 WORKDIR /usr/src/app
-
+ARG PORT=4000
+ENV PORT=$PORT
 RUN addgroup -g 1001 nodejs && \
     adduser -u 1001 -G nodejs -S -h /usr/src/app cearjs
 
@@ -44,7 +45,7 @@ COPY --chown=cearjs:nodejs --from=build /usr/src/app/dist ./dist/
 COPY --chown=cearjs:nodejs --from=build /usr/src/app/public ./public/
 COPY --chown=cearjs:nodejs --from=build /usr/src/app/drizzle ./drizzle/
 
-COPY --chown=cearjs:nodejs --from=build /usr/src/app/src/assets/temp ./src/assets/temp/
+# COPY --chown=cearjs:nodejs --from=build /usr/src/app/src/assets/temp ./src/assets/temp/
 
 USER cearjs
 
