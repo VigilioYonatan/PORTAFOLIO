@@ -25,7 +25,7 @@ ENV PORT=$PORT
 RUN pnpm run build:serve && \
     pnpm run build:client && \
     rm -rf node_modules && \
-    pnpm install --prod --no-frozen-lockfile
+    pnpm install --prod --no-frozen-lockfile --ignore-scripts
 
 # Production stage
 FROM base AS production
