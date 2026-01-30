@@ -5,77 +5,67 @@ import { astroProxy } from "@infrastructure/utils/server";
 import { SessionConfigService } from "@modules/auth/config/session.config";
 import { ConfigService } from "@nestjs/config";
 import { NestFactory } from "@nestjs/core";
-import express, { type Request, type Response, type NextFunction, type Application } from "express";
+import express from "express";
 import { Logger } from "nestjs-pino";
 import { AppModule } from "./app.module";
 
-// Cacheamos la instancia del servidor para optimizar ejecuciones en Vercel
-let serverCache: Application;
+async function bootstrap() {
+	// Validar variables de entorno ANTES de iniciar NestJS
+	validateEnvironments();
 
-async function bootstrap(): Promise<Application> {
-    // Validar variables de entorno
-    validateEnvironments();
+	const app = await NestFactory.create(AppModule, { bufferLogs: true });
+	app.enableShutdownHooks(); // Para evitar bug de puerto en uso
 
-    // Especificamos que usamos la plataforma Express
-    const app = await NestFactory.create(AppModule, { 
-        bufferLogs: true 
-    });
-    
-    app.enableShutdownHooks();
+	// get configService environment
+	const configService = app.get(ConfigService);
+	const corsOrigins = configService.getOrThrow<string>("CORS_ORIGINS");
+	const port = configService.getOrThrow<number>("PORT");
 
-    const configService = app.get(ConfigService);
-    const corsOrigins = configService.getOrThrow<string>("CORS_ORIGINS") as string;
-    const port = configService.get<number>("PORT") || 3000;
+	// Logger
+	app.useLogger(app.get(Logger));
 
-    // Logger
-    app.useLogger(app.get(Logger));
+	// Security Headers
+	// app.use(helmet(helmetConfig(configService)));
 
-    // CORS
-    app.enableCors({
-        origin: corsOrigins === "*" ? "*" : corsOrigins.split(",").map((s) => s.trim()),
-        credentials: true,
-    });
+	// Enable CORS
+	app.enableCors({
+		origin:
+			corsOrigins === "*" ? "*" : corsOrigins.split(",").map((s) => s.trim()),
+		credentials: true,
+	});
 
-    // Prefijos y configuración global
-    configureApp(app);
+	// Versioning
+	// Versioning & Global Prefix
+	configureApp(app);
 
-    // Sesión
-    const sessionConfig = app.get(SessionConfigService);
-    sessionConfig.setup(app);
-    
-    // Servir archivos estáticos de la carpeta dist/client
-    app.use(express.static(join(process.cwd(), "dist/client")));
+	// Swagger Configuration
+	//   const config = new DocumentBuilder()
+	//     .setTitle("Astro-Test API")
+	//     .setDescription("API documentation for Astro-Test project")
+	//     .setVersion("1.0")
+	//     .addTag("users")
+	//     .build();
+	//   const document = SwaggerModule.createDocument(app, config);
 
-    // Inicializamos la aplicación Nest sin bloquear el hilo con listen()
-    await app.init();
+	//   app.use(
+	//     "/reference",
+	//     apiReference({
+	//       content: document,
+	//     })
+	//   );
 
-    // Obtenemos la instancia subyacente de Express
-    const expressApp = app.getHttpAdapter().getInstance() as Application;
+	// Session & Passport Configuration
+	const sessionConfig = app.get(SessionConfigService);
+	sessionConfig.setup(app);
+	app.use(express.static(join(process.cwd(), "dist/client")));
 
-    // Ejecución en local (fuera de Vercel)
-    if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
-        const httpServer = await app.listen(port);
-        // Manejo de protocolos Upgrade (WebSockets) para el proxy de Astro
-        httpServer.on("upgrade", astroProxy.upgrade);
-        // biome-ignore lint/suspicious/noConsole: <explanation>
-        console.log(`Application is running on: http://localhost:${port}`);
-    }
+	// Start on port
 
-    return expressApp;
+	const server = await app.listen(port);
+	server.on("upgrade", astroProxy.upgrade);
+	// biome-ignore lint/suspicious/noConsole: Startup log
+	console.log(`Application is running on: http://localhost:${port}`);
+	// biome-ignore lint/suspicious/noConsole: Startup log
+	console.log(`Swagger Docs available at: http://localhost:${port}/reference`);
 }
-
-/**
- * Handler para Vercel Serverless Functions
- */
-export const handler = async (req: Request, res: Response, next: NextFunction) => {
-    if (!serverCache) {
-        serverCache = await bootstrap();
-    }
-    // Express maneja internamente la ejecución de la petición
-    return serverCache(req, res, next);
-};
-
-// Punto de entrada manual si se ejecuta el archivo directamente
-if (require.main === module) {
-    bootstrap();
-}
+bootstrap();
