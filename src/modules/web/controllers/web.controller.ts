@@ -144,7 +144,7 @@ export class WebController {
 		const { slug } = req.params;
 		const props = await this.webService.openSourceSlug(
 			req.locals.language,
-			slug,
+			slug as string,
 		);
 		return await astroRender(props)(req, res, next);
 	}
@@ -162,7 +162,10 @@ export class WebController {
 		@Next() next: NextFunction,
 	) {
 		const { slug } = req.params;
-		const props = await this.webService.projectSlug(req.locals.language, slug);
+		const props = await this.webService.projectSlug(
+			req.locals.language,
+			slug as string,
+		);
 		return await astroRender(props)(req, res, next);
 	}
 
@@ -191,7 +194,10 @@ export class WebController {
 		@Next() next: NextFunction,
 	) {
 		const { slug } = req.params;
-		const props = await this.webService.blogSlug(req.locals.language, slug);
+		const props = await this.webService.blogSlug(
+			req.locals.language,
+			slug as string,
+		);
 		return await astroRender(props)(req, res, next);
 	}
 
