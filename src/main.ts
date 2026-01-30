@@ -1,4 +1,4 @@
-import { join } from "node:path";
+import path from "node:path";
 import { validateEnvironments } from "@infrastructure/config/server";
 import { configureApp } from "@infrastructure/config/server/app.config";
 import { astroProxy } from "@infrastructure/utils/server";
@@ -57,8 +57,10 @@ async function bootstrap() {
 	// Session & Passport Configuration
 	const sessionConfig = app.get(SessionConfigService);
 	sessionConfig.setup(app);
-	app.use(express.static(join(process.cwd(), "dist/client")));
-	app.use(express.static(join(__dirname, "..", "public")));
+	app.use(express.static(path.join(process.cwd(), "dist/client")));
+	const publicDir = path.join(__dirname, "..", "public");
+	console.log({publicDir});
+	app.use(express.static(publicDir));
 	// Start on port
 
 	const server = await app.listen(port);
