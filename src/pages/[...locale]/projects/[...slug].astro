@@ -3,7 +3,7 @@ import WebLayout from "../_components/layouts/web-layout/index.astro";
 import FuturisticMDX from "@modules/blog-post/components/futuristic-mdx";
 import SocialHub from "@modules/blog-post/components/social-hub";
 import { ProjectGallery } from "@modules/project/components/project-gallery";
-import { GlobeIcon, Calendar, ArrowLeft, Play } from "lucide-preact";
+import { Globe, Calendar, ArrowLeft, Play } from "@lucide/astro";
 import { BrandIcon } from "@components/extras/brand-icon";
 import { siGithub } from "simple-icons";
 import { getLangFromUrl, useTranslations } from "../../../i18n";
@@ -118,7 +118,7 @@ const description = project.description;
                 rel="noopener noreferrer"
                 class="flex items-center gap-2 px-6 py-3 bg-primary text-black font-bold text-sm rounded-lg hover:bg-primary/90 transition-colors"
               >
-                <GlobeIcon size={18} />
+                <Globe size={18} />
                 {t("slug.live_demo")}
               </a>
             )
