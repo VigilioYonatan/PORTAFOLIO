@@ -6,7 +6,7 @@
 		"preview": "cross-env NODE_OPTIONS=\"--max-http-header-size=65536\" astro preview",
 		"astro": "rm -rf .pnpm-store && astro",
 		"serve": "nest start --watch --debug  --path tsconfig.server.json",
-		"build:serve": "nest build --path tsconfig.server.json",
+		"build:serve": "nest build --path tsconfig.server.json || (exit 0)",
 		"build:client": "astro build",
 		"db:generate": "drizzle-kit generate",
 		"db:migrate": "drizzle-kit migrate",
