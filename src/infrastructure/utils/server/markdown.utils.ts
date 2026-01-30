@@ -1,5 +1,4 @@
-import { createHighlighter } from "shiki";
-
+const { createHighlighter } = await import('shiki');
 // Singleton highlighter to avoid reloading themes on every request
 let highlighter: Awaited<ReturnType<typeof createHighlighter>> | null = null;
 
