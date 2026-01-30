@@ -5,6 +5,7 @@
 		"dev": "cross-env NODE_OPTIONS=\"--max-http-header-size=65536\" astro dev",
 		"preview": "cross-env NODE_OPTIONS=\"--max-http-header-size=65536\" astro preview",
 		"astro": "rm -rf .pnpm-store && astro",
+		"start": "cross-env NODE_OPTIONS=\"--max-http-header-size=65536\" node dist/index.js",
 		"serve": "nest start --watch --debug  --path tsconfig.server.json",
 		"build:serve": "nest build --path tsconfig.server.json",
 		"build:client": "astro build",
