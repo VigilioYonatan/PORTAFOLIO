@@ -18,7 +18,7 @@ import {
 import { useEffect } from "preact/hooks";
 import type { JSX } from "preact/jsx-runtime";
 import { type Resolver, useForm } from "react-hook-form";
-import { siGithub, siX, siYoutube } from "simple-icons";
+import { siGithub, siWhatsapp, siX, siYoutube } from "simple-icons";
 import { portfolioConfigShowApi } from "../apis/portfolio-config.show.api";
 import { portfolioConfigUpdateApi } from "../apis/portfolio-config.update.api";
 import type { PortfolioConfigSchema } from "../schemas/portfolio-config.schema";
@@ -233,9 +233,9 @@ export default function ThemeCustomizer({ lang = "es" }: ThemeCustomizerProps) {
 									ico={<BrandIcon icon={siYoutube} size={16} />}
 								/>
 								<Form.control<PortfolioConfigSchema>
-									name="social_links.portfolio"
-									title="EXTERNAL_PORTFOLIO"
-									ico={<Globe size={16} />}
+									name="social_links.whatsapp"
+									title="WHATSAPP_COMM"
+									ico={<BrandIcon icon={siWhatsapp} size={16} />}
 								/>
 							</div>
 						</section>
