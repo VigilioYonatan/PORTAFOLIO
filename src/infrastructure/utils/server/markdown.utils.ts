@@ -1,8 +1,9 @@
-const { createHighlighter } = await import('shiki');
 // Singleton highlighter to avoid reloading themes on every request
-let highlighter: Awaited<ReturnType<typeof createHighlighter>> | null = null;
+// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+let highlighter: Awaited<ReturnType<any>> | null = null;
 
 async function getHighlighter() {
+	const { createHighlighter } = await import('shiki');
 	if (!highlighter) {
 		highlighter = await createHighlighter({
 			themes: ["dracula", "min-light"], // Dark and light themes
