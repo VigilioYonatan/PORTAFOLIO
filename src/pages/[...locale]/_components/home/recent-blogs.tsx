@@ -1,7 +1,7 @@
 import { printFileWithDimension } from "@infrastructure/utils/hybrid";
-import type { Lang } from "@src/i18n";
 import type { BlogPostSchema } from "@modules/blog-post/schemas/blog-post.schema";
 import { DIMENSION_IMAGE } from "@modules/uploads/const/upload.const"; // Check if correct
+import type { Lang } from "@src/i18n";
 import { Calendar, Terminal } from "lucide-preact";
 
 interface RecentBlogsProps {

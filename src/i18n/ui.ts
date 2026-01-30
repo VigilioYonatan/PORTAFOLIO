@@ -30,7 +30,7 @@ export const ui = {
 				saas: "SaaS Platforms",
 			},
 			services: {
-				desc: "I specialize in designing robust, maintainable software with clean architecture principles, ensuring scalability, performance, and long-term code quality.",
+				desc: "I am Yonatan Vigilio Lavado, a software developer with over 6 years of experience, specializing in AI implementation since 2020. I focus on designing robust and maintainable software using clean architecture principles, ensuring long-term scalability, performance, and code quality. I have led scalable projects and developed open-source libraries, mastering a wide stack of modern technologies. Beyond my passion for continuous learning and innovation, I am an electronic music enthusiast, specifically Drum and Bass, which I explore through music production in my spare time.",
 				title: "Services & Capabilities",
 			},
 		},
@@ -157,8 +157,18 @@ export const ui = {
 			source_id: "SOURCE_ID",
 			status: "STATUS",
 			title: "Latest Articles",
+			description: "Exploring ideas at the frontier of technology.",
+			featured: "Featured",
+			read_article: "Read Article",
+			none: "No posts found.",
 			verified: "VERIFIED",
 			version: "VERSION",
+		},
+		opensource: {
+			title: "Open Source",
+			subtitle:
+				"Real libraries and modular components published on NPM. Focused on extreme optimization, fluid DX, and minimalist aesthetics.",
+			view_details: "View Details",
 		},
 		common: {
 			actions: "Actions",
@@ -260,6 +270,7 @@ export const ui = {
 			experience: {
 				form: {
 					company: "Company",
+					content: "Detailed Content (Markdown)",
 					current: "Current Job",
 					description: "Description",
 					end_date: "End Date",
@@ -358,6 +369,8 @@ export const ui = {
 					impact: "IMPACT & RESULTS",
 					init: "INITIALIZING NEW NODE",
 					loading: "PROCESSING...",
+					language: "TRANSLATION_LANGUAGE",
+					parent: "PARENT_NODE (Optional)",
 					repo: "REPOSITORY (GitHub)",
 					seo_desc: "SEO DESCRIPTION",
 					seo_opt: "Meta Optimization (SEO)",
@@ -439,6 +452,7 @@ export const ui = {
 				level: "LEVEL_04_AUTH",
 				main: "Main",
 				music: "Music",
+				open_source: "Open Source",
 				panel: "Panel",
 				profile: "Admin Profile",
 				projects: "Projects",
@@ -526,6 +540,7 @@ export const ui = {
 			dashboard: "DASHBOARD",
 			home: "HOME",
 			projects: "PROJECTS",
+			opensource: "OPEN SOURCE",
 		},
 		home: {
 			cv: "DOWNLOAD CV",
@@ -536,16 +551,21 @@ export const ui = {
 				desc1: "Architecting intelligent",
 				desc1_end: "solutions...",
 				desc1_highlight: "AI & Automatization",
-				desc2: "Crafting immersive",
-				desc2_end: "experiences.",
+				desc2: "Designing memorable digital experiences for",
+				desc2_end: ".",
 				desc2_highlight: "Web & Mobile",
+				desc3: "Creating real impact through",
+				desc3_end: ".",
+				desc3_highlight: "Soulful Technology",
 				engineer: "ENGINEER_AI",
-				execute: "EXECUTE_PROTOCOL",
+				execute: "CONTACT NOW",
+				view_code: "VIEW CODE",
 				software: "SOFTWARE",
 				source: "SOURCE",
-				stack: "## Stack: Python, PyTorch, React, NestJS, Docker, AWS.",
+				stack:
+					"## Stack: Typescript, Tailwind, React, NestJS, Langchain, Redis, Docker, AWS.",
 				subtitle: "Building scalable, high-performance web applications.",
-				title: "Senior Full-Stack Developer",
+				title: "Software Engineer",
 			},
 			technologies: "TECHNOLOGIES",
 		},
@@ -559,10 +579,17 @@ export const ui = {
 				neural: "TRAINING NEURAL WEIGHTS...",
 				uplink: "ESTABLISHING NEURO-LINK...",
 			},
-			initializing: "Initializing Senior Environment",
+			initializing: "Initializing Software Engineer Environment",
 			loading_modules: "LOADING MODULES",
 			secure_connection: "Secure Connection Established // TLS 1.3",
 			system_boot: "SYSTEM BOOT",
+			terminal: {
+				description: "Vigilio Portfolio Core",
+				active: "Active: active (running)",
+				tasks: "Tasks",
+				memory: "Memory",
+				done: "DONE.",
+			},
 		},
 		layout: {
 			encryption: "Encryption",
@@ -580,11 +607,21 @@ export const ui = {
 			},
 			home: {
 				description:
-					"Senior Full-Stack Developer specializing in modern web technologies, scalable architecture, and user-centric design.",
-				title: "Vigilio Yonatan | Senior Full-Stack Developer",
+					"I'm Yonatan Vigilio Lavado, a software engineer with over 6 years of experience building scalable solutions and AI since 2020. Passionate about clean architecture, open source, and Drum and Bass production.",
+				title: "Vigilio Yonatan | Software Engineer with AI",
 			},
 			projects: {
 				title: "Projects | Vigilio Yonatan",
+			},
+			experience: {
+				title: "Experience | Vigilio Yonatan",
+				description:
+					"My professional career and achievements in software engineering and AI.",
+			},
+			opensource: {
+				title: "Open Source | Vigilio Yonatan",
+				description:
+					"Discover my contributions to the open-source community and my own library ecosystem.",
 			},
 		},
 		mock: {
@@ -644,6 +681,16 @@ export const ui = {
 			tech_stack: "Tech Stack",
 			title: "Featured Projects",
 			view_more: "View More",
+			my_work: "My Work",
+			description:
+				"A collection of projects showcasing my expertise in software architecture and full-stack development.",
+			none: "No projects found.",
+			check_back: "Check back soon for updates.",
+			status: {
+				live: "Live",
+				in_dev: "In Development",
+				archived: "Archived",
+			},
 		},
 		skills: {
 			cat: {
@@ -655,6 +702,10 @@ export const ui = {
 					desc: "Scalable, secure, and event-driven systems.",
 					title: "Backend Architecture",
 				},
+				database: {
+					desc: "Optimized relational and non-relational storage architectures.",
+					title: "Database Management",
+				},
 				devops: {
 					desc: "CI/CD pipelines, containerization, and orchestration.",
 					title: "DevOps & Cloud",
@@ -663,13 +714,17 @@ export const ui = {
 					desc: "Building immersive, high-performance interfaces.",
 					title: "Frontend Engineering",
 				},
+				language: {
+					desc: "Core proficiency in diverse programming paradigms.",
+					title: "Programming Languages",
+				},
 				mobile: {
 					desc: "Cross-platform native experiences.",
 					title: "Mobile Development",
 				},
 			},
 			loading: "> LOADING_MODULES: FRONTEND, BACKEND, CLOUD, AI...",
-			subtitle: "> SYSTEM_ANALYSIS: FULL_STACK_PROFICIENCY_DETECTED",
+			subtitle: "> PROFILE: SOFTWARE ENGINEERING WITH ARTIFICIAL INTELLIGENCE",
 			title: "Neural Capabilities Matrix",
 		},
 		slug: {
@@ -689,6 +744,9 @@ export const ui = {
 			processor: "Processor",
 			storage: "Storage",
 			uptime: "Uptime",
+		},
+		project_gallery: {
+			title: "Gallery",
 		},
 	},
 	es: {
@@ -713,7 +771,7 @@ export const ui = {
 				saas: "Plataformas SaaS",
 			},
 			services: {
-				desc: "Especializado en diseñar software robusto y mantenible con principios de arquitectura limpia, asegurando escalabilidad, rendimiento y calidad de código a largo plazo.",
+				desc: "Soy Yonatan Vigilio Lavado, desarrollador de software con más de 6 años de experiencia y especialista en la implementación de inteligencia artificial desde 2020. Me especializo en el diseño de software robusto y mantenible bajo principios de arquitectura limpia, asegurando escalabilidad, rendimiento y calidad de código a largo plazo. He liderado proyectos escalables y el desarrollo de bibliotecas open source, dominando un amplio stack de tecnologías modernas. Además de mi pasión por el aprendizaje continuo y la innovación, soy un entusiasta de la música electrónica, específicamente del Drum and Bass, género que exploro a través de la producción musical en mi tiempo libre.",
 				title: "Servicios y Capacidades",
 			},
 		},
@@ -841,8 +899,18 @@ export const ui = {
 			source_id: "ID_FUENTE",
 			status: "ESTADO",
 			title: "Últimos Artículos",
+			description: "Explorando ideas en la frontera de la tecnología.",
+			featured: "Destacado",
+			read_article: "Leer Artículo",
+			none: "No se encontraron artículos.",
 			verified: "VERIFICADO",
 			version: "VERSIÓN",
+		},
+		opensource: {
+			title: "Open Source",
+			subtitle:
+				"Bibliotecas reales y componentes modulares publicados en NPM. Enfocados en la optimización extrema, una DX fluida y estética minimalista.",
+			view_details: "Ver Detalles",
 		},
 		common: {
 			actions: "Acciones",
@@ -944,6 +1012,7 @@ export const ui = {
 			experience: {
 				form: {
 					company: "Empresa",
+					content: "Contenido Detallado (Markdown)",
 					current: "Trabajo Actual",
 					description: "Descripción",
 					end_date: "Fecha de Fin",
@@ -1042,6 +1111,8 @@ export const ui = {
 					impact: "IMPACTO Y RESULTADOS",
 					init: "INICIALIZANDO NUEVO NODO",
 					loading: "PROCESANDO...",
+					language: "IDIOMA DE TRADUCCIÓN",
+					parent: "NODO PADRE (Opcional)",
 					repo: "REPOSITORIO (GitHub)",
 					seo_desc: "DESCRIPCIÓN SEO",
 					seo_opt: "Optimización Meta (SEO)",
@@ -1123,6 +1194,7 @@ export const ui = {
 				level: "NIVEL_04_AUTH",
 				main: "Principal",
 				music: "Música",
+				open_source: "Open Source",
 				panel: "Panel",
 				profile: "Perfil Admin",
 				projects: "Proyectos",
@@ -1210,6 +1282,7 @@ export const ui = {
 			dashboard: "PANEL",
 			home: "INICIO",
 			projects: "PROYECTOS",
+			opensource: "OPEN SOURCE",
 		},
 		home: {
 			cv: "DESCARGAR CV",
@@ -1220,17 +1293,22 @@ export const ui = {
 				desc1: "Arquitecturando soluciones inteligentes de",
 				desc1_end: "...",
 				desc1_highlight: "IA y Automatización",
-				desc2: "Creando experiencias inmersivas",
+				desc2: "Diseñando experiencias digitales memorables para",
 				desc2_end: ".",
 				desc2_highlight: "Web y Móvil",
-				engineer: "DE_SOFTWARE_IA",
-				execute: "EJECUTAR_PROTOCOLO",
+				desc3: "Creando impacto real a través de",
+				desc3_end: ".",
+				desc3_highlight: "Tecnología con Alma",
+				engineer: "DE SOFTWARE CON IA",
+				execute: "COMUNÍCATE AHORA",
+				view_code: "VER CÓDIGO",
 				software: "INGENIERO",
 				source: "CÓDIGO_FUENTE",
-				stack: "## Stack: Python, PyTorch, React, NestJS, Docker, AWS.",
+				stack:
+					"## Stack: Typescript, Tailwind, React, NestJS, Langchain, Redis, Docker, AWS.",
 				subtitle:
 					"Construyendo aplicaciones web escalables y de alto rendimiento.",
-				title: "Desarrollador Full-Stack Senior",
+				title: "Ingeniero de Software con IA",
 			},
 			technologies: "TECNOLOGÍAS",
 		},
@@ -1244,10 +1322,17 @@ export const ui = {
 				neural: "ENTRENANDO PESOS NEURONALES...",
 				uplink: "ESTABLECIENDO ENLACE-NEURO...",
 			},
-			initializing: "Inicializando Entorno Senior",
+			initializing: "Inicializando Entorno de Ingeniero de Software con IA",
 			loading_modules: "CARGANDO MÓDULOS",
 			secure_connection: "Conexión Segura Establecida // TLS 1.3",
 			system_boot: "INICIO DE SISTEMA",
+			terminal: {
+				description: "Núcleo de Portafolio Vigilio",
+				active: "Activo: activo (en ejecución)",
+				tasks: "Tareas",
+				memory: "Memoria",
+				done: "LISTO.",
+			},
 		},
 		layout: {
 			encryption: "Encriptación",
@@ -1265,11 +1350,21 @@ export const ui = {
 			},
 			home: {
 				description:
-					"Desarrollador Full-Stack Senior especializado en tecnologías web modernas, arquitectura escalable y diseño centrado en el usuario.",
-				title: "Vigilio Yonatan | Desarrollador Full-Stack Senior",
+					"Soy Yonatan Vigilio Lavado, ingeniero de software con más de 6 años de experiencia desarrollando soluciones escalables e inteligencia artificial desde 2020. Apasionado por la arquitectura limpia, el open source y la producción de Drum and Bass.",
+				title: "Vigilio Yonatan | Ingeniero de Software con IA",
 			},
 			projects: {
 				title: "Proyectos | Vigilio Yonatan",
+			},
+			experience: {
+				title: "Experiencia | Vigilio Yonatan",
+				description:
+					"Mi trayectoria profesional y logros en ingeniería de software e IA.",
+			},
+			opensource: {
+				title: "Open Source | Vigilio Yonatan",
+				description:
+					"Descubre mis contribuciones a la comunidad open source y mi propio ecosistema de librerías.",
 			},
 		},
 		mock: {
@@ -1331,6 +1426,16 @@ export const ui = {
 			tech_stack: "Stack Tecnológico",
 			title: "Proyectos Destacados",
 			view_more: "Ver Más",
+			my_work: "Mi Trabajo",
+			description:
+				"Una colección de proyectos que demuestran mi experiencia en arquitectura de software y desarrollo full-stack.",
+			none: "No se encontraron proyectos.",
+			check_back: "Vuelve pronto.",
+			status: {
+				live: "En Producción",
+				in_dev: "En Desarrollo",
+				archived: "Archivado",
+			},
 		},
 		skills: {
 			cat: {
@@ -1342,6 +1447,10 @@ export const ui = {
 					desc: "Sistemas escalables, seguros y orientados a eventos.",
 					title: "Arquitectura Backend",
 				},
+				database: {
+					desc: "Arquitecturas de almacenamiento optimizadas, relacionales y no relacionales.",
+					title: "Gestión de Base de Datos",
+				},
 				devops: {
 					desc: "Pipelines CI/CD, contenedorización y orquestación.",
 					title: "DevOps & Cloud",
@@ -1350,13 +1459,17 @@ export const ui = {
 					desc: "Construyendo interfaces inmersivas y de alto rendimiento.",
 					title: "Ingeniería Frontend",
 				},
+				language: {
+					desc: "Competencia central en diversos paradigmas de programación.",
+					title: "Lenguajes de Programación",
+				},
 				mobile: {
 					desc: "Experiencias nativas multiplataforma.",
 					title: "Desarrollo Móvil",
 				},
 			},
 			loading: "> CARGANDO_MÓDULOS: FRONTEND, BACKEND, CLOUD, IA...",
-			subtitle: "> ANÁLISIS_SISTEMA: PROFICIENCIA_FULL_STACK_DETECTADA",
+			subtitle: "> PERFIL: INGENIERÍA DE SOFTWARE CON INTELIGENCIA ARTIFICIAL",
 			title: "Matriz de Capacidades Neuronales",
 		},
 		slug: {
@@ -1376,6 +1489,9 @@ export const ui = {
 			processor: "Procesador",
 			storage: "Almacenamiento",
 			uptime: "Tiempo_Actividad",
+		},
+		project_gallery: {
+			title: "Galería",
 		},
 	},
 	pt: {
@@ -1401,7 +1517,7 @@ export const ui = {
 				saas: "Plataformas SaaS",
 			},
 			services: {
-				desc: "Especializado em projetar software robusto e sustentável com princípios de arquitetura limpa, garantindo escalabilidade, desempenho e qualidade de código a longo prazo.",
+				desc: "Sou Yonatan Vigilio Lavado, desenvolvedor de software com mais de 6 anos de experiência e implementação de inteligência artificial desde 2020. Especializo-me no design de software robusto e de fácil manutenção sob princípios de arquitetura limpa, garantindo escalabilidade, desempenho e qualidade de código a longo prazo. Lidero projetos escaláveis e o desenvolvimento de bibliotecas open source, dominando um amplo stack de tecnologias modernas. Além da minha paixão pelo aprendizado contínuo e inovação, sou um entusiasta da música eletrônica, especificamente Drum and Bass, gênero que exploro através da produção musical no meu tempo livre.",
 				title: "Serviços e Capacidades",
 			},
 		},
@@ -1529,8 +1645,18 @@ export const ui = {
 			source_id: "ID_FONTE",
 			status: "STATUS",
 			title: "Últimos Artigos",
+			description: "Explorando ideias na fronteira da tecnologia.",
+			featured: "Destaque",
+			read_article: "Ler Artigo",
+			none: "Nenhum artigo encontrado.",
 			verified: "VERIFICADO",
 			version: "VERSÃO",
+		},
+		opensource: {
+			title: "Open Source",
+			subtitle:
+				"Bibliotecas reais e componentes modulares publicados no NPM. Focados em otimização extrema, DX fluida e estética minimalista.",
+			view_details: "Ver Detalhes",
 		},
 		common: {
 			actions: "Ações",
@@ -1632,6 +1758,7 @@ export const ui = {
 			experience: {
 				form: {
 					company: "Empresa",
+					content: "Conteúdo Detalhado (Markdown)",
 					current: "Trabalho Atual",
 					description: "Descrição",
 					end_date: "Data de Término",
@@ -1729,6 +1856,8 @@ export const ui = {
 					impact: "IMPACTO E RESULTADOS",
 					init: "INICIALIZANDO NOVO NÓ",
 					loading: "PROCESSANDO...",
+					language: "IDIOMA DE TRADUÇÃO",
+					parent: "NÓ PAI (Opcional)",
 					repo: "REPOSITÓRIO (GitHub)",
 					seo_desc: "DESCRIÇÃO SEO",
 					seo_opt: "Otimização Meta (SEO)",
@@ -1897,6 +2026,7 @@ export const ui = {
 			dashboard: "PAINEL",
 			home: "INÍCIO",
 			projects: "PROJETOS",
+			opensource: "OPEN SOURCE",
 		},
 		home: {
 			cv: "BAIXAR CV",
@@ -1907,14 +2037,19 @@ export const ui = {
 				desc1: "Arquitetando soluções inteligentes de",
 				desc1_end: "...",
 				desc1_highlight: "IA e Automação",
-				desc2: "Criando experiências imersivas",
+				desc2: "Projetando experiências digitais memoráveis para",
 				desc2_end: ".",
-				desc2_highlight: "Web e Móvil",
-				engineer: "DE_SOFTWARE_IA",
-				execute: "EXECUTAR_PROTOCOLO",
+				desc2_highlight: "Web e Mobile",
+				desc3: "Criando impacto real através de",
+				desc3_end: ".",
+				desc3_highlight: "Tecnologia com Alma",
+				engineer: "DE SOFTWARE CON IA",
+				execute: "ENTRE EM CONTATO",
+				view_code: "VER CÓDIGO",
 				software: "ENGENHEIRO",
 				source: "CÓDIGO_FONTE",
-				stack: "## Stack: Python, PyTorch, React, NestJS, Docker, AWS.",
+				stack:
+					"## Stack: Typescript, Tailwind, React, NestJS, Langchain, Redis, Docker, AWS.",
 				subtitle: "Construindo aplicações web escaláveis e de alto desempenho.",
 				title: "Desenvolvedor Full-Stack Sênior",
 			},
@@ -1934,6 +2069,13 @@ export const ui = {
 			loading_modules: "CARREGANDO MÓDULOS",
 			secure_connection: "Conexão Segura Estabelecida // TLS 1.3",
 			system_boot: "INICIALIZAÇÃO DO SISTEMA",
+			terminal: {
+				description: "Núcleo do Portfólio Vigilio",
+				active: "Ativo: ativo (em execução)",
+				tasks: "Tarefas",
+				memory: "Memória",
+				done: "PRONTO.",
+			},
 		},
 		layout: {
 			encryption: "Criptografia",
@@ -1951,11 +2093,21 @@ export const ui = {
 			},
 			home: {
 				description:
-					"Desenvolvedor Full-Stack Sênior especializado em tecnologias web modernas, arquitetura escalável e design centrado no usuário.",
-				title: "Vigilio Yonatan | Desenvolvedor Full-Stack Sênior",
+					"Sou Yonatan Vigilio Lavado, engenheiro de software com mais de 6 anos de experiência desenvolvendo soluções escaláveis e inteligência artificial desde 2020. Apaixonado por arquitetura limpa, open source e produção de Drum and Bass.",
+				title: "Vigilio Yonatan | Engenheiro de Software com IA",
 			},
 			projects: {
 				title: "Projetos | Vigilio Yonatan",
+			},
+			experience: {
+				title: "Experiência | Vigilio Yonatan",
+				description:
+					"Minha trajetória profissional e conquistas em engenharia de software e IA.",
+			},
+			opensource: {
+				title: "Open Source | Vigilio Yonatan",
+				description:
+					"Descubra minhas contribuições para a comunidade open source e meu próprio ecossistema de bibliotecas.",
 			},
 		},
 		mock: {
@@ -2027,6 +2179,10 @@ export const ui = {
 					desc: "Sistemas escaláveis, seguros e orientados a eventos.",
 					title: "Arquitetura Backend",
 				},
+				database: {
+					desc: "Arquiteturas de armazenamento otimizadas, relacionais e não relacionais.",
+					title: "Gestão de Banco de Dados",
+				},
 				devops: {
 					desc: "Pipelines CI/CD, conteinerização e orquestração.",
 					title: "DevOps & Cloud",
@@ -2035,13 +2191,17 @@ export const ui = {
 					desc: "Construindo interfaces imersivas e de alto desempenho.",
 					title: "Engenharia Frontend",
 				},
+				language: {
+					desc: "Proficiência central em diversos paradigmas de programação.",
+					title: "Linguagens de Programação",
+				},
 				mobile: {
 					desc: "Experiências nativas multiplataforma.",
 					title: "Desenvolvimento Móvel",
 				},
 			},
 			loading: "> CARREGANDO_MÓDULOS: FRONTEND, BACKEND, CLOUD, IA...",
-			subtitle: "> ANÁLISE_SISTEMA: PROFICIÊNCIA_FULL_STACK_DETECTADA",
+			subtitle: "> PERFIL: ENGENHARIA DE SOFTWARE COM INTELIGÊNCIA ARTIFICIAL",
 			title: "Matriz de Capacidades Neurais",
 		},
 		slug: {
@@ -2061,6 +2221,9 @@ export const ui = {
 			processor: "Processador",
 			storage: "Armazenamento",
 			uptime: "Tempo_Atividade",
+		},
+		project_gallery: {
+			title: "Galeria",
 		},
 	},
 };

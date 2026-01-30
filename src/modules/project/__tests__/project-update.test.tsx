@@ -29,6 +29,14 @@ vi.mock("@modules/technology/apis/technology.index.api", () => ({
 	})),
 }));
 
+// Mock projects API
+vi.mock("@modules/project/apis/project.index.api", () => ({
+	projectIndexApi: vi.fn(() => ({
+		isLoading: false,
+		data: { results: [{ id: 1, title: "Test Project" }] },
+	})),
+}));
+
 // Mock MKD Editor to avoid browser API issues in tests
 vi.mock("@components/form/form-mkd-editor", () => ({
 	FormMKDEditor: () => <div data-testid="mkd-editor" />,

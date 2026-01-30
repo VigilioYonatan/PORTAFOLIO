@@ -24,9 +24,9 @@ export default function PlanetOverlay() {
 	}, [isActive]);
 
 	const videos = [
-		{ src: "/video/reaper_car.mp4", label: "REAPER_DRIVE" },
-		{ src: "/video/reaper_ninja.mp4", label: "REAPER_STRIKE" },
-		{ src: "/video/reaper_ovni.mp4", label: "REAPER_ASCENT" },
+		{ src: "/video/reaper_car.mp4", label: "RAVEPUNK" },
+		{ src: "/video/reaper_ninja.mp4", label: "HEADHUNTER" },
+		{ src: "/video/reaper_ovni.mp4", label: "HEATSEEKER" },
 	];
 
 	// Track which video is currently focused
@@ -112,7 +112,7 @@ function VideoColumn({
 
 		if (isFocused) {
 			videoRef.current.muted = false;
-			videoRef.current.volume = 0.2;
+			videoRef.current.volume = 0.1;
 			videoRef.current.play().catch(() => {});
 		} else {
 			videoRef.current.muted = true;

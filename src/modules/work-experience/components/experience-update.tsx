@@ -87,6 +87,11 @@ export default function ExperienceUpdate({
 				placeholder="Describe tus responsabilidades y logros..."
 				required
 			/>
+			<Form.control.area<WorkExperienceStoreDto>
+				name="content"
+				title={t("dashboard.experience.form.content")}
+				placeholder="Contenido detallado en formato Markdown..."
+			/>
 			<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 				<Form.control<WorkExperienceStoreDto>
 					name="start_date"

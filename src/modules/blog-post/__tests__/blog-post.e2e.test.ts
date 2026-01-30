@@ -84,10 +84,6 @@ describe("BlogPostModule (e2e)", () => {
 				.send(payload);
 
 			if (response.status !== 201) {
-				console.error(
-					"❌ POST /api/v1/blog-post failed:",
-					JSON.stringify(response.body, null, 2),
-				);
 			}
 
 			expect(response.status).toBe(201);

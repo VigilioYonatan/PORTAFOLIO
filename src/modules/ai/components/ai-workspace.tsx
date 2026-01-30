@@ -11,10 +11,9 @@ import {
 	DatabaseIcon,
 	NetworkIcon,
 } from "lucide-preact";
-import type { Lang } from "@src/i18n";
 import IndexStatus from "./index-status";
 
-export default function AIWorkspace({ params }: { params: { lang: Lang } }) {
+export default function AIWorkspace() {
 	return (
 		<div class="flex flex-col gap-6 p-2 animate-in fade-in duration-500 relative">
 			{/* Ambient System Scanlines */}

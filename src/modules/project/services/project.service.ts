@@ -7,6 +7,7 @@ import {
 	Logger,
 	NotFoundException,
 } from "@nestjs/common";
+import type { Lang } from "@src/i18n";
 import { ProjectCache } from "../cache/project.cache";
 import type { ProjectQueryDto } from "../dtos/project.query.dto";
 import type {
@@ -219,6 +220,7 @@ export class ProjectService {
 	async showBySlug(
 		tenant_id: number,
 		slug: string,
+		language?: Lang,
 	): Promise<ProjectShowResponseDto> {
 		this.logger.log({ tenant_id, slug }, "Fetching project by slug");
 
@@ -227,7 +229,11 @@ export class ProjectService {
 
 		if (!project) {
 			// 2. Try DB
-			project = await this.projectRepository.showBySlug(tenant_id, slug);
+			project = await this.projectRepository.showBySlug(
+				tenant_id,
+				slug,
+				language,
+			);
 
 			if (!project) {
 				this.logger.warn({ tenant_id, slug }, "Project not found by slug");

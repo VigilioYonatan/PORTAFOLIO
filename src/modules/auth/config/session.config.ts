@@ -25,7 +25,8 @@ export class SessionConfigService {
 	) {}
 
 	setup(app: INestApplication) {
-		const isProd = this.configService.getOrThrow("NODE_ENV") === "PRODUCTION";
+		// const isProd = this.configService.getOrThrow("NODE_ENV") === "PRODUCTION";
+		const isProd = false;
 		let store: Store;
 
 		if (isProd) {

@@ -18,6 +18,7 @@ import { ContactModule } from "@modules/contact/modules/contact.module";
 import { DocumentModule } from "@modules/documents/document.module";
 import { MusicModule } from "@modules/music/music.module";
 import { NotificationModule } from "@modules/notification/notification.module";
+import { OpenSourceModule } from "@modules/open-source/modules/open-source.module";
 import { PortfolioConfigModule } from "@modules/portfolio-config/portfolio-config.module";
 import { ProjectModule } from "@modules/project/project.module";
 import { TecheableModule } from "@modules/techeable/techeable.module";
@@ -71,6 +72,7 @@ import { SocialModule } from "./modules/social/social.module";
 		AnalyticsModule,
 		TestimonialModule,
 		WorkMilestoneModule,
+		OpenSourceModule,
 		WebModule,
 	],
 	providers: [

@@ -17,12 +17,11 @@ import {
 } from "lucide-preact";
 import { useEffect } from "preact/hooks";
 import type { UseFormReturn } from "react-hook-form";
+import type { ProjectStoreDto } from "../dtos/project.store.dto";
 
 interface ProjectFormProps {
-	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
-	form: UseFormReturn<any>;
-	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
-	onSubmit: (data: any) => void;
+	form: UseFormReturn<ProjectStoreDto>;
+	onSubmit: (data: ProjectStoreDto) => void;
 	isLoading: boolean;
 	technologies: TechnologyIndexResponseDto["results"];
 	initialTitle?: string;
@@ -193,12 +192,12 @@ export function ProjectForm({
 						{t("dashboard.project.form.seo_opt")}
 					</h3>
 					<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-						<Form.control<ProjectUpdateDto>
+						<Form.control
 							name="seo.title"
 							title={t("dashboard.project.form.seo_title")}
 							placeholder="Título del proyecto para buscadores"
 						/>
-						<Form.control.area<ProjectUpdateDto>
+						<Form.control.area
 							name="seo.description"
 							title={t("dashboard.project.form.seo_desc")}
 							placeholder="Meta descripción (150-160 caracteres recomendado)"

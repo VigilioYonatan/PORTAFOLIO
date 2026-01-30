@@ -1,4 +1,5 @@
 import { signal } from "@preact/signals";
+import Cookies from "js-cookie";
 
 export const isProtostarActive = signal(false); // Mode (Theme + Sidebar Player replacement)
 export const isOverlayOpen = signal(false); // Fullscreen Overlay visibility (Protostar)
@@ -15,8 +16,8 @@ const resetToDefault = () => {
 	docStyle.setProperty("--primary", defaultColor);
 	docStyle.setProperty("--primary-rgb", defaultRgb);
 
-	localStorage.removeItem("theme-color");
-	localStorage.removeItem("theme-name");
+	Cookies.remove("theme-color");
+	Cookies.remove("theme-name");
 };
 
 export const toggleProtostarMode = (active: boolean) => {
@@ -41,9 +42,9 @@ export const toggleProtostarMode = (active: boolean) => {
 		docStyle.setProperty("--primary", "#22c55e");
 		docStyle.setProperty("--primary-rgb", "34, 197, 94");
 
-		// Persist to LOCAL STORAGE
-		localStorage.setItem("theme-color", "#22c55e");
-		localStorage.setItem("theme-name", "Protostar");
+		// Persist to COOKIES
+		Cookies.set("theme-color", "#22c55e", { expires: 365, path: "/" });
+		Cookies.set("theme-name", "Protostar", { expires: 365, path: "/" });
 	} else {
 		// Revert to default and CLEAR STORAGE
 		if (!isNatureActive.value && !isPlanetActive.value) {
@@ -71,9 +72,9 @@ export const toggleNatureMode = (active: boolean) => {
 		docStyle.setProperty("--primary", "#ffffff");
 		docStyle.setProperty("--primary-rgb", "255, 255, 255");
 
-		// Persist to LOCAL STORAGE
-		localStorage.setItem("theme-color", "#ffffff");
-		localStorage.setItem("theme-name", "Nature");
+		// Persist to COOKIES
+		Cookies.set("theme-color", "#ffffff", { expires: 365, path: "/" });
+		Cookies.set("theme-name", "Nature", { expires: 365, path: "/" });
 	} else {
 		if (!isPlanetActive.value && !isProtostarActive.value) {
 			resetToDefault();
@@ -96,9 +97,9 @@ export const togglePlanetMode = (active: boolean) => {
 		docStyle.setProperty("--primary", "#a855f7");
 		docStyle.setProperty("--primary-rgb", "168, 85, 247");
 
-		// Persist to LOCAL STORAGE
-		localStorage.setItem("theme-color", "#a855f7");
-		localStorage.setItem("theme-name", "Planet");
+		// Persist to COOKIES
+		Cookies.set("theme-color", "#a855f7", { expires: 365, path: "/" });
+		Cookies.set("theme-name", "Planet", { expires: 365, path: "/" });
 	} else {
 		if (!isNatureActive.value && !isProtostarActive.value) {
 			resetToDefault();

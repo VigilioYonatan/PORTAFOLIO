@@ -84,6 +84,14 @@ export const projectEntityRelations = relations(
 			references: [tenantEntity.id],
 		}),
 		techeables: many(techeableEntity),
+		parent: one(projectEntity, {
+			fields: [projectEntity.parent_id],
+			references: [projectEntity.id],
+			relationName: "translations",
+		}),
+		translations: many(projectEntity, {
+			relationName: "translations",
+		}),
 	}),
 );
 

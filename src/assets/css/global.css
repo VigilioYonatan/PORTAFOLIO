@@ -222,6 +222,15 @@
 			transform: translateX(-50%);
 		}
 	}
+
+	@keyframes border-beam-rotate {
+		from {
+			--border-beam-angle: 0deg;
+		}
+		to {
+			--border-beam-angle: 360deg;
+		}
+	}
 }
 
 @keyframes perspectiveShift {
@@ -379,6 +388,32 @@
 		text-shadow: -1px 0 #00fff9;
 		clip-path: inset(54% 0 21% 0);
 		animation: glitch-heavy 2.5s infinite linear alternate-reverse;
+	}
+
+	/* Border Beam Utility */
+	.border-beam {
+		--border-beam-size: 2px;
+		--border-beam-duration: 4s;
+		--border-beam-color: var(--color-primary);
+		position: relative;
+		border: var(--border-beam-size) solid transparent;
+		background-clip: padding-box, border-box;
+		background-origin: padding-box, border-box;
+		background-image:
+			linear-gradient(var(--color-background), var(--color-background)),
+			conic-gradient(
+				from var(--border-beam-angle, 0deg),
+				transparent,
+				var(--border-beam-color) 20%,
+				transparent 40%
+			);
+		animation: border-beam-rotate var(--border-beam-duration) linear infinite;
+	}
+
+	@property --border-beam-angle {
+		syntax: '<angle>';
+		initial-value: 0deg;
+		inherits: false;
 	}
 }
 

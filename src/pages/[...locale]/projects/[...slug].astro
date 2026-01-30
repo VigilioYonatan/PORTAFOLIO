@@ -29,17 +29,22 @@ const statusColors = {
 } as const;
 
 const statusLabels = {
-  live: lang === "es" ? "En Producción" : "Live",
-  in_dev: lang === "es" ? "En Desarrollo" : "In Development",
-  archived: lang === "es" ? "Archivado" : "Archived",
+  live: t("projects.status.live"),
+  in_dev: t("projects.status.in_dev"),
+  archived: t("projects.status.archived"),
 } as const;
 
 const allImages = project.images || [];
 const allVideos = project.videos || [];
+
+const title = `${project.title} | ${t("header.projects")}`;
+const description = project.description;
 ---
 
 <WebLayout
-  title={`${project.title} | ${lang === "es" ? "Proyectos" : "Projects"}`}
+  title={title}
+  description={description}
+  translations={(Astro.locals.props as WebProjectSlugResponseDto).translations}
 >
   <div class="min-h-screen">
     {/* Hero Header with Image */}
@@ -53,13 +58,13 @@ const allVideos = project.videos || [];
             class="absolute inset-0 w-full h-full object-cover"
           />
         ) : (
-          <div class="absolute inset-0 bg-gradient-to-br from-primary/20 to-background" />
+          <div class="absolute inset-0 bg-linear-to-br from-primary/20 to-background" />
         )
       }
 
       {/* Gradient Overlay */}
       <div
-        class="absolute inset-0 bg-gradient-to-t from-background via-background/80 to-transparent"
+        class="absolute inset-0 bg-linear-to-t from-background via-background/80 to-transparent"
       >
       </div>
 
@@ -71,7 +76,7 @@ const allVideos = project.videos || [];
           class="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-white transition-colors mb-8"
         >
           <ArrowLeft size={16} />
-          {lang === "es" ? "Volver a Proyectos" : "Back to Projects"}
+          {t("slug.back_to_archives")}
         </a>
 
         {/* Status Badge */}
@@ -141,51 +146,6 @@ const allVideos = project.videos || [];
     </div>
 
     <div class="container mx-auto py-12 px-4 max-w-7xl">
-      {/* Videos Section - Full Width Above Content */}
-      {
-        allVideos.length > 0 && (
-          <section class="mb-12">
-            <h3 class="font-mono text-primary text-sm uppercase tracking-widest mb-6 flex items-center gap-2">
-              <Play size={16} class="text-primary" />
-              {lang === "es" ? "Demo en Video" : "Video Demo"}
-            </h3>
-            <div
-              class={`grid gap-6 ${allVideos.length === 1 ? "max-w-4xl" : "grid-cols-1 md:grid-cols-2"}`}
-            >
-              {allVideos.map((video) => (
-                <div class="group relative rounded-2xl overflow-hidden border border-white/10 bg-gradient-to-br from-zinc-900 to-black shadow-2xl">
-                  {/* Video Glow Effect */}
-                  <div class="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-
-                  {/* Video Player */}
-                  <div class="relative aspect-video">
-                    <video
-                      controls
-                      class="w-full h-full object-cover"
-                      poster={project.images?.[0]?.key}
-                      preload="metadata"
-                    >
-                      <source src={video.key} type="video/mp4" />
-                    </video>
-                  </div>
-
-                  {/* Video Info Bar */}
-                  <div class="px-4 py-3 bg-black/50 backdrop-blur-sm border-t border-white/5 flex items-center justify-between">
-                    <span class="text-xs text-muted-foreground font-mono uppercase tracking-wider">
-                      {video.original_name || "Demo Video"}
-                    </span>
-                    <span class="text-xs text-primary/60 font-mono">
-                      {video.size
-                        ? `${(video.size / 1024 / 1024).toFixed(1)} MB`
-                        : ""}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
-        )
-      }
 
       <div class="flex flex-col lg:flex-row gap-8">
         {/* Left Sidebar - Tech Stack & Stats */}
@@ -224,10 +184,10 @@ const allVideos = project.videos || [];
 
             {/* Languages Stats */}
             {
-              project.languages_stats && project.languages_stats.length > 0 && (
+              project.languages_stats && project.languages_stats.length > 0 ? (
                 <div class="p-5 border border-white/10 rounded-2xl bg-card/50 backdrop-blur-sm">
                   <h4 class="font-bold mb-4 font-mono text-xs uppercase tracking-widest text-primary">
-                    {lang === "es" ? "Lenguajes" : "Languages"}
+                    {t("dashboard.sidebar.technologies")}
                   </h4>
                   <div class="space-y-2.5">
                     {project.languages_stats.map((langStat) => (
@@ -250,12 +210,12 @@ const allVideos = project.videos || [];
                     ))}
                   </div>
                 </div>
-              )
+              ):null
             }
 
             {/* GitHub Stats */}
             {
-              (project.github_stars || project.github_forks) && (
+              (project.github_stars || project.github_forks) ? (
                 <div class="p-5 border border-white/10 rounded-2xl bg-card/50 backdrop-blur-sm">
                   <h4 class="font-bold mb-4 font-mono text-xs uppercase tracking-widest text-primary">
                     GitHub
@@ -283,7 +243,7 @@ const allVideos = project.videos || [];
                     )}
                   </div>
                 </div>
-              )
+              ):null
             }
           </div>
         </aside>
@@ -316,7 +276,7 @@ const allVideos = project.videos || [];
             {/* Social Hub */}
             <SocialHub
               lang={lang}
-              client:load
+              client:only="preact"
               likes={0}
               comments={0}
               id={project.id}
@@ -327,7 +287,7 @@ const allVideos = project.videos || [];
 
         {/* Right Sidebar - Image Gallery */}
         {
-          allImages.length > 0 && (
+          allImages.length > 0 ? (
             <aside class="lg:w-72 xl:w-80 flex-shrink-0 order-3">
               <div class="lg:sticky lg:top-24">
                 <ProjectGallery
@@ -338,6 +298,8 @@ const allVideos = project.videos || [];
                 />
               </div>
             </aside>
+          ) : (
+            null  
           )
         }
       </div>

@@ -47,8 +47,6 @@ export default function ProjectUpdate({
 		},
 	});
 
-	console.log({ errors: projectUpdateForm.formState.errors });
-
 	function onProjectUpdate(body: ProjectUpdateDto) {
 		sweetModal({
 			title:
@@ -86,7 +84,8 @@ export default function ProjectUpdate({
 
 	return (
 		<ProjectForm
-			form={projectUpdateForm}
+			// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+			form={projectUpdateForm as any}
 			onSubmit={onProjectUpdate}
 			isLoading={projectUpdateMutation.isLoading || false}
 			technologies={technologiesQuery.data?.results || []}

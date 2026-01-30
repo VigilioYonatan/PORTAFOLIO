@@ -1,7 +1,7 @@
-import DocumentStore from "@modules/documents/components/document-store";
 import DocumentTable from "@modules/ai/components/document-table";
+import DocumentStore from "@modules/documents/components/document-store";
 import { type Lang, useTranslations } from "@src/i18n";
-import { FileTextIcon, DatabaseIcon } from "lucide-preact";
+import { DatabaseIcon, FileTextIcon } from "lucide-preact";
 
 interface DocumentManagerProps {
 	params: {

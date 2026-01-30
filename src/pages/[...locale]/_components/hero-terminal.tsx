@@ -1,13 +1,31 @@
 import { useEntranceAnimation } from "@hooks/use-motion";
 import { type Lang, useTranslations } from "@src/i18n";
 import { audioStore } from "@stores/audio.store";
+import {
+	Code,
+	Github,
+	Linkedin,
+	MessageCircle,
+	Twitter,
+	Youtube,
+} from "lucide-preact";
 import { useEffect, useRef } from "preact/hooks";
 
 interface HeroTerminalProps {
 	lang?: Lang;
+	socials?: {
+		linkedin: string | null;
+		github: string | null;
+		twitter: string | null;
+		youtube: string | null;
+		whatsapp: string | null;
+	} | null;
 }
 
-export default function HeroTerminal({ lang = "es" }: HeroTerminalProps) {
+export default function HeroTerminal({
+	lang = "es",
+	socials,
+}: HeroTerminalProps) {
 	const containerRef = useEntranceAnimation(0.2);
 	const { bassIntensity, beatDetected } = audioStore.state;
 	const glowRef = useRef<HTMLDivElement>(null);
@@ -81,7 +99,7 @@ export default function HeroTerminal({ lang = "es" }: HeroTerminalProps) {
 											{t("home.hero.badge")}
 										</span>
 									</div>
-									<h1 class="text-2xl md:text-6xl lg:text-8xl font-black tracking-tighter text-white leading-none break-all md:break-normal">
+									<h1 class="text-2xl md:text-5xl lg:text-6xl font-black tracking-tighter text-white leading-tight break-all md:break-normal uppercase">
 										{t("home.hero.software")}
 										<br />
 										<span
@@ -117,29 +135,125 @@ export default function HeroTerminal({ lang = "es" }: HeroTerminalProps) {
 										{t("home.hero.desc2_end")}
 									</span>
 								</p>
+								<p class="flex items-center flex-wrap gap-2 leading-relaxed">
+									<span class="text-primary">&gt;</span>
+									<span>
+										{t("home.hero.desc3")}{" "}
+										<span class="text-foreground">
+											{t("home.hero.desc3_highlight")}
+										</span>
+										{t("home.hero.desc3_end")}
+									</span>
+								</p>
 								<p class="opacity-40 text-[10px] mt-4">
 									{t("home.hero.stack")}
 								</p>
 							</div>
 
-							{/* Buttons */}
-							<div class="flex flex-wrap gap-4 mt-8">
-								<button
-									type="button"
-									aria-label="Execute Protocol"
-									class="px-8 py-3 bg-primary text-primary-foreground font-bold text-[11px] tracking-widest uppercase hover:bg-primary/90 transition-all shadow-(0_0_20px_rgba(6,182,212,0.3)) active:scale-95 flex items-center gap-3 group"
-								>
-									<div class="w-3 h-3 border-2 border-primary-foreground rounded-full border-t-transparent animate-spin-slow group-hover:animate-spin" />
-									{t("home.hero.execute")}
-								</button>
-								<button
-									type="button"
-									aria-label="View Source Code"
-									class="px-8 py-3 bg-transparent border border-white/20 text-white font-bold text-[11px] tracking-widest uppercase hover:bg-white/5 transition-all active:scale-95 flex items-center gap-3"
-								>
-									<span class="text-white/40">&lt; &gt;</span>
-									{t("home.hero.source")}
-								</button>
+							{/* Buttons & Socials */}
+							<div class="flex flex-col md:flex-row md:items-center justify-between gap-8 mt-12">
+								<div class="flex flex-wrap gap-4">
+									<a
+										href={
+											socials?.whatsapp
+												? socials.whatsapp.startsWith("http")
+													? socials.whatsapp
+													: `https://wa.me/${socials.whatsapp.replace(/\D/g, "")}`
+												: "#"
+										}
+										target="_blank"
+										rel="noopener noreferrer"
+										aria-label="Start Project"
+										class="px-8 py-3 bg-primary text-primary-foreground font-bold text-[11px] tracking-widest uppercase hover:bg-primary/90 transition-all shadow-[0_0_20px_rgba(6,182,212,0.3)] active:scale-95 flex items-center gap-3 group"
+									>
+										<MessageCircle size={16} className="animate-pulse" />
+										{t("home.hero.execute")}
+									</a>
+									<a
+										href="https://github.com/VigilioYonatan/PORTAFOLIO"
+										target="_blank"
+										rel="noopener noreferrer"
+										aria-label="View Source Code"
+										class="px-8 py-3 bg-zinc-900 border border-white/10 text-white font-bold text-[11px] tracking-widest uppercase hover:bg-white/5 transition-all shadow-sm active:scale-95 flex items-center gap-3 group"
+									>
+										<Code size={16} />
+										{t("home.hero.view_code")}
+									</a>
+								</div>
+
+								{/* Social Links */}
+								<div class="flex items-center gap-6">
+									{socials?.github && (
+										<a
+											href={socials.github}
+											target="_blank"
+											rel="noopener noreferrer"
+											class="text-muted-foreground hover:text-primary transition-all hover:scale-110 p-2 border border-white/5 hover:border-primary/20 bg-white/5 rounded-sm group relative"
+											aria-label="GitHub Profile"
+										>
+											<Github size={18} />
+											<span class="absolute -top-8 left-1/2 -translate-x-1/2 bg-zinc-900 border border-white/10 px-2 py-1 text-[8px] uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+												GitHub
+											</span>
+										</a>
+									)}
+									{socials?.linkedin && (
+										<a
+											href={socials.linkedin}
+											target="_blank"
+											rel="noopener noreferrer"
+											class="text-muted-foreground hover:text-primary transition-all hover:scale-110 p-2 border border-white/5 hover:border-primary/20 bg-white/5 rounded-sm group relative"
+											aria-label="LinkedIn Profile"
+										>
+											<Linkedin size={18} />
+											<span class="absolute -top-8 left-1/2 -translate-x-1/2 bg-zinc-900 border border-white/10 px-2 py-1 text-[8px] uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+												LinkedIn
+											</span>
+										</a>
+									)}
+									{socials?.twitter && (
+										<a
+											href={socials.twitter}
+											target="_blank"
+											rel="noopener noreferrer"
+											class="text-muted-foreground hover:text-primary transition-all hover:scale-110 p-2 border border-white/5 hover:border-primary/20 bg-white/5 rounded-sm group relative"
+											aria-label="Twitter Profile"
+										>
+											<Twitter size={18} />
+											<span class="absolute -top-8 left-1/2 -translate-x-1/2 bg-zinc-900 border border-white/10 px-2 py-1 text-[8px] uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+												Twitter
+											</span>
+										</a>
+									)}
+									{socials?.youtube && (
+										<a
+											href={socials.youtube}
+											target="_blank"
+											rel="noopener noreferrer"
+											class="text-muted-foreground hover:text-primary transition-all hover:scale-110 p-2 border border-white/5 hover:border-primary/20 bg-white/5 rounded-sm group relative"
+											aria-label="YouTube Channel"
+										>
+											<Youtube size={18} />
+											<span class="absolute -top-8 left-1/2 -translate-x-1/2 bg-zinc-900 border border-white/10 px-2 py-1 text-[8px] uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+												YouTube
+											</span>
+										</a>
+									)}
+									{socials?.whatsapp && (
+										<a
+											href={socials.whatsapp}
+											target="_blank"
+											rel="noopener noreferrer"
+											class="text-muted-foreground hover:text-green-500 transition-all hover:scale-110 p-2 border border-white/5 hover:border-green-500/20 bg-white/5 rounded-sm group relative"
+											aria-label="WhatsApp"
+										>
+											<MessageCircle size={18} />
+											<span class="absolute -top-8 left-1/2 -translate-x-1/2 bg-zinc-900 border border-white/10 px-2 py-1 text-[8px] uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+												WhatsApp
+											</span>
+										</a>
+									)}
+								</div>
 							</div>
 						</div>
 					</div>

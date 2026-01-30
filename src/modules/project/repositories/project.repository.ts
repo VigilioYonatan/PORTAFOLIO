@@ -4,6 +4,7 @@ import { toNull } from "@infrastructure/utils/server";
 import { techeableEntity } from "@modules/techeable/entities/techeable.entity";
 import { TECHEABLE_TYPES } from "@modules/techeable/schemas/techeable.schema";
 import { Inject, Injectable } from "@nestjs/common";
+import type { Lang } from "@src/i18n";
 import {
 	and,
 	asc,
@@ -108,13 +109,19 @@ export class ProjectRepository {
 	async showBySlug(
 		tenant_id: number,
 		slug: string,
+		language?: Lang,
 	): Promise<ProjectWithRelations | null> {
 		const result = await this.db.query.projectEntity.findFirst({
 			where: and(
 				eq(projectEntity.tenant_id, tenant_id),
 				eq(projectEntity.slug, slug),
+				language ? eq(projectEntity.language, language) : undefined,
 			),
-			with: { techeables: { with: { technology: true } } },
+			with: {
+				techeables: { with: { technology: true } },
+				translations: true,
+				parent: { with: { translations: true } },
+			},
 		});
 		return toNull(result);
 	}

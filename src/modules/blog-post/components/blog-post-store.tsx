@@ -49,7 +49,6 @@ export default function BlogPostStore({
 	});
 
 	const title = blogPostStoreForm.watch("title");
-	console.log(blogPostStoreForm.formState.errors);
 
 	useEffect(() => {
 		if (title) {

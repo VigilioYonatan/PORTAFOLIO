@@ -6,6 +6,7 @@ import {
 	HomeIcon,
 	type LucideIcon,
 	MailIcon,
+	PackageIcon,
 	RssIcon,
 	UserIcon,
 } from "lucide-preact";
@@ -29,8 +30,13 @@ export default function NavLinks({ lang, vertical, className }: NavLinksProps) {
 			icon: DatabaseIcon,
 		},
 		{ href: `/${lang}/projects`, label: t("header.projects"), icon: GridIcon },
+		{
+			href: `/${lang}/open-source`,
+			label: t("header.opensource"),
+			icon: PackageIcon,
+		},
 		{ href: `/${lang}/blog`, label: t("header.blog"), icon: RssIcon },
-		
+
 		{ href: `/${lang}/contact`, label: t("header.contact"), icon: MailIcon },
 	];
 
@@ -49,13 +55,16 @@ export default function NavLinks({ lang, vertical, className }: NavLinksProps) {
 					className={cn(
 						"relative font-mono text-sm tracking-widest text-muted-foreground hover:text-primary transition-all py-2 group flex items-center gap-4 w-full px-4 border-l-2 border-transparent hover:border-primary hover:bg-primary/5",
 						!vertical && "border-none px-0 hover:bg-transparent",
+						link.href.includes("open-source") && vertical && "border-beam",
 					)}
 				>
 					{vertical && (
-						<link.icon
-							{...sizeIcon.small}
-							className="group-hover:scale-110 transition-transform"
-						/>
+						<div className="relative">
+							<link.icon
+								{...sizeIcon.small}
+								className="group-hover:scale-110 transition-transform"
+							/>
+						</div>
 					)}
 					<span className="relative z-10">{link.label}</span>
 					{!vertical && (

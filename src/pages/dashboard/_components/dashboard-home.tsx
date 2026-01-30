@@ -19,10 +19,9 @@ import {
 import AnalyticsGrid from "./analytics-grid";
 
 interface DashboardHomeProps {
-	params:{
-
+	params: {
 		lang: Lang;
-	}
+	};
 }
 
 export default function DashboardHome({ params }: DashboardHomeProps) {

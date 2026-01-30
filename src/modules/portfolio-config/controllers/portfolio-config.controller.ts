@@ -73,7 +73,6 @@ export class PortfolioConfigController {
 	@Roles(1) // ADMIN only
 	@HttpCode(200)
 	@Put("/")
-	@Patch("/")
 	@ApiOperation({
 		summary: "Actualizar configuración del portfolio",
 		description:
@@ -86,6 +85,30 @@ export class PortfolioConfigController {
 		description: "Configuración actualizada",
 	})
 	update(
+		@Req() req: Request,
+		@Body(new ZodPipe(portfolioConfigUpdateDto)) body: PortfolioConfigUpdateDto,
+	): Promise<PortfolioConfigUpdateResponseClassDto> {
+		return this.portfolioConfigService.update(req.locals.tenant.id, body);
+	}
+
+	/**
+	 * PATCH /config
+	 * Actualiza parcialmente los datos del portfolio
+	 */
+	@Roles(1) // ADMIN only
+	@HttpCode(200)
+	@Patch("/")
+	@ApiOperation({
+		summary: "Actualizar configuración del portfolio (parcial)",
+		description: "Actualiza parcialmente los datos del portfolio (Solo Admin).",
+	})
+	@ApiBody({ type: PortfolioConfigUpdateClassDto })
+	@ApiResponse({
+		status: 200,
+		type: PortfolioConfigUpdateResponseClassDto,
+		description: "Configuración actualizada",
+	})
+	updatePartial(
 		@Req() req: Request,
 		@Body(new ZodPipe(portfolioConfigUpdateDto)) body: PortfolioConfigUpdateDto,
 	): Promise<PortfolioConfigUpdateResponseClassDto> {

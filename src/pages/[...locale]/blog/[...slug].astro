@@ -15,7 +15,7 @@ if (!post) {
 }
 ---
 
-<WebLayout title={`Blog: ${post.title}`}>
+<WebLayout title={`Blog: ${post.title}`} translations={(Astro.locals.props as WebBlogSlugResponseDto).translations}>
   <div class="container mx-auto py-20 px-4 max-w-4xl">
     <a
       href={`/${lang}/blog`}

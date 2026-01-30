@@ -15,6 +15,28 @@ export class ProjectSeeder {
 	async run(tenant_id: number) {
 		const projects = [
 			{
+				title: "Vigilio Portfolio - Manifiesto Digital 2026",
+				description:
+					"Sitio web de portafolio profesional de alto rendimiento utilizando la arquitectura de islas de Astro y NestJS.",
+				content:
+					"He desarrollado mi sitio web de portafolio profesional como un manifiesto digital de ingeniería de software. Utilicé **Astro** con su innovadora **Arquitectura de Islas** para lograr una carga instantánea y SEO óptimo, integrando componentes dinámicos con **React y TypeScript**. El backend está potenciado por **NestJS** con una arquitectura limpia y modular, utilizando **Docker** para la contenedorización y **Redis** para el almacenamiento en caché. El sistema incluye un asistente de IA integrado con **Ollama** y búsqueda semántica con **pgvector**, demostrando la convergencia entre el desarrollo web moderno y la Inteligencia Artificial.",
+				impact_summary:
+					"Portafolio ultra-rápido con IA integrada y arquitectura de vanguardia.",
+				start_date: new Date("2026-01-01"),
+				status: "live",
+			},
+			{
+				title: "Sistema de Traducción de Voz en Tiempo Real con RAG y Python",
+				description:
+					"Innovador sistema de traducción de voz en tiempo real para videos de YouTube utilizando agentes RAG y Python.",
+				content:
+					"Desarrollé un sistema avanzado de traducción de voz en tiempo real aplicado a videos de YouTube. Utilicé **Python** como lenguaje principal, integrando **entrenamiento RAG (Retrieval-Augmented Generation)** para contextualizar las traducciones y un algoritmo especializado para procesar audio en tiempo real. El sistema logra una latencia mínima y una precisión excepcional, permitiendo romper las barreras lingüísticas en contenido multimedia de forma fluida. Este proyecto representa la vanguardia en el procesamiento de lenguaje natural y la IA aplicada al video.",
+				impact_summary:
+					"Traducción instantánea de contenido multimedia con alta precisión contextual.",
+				start_date: new Date("2025-02-01"),
+				status: "live",
+			},
+			{
 				title:
 					"Plataforma Educativa con Inteligencia Artificial - CEAR LATINOAMERICANO",
 				description:
@@ -62,11 +84,13 @@ export class ProjectSeeder {
 				status: "live",
 			},
 			{
-				title: "ERP y CRM",
-				description: "Sistema ERP completo y personalizable.",
+				title: "ERP y CRM de Alto Impacto - Gestión Empresarial 360",
+				description:
+					"Sistema ERP (Enterprise Resource Planning) completo y complejo diseñado para la gestión integral de áreas críticas empresariales.",
 				content:
-					"Desarrollé un sistema ERP (Enterprise Resource Planning) completo y personalizable que abarca todas las áreas funcionales clave de una empresa, desde la gestión de recursos humanos hasta la contabilidad y la gestión de inventario. El stack usado fue Nodejs - Express.JS en el servidor y React.JS en el cliente.",
-				impact_summary: "Gestión integral de recursos empresariales.",
+					"Desarrollé un sistema ERP completo y personalizable que abarca todas las áreas funcionales clave de una empresa, desde la gestión de recursos humanos hasta la contabilidad, finanzas y la gestión de inventario en tiempo real. Fue un proyecto de alta complejidad técnica que requería una consistencia de datos absoluta y una interfaz intuitiva para procesos administrativos densos. El stack tecnológico se basó en **Node.js y Express.js** para un backend escalable y **React.js** en el frontend para una experiencia de usuario fluida y reactiva. Implementé módulos de facturación, control de asistencia, y reportes analíticos avanzados, consolidando una herramienta esencial para la transformación digital de negocios.",
+				impact_summary:
+					"Gestión integral y automatización de procesos complejos con arquitectura escalable.",
 				start_date: new Date("2023-01-01"),
 				status: "live",
 			},

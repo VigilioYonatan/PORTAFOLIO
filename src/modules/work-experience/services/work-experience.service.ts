@@ -1,4 +1,6 @@
 import { paginator } from "@infrastructure/utils/server";
+import { AI_TECHNICAL_PROTECTION } from "@modules/ai/const/ai-prompts.const";
+import { AiService } from "@modules/ai/services/ai.service";
 import { Injectable, Logger, NotFoundException } from "@nestjs/common";
 import { WorkExperienceCache } from "../cache/work-experience.cache";
 import type { WorkExperienceQueryDto } from "../dtos/work-experience.query.dto";
@@ -21,6 +23,7 @@ export class WorkExperienceService {
 	constructor(
 		private readonly workExperienceRepository: WorkExperienceRepository,
 		private readonly workExperienceCache: WorkExperienceCache,
+		private readonly aiService: AiService,
 	) {}
 
 	async index(
@@ -87,15 +90,101 @@ export class WorkExperienceService {
 		body: WorkExperienceStoreDto,
 	): Promise<WorkExperienceStoreResponseDto> {
 		this.logger.log({ tenant_id }, "Creating work experience");
-		const experience = await this.workExperienceRepository.store(
-			tenant_id,
-			body,
+		const experience = await this.workExperienceRepository.store(tenant_id, {
+			...body,
+			language: "es",
+			parent_id: null,
+		});
+
+		// Auto-translate (original is always Spanish)
+		this.generateTranslations(tenant_id, experience).catch((err) =>
+			this.logger.error("Error generating translations", err),
 		);
 
 		// Cache Write-Through + Invalidate lists
 		await this.workExperienceCache.invalidateLists(tenant_id);
 
 		return { success: true, experience };
+	}
+
+	private async generateTranslations(
+		tenant_id: number,
+		originalExperience: WorkExperienceSchema,
+	) {
+		const targetLanguages = ["en", "pt"];
+
+		const translations = await Promise.all(
+			targetLanguages.map(async (lang) => {
+				try {
+					const prompt = `
+					Translate the following work experience content to ${lang === "en" ? "English" : "Portuguese"}.
+					${AI_TECHNICAL_PROTECTION}
+					
+					Return a JSON object with the following structure:
+					{
+						"company": "Translated Company Name",
+						"position": "Translated Position",
+						"description": "Translated Description",
+						"content": "Translated Content (Markdown or null)",
+						"location": "Translated Location or null"
+					}
+					Original Data:
+					Company: ${originalExperience.company}
+					Position: ${originalExperience.position}
+					Description: ${originalExperience.description}
+					Content: ${originalExperience.content || ""}
+					Location: ${originalExperience.location || ""}
+				`;
+
+					const jsonResponse = await this.aiService.generate({
+						model: "openai/gpt-4o-mini",
+						temperature: 0.3,
+						system:
+							"You are a professional translator. Return only valid JSON.",
+						messages: [{ role: "user", content: prompt }],
+					});
+
+					const cleanJson = jsonResponse.replace(/```json|```/g, "").trim();
+					const translated = JSON.parse(cleanJson);
+
+					const {
+						id,
+						created_at,
+						updated_at,
+						tenant_id: t_id,
+						...rest
+					} = originalExperience;
+
+					return {
+						...rest,
+						company: translated.company,
+						position: translated.position,
+						description: translated.description,
+						content: translated.content,
+						location: translated.location,
+						language: lang as "en" | "pt",
+						parent_id: originalExperience.id,
+					};
+				} catch (error) {
+					this.logger.error(
+						`Failed to translate work experience #${originalExperience.id} to ${lang}`,
+						error,
+					);
+					return null;
+				}
+			}),
+		);
+
+		const validTranslations = translations.filter((t) => t !== null);
+		if (validTranslations.length > 0) {
+			await this.workExperienceRepository.bulkStore(
+				tenant_id,
+				validTranslations,
+			);
+			this.logger.log(
+				`Created ${validTranslations.length} translations for work experience #${originalExperience.id}`,
+			);
+		}
 	}
 
 	async update(

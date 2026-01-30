@@ -3,7 +3,6 @@ import { type Lang } from "@src/i18n";
 import { Menu, X } from "lucide-preact";
 import { useEffect, useState } from "preact/hooks";
 import NavLinks from "../../nav-links";
-import TerminalLogo from "../../terminal-logo";
 
 interface MobileHeaderProps {
 	lang: Lang;
@@ -25,7 +24,21 @@ export default function MobileHeader({ lang }: MobileHeaderProps) {
 
 	return (
 		<header className="flex md:hidden items-center justify-between p-4 border-b border-white/5 bg-black/40 backdrop-blur-xl sticky top-0 z-50">
-			<TerminalLogo className="text-lg" />
+			<a href={`/${lang}`} className="flex items-center gap-3 group">
+				<img
+					src="/images/vigilio.png"
+					alt="Vigilio Logo"
+					className="w-10 h-10 object-contain group-hover:scale-105 transition-transform"
+				/>
+				<div className="flex flex-col justify-center">
+					<span className="text-sm font-black tracking-widest text-white leading-none">
+						YONATAN
+					</span>
+					<span className="text-[10px] font-bold tracking-[0.2em] text-muted-foreground leading-none mt-0.5">
+						VIGILIO
+					</span>
+				</div>
+			</a>
 
 			<button
 				onClick={() => setIsOpen(true)}

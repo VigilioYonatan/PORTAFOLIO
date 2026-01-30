@@ -23,11 +23,32 @@ const t = useTranslations(lang);
 const {
   title = t("metadata.home.title"),
   description = t("metadata.home.description"),
+  translations,
 } = Astro.props;
+
+// Cookie-based Theme Persistence (SSR to prevent FOUC)
+const themeColorCookie = Astro.cookies.get("theme-color")?.value;
+const defaultThemeColor = "#306998"; // Python Blue (default)
+const activeThemeColor = themeColorCookie || defaultThemeColor;
+
+function hexToRgb(hex: string): string {
+  // Expand shorthand form (e.g. "03F") to full form (e.g. "0033FF")
+  const shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
+  const fullHex = hex.replace(shorthandRegex, (_m, r, g, b) => {
+    return r + r + g + g + b + b;
+  });
+
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(fullHex);
+  return result
+    ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}`
+    : "48, 105, 152"; // Default fallback
+}
+
+const activeThemeRgb = hexToRgb(activeThemeColor);
 ---
 
 <!doctype html>
-<html lang={lang} class="dark">
+<html lang={lang} class="dark" style={`--primary: ${activeThemeColor}; --primary-rgb: ${activeThemeRgb};`}>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
@@ -71,8 +92,14 @@ const {
     <aside
       class="hidden md:flex w-64 border-r border-white/5 bg-black/40 backdrop-blur-xl flex-col shrink-0 z-40 relative group"
     >
-      <div class="h-20 flex items-center px-6">
-        <TerminalLogo className="text-xl" />
+      <div class="h-24 flex items-center px-6">
+        <a href={`/${lang}`} class="flex items-center gap-4 group">
+          <img src="/images/vigilio.png" alt="Vigilio Logo" class="w-16 h-16 object-contain group-hover:scale-105 transition-transform" />
+          <div class="flex flex-col justify-center">
+             <span class="text-base font-black tracking-widest text-white leading-none">YONATAN</span>
+             <span class="text-xs font-bold tracking-[0.2em] text-muted-foreground leading-none mt-1">VIGILIO</span>
+          </div>
+        </a>
       </div>
 
       <nav class="flex-1 overflow-y-auto px-2 py-4 thin-scrollbar">
@@ -91,10 +118,10 @@ const {
         {/* Controls Area */}
         <div class="flex items-start justify-between gap-4">
           <div class="flex-1">
-            <LanguageSwitcher client:load />
+            <LanguageSwitcher translations={translations} client:load />
           </div>
           <div>
-            <TechThemeSwitcher client:load />
+            <TechThemeSwitcher initialColor={activeThemeColor} client:load />
           </div>
         </div>
       </div>
@@ -185,7 +212,7 @@ const {
             <p
               class="text-[9px] text-muted-foreground/80 leading-relaxed uppercase tracking-widest"
             >
-              Kubernetes / Distributed
+              Docker Swarm / Distributed
             </p>
           </div>
 

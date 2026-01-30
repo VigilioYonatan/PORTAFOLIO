@@ -125,6 +125,12 @@ process.env.LOG_LEVEL = "ERROR";
 vi.mock("@src/i18n", () => ({
 	useTranslations: vi.fn(() => (key: string) => key),
 	getTranslatedPath: vi.fn((path: string) => path),
+	languages: {
+		en: "English",
+		es: "Español",
+		pt: "Português",
+	},
+	defaultLang: "es",
 }));
 
 // Mock global fetch

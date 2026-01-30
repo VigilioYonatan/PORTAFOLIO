@@ -51,6 +51,7 @@ export class WebController {
 			arch: os.arch(),
 		};
 	}
+
 	@Public()
 	@Get([
 		WebPath.CONTACT,
@@ -80,6 +81,22 @@ export class WebController {
 
 	@Public()
 	@Get([
+		WebPath.EXPERIENCE,
+		WebPath.EXPERIENCE_ES,
+		WebPath.EXPERIENCE_EN,
+		WebPath.EXPERIENCE_PT,
+	])
+	async experience(
+		@Req() req: Request,
+		@Res() res: Response,
+		@Next() next: NextFunction,
+	) {
+		const props = await this.webService.experience(req.locals.language);
+		return await astroRender(props)(req, res, next);
+	}
+
+	@Public()
+	@Get([
 		WebPath.PROJECTS,
 		WebPath.PROJECTS_ES,
 		WebPath.PROJECTS_EN,
@@ -92,6 +109,43 @@ export class WebController {
 	) {
 		const page = req.query.page ? Number(req.query.page) : 1;
 		const props = await this.webService.projects(req.locals.language, page);
+		return await astroRender(props)(req, res, next);
+	}
+
+	@Public()
+	@Get([
+		WebPath.OPEN_SOURCE,
+		WebPath.OPEN_SOURCE_ES,
+		WebPath.OPEN_SOURCE_EN,
+		WebPath.OPEN_SOURCE_PT,
+	])
+	async openSource(
+		@Req() req: Request,
+		@Res() res: Response,
+		@Next() next: NextFunction,
+	) {
+		const page = req.query.page ? Number(req.query.page) : 1;
+		const props = await this.webService.openSource(req.locals.language, page);
+		return await astroRender(props)(req, res, next);
+	}
+
+	@Public()
+	@Get([
+		WebPath.OPEN_SOURCE_SLUG,
+		WebPath.OPEN_SOURCE_SLUG_ES,
+		WebPath.OPEN_SOURCE_SLUG_EN,
+		WebPath.OPEN_SOURCE_SLUG_PT,
+	])
+	async openSourceSlug(
+		@Req() req: Request,
+		@Res() res: Response,
+		@Next() next: NextFunction,
+	) {
+		const { slug } = req.params;
+		const props = await this.webService.openSourceSlug(
+			req.locals.language,
+			slug,
+		);
 		return await astroRender(props)(req, res, next);
 	}
 

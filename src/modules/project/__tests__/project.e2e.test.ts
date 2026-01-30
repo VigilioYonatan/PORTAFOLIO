@@ -77,6 +77,8 @@ describe("ProjectModule (e2e)", () => {
 				images: null,
 				videos: null,
 				seo: null,
+				language: "es",
+				parent_id: null,
 				techeables: [],
 			};
 
@@ -135,6 +137,8 @@ describe("ProjectModule (e2e)", () => {
 				images: null,
 				videos: null,
 				seo: null,
+				language: "es",
+				parent_id: null,
 				techeables: [],
 			};
 

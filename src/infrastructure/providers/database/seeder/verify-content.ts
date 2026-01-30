@@ -1,3 +1,4 @@
+/** biome-ignore-all lint/suspicious/noConsole: <explanation> */
 import { NestFactory } from "@nestjs/core";
 import { sql } from "drizzle-orm";
 import { schema } from "../database.schema";

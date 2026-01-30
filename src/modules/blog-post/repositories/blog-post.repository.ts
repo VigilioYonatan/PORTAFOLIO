@@ -1,6 +1,7 @@
 import { DRIZZLE } from "@infrastructure/providers/database/database.const";
 import { type schema } from "@infrastructure/providers/database/database.schema";
 import { Inject, Injectable } from "@nestjs/common";
+import type { Lang } from "@src/i18n";
 import { and, desc, eq, ilike, sql } from "drizzle-orm";
 import { type NodePgDatabase } from "drizzle-orm/node-postgres";
 import type { BlogPostQueryDto } from "../dtos/blog-post.query.dto";
@@ -76,15 +77,23 @@ export class BlogPostRepository {
 	async showBySlug(
 		tenant_id: number,
 		slug: string,
+		language?: Lang,
 	): Promise<BlogPostSchema | null> {
 		const blogPost = await this.db.query.blogPostEntity.findFirst({
 			where: and(
 				eq(blogPostEntity.tenant_id, tenant_id),
 				eq(blogPostEntity.slug, slug),
+				language ? eq(blogPostEntity.language, language) : undefined,
 			),
 			with: {
 				category: true,
 				author: true,
+				translations: true,
+				parent: {
+					with: {
+						translations: true,
+					},
+				},
 			},
 		});
 		return blogPost || null;

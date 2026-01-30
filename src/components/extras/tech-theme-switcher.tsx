@@ -1,4 +1,5 @@
 import { cn } from "@infrastructure/utils/client/cn";
+import Cookies from "js-cookie";
 import { Palette, X } from "lucide-preact";
 import { useEffect, useRef, useState } from "preact/hooks";
 import {
@@ -24,8 +25,10 @@ function hexToRgb(hex: string): string {
 
 export default function TechThemeSwitcher({
 	className,
+	initialColor,
 }: {
 	className?: string;
+	initialColor?: string;
 }) {
 	const themes = [
 		{ name: "Python", color: "#306998", icon: siPython },
@@ -35,47 +38,34 @@ export default function TechThemeSwitcher({
 		{ name: "Docker", color: "#2496ED", icon: siDocker },
 		{ name: "NestJS", color: "#E0234E", icon: siNestjs },
 		{ name: "React", color: "#61DAFB", icon: siReact },
-		{
-			name: "Protostar",
-			color: "#22c55e",
-			icon: {
-				path: "M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0zM12 9v4M12 17h.01",
-			} as any,
-		},
-		{
-			name: "Nature",
-			color: "#ffffff",
-			icon: {
-				path: "M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71L12 2z", // Simple leaf-ish triangle
-			} as any,
-		},
-		{
-			name: "Planet",
-			color: "#a855f7",
-			icon: {
-				path: "M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z", // Simple circle
-			} as any,
-		},
 	];
 
 	const [isOpen, setIsOpen] = useState(false);
 	const containerRef = useRef<HTMLDivElement>(null);
-	const [activeTheme, setActiveTheme] = useState(themes[0]);
+
+	// Initialize with prop if available, otherwise default
+	const [activeTheme, setActiveTheme] = useState(
+		initialColor
+			? themes.find((t) => t.color === initialColor) || themes[0]
+			: themes[0],
+	);
 
 	const changeTheme = (theme: (typeof themes)[0]) => {
 		const rgb = hexToRgb(theme.color);
 		document.documentElement.style.setProperty("--primary", theme.color);
 		document.documentElement.style.setProperty("--primary-rgb", rgb);
 
-		localStorage.setItem("theme-color", theme.color);
-		localStorage.setItem("theme-name", theme.name);
+		// Save to Cookies (for SSR to avoid FOUC) using js-cookie
+		Cookies.set("theme-color", theme.color, { expires: 365, path: "/" });
+		Cookies.set("theme-name", theme.name, { expires: 365, path: "/" });
+
 		setActiveTheme(theme);
 		setIsOpen(false);
 	};
 
 	useEffect(() => {
-		const savedColor = localStorage.getItem("theme-color");
-		const savedName = localStorage.getItem("theme-name");
+		const savedColor = Cookies.get("theme-color");
+		const savedName = Cookies.get("theme-name");
 		if (savedColor) {
 			const rgb = hexToRgb(savedColor);
 			document.documentElement.style.setProperty("--primary", savedColor);

@@ -18,9 +18,9 @@ const statusColors = {
 } as const;
 
 const statusLabels = {
-  live: lang === "es" ? "En Producción" : "Live",
-  in_dev: lang === "es" ? "En Desarrollo" : "In Development",
-  archived: lang === "es" ? "Archivado" : "Archived",
+  live: t("projects.status.live"),
+  in_dev: t("projects.status.in_dev"),
+  archived: t("projects.status.archived"),
 } as const;
 ---
 
@@ -28,7 +28,7 @@ const statusLabels = {
   <div class="container mx-auto py-20 px-4 min-h-screen">
     <div class="flex flex-col items-center text-center mb-16 space-y-4">
       <span class="text-primary font-mono text-sm tracking-widest uppercase">
-        {lang === "es" ? "Mi Trabajo" : "My Work"}
+        {t("projects.my_work")}
       </span>
       <h1
         class="text-5xl md:text-7xl font-black text-transparent bg-clip-text bg-gradient-to-b from-white to-white/40"
@@ -36,11 +36,7 @@ const statusLabels = {
         {t("projects.title")}
       </h1>
       <p class="text-xl text-muted-foreground max-w-2xl font-light">
-        {
-          lang === "es"
-            ? "Una colección de proyectos que demuestran mi experiencia en arquitectura de software y desarrollo full-stack."
-            : "A collection of projects showcasing my expertise in software architecture and full-stack development."
-        }
+        {t("projects.description")}
       </p>
     </div>
 
@@ -155,14 +151,10 @@ const statusLabels = {
               <span class="text-2xl">?</span>
             </div>
             <p class="text-xl font-bold text-white">
-              {lang === "es"
-                ? "No se encontraron proyectos."
-                : "No projects found."}
+              {t("projects.none")}
             </p>
             <p class="text-muted-foreground">
-              {lang === "es"
-                ? "Vuelve pronto."
-                : "Check back soon for updates."}
+              {t("projects.check_back")}
             </p>
           </div>
         )

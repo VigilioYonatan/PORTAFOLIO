@@ -1,5 +1,5 @@
 import { useSignal } from "@preact/signals";
-import { useTranslations, type Lang } from "@src/i18n";
+import { type Lang, useTranslations } from "@src/i18n";
 import { audioStore } from "@stores/audio.store";
 import {
 	ActivityIcon,

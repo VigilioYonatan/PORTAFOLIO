@@ -37,7 +37,7 @@ describe("HeroTerminal Component", () => {
 	it("renders CTA buttons with correct text", () => {
 		render(<HeroTerminal />);
 		expect(screen.getByText("home.hero.execute")).toBeInTheDocument();
-		expect(screen.getByText("home.hero.source")).toBeInTheDocument();
+		// Removed home.hero.source as it was replaced by social links
 	});
 
 	it("renders system subtitles", () => {

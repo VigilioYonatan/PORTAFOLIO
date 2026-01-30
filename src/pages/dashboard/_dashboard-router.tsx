@@ -1,7 +1,7 @@
+import { type Lang } from "@src/i18n";
 import { lazy, Suspense } from "preact/compat";
 import { Route, Router, Switch } from "wouter-preact";
 import DashboardLayout from "./_components/dashboard-layout";
-import { type Lang } from "@src/i18n";
 
 const DashboardHome = lazy(() => import("./_components/dashboard-home"));
 const AIWorkspace = lazy(() => import("@modules/ai/components/ai-workspace"));
@@ -12,6 +12,9 @@ const ProjectManager = lazy(
 	() => import("./_components/projects/project-manager"),
 );
 const BlogManager = lazy(() => import("./_components/blog/blog-manager"));
+const OpenSourceManager = lazy(
+	() => import("@modules/open-source/components/open-source.index"),
+);
 
 const HRDashboard = lazy(() => import("./_components/hr/hr-dashboard"));
 const Inbox = lazy(() => import("./_components/inbox/inbox"));
@@ -45,10 +48,7 @@ export function DashboardRouter({ lang = "es" }: DashboardRouterProps) {
 							children={<DashboardHome params={{ lang }} />}
 						/>
 						{/* Modules */}
-						<Route
-							path="/dashboard/ai"
-							children={<AIWorkspace params={{ lang }} />}
-						/>
+						<Route path="/dashboard/ai" children={<AIWorkspace />} />
 						<Route
 							path="/dashboard/documents"
 							children={<DocumentManager params={{ lang }} />}
@@ -64,6 +64,10 @@ export function DashboardRouter({ lang = "es" }: DashboardRouterProps) {
 							children={<BlogManager params={{ lang }} />}
 						/>
 						<Route
+							path="/dashboard/open-source"
+							children={<OpenSourceManager lang={lang} />}
+						/>
+						<Route
 							path="/dashboard/content"
 							children={<ProjectManager params={{ lang }} />}
 						/>
@@ -77,14 +81,8 @@ export function DashboardRouter({ lang = "es" }: DashboardRouterProps) {
 							path="/dashboard/inbox"
 							children={<Inbox params={{ lang }} />}
 						/>
-						<Route
-							path="/dashboard/shared"
-							children={<SharedWorkspace />}
-						/>
-						<Route
-							path="/dashboard/tech"
-							children={<SharedWorkspace />}
-						/>
+						<Route path="/dashboard/shared" children={<SharedWorkspace />} />
+						<Route path="/dashboard/tech" children={<SharedWorkspace />} />
 						<Route
 							path="/dashboard/settings"
 							children={<Settings params={{ lang }} />}

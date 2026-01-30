@@ -1,9 +1,11 @@
+import { join } from "node:path";
 import { validateEnvironments } from "@infrastructure/config/server";
 import { configureApp } from "@infrastructure/config/server/app.config";
 import { astroProxy } from "@infrastructure/utils/server";
 import { SessionConfigService } from "@modules/auth/config/session.config";
 import { ConfigService } from "@nestjs/config";
 import { NestFactory } from "@nestjs/core";
+import express from "express";
 import { Logger } from "nestjs-pino";
 import { AppModule } from "./app.module";
 
@@ -55,6 +57,7 @@ async function bootstrap() {
 	// Session & Passport Configuration
 	const sessionConfig = app.get(SessionConfigService);
 	sessionConfig.setup(app);
+	app.use(express.static(join(process.cwd(), "dist/client")));
 
 	// Start on port
 

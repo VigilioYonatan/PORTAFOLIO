@@ -6,6 +6,7 @@ export const workExperienceQueryDto = workExperienceSchema
 	.pick({
 		is_visible: true,
 		is_current: true,
+		language: true,
 	})
 	.partial()
 	.extend(querySchema.shape);

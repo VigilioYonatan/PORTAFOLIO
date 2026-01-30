@@ -99,7 +99,6 @@ export default function PostBentoGrid({ lang = "es" }: PostBentoGridProps) {
 							))}
 						</select>
 						<div class="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/40 pointer-events-none">
-
 							<svg
 								xmlns="http://www.w3.org/2000/svg"
 								width="12"
@@ -111,7 +110,8 @@ export default function PostBentoGrid({ lang = "es" }: PostBentoGridProps) {
 								stroke-linecap="round"
 								stroke-linejoin="round"
 								class="lucide lucide-chevron-down"
-							><title> </title>
+							>
+								<title> </title>
 								<path d="m6 9 6 6 6-6" />
 							</svg>
 						</div>

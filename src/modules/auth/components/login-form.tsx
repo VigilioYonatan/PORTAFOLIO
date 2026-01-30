@@ -25,7 +25,7 @@ interface LockoutInfo {
 // COMPONENT
 // ============================================
 
-export function LoginForm({ lang = "es" }: LoginFormProps) {
+export default function LoginForm({ lang = "es" }: LoginFormProps) {
 	const t = useTranslations(lang);
 	const authLoginMutation = authLoginApi();
 
@@ -162,11 +162,9 @@ export function LoginForm({ lang = "es" }: LoginFormProps) {
 							<div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
 							<span className="relative z-10 flex items-center gap-2">
 								{authLoginMutation.isLoading ? (
-									<>
-										<span className="animate-pulse">
-											{t("auth.terminal.processing")}
-										</span>
-									</>
+									<span className="animate-pulse">
+										{t("auth.terminal.processing")}
+									</span>
 								) : (
 									<>
 										[ {t("auth.terminal.execute")} ]{" "}
@@ -243,5 +241,3 @@ export function LoginForm({ lang = "es" }: LoginFormProps) {
 		</div>
 	);
 }
-
-export default LoginForm;

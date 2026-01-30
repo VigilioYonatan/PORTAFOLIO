@@ -2,8 +2,7 @@ import LanguageSwitcher from "@components/extras/language-switcher";
 import TechThemeSwitcher from "@components/extras/tech-theme-switcher";
 import { cn } from "@infrastructure/utils/client/cn";
 import { type Lang, useTranslations } from "@src/i18n";
-import { isChatOpen } from "@stores/chat.store";
-import { Activity, Cpu, MessageSquare, X } from "lucide-preact";
+import { Activity, Cpu, X } from "lucide-preact";
 import { useEffect, useState } from "preact/hooks";
 import NeuroPlayer from "../../neuro-player";
 import NatureButton from "../../special/nature-button";
@@ -41,23 +40,12 @@ export default function MobileToolsDock({ lang }: MobileToolsDockProps) {
 						: "translate-y-0 opacity-100",
 				)}
 			>
-				{/* Chat Button */}
-				<button
-					onClick={() => {
-						isChatOpen.value = !isChatOpen.value;
-					}}
-					className="w-12 h-12 rounded-full bg-zinc-800 text-white border border-white/10 shadow-lg flex items-center justify-center hover:scale-110 active:scale-95 transition-all"
-					aria-label="Toggle Chat"
-					type="button"
-				>
-					<MessageSquare className="w-5 h-5" />
-				</button>
-
 				{/* Tools Button */}
 				<button
 					onClick={() => {
 						setIsOpen(true);
-					}}type="button"
+					}}
+					type="button"
 					className="w-12 h-12 rounded-full bg-primary text-primary-foreground shadow-[0_0_20px_rgba(6,182,212,0.4)] flex items-center justify-center hover:scale-110 active:scale-95 transition-all"
 					aria-label="Open System Tools"
 				>

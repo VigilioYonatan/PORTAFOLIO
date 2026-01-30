@@ -41,6 +41,10 @@ import {
 	notificationRelations,
 } from "@modules/notification/entities/notification.entity";
 import { subscriptionEntity } from "@modules/notification/entities/subscription.entity";
+import {
+	openSourceEntity,
+	openSourceEntityRelations,
+} from "@modules/open-source/entities/open-source.entity";
 // Portfolio Config
 import {
 	portfolioConfigEntity,
@@ -185,6 +189,9 @@ export interface Schema {
 	subscriptionEntity: typeof subscriptionEntity;
 	aiInsightEntity: typeof aiInsightEntity;
 	aiInsightRelations: typeof aiInsightRelations;
+	// Open Source
+	openSourceEntity: typeof openSourceEntity;
+	openSourceEntityRelations: typeof openSourceEntityRelations;
 
 	[key: string]: unknown;
 }
@@ -273,4 +280,7 @@ export const schema: Schema = {
 	workMilestoneEntityRelations,
 	aiInsightEntity,
 	aiInsightRelations,
+	// Open Source
+	openSourceEntity,
+	openSourceEntityRelations,
 };

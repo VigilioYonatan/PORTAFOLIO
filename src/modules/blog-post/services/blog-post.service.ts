@@ -3,6 +3,7 @@ import { paginator } from "@infrastructure/utils/server";
 import { AI_TECHNICAL_PROTECTION } from "@modules/ai/const/ai-prompts.const";
 import { AiService } from "@modules/ai/services/ai.service";
 import { Injectable, Logger, NotFoundException } from "@nestjs/common";
+import type { Lang } from "@src/i18n";
 import { BlogPostCache } from "../cache/blog-post.cache";
 import { type BlogPostQueryDto } from "../dtos/blog-post.query.dto";
 import type {
@@ -55,7 +56,7 @@ export class BlogPostService {
 
 	private async generateTranslations(
 		tenant_id: number,
-		userId: number,
+		_user_id: number,
 		originalPost: BlogPostSchema,
 	) {
 		const targetLanguages = ["en", "pt"];
@@ -175,13 +176,14 @@ export class BlogPostService {
 	async showBySlug(
 		tenant_id: number,
 		slug: string,
+		language?: Lang,
 	): Promise<BlogPostShowResponseDto> {
 		this.logger.log({ tenant_id, slug }, "Fetching blog post by slug");
 
 		let blogPost = await this.blogPostCache.getBySlug(tenant_id, slug);
 
 		if (!blogPost) {
-			blogPost = await this.repository.showBySlug(tenant_id, slug);
+			blogPost = await this.repository.showBySlug(tenant_id, slug, language);
 			if (blogPost) {
 				await this.blogPostCache.setBySlug(tenant_id, blogPost.slug, blogPost);
 			}

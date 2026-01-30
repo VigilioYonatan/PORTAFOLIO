@@ -11,8 +11,8 @@ import {
 	HttpCode,
 	Param,
 	ParseIntPipe,
+	Patch,
 	Post,
-	Put,
 	Query,
 	Req,
 	UseGuards,
@@ -85,7 +85,7 @@ export class WorkExperienceController {
 	}
 
 	@HttpCode(200)
-	@Put("/:id")
+	@Patch("/:id")
 	@Roles(1) // Admin
 	@ApiOperation({ summary: "Actualizar experiencia laboral" })
 	@ApiResponse({

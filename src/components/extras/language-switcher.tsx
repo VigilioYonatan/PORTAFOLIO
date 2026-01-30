@@ -5,9 +5,13 @@ import { useEffect, useState } from "preact/hooks";
 
 interface LanguageSwitcherProps {
 	className?: string;
+	translations?: Record<string, string>;
 }
 
-export default function LanguageSwitcher({ className }: LanguageSwitcherProps) {
+export default function LanguageSwitcher({
+	className,
+	translations,
+}: LanguageSwitcherProps) {
 	const languages = LANGUAGES.map((lang) => ({
 		code: lang,
 		label: lang.toUpperCase(),
@@ -30,17 +34,42 @@ export default function LanguageSwitcher({ className }: LanguageSwitcherProps) {
 	const changeLanguage = (langCode: string) => {
 		const currentPath = window.location.pathname;
 		const segments = currentPath.split("/").filter(Boolean);
-
-		let newPath = "";
-		if (
+		const currentLangFromUrl =
 			segments.length > 0 &&
 			(LANGUAGES as readonly string[]).includes(segments[0])
-		) {
-			segments[0] = langCode;
-			newPath = `/${segments.join("/")}`;
+				? segments[0]
+				: "es"; // Default language
+
+		let newPath = "";
+		let updatedSegments = [...segments];
+
+		if ((LANGUAGES as readonly string[]).includes(segments[0])) {
+			updatedSegments[0] = langCode;
 		} else {
-			newPath = `/${langCode}${currentPath === "/" ? "" : currentPath}`;
+			updatedSegments = [langCode, ...segments];
 		}
+
+		// If we have translations for this entity, use the translated slug
+		if (translations?.[langCode]) {
+			const currentSlug = translations[currentLangFromUrl];
+			if (currentSlug) {
+				const slugIndex = updatedSegments.indexOf(currentSlug);
+				// If not found in updated segments (maybe it was the old lang version),
+				// find it in original segments relative to currentLang
+				if (slugIndex !== -1) {
+					updatedSegments[slugIndex] = translations[langCode];
+				} else {
+					// Fallback: try to find the last segment if it matches currentSlug
+					const lastSegment = segments[segments.length - 1];
+					if (lastSegment === currentSlug) {
+						updatedSegments[updatedSegments.length - 1] =
+							translations[langCode];
+					}
+				}
+			}
+		}
+
+		newPath = `/${updatedSegments.join("/")}`;
 		window.location.href = newPath;
 	};
 

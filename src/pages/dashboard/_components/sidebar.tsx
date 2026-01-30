@@ -1,4 +1,3 @@
-import TerminalLogo from "@components/extras/terminal-logo";
 import { cn } from "@infrastructure/utils/client";
 import { type Lang, useTranslations } from "@src/i18n";
 import {
@@ -10,6 +9,7 @@ import {
 	LayoutDashboard,
 	MessageSquare,
 	Music,
+	Package,
 	PenTool,
 	Settings,
 	ShieldCheckIcon,
@@ -66,6 +66,11 @@ export default function Sidebar({
 						label: t("dashboard.sidebar.blog"),
 						href: "/dashboard/blog",
 						icon: PenTool,
+					},
+					{
+						label: t("dashboard.sidebar.open_source"),
+						href: "/dashboard/open-source",
+						icon: Package,
 					},
 					{
 						label: t("dashboard.sidebar.experience"),
@@ -129,7 +134,11 @@ export default function Sidebar({
 				<div class="p-6 border-b border-white/5 flex items-center gap-3 relative group">
 					<div class="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity" />
 					<Link href="/">
-						<TerminalLogo className="w-8 h-8 text-primary animate-glitch-sm cursor-pointer" />
+						<img
+							src="/images/vigilio.png"
+							alt="Vigilio Logo"
+							class="w-10 h-10 object-contain"
+						/>
 					</Link>
 					<div class="flex flex-col">
 						<span class="font-black text-sm tracking-[0.3em] text-white">

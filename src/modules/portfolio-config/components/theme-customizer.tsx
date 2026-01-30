@@ -18,8 +18,7 @@ import {
 import { useEffect } from "preact/hooks";
 import type { JSX } from "preact/jsx-runtime";
 import { type Resolver, useForm } from "react-hook-form";
-import { siX } from "simple-icons";
-import { siGithub, siYoutube } from "simple-icons";
+import { siGithub, siX, siYoutube } from "simple-icons";
 import { portfolioConfigShowApi } from "../apis/portfolio-config.show.api";
 import { portfolioConfigUpdateApi } from "../apis/portfolio-config.update.api";
 import type { PortfolioConfigSchema } from "../schemas/portfolio-config.schema";

@@ -10,7 +10,7 @@ public/video/
 # Dependencies
 node_modules/
 .pnpm-store/
-
+script/
 # Logs
 *.log
 npm-debug.log*

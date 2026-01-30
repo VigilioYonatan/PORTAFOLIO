@@ -17,11 +17,9 @@ export class PortfolioConfigSeeder {
 		{
 			name: "Yonatan Vigilio Lavado",
 			profile_title: "Ingeniero de Software con Inteligencia Artificial",
-			biography: `Soy un ingeniero de software con Inteligencia Artificial especializado en el desarrollo de aplicaciones web y móviles, con más de 6 años de experiencia. A lo largo de mi carrera, he trabajado en diversos proyectos, desde sitios web interactivos hasta aplicaciones móviles complejas implementando inteligencia Artifical.
+			biography: `Soy Yonatan Vigilio Lavado, desarrollador de software con más de 6 años de experiencia y especialista en la implementación de inteligencia artificial desde 2020. Me especializo en el diseño de software robusto y mantenible bajo principios de arquitectura limpia, asegurando escalabilidad, rendimiento y calidad de código a largo plazo. He liderado proyectos escalables y el desarrollo de bibliotecas open source, dominando un amplio stack de tecnologías modernas. 
 
-Tengo un dominio sólido de frameworks modernos como React y Vue.js para el frontend, y en el backend he utilizado Express.js, Nest.js y Laravel para construir aplicaciones escalables, seguras y eficientes. Además, cuento con experiencia en integración y entrega continua (CI/CD) utilizando Docker, optimizando así los flujos de desarrollo y despliegue.
-
-Aporto mi conocimiento, creatividad y compromiso a cada proyecto, con el objetivo de desarrollar y automatizar soluciones tecnológicas innovadoras que realmente marquen la diferencia.`,
+Además de mi pasión por el aprendizaje continuo y la innovación, soy un entusiasta de la música electrónica, específicamente del Drum and Bass, género que exploro a través de la producción musical en mi tiempo libre, lo que me ayuda a mantener un equilibrio entre la lógica del código y la creatividad sonora.`,
 			email: "yonatanvigiliolavado09@gmail.com",
 			phone: "+51 959 884 398",
 			address: "Lima, Peru",
@@ -30,7 +28,7 @@ Aporto mi conocimiento, creatividad y compromiso a cada proyecto, con el objetiv
 				github: "https://github.com/yonatanvigilio",
 				twitter: null,
 				youtube: null,
-				portfolio: "https://yonatanvigilio.com",
+				whatsapp: "https://wa.me/51959884398",
 			},
 			logo: null,
 			color_primary: "#3B82F6",

@@ -12,20 +12,22 @@ export const astroProxy = createProxyMiddleware({
 
 export function astroRender(props: Record<string, unknown> = {}) {
 	return async (req: Request, res: Response, next: NextFunction) => {
-		if (req.originalUrl.startsWith("/api")) return next();
-		try {
-			req.headers["x-astro-locals"] = Buffer.from(
-				JSON.stringify({
-					...req.locals,
-					props,
-				}),
-			).toString("base64");
-			return astroProxy(req, res, next);
-		} catch (_error) {
+		const isProduction = getEnvironments().NODE_ENV === "PRODUCTION";
+
+		// Standardize locals transmission
+		req.headers["x-astro-locals"] = Buffer.from(
+			JSON.stringify({
+				...req.locals,
+				props,
+			}),
+		).toString("base64");
+
+		if (isProduction) {
 			const entryPath = path.join(process.cwd(), "dist/server/entry.mjs");
 			const { handler: astroHandler } = await import(entryPath);
-			req.locals.props = props;
-			await astroHandler(req, res, next);
+			return astroHandler(req, res, next);
 		}
+
+		return astroProxy(req, res, next);
 	};
 }

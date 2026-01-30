@@ -348,6 +348,7 @@ export default function ProjectTable({ lang = "es" }: ProjectTableProps) {
 								stroke-linejoin="round"
 								class="lucide lucide-chevron-down"
 							>
+								<title> </title>
 								<path d="m6 9 6 6 6-6" />
 							</svg>
 						</div>

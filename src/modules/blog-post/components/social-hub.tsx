@@ -10,7 +10,6 @@ import type { SocialCommentStoreDto } from "@modules/social/dtos/social-comment.
 import { socialCommentStoreDto } from "@modules/social/dtos/social-comment.store.dto";
 import type { SocialReactionStoreDto } from "@modules/social/dtos/social-reaction.store.dto";
 import type { SocialCommentSchema } from "@modules/social/schemas/social-comment.schema";
-import type { SocialReactionSchema } from "@modules/social/schemas/social-reaction.schema";
 import { useSignal } from "@preact/signals";
 import { useQuery } from "@vigilio/preact-fetching";
 import usePaginator from "@vigilio/preact-paginator";
@@ -249,10 +248,13 @@ function SocialCommentForm({
 
 			<div class="grid grid-cols-2 gap-4">
 				<div class="space-y-1">
-					<label class="text-xs text-muted-foreground ml-1">Name</label>
+					<label class="text-xs text-muted-foreground ml-1" htmlFor="name">
+						Name
+					</label>
 					<input
 						{...form.register("name")}
 						placeholder="John"
+						id="name"
 						class="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-2.5 text-sm focus:border-primary/50 focus:ring-1 focus:ring-primary/50 outline-none transition-all"
 					/>
 					{form.formState.errors.name && (
@@ -262,11 +264,14 @@ function SocialCommentForm({
 					)}
 				</div>
 				<div class="space-y-1">
-					<label class="text-xs text-muted-foreground ml-1">Surname</label>
+					<label class="text-xs text-muted-foreground ml-1" htmlFor="surname">
+						Surname
+					</label>
 					<input
 						{...form.register("surname")}
 						placeholder="Doe"
 						class="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-2.5 text-sm focus:border-primary/50 focus:ring-1 focus:ring-primary/50 outline-none transition-all"
+						id="surname"
 					/>
 					{form.formState.errors.surname && (
 						<p class="text-red-500 text-[10px] ml-1">
@@ -277,10 +282,13 @@ function SocialCommentForm({
 			</div>
 
 			<div class="space-y-1">
-				<label class="text-xs text-muted-foreground ml-1">Comment</label>
+				<label class="text-xs text-muted-foreground ml-1" htmlFor="content">
+					Comment
+				</label>
 				<textarea
 					{...form.register("content")}
 					rows={3}
+					id="content"
 					placeholder="Share your thoughts..."
 					class="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-3 text-sm focus:border-primary/50 focus:ring-1 focus:ring-primary/50 outline-none transition-all resize-none"
 				/>

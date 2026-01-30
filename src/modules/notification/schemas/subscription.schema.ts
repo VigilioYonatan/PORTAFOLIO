@@ -5,7 +5,7 @@ export const subscriptionSchema = z.object({
 	id: z.number().int().positive(),
 	tenant_id: z.number().int().positive(),
 	user_id: z.number().int().positive().nullable(), // Nullable for potential future visitor subscriptions
-	endpoint: z.string().url(),
+	endpoint: z.url(),
 	keys: z.object({
 		p256dh: z.string(),
 		auth: z.string(),

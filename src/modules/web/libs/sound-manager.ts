@@ -12,6 +12,7 @@ export function playNotificationSound() {
 	}
 
 	const audio = new Audio(SOUND_URL);
+	// biome-ignore lint/suspicious/noConsole: <explanation>
 	audio.play().catch((err) => console.error("Error playing sound:", err));
 }
 

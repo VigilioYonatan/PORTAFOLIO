@@ -1,10 +1,12 @@
 import { BlogPostService } from "@modules/blog-post/services/blog-post.service";
 import { MusicService } from "@modules/music/services/music.service";
+import { OpenSourceService } from "@modules/open-source/services/open-source.service";
+import { PortfolioConfigService } from "@modules/portfolio-config/services/portfolio-config.service";
 import { ProjectService } from "@modules/project/services/project.service";
 import { TechnologyService } from "@modules/technology/services/technology.service";
 import { WorkExperienceService } from "@modules/work-experience/services/work-experience.service";
 import { Test, type TestingModule } from "@nestjs/testing";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, type Mock, vi } from "vitest";
 import { WebService } from "../services/web.service";
 
 describe("WebService", () => {
@@ -34,6 +36,15 @@ describe("WebService", () => {
 		index: vi.fn(),
 	};
 
+	const mockOpenSourceService = {
+		index: vi.fn(),
+		showBySlug: vi.fn(),
+	};
+
+	const mockPortfolioConfigService = {
+		show: vi.fn(),
+	};
+
 	beforeEach(async () => {
 		const module: TestingModule = await Test.createTestingModule({
 			providers: [
@@ -43,6 +54,11 @@ describe("WebService", () => {
 				{ provide: ProjectService, useValue: mockProjectService },
 				{ provide: TechnologyService, useValue: mockTechnologyService },
 				{ provide: WorkExperienceService, useValue: mockWorkExperienceService },
+				{ provide: OpenSourceService, useValue: mockOpenSourceService },
+				{
+					provide: PortfolioConfigService,
+					useValue: mockPortfolioConfigService,
+				},
 			],
 		}).compile();
 
@@ -58,7 +74,7 @@ describe("WebService", () => {
 	describe("index", () => {
 		it("should return home props with music tracks", async () => {
 			const mockTracks = [{ id: 1, title: "Track 1" }];
-			(musicService.index as any).mockReturnValue(
+			(musicService.index as unknown as Mock).mockReturnValue(
 				Promise.resolve({
 					success: true,
 					count: 1,
@@ -68,7 +84,7 @@ describe("WebService", () => {
 				}),
 			);
 
-			(mockWorkExperienceService.index as any).mockReturnValue(
+			(mockWorkExperienceService.index as unknown as Mock).mockReturnValue(
 				Promise.resolve({
 					success: true,
 					count: 0,
@@ -76,7 +92,7 @@ describe("WebService", () => {
 				}),
 			);
 
-			(mockProjectService.index as any).mockReturnValue(
+			(mockProjectService.index as unknown as Mock).mockReturnValue(
 				Promise.resolve({
 					success: true,
 					count: 0,
@@ -84,23 +100,42 @@ describe("WebService", () => {
 				}),
 			);
 
-			(mockBlogPostService.index as any).mockReturnValue(
+			(mockBlogPostService.index as unknown as Mock).mockReturnValue(
 				Promise.resolve({
 					success: true,
 					count: 0,
 					results: [],
+				}),
+			);
+
+			(mockOpenSourceService.index as unknown as Mock).mockReturnValue(
+				Promise.resolve({
+					success: true,
+					count: 0,
+					results: [],
+				}),
+			);
+
+			(mockPortfolioConfigService.show as unknown as Mock).mockReturnValue(
+				Promise.resolve({
+					success: true,
+					config: { social_links: { github: "test" } },
 				}),
 			);
 
 			const result = await service.index("es");
 
 			expect(result).toEqual({
-				title: "Portafolio",
-				description: "Mi Portafolio Profesional",
+				title: "Vigilio Yonatan | Ingeniero de Software con IA",
+				description:
+					"Soy Yonatan Vigilio Lavado, ingeniero de software con más de 6 años de experiencia desarrollando soluciones escalables e inteligencia artificial desde 2020. Apasionado por la arquitectura limpia, el open source y la producción de Drum and Bass.",
 				musicTracks: mockTracks,
 				experiences: [],
 				latestProjects: [],
+				latestOpenSources: [],
+				socials: { github: "test" },
 				latestPosts: [],
+				liveVisitors: expect.any(Number),
 			});
 			expect(musicService.index).toHaveBeenCalledWith(1, {
 				limit: 10,
@@ -112,7 +147,7 @@ describe("WebService", () => {
 	describe("blog", () => {
 		it("should return blog props with paginated posts", async () => {
 			const mockPosts = [{ id: 1, title: "Post 1" }];
-			(blogPostService.index as any).mockReturnValue(
+			(blogPostService.index as unknown as Mock).mockReturnValue(
 				Promise.resolve({
 					success: true,
 					results: mockPosts,
@@ -125,7 +160,7 @@ describe("WebService", () => {
 			const result = await service.blog("es", 1, 9);
 
 			expect(result).toEqual({
-				title: "Blog | Pylot",
+				title: "Blog | Vigilio Yonatan",
 				description: "Lee nuestras últimas noticias y artículos.",
 				posts: mockPosts,
 				total: 1,
@@ -143,7 +178,7 @@ describe("WebService", () => {
 	describe("blogSlug", () => {
 		it("should return blog post props by slug", async () => {
 			const mockPost = { id: 1, title: "Post 1", extract: "Summary" };
-			(blogPostService.showBySlug as any).mockReturnValue(
+			(blogPostService.showBySlug as unknown as Mock).mockReturnValue(
 				Promise.resolve({
 					success: true,
 					post: mockPost,
@@ -156,15 +191,20 @@ describe("WebService", () => {
 				title: "Post 1",
 				description: "Summary",
 				post: mockPost,
+				translations: {},
 			});
-			expect(blogPostService.showBySlug).toHaveBeenCalledWith(1, "post-1");
+			expect(blogPostService.showBySlug).toHaveBeenCalledWith(
+				1,
+				"post-1",
+				"es",
+			);
 		});
 	});
 
 	describe("projects", () => {
 		it("should return projects props with paginated projects", async () => {
 			const mockProjects = [{ id: 1, title: "Project 1" }];
-			(mockProjectService.index as any).mockReturnValue(
+			(mockProjectService.index as unknown as Mock).mockReturnValue(
 				Promise.resolve({
 					success: true,
 					results: mockProjects,
@@ -175,7 +215,7 @@ describe("WebService", () => {
 			const result = await service.projects("es", 1, 9);
 
 			expect(result).toEqual({
-				title: "Proyectos | Pylot",
+				title: "Proyectos | Vigilio Yonatan",
 				description: "Explora mi trabajo y proyectos.",
 				projects: mockProjects,
 				total: 1,

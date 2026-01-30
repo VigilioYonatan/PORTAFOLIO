@@ -4,6 +4,7 @@ import { BlogPostSeeder } from "@modules/blog-post/seeders/blog-post.seeder";
 import { ConversationSeeder } from "@modules/chat/seeders/conversation.seeder";
 import { ContactSeeder } from "@modules/contact/seeders/contact.seeder";
 import { MusicTrackSeeder } from "@modules/music/seeders/music.seeder";
+import { OpenSourceSeeder } from "@modules/open-source/seeders/open-source.seeder";
 import { PortfolioConfigSeeder } from "@modules/portfolio-config/seeders/portfolio-config.seeder";
 import { ProjectSeeder } from "@modules/project/seeders/project.seeder";
 import { TechnologySeeder } from "@modules/technology/seeders/technology.seeder";
@@ -37,6 +38,7 @@ export class SeederService {
 		private readonly conversationSeeder: ConversationSeeder,
 		private readonly aiConfigSeeder: AiConfigSeeder,
 		private readonly projectSeeder: ProjectSeeder,
+		private readonly openSourceSeeder: OpenSourceSeeder,
 	) {}
 
 	async run() {
@@ -94,6 +96,9 @@ export class SeederService {
 
 		this.logger.log("   - Conversations...");
 		await this.conversationSeeder.run(tenantId);
+
+		this.logger.log("   - Open Source Projects...");
+		await this.openSourceSeeder.run(tenantId);
 
 		this.logger.log("✅ Seeding completado exitosamente.");
 		process.exit(0);

@@ -582,20 +582,43 @@ export class BlogPostSeeder {
 
 			const fullContent = fs.readFileSync(filePath, "utf-8");
 			// biome-ignore lint/suspicious/noConsole: Seeder debug
-			console.log(
-				`Found content for ${file}, length: ${fullContent.length}`,
-			);
-			const sections = fullContent.split("---");
+			console.log(`Found content for ${file}, length: ${fullContent.length}`);
 
 			const contentMap: Record<string, string> = {};
-			for (const section of sections) {
-				if (section.includes("### ESPAÑOL (ES)")) {
-					contentMap.es = section.replace("### ESPAÑOL (ES)", "").trim();
-				} else if (section.includes("### ENGLISH (EN)")) {
-					contentMap.en = section.replace("### ENGLISH (EN)", "").trim();
-				} else if (section.includes("### PORTUGUÊS (PT)")) {
-					contentMap.pt = section.replace("### PORTUGUÊS (PT)", "").trim();
-				}
+
+			// Robust parsing using headers instead of splitting by '---' (which might exist in content)
+			const enHeader = "### ENGLISH (EN)";
+			const esHeader = "### ESPAÑOL (ES)";
+			const ptHeader = "### PORTUGUÊS (PT)";
+
+			const enIndex = fullContent.indexOf(enHeader);
+			const esIndex = fullContent.indexOf(esHeader);
+			const ptIndex = fullContent.indexOf(ptHeader);
+
+			const indices = [
+				{ lang: "en", index: enIndex },
+				{ lang: "es", index: esIndex },
+				{ lang: "pt", index: ptIndex },
+			]
+				.filter((i) => i.index !== -1)
+				.sort((a, b) => a.index - b.index);
+
+			for (let i = 0; i < indices.length; i++) {
+				const current = indices[i];
+				const next = indices[i + 1];
+				const start =
+					current.index +
+					(current.lang === "en"
+						? enHeader.length
+						: current.lang === "es"
+							? esHeader.length
+							: ptHeader.length);
+				const end = next ? next.index : fullContent.length;
+
+				contentMap[current.lang] = fullContent
+					.slice(start, end)
+					.replace(/^-+|-+$/g, "") // remove leading/trailing --- if any
+					.trim();
 			}
 
 			// Seed ES (Main)

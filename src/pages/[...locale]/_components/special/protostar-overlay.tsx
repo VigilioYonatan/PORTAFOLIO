@@ -7,7 +7,7 @@ import {
 	isProtostarActive,
 } from "@stores/special-mode.store";
 import { Loader2Icon, XIcon } from "lucide-preact";
-import { useMemo, useEffect, useRef } from "preact/hooks";
+import { useEffect, useMemo, useRef } from "preact/hooks";
 
 export default function ProtostarOverlay() {
 	// Lazy Load State - refactored to Signal
@@ -39,7 +39,7 @@ export default function ProtostarOverlay() {
 			// Overlay Open: Pause Music, Play Fullscreen Video
 			if (videoRef.current) {
 				videoRef.current.muted = false;
-				videoRef.current.volume = 0.2;
+				videoRef.current.volume = 0.1;
 				videoRef.current.play().catch(() => {});
 			}
 			if (audioStore.state.isPlaying.value) {
@@ -144,7 +144,7 @@ export default function ProtostarOverlay() {
 				<div class="absolute inset-0 z-20 flex flex-col items-center justify-center text-green-500">
 					<Loader2Icon size={64} class="animate-spin" />
 					<p class="mt-4 font-mono text-sm tracking-[0.3em] animate-pulse">
-						LOADING PROTOSTAR MODULE...
+						LOADING INSOLATION MODULE...
 					</p>
 				</div>
 			)}

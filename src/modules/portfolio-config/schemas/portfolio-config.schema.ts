@@ -23,7 +23,7 @@ export const portfolioConfigSchema = z.object({
 			github: z.url().nullable(), // URL de GitHub
 			twitter: z.url().nullable(), // URL de Twitter/X
 			youtube: z.url().nullable(), // URL de YouTube
-			portfolio: z.url().nullable(), // URL de portfolio externo
+			whatsapp: z.string().nullable(), // URL o número de WhatsApp
 		})
 		.nullable(), // JSONB: SocialLinks
 	logo: z

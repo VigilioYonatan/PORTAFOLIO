@@ -4,6 +4,7 @@ import { BlogPostSeeder } from "@modules/blog-post/seeders/blog-post.seeder";
 import { ConversationSeeder } from "@modules/chat/seeders/conversation.seeder";
 import { ContactSeeder } from "@modules/contact/seeders/contact.seeder";
 import { MusicTrackSeeder } from "@modules/music/seeders/music.seeder";
+import { OpenSourceSeeder } from "@modules/open-source/seeders/open-source.seeder";
 import { PortfolioConfigSeeder } from "@modules/portfolio-config/seeders/portfolio-config.seeder";
 import { ProjectSeeder } from "@modules/project/seeders/project.seeder";
 import { TechnologySeeder } from "@modules/technology/seeders/technology.seeder";
@@ -33,6 +34,7 @@ import { SeederService } from "./seeder.service";
 		ConversationSeeder,
 		ProjectSeeder,
 		AiConfigSeeder,
+		OpenSourceSeeder,
 	],
 })
 export class SeederModule {}

@@ -73,6 +73,9 @@ export class WorkExperienceRepository {
 		if (is_visible !== undefined) {
 			baseWhere.push(eq(workExperienceEntity.is_visible, is_visible));
 		}
+		if (query.language !== undefined) {
+			baseWhere.push(eq(workExperienceEntity.language, query.language));
+		}
 
 		const baseWhereClause = and(...baseWhere);
 
@@ -93,15 +96,6 @@ export class WorkExperienceRepository {
 				offset,
 				where: baseWhereClause,
 				orderBy: orderBy,
-				columns: {
-					description: false,
-				},
-				extras: {
-					description:
-						sql<string>`substring(${workExperienceEntity.description} from 1 for 3000)`.as(
-							"description",
-						),
-				},
 			}),
 			this.db
 				.select({ count: sql<number>`count(*)` })
@@ -124,5 +118,19 @@ export class WorkExperienceRepository {
 			)
 			.returning();
 		return result;
+	}
+
+	async bulkStore(
+		tenant_id: number,
+		items: Omit<
+			WorkExperienceSchema,
+			"id" | "tenant_id" | "created_at" | "updated_at"
+		>[],
+	): Promise<WorkExperienceSchema[]> {
+		const results = await this.db
+			.insert(workExperienceEntity)
+			.values(items.map((item) => ({ ...item, tenant_id })))
+			.returning();
+		return results;
 	}
 }

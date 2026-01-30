@@ -3,6 +3,7 @@ import { testimonialSchema } from "../schemas/testimonial.schema";
 
 export const testimonialStoreDto = testimonialSchema.omit({
 	id: true,
+	tenant_id: true,
 	created_at: true,
 	updated_at: true,
 });

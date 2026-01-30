@@ -22,6 +22,13 @@
 			"when": 1769639224244,
 			"tag": "0002_striped_ink",
 			"breakpoints": true
+		},
+		{
+			"idx": 3,
+			"version": "7",
+			"when": 1769730376054,
+			"tag": "0003_yellow_lilandra",
+			"breakpoints": true
 		}
 	]
 }

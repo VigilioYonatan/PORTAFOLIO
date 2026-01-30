@@ -23,87 +23,73 @@ if (originalDatabaseUrl?.startsWith("pglite://")) {
  * Schema de validación para variables de entorno.
  * Usa z.coerce para conversión automática de tipos.
  */
-const environmentsSchema = z
-	.object({
-		// App
-		PUBLIC_NAME_APP: z.string().min(1),
-		NODE_ENV: z.enum(["PRODUCTION", "DEVELOPMENT", "STAGING", "TEST"]),
-		PUBLIC_URL: z.url(),
-		PUBLIC_PORT: z.coerce.number().int().positive(),
-		PORT: z.coerce.number().int().positive(),
+const environmentsSchema = z.object({
+	// App
+	PUBLIC_NAME_APP: z.string().min(1),
+	NODE_ENV: z.enum(["PRODUCTION", "DEVELOPMENT", "STAGING", "TEST"]),
+	PUBLIC_URL: z.url(),
+	PUBLIC_PORT: z.coerce.number().int().positive(),
+	PORT: z.coerce.number().int().positive(),
 
-		// Database
-		DB_HOST: z.string().min(1),
-		DB_PORT: z.coerce.number().int().min(1).max(65535),
-		DB_NAME: z.string().min(1),
-		DB_USER: z.string().min(1),
-		DB_PASS: z.string().min(1),
-		DATABASE_URL: z
-			.string()
-			.min(1)
-			.refine(
-				(url) => url.startsWith("postgres") || url.startsWith("pglite"),
-				"DATABASE_URL debe ser una URL de PostgreSQL o PGlite",
-			),
+	// Database
+	DB_HOST: z.string().min(1),
+	DB_PORT: z.coerce.number().int().min(1).max(65535),
+	DB_NAME: z.string().min(1),
+	DB_USER: z.string().min(1),
+	DB_PASS: z.string().min(1),
+	DATABASE_URL: z
+		.string()
+		.min(1)
+		.refine(
+			(url) => url.startsWith("postgres") || url.startsWith("pglite"),
+			"DATABASE_URL debe ser una URL de PostgreSQL o PGlite",
+		),
 
-		// Cache (Redis/Dragonfly)
-		REDIS_HOST: z.string().min(1),
-		REDIS_PORT: z.coerce.number().int().positive(),
-		REDIS_PASSWORD: z.string().optional(),
+	// Cache (Redis/Dragonfly)
+	REDIS_HOST: z.string().min(1),
+	REDIS_PORT: z.coerce.number().int().positive(),
+	REDIS_PASSWORD: z.string().optional(),
 
-		// JWT - SEGURIDAD CRÍTICA
-		JWT_KEY: z.string().min(32, "JWT_KEY debe tener al menos 32 caracteres"),
-		JWT_EXPIRES_IN: z.string(),
-		JWT_REFRESH_KEY: z.string().min(32).optional(),
-		JWT_REFRESH_EXPIRES_IN: z.string(),
+	// JWT - SEGURIDAD CRÍTICA
+	JWT_KEY: z.string().min(32, "JWT_KEY debe tener al menos 32 caracteres"),
+	JWT_EXPIRES_IN: z.string(),
+	JWT_REFRESH_KEY: z.string().min(32).optional(),
+	JWT_REFRESH_EXPIRES_IN: z.string(),
 
-		// HMAC
-		PUBLIC_HMAC_KEY: z
-			.string()
-			.min(16, "HMAC_KEY debe tener al menos 16 caracteres"),
+	// HMAC
+	PUBLIC_HMAC_KEY: z
+		.string()
+		.min(16, "HMAC_KEY debe tener al menos 16 caracteres"),
 
-		// Storage (MinIO/RustFS)
-		STORAGE_PROVIDER: z.enum(["LOCAL", "S3", "CLOUDINARY"]),
-		RUSTFS_ENDPOINT: z.string().min(1),
-		RUSTFS_PORT: z.coerce.number().int().positive(),
-		RUSTFS_ROOT_USER: z.string().min(1),
-		RUSTFS_ROOT_PASSWORD: z.string().min(8),
-		RUSTFS_BUCKET_NAME: z.string().min(1),
-		RUSTFS_REGION: z.string(),
-		RUSTFS_INTERNAL_ENDPOINT: z.url().optional(),
-		RUSTFS_PUBLIC_ENDPOINT: z.url().optional(),
+	// Storage (MinIO/RustFS)
+	STORAGE_PROVIDER: z.enum(["LOCAL", "S3", "CLOUDINARY"]),
+	RUSTFS_ENDPOINT: z.string().min(1),
+	RUSTFS_PORT: z.coerce.number().int().positive(),
+	RUSTFS_ROOT_USER: z.string().min(1),
+	RUSTFS_ROOT_PASSWORD: z.string().min(8),
+	RUSTFS_BUCKET_NAME: z.string().min(1),
+	RUSTFS_REGION: z.string(),
+	RUSTFS_INTERNAL_ENDPOINT: z.url().optional(),
+	RUSTFS_PUBLIC_ENDPOINT: z.url().optional(),
 
-		// Mail
-		MAIL_HOST: z.string().min(1),
-		MAIL_PORT: z.coerce.number().int().positive(),
-		MAIL_USER: z.string().min(1),
-		MAIL_PASS: z.string().min(1),
-		MAIL_FROM: z.email().optional(),
-		MAIL_FROM_NAME: z.string().optional(),
+	// Mail
+	MAIL_HOST: z.string().min(1),
+	MAIL_PORT: z.coerce.number().int().positive(),
+	MAIL_USER: z.string().min(1),
+	MAIL_PASS: z.string().min(1),
+	MAIL_FROM: z.email().optional(),
+	MAIL_FROM_NAME: z.string().optional(),
 
-		// Security extras
-		CORS_ORIGINS: z.string(),
-		THROTTLE_TTL: z.coerce.number().int().positive(),
-		THROTTLE_LIMIT: z.coerce.number().int().positive(),
-		LOG_LEVEL: z.enum(["DEBUG", "INFO", "WARN", "ERROR"]),
+	// Security extras
+	CORS_ORIGINS: z.string(),
+	THROTTLE_TTL: z.coerce.number().int().positive(),
+	THROTTLE_LIMIT: z.coerce.number().int().positive(),
+	LOG_LEVEL: z.enum(["DEBUG", "INFO", "WARN", "ERROR"]),
 
-		// AI API Keys
-		OPENROUTER_API_KEY: z.string().min(1),
-		OPENAI_API_KEY: z.string().optional(), // Optional - only needed if using OpenAI embeddings
-	})
-	.refine(
-		(data) => {
-			// En producción, passwords de Redis y refresh key son obligatorios
-			if (data.NODE_ENV === "PRODUCTION") {
-				return !!data.REDIS_PASSWORD && !!data.JWT_REFRESH_KEY;
-			}
-			return true;
-		},
-		{
-			message:
-				"REDIS_PASSWORD y JWT_REFRESH_KEY son obligatorios en producción",
-		},
-	);
+	// AI API Keys
+	OPENROUTER_API_KEY: z.string().min(1),
+	OPENAI_API_KEY: z.string().optional(), // Optional - only needed if using OpenAI embeddings
+});
 
 // ============================================================================
 // TIPOS INFERIDOS DEL SCHEMA

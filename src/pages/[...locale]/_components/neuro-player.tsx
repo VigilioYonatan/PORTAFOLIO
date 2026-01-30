@@ -82,6 +82,9 @@ export default function NeuroPlayer(props: NeuroPlayerProps) {
 
 				<div class="relative w-full aspect-video rounded-xl overflow-hidden bg-black">
 					<video
+						ref={(el) => {
+							if (el) el.volume = 0.1;
+						}}
 						src="/video/insolation.mp4"
 						class="w-full h-full object-cover"
 						autoPlay
@@ -147,7 +150,7 @@ export default function NeuroPlayer(props: NeuroPlayerProps) {
 						}}
 					/>
 					{/* Darken for contrast */}
-					<div class="absolute inset-0 bg-black/50 backdrop-blur-[2px]" />
+					<div class="absolute inset-0 bg-black/50" />
 					<div class="absolute inset-0 bg-[url('/grid.svg')] opacity-10 mix-blend-overlay" />
 				</div>
 
@@ -393,11 +396,11 @@ export default function NeuroPlayer(props: NeuroPlayerProps) {
 												min="0"
 												max="100"
 												value={volume.value}
-												onInput={(e) => setVolume(Number(e.currentTarget.value))}
+												onInput={(e) =>
+													setVolume(Number(e.currentTarget.value))
+												}
 												class="absolute h-24 w-10 -rotate-90 cursor-pointer opacity-0 z-10"
 												style={{
-													// biome-ignore lint/suspicious/noExplicitAny: custom css variable for slider thumb size
-													"--thumb-size": "40px",
 													width: "96px", // matching 24 * 4
 													height: "40px",
 												}}
@@ -530,7 +533,10 @@ export default function NeuroPlayer(props: NeuroPlayerProps) {
 function ReactiveGlow({
 	bassIntensity,
 	midIntensity,
-}: { bassIntensity: any; midIntensity: any }) {
+}: {
+	bassIntensity: { value: number };
+	midIntensity: { value: number };
+}) {
 	return (
 		<div
 			class="absolute inset-0 rounded-2xl pointer-events-none -z-10"

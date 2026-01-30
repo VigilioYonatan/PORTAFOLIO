@@ -66,20 +66,31 @@ export const blogPostEntity = pgTable(
 	],
 );
 
-export const blogPostEntityRelations = relations(blogPostEntity, ({ one }) => ({
-	tenant: one(tenantEntity, {
-		fields: [blogPostEntity.tenant_id],
-		references: [tenantEntity.id],
+export const blogPostEntityRelations = relations(
+	blogPostEntity,
+	({ one, many }) => ({
+		tenant: one(tenantEntity, {
+			fields: [blogPostEntity.tenant_id],
+			references: [tenantEntity.id],
+		}),
+		category: one(blogCategoryEntity, {
+			fields: [blogPostEntity.category_id],
+			references: [blogCategoryEntity.id],
+		}),
+		author: one(userEntity, {
+			fields: [blogPostEntity.author_id],
+			references: [userEntity.id],
+		}),
+		parent: one(blogPostEntity, {
+			fields: [blogPostEntity.parent_id],
+			references: [blogPostEntity.id],
+			relationName: "translations",
+		}),
+		translations: many(blogPostEntity, {
+			relationName: "translations",
+		}),
 	}),
-	category: one(blogCategoryEntity, {
-		fields: [blogPostEntity.category_id],
-		references: [blogCategoryEntity.id],
-	}),
-	author: one(userEntity, {
-		fields: [blogPostEntity.author_id],
-		references: [userEntity.id],
-	}),
-}));
+);
 
 export type BlogPostEntity = Entity<
 	BlogPostSchema,

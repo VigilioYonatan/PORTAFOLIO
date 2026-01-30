@@ -278,7 +278,7 @@ export default function FloatingActionChat() {
 				isTyping.value = false;
 				eventSource.close();
 			};
-		} catch (err) {
+		} catch (_err) {
 			messages.value = [
 				...messages.value,
 				{
@@ -330,32 +330,34 @@ export default function FloatingActionChat() {
 						</div>
 					</div>
 					{/* Mode Toggle Buttons */}
-					<div class="flex gap-1">
-						<button
-							type="button"
-							onClick={() => handleModeSwitch("AI")}
-							class={cn(
-								"px-2 py-1 text-[8px] font-bold tracking-widest rounded-sm transition-all",
-								chatMode.value === "AI"
-									? "bg-primary text-black"
-									: "bg-zinc-800 text-white/50 hover:text-white",
-							)}
-						>
-							AI
-						</button>
-						<button
-							type="button"
-							onClick={() => handleModeSwitch("LIVE")}
-							class={cn(
-								"px-2 py-1 text-[8px] font-bold tracking-widest rounded-sm transition-all",
-								chatMode.value === "LIVE"
-									? "bg-green-500 text-black"
-									: "bg-zinc-800 text-white/50 hover:text-white",
-							)}
-						>
-							SENIOR
-						</button>
-					</div>
+					{modeSelected.value && (
+						<div class="flex gap-1">
+							<button
+								type="button"
+								onClick={() => handleModeSwitch("AI")}
+								class={cn(
+									"px-2 py-1 text-[8px] font-bold tracking-widest rounded-sm transition-all",
+									chatMode.value === "AI"
+										? "bg-primary text-black"
+										: "bg-zinc-800 text-white/50 hover:text-white",
+								)}
+							>
+								AI
+							</button>
+							<button
+								type="button"
+								onClick={() => handleModeSwitch("LIVE")}
+								class={cn(
+									"px-2 py-1 text-[8px] font-bold tracking-widest rounded-sm transition-all",
+									chatMode.value === "LIVE"
+										? "bg-green-500 text-black"
+										: "bg-zinc-800 text-white/50 hover:text-white",
+								)}
+							>
+								SENIOR
+							</button>
+						</div>
+					)}
 				</div>
 
 				{/* Terminal Messages */}
@@ -391,7 +393,7 @@ export default function FloatingActionChat() {
 									<span class="relative z-10 flex items-center justify-center gap-2">
 										<BotIcon size={14} /> Hablar con IA
 									</span>
-									<div class="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500" />
+									<div class="absolute inset-0 bg-white/20 -translate-x-full group-hover:translate-x-full transition-transform duration-500" />
 								</button>
 								<button
 									type="button"
@@ -411,7 +413,7 @@ export default function FloatingActionChat() {
 									<span class="relative z-10 flex items-center justify-center gap-2">
 										<UserIcon size={14} /> Yonatan Vigilio
 									</span>
-									<div class="absolute inset-0 bg-white/5 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500" />
+									<div class="absolute inset-0 bg-white/5 -translate-x-full group-hover:translate-x-full transition-transform duration-500" />
 								</button>
 							</div>
 						</div>
@@ -550,20 +552,23 @@ export default function FloatingActionChat() {
 				</div>
 
 				{/* FAB Button */}
-				<button
-					type="button"
-					aria-label={isChatOpen.value ? "Close Interface" : "Open AI Nexus"}
-					onClick={() => (isChatOpen.value = !isChatOpen.value)}
-					class={cn(
-						"fixed bottom-6 right-6 z-50 p-4 rounded-full shadow-[0_0_30px_rgba(6,182,212,0.4)] transition-all hover:scale-110 active:scale-95 group",
-						isChatOpen.value
-							? "bg-red-500 hover:bg-red-600 text-white"
-							: "bg-black/80 border border-primary/50 text-primary hover:bg-primary hover:text-black backdrop-blur-md",
-					)}
-				>
-					{isChatOpen.value ? <XIcon size={24} /> : <BotIcon size={24} />}
-				</button>
 			</div>
+			{/* FAB Button */}
+			<button
+				type="button"
+				aria-label={isChatOpen.value ? "Close Interface" : "Open AI Nexus"}
+				onClick={() => {
+					isChatOpen.value = !isChatOpen.value;
+				}}
+				class={cn(
+					"fixed bottom-6 right-6 z-[60] p-4 rounded-full shadow-[0_0_30px_rgba(6,182,212,0.4)] transition-all hover:scale-110 active:scale-95 group md:hidden",
+					isChatOpen.value
+						? "bg-red-500 hover:bg-red-600 text-white"
+						: "bg-black/80 border border-primary/50 text-primary hover:bg-primary hover:text-black backdrop-blur-md",
+				)}
+			>
+				{isChatOpen.value ? <XIcon size={24} /> : <BotIcon size={24} />}
+			</button>
 		</>
 	);
 }

@@ -12,6 +12,7 @@ interface ModalProps {
 	contentClassName?: string; // For the modal content
 	closeButtonClassName?: string;
 	showCloseButton?: boolean;
+	isCloseButtonBackground?: boolean;
 }
 
 export default function Modal({
@@ -22,6 +23,7 @@ export default function Modal({
 	contentClassName,
 	closeButtonClassName,
 	showCloseButton = true,
+	isCloseButtonBackground = false,
 }: ModalProps) {
 	const ref = useRef<HTMLDivElement>(null);
 
@@ -46,7 +48,8 @@ export default function Modal({
 				className,
 			)}
 			onClick={(e) => {
-				if (e.target === e.currentTarget) onClose();
+				if (e.target === e.currentTarget)
+					isCloseButtonBackground ? onClose() : null;
 			}}
 		>
 			<div

@@ -31,8 +31,5 @@ export const subscriptionEntity = pgTable(
 			.defaultNow()
 			.notNull(),
 	},
-	(t) => ({
-		// Ensure one subscription per endpoint/user combo if needed, or just endpoint
-		unq: unique().on(t.endpoint), // Endpoints are unique
-	}),
+	(t) => [unique().on(t.endpoint)],
 );

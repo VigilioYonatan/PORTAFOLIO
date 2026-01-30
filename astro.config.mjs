@@ -12,6 +12,7 @@ const __dirname = path.dirname(__filename);
 
 export default defineConfig({
 	output: "server",
+
 	integrations: [preact({ compat: true })],
 	i18n: {
 		defaultLocale: "es",

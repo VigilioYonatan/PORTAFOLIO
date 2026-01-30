@@ -24,9 +24,9 @@ export default function NatureOverlay() {
 	}, [isActive]);
 
 	const videos = [
-		{ src: "/video/wolf.mp4", label: "CANIS_LUPUS" },
-		{ src: "/video/bird.mp4", label: "AVES_CLASS" },
-		{ src: "/video/ballena.mp4", label: "CETACEA_GIGAS" },
+		{ src: "/video/wolf.mp4", label: "OUT THERE" },
+		{ src: "/video/bird.mp4", label: "NEMESIS" },
+		{ src: "/video/ballena.mp4", label: "SOMEWHERE ELSE" },
 	];
 
 	// Track which video is concurrently focused (Mobile tap logic)
@@ -43,7 +43,7 @@ export default function NatureOverlay() {
 		>
 			{/* Header */}
 			<div class="absolute top-8 left-8 text-white font-black tracking-[0.5em] text-2xl uppercase mix-blend-screen z-50">
-				NATURE_PROTOCOL
+				MUZZ_PROTOCOL
 			</div>
 
 			{/* Video Grid - Split Screen (3 Columns) */}
@@ -113,7 +113,7 @@ function VideoColumn({
 
 		if (isFocused) {
 			videoRef.current.muted = false;
-			videoRef.current.volume = 0.2;
+			videoRef.current.volume = 0.1;
 			videoRef.current.play().catch(() => {});
 		} else {
 			videoRef.current.muted = true;

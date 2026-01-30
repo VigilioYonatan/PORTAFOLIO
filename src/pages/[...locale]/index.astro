@@ -5,40 +5,47 @@ import TechOrbit from "./_components/tech-orbit";
 import WaveTimeline from "./_components/wave-timeline";
 import { ArrowRight, Download } from "lucide-preact";
 import { sizeIcon } from "@infrastructure/utils/client";
-import type { WorkExperienceSchema } from "@modules/work-experience/schemas/work-experience.schema";
 import SectionTitle from "@components/extras/section-title.astro";
 import SystemIntro from "./_components/system-intro";
 import Button from "@components/extras/button";
 import { getLangFromUrl, useTranslations } from "../../i18n";
 import type { WebIndexResponseDto } from "@modules/web/dtos/web.response.dto";
 import RecentProjects from "./_components/home/recent-projects";
+import RecentOpenSources from "./_components/home/recent-open-sources";
 import RecentBlogs from "./_components/home/recent-blogs";
+import LiveVisitors from "./_components/live-visitors";
 
 const lang = getLangFromUrl(Astro.url);
 const t = useTranslations(lang);
 
-const { experiences, latestProjects, latestPosts } = Astro.locals
-  .props as WebIndexResponseDto;
+const {
+  experiences,
+  latestProjects,
+  latestPosts,
+  latestOpenSources,
+  socials,
+  liveVisitors,
+} = Astro.locals.props as WebIndexResponseDto;
 ---
 
 <WebLayout>
-  <SystemIntro lang={lang} client:load />
+  <SystemIntro lang={lang} client:load transition:persist />
+  <LiveVisitors initialCount={liveVisitors} client:load />
+
   <main class="relative flex flex-col items-center pb-24">
     {/* Hero Section with Tech Orbit Background */}
     <section
       class="relative w-full min-h-[90vh] flex items-center justify-center py-16 overflow-hidden"
     >
-      {/* Background Tech Orbit - Kept as is */}
+      {/* Background Tech Orbit */}
       <div
         class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-40"
       >
         <TechOrbit client:load />
       </div>
 
-      <div
-        class="container mx-auto px-4 z-10 flex flex-col items-center gap-12"
-      >
-        <HeroTerminal lang={lang} client:load />
+      <div class="container mx-auto px-4 z-10 flex flex-col items-center gap-12">
+        <HeroTerminal lang={lang} socials={socials} client:load />
 
         <div
           class="flex flex-wrap gap-6 justify-center animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-500"
@@ -68,22 +75,53 @@ const { experiences, latestProjects, latestPosts } = Astro.locals
             <span class="tracking-[0.2em]">{t("home.cv")}</span>
           </Button>
         </div>
+
+        {/* Scroll Down Button */}
+        <div class="animate-bounce mt-8">
+          <button
+            type="button"
+            aria-label="Scroll Down"
+            class="p-2 rounded-full border border-white/10 text-white/40 hover:text-primary transition-colors active:scale-95"
+            onclick="document.getElementById('experience-section').scrollIntoView({ behavior: 'smooth' })"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="m6 9 6 6 6-6"></path>
+            </svg>
+          </button>
+        </div>
       </div>
     </section>
+
     {/* Career Timeline Section */}
     <section
-      class="w-full relative z-10 border-y border-white/5 bg-zinc-950/20 py-24"
+      id="experience-section"
+      class="w-full relative z-10 border-y border-white/5 bg-zinc-950/20 py-16"
     >
       <div class="container mx-auto px-4">
         <SectionTitle title={t("home.experience")} className="mb-12" />
         <WaveTimeline experiences={experiences} lang={lang} client:load />
       </div>
     </section>
+
     {/* Recent Projects Section */}
     <section class="w-full container mx-auto px-4 py-24">
       <SectionTitle title={t("projects.title")} className="mb-12" />
       <div class="">
-         <RecentProjects latestProjects={latestProjects} lang={lang} client:visible />
+        <RecentProjects
+          latestProjects={latestProjects}
+          lang={lang}
+          client:visible
+        />
       </div>
       <div class="flex justify-center mt-12">
         <Button
@@ -92,19 +130,40 @@ const { experiences, latestProjects, latestPosts } = Astro.locals
           as="a"
           className="gap-2 text-muted-foreground hover:text-primary transition-all hover:gap-3"
         >
-          {t("common.show")} {t("header.projects")}
+          {`${t("common.show")} ${t("header.projects")}`}
           <ArrowRight size={16} />
         </Button>
       </div>
     </section>
 
-   
+    {/* Open Source Section */}
+    <section class="w-full container mx-auto px-4 py-24 border-t border-white/5">
+      <SectionTitle title={t("opensource.title")} className="mb-12" />
+      <div class="">
+        <RecentOpenSources
+          latestOpenSources={latestOpenSources}
+          lang={lang}
+          client:visible
+        />
+      </div>
+      <div class="flex justify-center mt-12">
+        <Button
+          variant="ghost"
+          href={`/${lang}/open-source`}
+          as="a"
+          className="gap-2 text-muted-foreground hover:text-primary transition-all hover:gap-3 group/os border-beam"
+        >
+          {`${t("common.show")} ${t("header.opensource")}`}
+          <ArrowRight size={16} />
+        </Button>
+      </div>
+    </section>
 
     {/* Latest Blogs Section */}
     <section class="w-full container mx-auto px-4 py-24 border-t border-white/5">
       <SectionTitle title={t("blog.title")} className="mb-12" />
       <div class="">
-          <RecentBlogs latestPosts={latestPosts} lang={lang} client:visible />
+        <RecentBlogs latestPosts={latestPosts} lang={lang} client:visible />
       </div>
       <div class="flex justify-center mt-12">
         <Button
@@ -113,7 +172,7 @@ const { experiences, latestProjects, latestPosts } = Astro.locals
           as="a"
           className="gap-2 text-muted-foreground hover:text-primary transition-all hover:gap-3"
         >
-          {t("common.show")} {t("header.blog")}
+          {`${t("common.show")} ${t("header.blog")}`}
           <ArrowRight size={16} />
         </Button>
       </div>
