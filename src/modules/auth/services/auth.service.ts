@@ -20,7 +20,6 @@ import { ConfigService } from "@nestjs/config";
 import { EventEmitter2 } from "@nestjs/event-emitter";
 import { JwtService } from "@nestjs/jwt";
 import * as bcrypt from "bcrypt";
-import { NobleCryptoPlugin, ScureBase32Plugin, TOTP } from "otplib";
 import type { Profile } from "passport-google-oauth20";
 import { toDataURL } from "qrcode";
 import type {
@@ -450,6 +449,8 @@ export class AuthService {
 		tenant_id: number,
 		user_id: number,
 	): Promise<AuthMfaSetupResponseDto> {
+		const { NobleCryptoPlugin, ScureBase32Plugin, TOTP } = await import("otplib");
+
 		this.logger.log({ user_id, tenant_id }, "Setting up MFA");
 
 		const user = await this.userService.showByIdForAuth(tenant_id, user_id);
@@ -499,6 +500,8 @@ export class AuthService {
 		user_id: number,
 		body: AuthMfaVerifyDto,
 	): Promise<AuthMfaVerifyResponseDto> {
+		const { NobleCryptoPlugin, ScureBase32Plugin, TOTP } = await import("otplib");
+
 		this.logger.log({ tenant_id, user_id }, "Verifying MFA setup");
 		const user = await this.userService.showByIdForAuth(tenant_id, user_id);
 
@@ -543,6 +546,7 @@ export class AuthService {
 		user_id: number,
 		body: AuthMfaDisableDto,
 	): Promise<AuthMfaDisableResponseDto> {
+		const { NobleCryptoPlugin, ScureBase32Plugin, TOTP } = await import("otplib");
 		this.logger.log({ tenant_id, user_id }, "Deactivating MFA");
 		const user = await this.userService.showByIdForAuth(tenant_id, user_id);
 
