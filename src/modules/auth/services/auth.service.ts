@@ -607,6 +607,7 @@ export class AuthService {
 
 	async verifyMfa(dto: AuthMfaLoginDto): Promise<AuthLoginResponseApi> {
 		this.logger.log("Processing MFA login verification");
+		const { NobleCryptoPlugin, ScureBase32Plugin, TOTP } = await import("otplib");
 
 		// Verify temp token to get user info
 		let payload: {
