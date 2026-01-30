@@ -23,8 +23,12 @@ export function astroRender(props: Record<string, unknown> = {}) {
 		).toString("base64");
 
 		if (isProduction) {
-			const entryPath = path.join(process.cwd(), "dist/server/entry.mjs");
-			const { handler: astroHandler } = await import(entryPath);
+			// const entryPath = path.join(process.cwd(), "dist/server/entry.mjs");
+			// const { handler: astroHandler } = await import(entryPath);
+			const entryPath = path.resolve(process.cwd(), "dist", "server", "entry.mjs");
+			// IMPORTANTE: En Vercel, a veces el import dinámico necesita el prefijo file:// 
+			// para rutas absolutas en entornos ESM/CJS híbridos
+			const { handler: astroHandler } = await import(`file://${entryPath}`);
 			return astroHandler(req, res, next);
 		}
 
