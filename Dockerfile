@@ -19,6 +19,8 @@ FROM base AS build
 WORKDIR /usr/src/app
 COPY . .
 COPY --from=dependencies /usr/src/app/node_modules ./node_modules
+ARG PORT=4000
+ENV PORT=$PORT
 # Cacheamos también la instalación final de producción
 RUN pnpm run build:serve && \
     pnpm run build:client && \
