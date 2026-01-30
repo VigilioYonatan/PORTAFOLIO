@@ -58,8 +58,7 @@ async function bootstrap() {
 	const sessionConfig = app.get(SessionConfigService);
 	sessionConfig.setup(app);
 	app.use(express.static(join(process.cwd(), "dist/client")));
-	app.use(express.static(join(process.cwd(), "public")));
-
+	app.use(express.static(join(__dirname, "..", "public")));
 	// Start on port
 
 	const server = await app.listen(port);

@@ -28,7 +28,7 @@ export class LocalStorageProvider implements StorageProvider {
 
 	constructor(private readonly configService: ConfigService<Environments>) {
 		// Resolve public directory relative to project root
-		this.publicDir = path.resolve(process.cwd(), "public");
+		this.publicDir = path.join(__dirname, '..', 'public')
 		this.publicUrl = this.configService.getOrThrow("PUBLIC_URL");
 		this.ensurePublicDir();
 	}
