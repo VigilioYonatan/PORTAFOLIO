@@ -6,11 +6,11 @@
       "use": "@vercel/node"
     }
   ],
-  "functions": {
-    "dist/main.js": {
-      "includeFiles": "dist/server/**"
-    }
-  },
+ "functions": {
+  "dist/main.js": {
+    "includeFiles": "dist/**"
+  }
+},
   "routes": [
     {
       "src": "/(.*)",
