@@ -1,4 +1,3 @@
-import { marked } from "marked";
 import { createHighlighter } from "shiki";
 
 // Singleton highlighter to avoid reloading themes on every request
@@ -36,6 +35,7 @@ async function getHighlighter() {
  * @returns HTML string
  */
 export async function renderMarkdown(content: string): Promise<string> {
+	const { marked } = await import('marked');
 	const hl = await getHighlighter();
 
 	// Create a new renderer to avoid type issues with object literal
