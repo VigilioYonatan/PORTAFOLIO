@@ -22,6 +22,7 @@ export class SessionConfigService {
 	) {}
 
 	setup(app: INestApplication) {
+		app.getHttpAdapter().getInstance().set('trust proxy', 1);
 		const isProd = this.configService.getOrThrow("NODE_ENV") === "PRODUCTION";
 
 		// if (isProd) {
