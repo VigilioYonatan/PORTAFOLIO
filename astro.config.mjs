@@ -6,7 +6,7 @@ import tailwindcss from "@tailwindcss/vite";
 import { defineConfig, envField } from "astro/config";
 import { loadEnv } from "vite";
 
-const { PUBLIC_PORT, PORT } = loadEnv(process.env.NODE_ENV, process.cwd(), "");
+const { PUBLIC_PORT } = loadEnv(process.env.PUBLIC_PORT, process.cwd(), "");
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -23,32 +23,36 @@ export default defineConfig({
 	},
 	env: {
 		schema: {
-			PUBLIC_NAME_APP: envField.string({
-				context: "client",
+			NAME_APP: envField.string({
+				context: "server",
 				access: "public",
 			}),
-			PUBLIC_ENV: envField.string({
-				context: "client",
+			NODE_ENV: envField.string({
+				context: "server",
 				access: "public",
 			}),
 			PUBLIC_URL: envField.string({
 				context: "client",
 				access: "public",
 			}),
-			PUBLIC_PORT: envField.string({
-				context: "client",
+			PORT: envField.string({
+				context: "server",
 				access: "public",
 			}),
-			PUBLIC_HMAC_KEY: envField.string({
-				context: "client",
-				access: "public",
+			HMAC_KEY: envField.string({
+				context: "server",
+				access: "secret",
 			}),
-			PUBLIC_VAPID_EMAIL: envField.string({
-				context: "client",
+			VAPID_EMAIL: envField.string({
+				context: "server",
 				access: "public",
 			}),
 			PUBLIC_VAPID_KEY: envField.string({
 				context: "client",
+				access: "public",
+			}),
+			STORAGE_URL: envField.string({
+				context: "server",
 				access: "public",
 			}),
 		},
@@ -58,7 +62,7 @@ export default defineConfig({
 		server: {
 			proxy: {
 				"/api": {
-					target: `http://localhost:${PORT || 3004}`,
+					target: `http://localhost:${PUBLIC_PORT || 3004}`,
 					changeOrigin: true,
 				},
 			},
@@ -140,7 +144,7 @@ export default defineConfig({
 		pool: "forks",
 	},
 	server: {
-		port: Number(process.env.PORT || PUBLIC_PORT),
+		port: Number(PUBLIC_PORT || 3004),
 		watch: {
 			ignored: ["**/.sessions/**"], // Ignorar carpeta de sesiones para evitar hot reload infinito
 		},

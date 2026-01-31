@@ -26,7 +26,7 @@ export class SessionConfigService {
 		if (isProd) {
 			app.getHttpAdapter().getInstance().set("trust proxy", 1);
 		}
-		
+
 		// if (isProd) {
 		// 	// Producción: Redis
 		// 	const redisInstance = getRedisClient(this.configService);
@@ -44,7 +44,7 @@ export class SessionConfigService {
 			createTableIfMissing: true, // Crea la tabla automáticamente si no existe :)
 			pruneSessionInterval: 60 * 60, // Limpieza cada 1h
 		});
-		
+
 		this.logger.log(
 			"\x1b[33m⚡ Sesiones guardadas en PostgreSQL (Dev Persistent)\x1b[0m",
 		);

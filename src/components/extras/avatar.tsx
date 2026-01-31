@@ -47,7 +47,13 @@ function Avatar({ user, size = "md", status, className }: AvatarProps) {
 			>
 				{user?.avatar ? (
 					<img
-						src={printFileWithDimension(user.avatar, DIMENSION_IMAGE.xs)[0]}
+						src={
+							printFileWithDimension(
+								user.avatar,
+								DIMENSION_IMAGE.xs,
+								window.env.STORAGE_URL,
+							)[0]
+						}
 						alt={user.username || ""}
 						title={user.username || ""}
 						width={DIMENSION_IMAGE.xs}

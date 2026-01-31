@@ -32,7 +32,7 @@ export const technologyEntity = pgTable(
 		id: serial().primaryKey(),
 		name: varchar({ length: 100 }).notNull(),
 		category: technologyCategoryEnum().notNull(),
-		icon: jsonb().$type<FilesSchema[]>().notNull().default([]),
+		icon: jsonb().$type<FilesSchema[]>().default([]),
 		tenant_id: integer()
 			.notNull()
 			.references(() => tenantEntity.id),

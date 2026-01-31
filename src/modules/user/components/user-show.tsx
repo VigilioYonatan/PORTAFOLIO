@@ -14,8 +14,12 @@ interface UserShowProps {
 
 export function UserShow({ user }: UserShowProps) {
 	const roleInfo = getRoleBadgeInfo(user.role_id);
-	const avatarUrl = user.avatar?.[0]
-		? printFileWithDimension(user.avatar, DIMENSION_IMAGE.md)[0]
+	const avatarUrl = user.avatar
+		? printFileWithDimension(
+				user.avatar,
+				DIMENSION_IMAGE.md,
+				window.env.STORAGE_URL,
+			)[0]
 		: null;
 
 	return (

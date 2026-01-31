@@ -31,7 +31,13 @@ export default function TechStackIcons({
 				>
 					{tech.icon?.[0] ? (
 						<img
-							src={printFileWithDimension(tech.icon, DIMENSION_IMAGE.xs)[0]}
+							src={
+								printFileWithDimension(
+									tech.icon,
+									DIMENSION_IMAGE.xs,
+									window.env.STORAGE_URL,
+								)[0]
+							}
 							alt={tech.name}
 							title={tech.name}
 							width={DIMENSION_IMAGE.xs}

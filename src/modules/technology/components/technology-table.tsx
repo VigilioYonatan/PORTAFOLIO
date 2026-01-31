@@ -42,7 +42,13 @@ export default function TechnologyTable({ lang = "es" }: TechnologyTableProps) {
 					<div class="w-10 h-10 rounded-lg bg-zinc-900 border border-white/5 overflow-hidden flex items-center justify-center p-1.5">
 						{row.icon && row.icon.length > 0 ? (
 							<img
-								src={printFileWithDimension(row.icon, DIMENSION_IMAGE.xs)[0]}
+								src={
+									printFileWithDimension(
+										row.icon,
+										DIMENSION_IMAGE.xs,
+										window.env.STORAGE_URL,
+									)[0]
+								}
 								alt={row.name}
 								title={row.name}
 								width={DIMENSION_IMAGE.xs}

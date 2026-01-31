@@ -12,13 +12,16 @@ import {
   Sparkles,
   Terminal,
 } from "lucide-preact";
-
+import { printFileWithDimension } from "@infrastructure/utils/hybrid/file.utils";
+import { DIMENSION_IMAGE } from "@modules/uploads/const/upload.const";
+import { Image } from "astro:assets";
+import * as env from "astro:env/server";
 const lang = getLangFromUrl(Astro.url);
 const t = useTranslations(lang);
 
 const { title, description, technologies } = Astro.locals
   .props as WebAboutResponseDto;
-
+console.log({technologies});
 const stats = [
   { value: "6+", label: t("home.experience") || "Years Exp." },
   { value: "50+", label: t("header.projects") || "Projects" },
@@ -73,7 +76,6 @@ const services = [
         >
         </div>
       </div>
-
       <h1
         class="text-4xl md:text-6xl font-black tracking-tight text-white mb-2"
       >
@@ -204,10 +206,13 @@ const services = [
                           <div class="absolute inset-0 bg-primary/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-full" />
                           
                           <div class="relative z-10 w-12 h-12 flex items-center justify-center rounded-lg bg-zinc-900 border border-white/5 group-hover:border-primary/30 transition-all duration-500 shadow-inner">
-                            {tech.icon?.[0] ? (
-                              <img
-                                src={tech.icon[0].key}
+                            {tech.icon ? (
+                              <Image
+                                src={printFileWithDimension(tech.icon, DIMENSION_IMAGE.xs,env.STORAGE_URL)[0]}
                                 alt={tech.name}
+                                width={DIMENSION_IMAGE.xs}
+                                height={DIMENSION_IMAGE.xs}
+                                title={tech.name}
                                 class="w-8 h-8 object-contain transition-transform duration-500 group-hover:scale-110"
                               />
                             ) : (

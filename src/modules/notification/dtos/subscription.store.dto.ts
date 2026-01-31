@@ -13,8 +13,8 @@ export class SubscriptionStoreDto extends createZodDto(subscriptionStoreDto) {}
 export const sendNotificationDto = z.object({
 	title: z.string(),
 	body: z.string(),
-	url: z.string().optional(),
-	icon: z.string().optional(),
+	url: z.string().nullable(),
+	icon: z.string().nullable(),
 });
 
 export class SendNotificationDto extends createZodDto(sendNotificationDto) {}

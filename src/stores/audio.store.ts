@@ -320,8 +320,16 @@ async function loadMoreTracks() {
 				id: String(t.id),
 				title: t.title,
 				artist: t.artist || "Unknown",
-				src: printFileWithDimension(t.audio_file, null)[0],
-				cover: printFileWithDimension(t.cover, DIMENSION_IMAGE.sm)[0],
+				src: printFileWithDimension(
+					t.audio_file,
+					null,
+					window.env.STORAGE_URL,
+				)[0],
+				cover: printFileWithDimension(
+					t.cover,
+					DIMENSION_IMAGE.sm,
+					window.env.STORAGE_URL,
+				)[0],
 			}));
 			addTracks(mapped);
 			page.value++;

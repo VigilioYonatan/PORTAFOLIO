@@ -12,6 +12,7 @@ export const clientEnvironmentsSchema = z.object({
 	// Push notifications
 	PUBLIC_VAPID_KEY: z.string().min(1).optional(),
 	PRIVATE_VAPID_KEY: z.string().min(1).optional(),
+	PUBLIC_STORAGE_ENDPOINT: z.string().min(1).optional(),
 });
 
 /** Tipo inferido del schema de cliente */

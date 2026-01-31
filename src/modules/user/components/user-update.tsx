@@ -81,7 +81,13 @@ export function UserUpdate({ user, refetch }: UserUpdateProps) {
 				<div class="w-14 h-14 rounded-full bg-gradient-to-br from-primary/20 to-primary/40 flex items-center justify-center overflow-hidden border-2 border-border">
 					{user.avatar?.[0] ? (
 						<img
-							src={printFileWithDimension(user.avatar, DIMENSION_IMAGE.xs)[0]}
+							src={
+								printFileWithDimension(
+									user.avatar,
+									DIMENSION_IMAGE.xs,
+									window.env.STORAGE_URL,
+								)[0]
+							}
 							alt={user.username}
 							title={user.username}
 							width={DIMENSION_IMAGE.xs}

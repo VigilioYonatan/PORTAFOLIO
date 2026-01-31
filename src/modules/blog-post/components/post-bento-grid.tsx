@@ -177,7 +177,11 @@ export default function PostBentoGrid({ lang = "es" }: PostBentoGridProps) {
 								{post.cover ? (
 									<img
 										src={
-											printFileWithDimension(post.cover, DIMENSION_IMAGE.md)[0]
+											printFileWithDimension(
+												post.cover,
+												DIMENSION_IMAGE.md,
+												window.env.STORAGE_URL,
+											)[0]
 										}
 										alt={post.title}
 										title={post.title}

@@ -21,23 +21,40 @@ export function formatFileSize(bytes: number, decimals = 2): string {
 }
 
 // dimension solo es valido para imagenes
+// publicCdnUrl: URL del CDN público (ej: https://pub-xxx.r2.dev o / para local)
 export function printFileWithDimension(
 	files: FilesSchema[] | null,
 	dimension: number | null = null,
+	publicCdnUrl = "/",
 	custom_file_no_found: string | null = null,
-) {
-	if (!files) {
+): string[] {
+	if (!files || files.length === 0) {
 		return [custom_file_no_found || "noimagefound"];
 	}
+
 	const filterImages = dimension
 		? files.filter(
 				(img) => img.key?.startsWith("https://") || img.dimension === dimension,
 			)
 		: files;
 
-	return filterImages.map((file) =>
-		file.key!.startsWith("https://") ? file.key : `/${file.key}`,
-	);
+	return filterImages.map((file) => {
+		// Si ya es URL absoluta, usarla directamente
+		if (file.key!.startsWith("https://") || file.key!.startsWith("http://")) {
+			return file.key!;
+		}
+
+		// Si es público, usar CDN URL
+		if (file.isPublic !== false) {
+			// Para local, agregamos / al inicio
+			const baseUrl = publicCdnUrl === "/" ? "" : publicCdnUrl;
+			return `${baseUrl}/${file.key}`;
+		}
+
+		// Para archivos privados, retornamos el key
+		// El backend debe generar presigned URL antes de enviar al cliente
+		return `/${file.key}`;
+	});
 }
 
 /**

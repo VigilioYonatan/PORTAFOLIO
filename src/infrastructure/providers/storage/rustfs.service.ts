@@ -87,7 +87,7 @@ export class RustFSService {
 		private readonly configService: ConfigService<Environments>,
 		private readonly cacheService: CacheService,
 	) {
-		this.bucket = this.configService.getOrThrow("RUSTFS_BUCKET_NAME");
+		this.bucket = this.configService.getOrThrow("STORAGE_BUCKET_PUBLIC");
 		const provider = this.configService.get("STORAGE_PROVIDER");
 
 		if (provider === "LOCAL") {
@@ -96,17 +96,15 @@ export class RustFSService {
 		}
 
 		const credentials = {
-			accessKeyId: this.configService.getOrThrow("RUSTFS_ROOT_USER"),
-			secretAccessKey: this.configService.getOrThrow("RUSTFS_ROOT_PASSWORD"),
+			accessKeyId: this.configService.getOrThrow("STORAGE_ACCESS_KEY"),
+			secretAccessKey: this.configService.getOrThrow("STORAGE_SECRET_KEY"),
 		};
 
-		const region = this.configService.getOrThrow("RUSTFS_REGION");
+		const region = this.configService.getOrThrow("STORAGE_REGION");
 		const internalEndpoint = this.configService.getOrThrow(
-			"RUSTFS_INTERNAL_ENDPOINT",
+			"STORAGE_INTERNAL_ENDPOINT",
 		);
-		const publicEndpoint = this.configService.getOrThrow(
-			"RUSTFS_PUBLIC_ENDPOINT",
-		);
+		const publicEndpoint = this.configService.getOrThrow("STORAGE_URL");
 
 		// Primary client (always uses internal endpoint for Docker networking)
 		this.s3Client = new S3Client({
@@ -226,7 +224,7 @@ export class RustFSService {
 
 			await upload.done();
 
-			const publicEndpoint = this.configService.get("RUSTFS_PUBLIC_ENDPOINT");
+			const publicEndpoint = this.configService.get("STORAGE_URL");
 			return {
 				key,
 				url: `${publicEndpoint}/${this.bucket}/${key}`,
@@ -345,7 +343,7 @@ export class RustFSService {
 	 * Best for: public assets accessible via CDN.
 	 */
 	getPublicUrl(key: string): string {
-		const publicEndpoint = this.configService.get("RUSTFS_PUBLIC_ENDPOINT");
+		const publicEndpoint = this.configService.get("STORAGE_URL");
 		return `${publicEndpoint}/${this.bucket}/${key}`;
 	}
 
@@ -473,7 +471,7 @@ export class RustFSService {
 	 * Verify the signature of a local upload request.
 	 */
 	verifyLocalSignature(key: string, signature: string): boolean {
-		const secret = this.configService.getOrThrow("RUSTFS_ROOT_PASSWORD");
+		const secret = this.configService.getOrThrow("STORAGE_SECRET_KEY");
 		const expected = crypto
 			.createHmac("sha256", secret)
 			.update(key)
@@ -507,7 +505,7 @@ export class RustFSService {
 		// local simulation
 		if (provider === "LOCAL") {
 			const publicUrl = this.configService.get("PUBLIC_URL");
-			const secret = this.configService.getOrThrow("RUSTFS_ROOT_PASSWORD");
+			const secret = this.configService.getOrThrow("STORAGE_SECRET_KEY");
 			const signature = crypto
 				.createHmac("sha256", secret)
 				.update(key)

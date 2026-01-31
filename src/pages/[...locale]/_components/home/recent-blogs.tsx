@@ -38,7 +38,11 @@ export default function RecentBlogs({ latestPosts, lang }: RecentBlogsProps) {
 							{post.cover?.[0] ? (
 								<img
 									src={
-										printFileWithDimension(post.cover, DIMENSION_IMAGE.md)[0]
+										printFileWithDimension(
+											post.cover,
+											DIMENSION_IMAGE.md,
+											window.env.STORAGE_URL,
+										)[0]
 									}
 									alt={post.title}
 									class="w-full h-full object-cover opacity-70 grayscale group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-500 group-hover:scale-105"

@@ -99,7 +99,11 @@ export default function UserIndex() {
 							{row.avatar?.[0] ? (
 								<img
 									src={
-										printFileWithDimension(row.avatar, DIMENSION_IMAGE.xs)[0]
+										printFileWithDimension(
+											row.avatar,
+											DIMENSION_IMAGE.xs,
+											window.env.STORAGE_URL,
+										)[0]
 									}
 									alt={row.username}
 									title={row.username}

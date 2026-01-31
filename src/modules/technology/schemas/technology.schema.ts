@@ -17,7 +17,7 @@ export const technologySchema = z.object({
 	]),
 	icon: z
 		.array(filesSchema(UPLOAD_CONFIG.technology.icon?.dimensions))
-		.optional(),
+		.nullable(),
 	tenant_id: z.number().int().positive(),
 	...timeStampSchema.shape,
 });

@@ -10,7 +10,7 @@ export const userProfileUpdateDto = userSchema
 		phone_number: true,
 	})
 	.extend({
-		password: z.string().optional(),
+		password: z.string().nullable(),
 	})
 	.partial();
 

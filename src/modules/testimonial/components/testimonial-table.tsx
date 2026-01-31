@@ -53,7 +53,11 @@ export default function TestimonialTable({
 							{row.avatar?.[0] ? (
 								<img
 									src={
-										printFileWithDimension(row.avatar, DIMENSION_IMAGE.xs)[0]
+										printFileWithDimension(
+											row.avatar,
+											DIMENSION_IMAGE.xs,
+											window.env.STORAGE_URL,
+										)[0]
 									}
 									alt={row.author_name}
 									title={row.author_name}

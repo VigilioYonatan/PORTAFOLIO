@@ -7,4 +7,10 @@ declare global {
 			props: Record<string, unknown>;
 		}
 	}
+	interface Window {
+		env: {
+			STORAGE_URL: string;
+			NAME_APP: string;
+		};
+	}
 }

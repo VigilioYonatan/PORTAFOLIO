@@ -8,7 +8,7 @@ export const workMilestoneSchema = z.object({
 	id: z.number().int().positive(),
 	title: z.string().min(1).max(100),
 	description: z.string().min(1).max(500),
-	icon: z.string().max(100).nullable().optional(),
+	icon: z.string().max(100).nullable(),
 	milestone_date: customDateSchema,
 	sort_order: z.number().int(),
 	work_experience_id: z.number().int().positive(),

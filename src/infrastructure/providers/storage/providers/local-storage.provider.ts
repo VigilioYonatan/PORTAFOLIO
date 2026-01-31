@@ -5,7 +5,7 @@ import path from "node:path";
 import { pipeline } from "node:stream/promises";
 import type { Environments } from "@infrastructure/config/server";
 import type { FilesSchema } from "@modules/uploads/schemas/upload.schema";
-import { Injectable, Logger } from "@nestjs/common";
+import { Injectable, Logger, NotFoundException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import type {
 	StorageProvider,
@@ -18,27 +18,32 @@ import type {
 
 /**
  * Local filesystem storage provider.
- * Saves files to the /public directory for direct serving via Express static.
+ * Public files: /public directory for direct serving via Express static.
+ * Private files: /private-storage directory served via authenticated endpoint.
  */
 @Injectable()
 export class LocalStorageProvider implements StorageProvider {
 	private readonly logger = new Logger(LocalStorageProvider.name);
 	private readonly publicDir: string;
+	private readonly privateDir: string;
 	private readonly publicUrl: string;
 
 	constructor(private readonly configService: ConfigService<Environments>) {
-		// Resolve public directory relative to project root
+		// Resolve directories relative to project root
 		this.publicDir = path.join(process.cwd(), "public");
+		this.privateDir = path.join(process.cwd(), "private-storage");
 		this.publicUrl = this.configService.getOrThrow("PUBLIC_URL");
-		this.ensurePublicDir();
+		this.ensureDirectories();
 	}
 
-	private async ensurePublicDir(): Promise<void> {
+	private async ensureDirectories(): Promise<void> {
 		try {
 			await fs.mkdir(this.publicDir, { recursive: true });
+			await fs.mkdir(this.privateDir, { recursive: true });
 			this.logger.log(`Public directory verified: ${this.publicDir}`);
+			this.logger.log(`Private directory verified: ${this.privateDir}`);
 		} catch (error) {
-			this.logger.error(`Failed to create public directory`, error);
+			this.logger.error(`Failed to create storage directories`, error);
 		}
 	}
 
@@ -46,9 +51,12 @@ export class LocalStorageProvider implements StorageProvider {
 		key: string,
 		file: Buffer | ReadStream,
 		_mimetype: string,
+		isPublic = true,
 	): Promise<UploadResult> {
-		const filePath = path.join(this.publicDir, key);
-		if (!filePath.startsWith(this.publicDir)) {
+		const baseDir = isPublic ? this.publicDir : this.privateDir;
+		const filePath = path.join(baseDir, key);
+
+		if (!filePath.startsWith(baseDir)) {
 			throw new Error("Invalid file path (Path Traversal detected)");
 		}
 		const fileDir = path.dirname(filePath);
@@ -64,11 +72,13 @@ export class LocalStorageProvider implements StorageProvider {
 			await pipeline(file, writeStream);
 		}
 
-		this.logger.debug(`File uploaded locally: ${key}`);
+		this.logger.debug(
+			`File uploaded locally (${isPublic ? "public" : "private"}): ${key}`,
+		);
 
 		return {
 			key,
-			url: this.getPublicUrl(key),
+			url: isPublic ? this.getPublicUrl(key) : this.getPrivateUrl(key),
 		};
 	}
 
@@ -108,11 +118,16 @@ export class LocalStorageProvider implements StorageProvider {
 	}
 
 	getPublicUrl(key: string): string {
-		return `${this.publicUrl}/public/${key}`;
+		return `${this.publicUrl}/${key}`;
 	}
 
-	async fileExists(key: string): Promise<boolean> {
-		const filePath = path.join(this.publicDir, key);
+	getPrivateUrl(key: string): string {
+		return `${this.publicUrl}/api/v1/upload/files/${encodeURIComponent(key)}`;
+	}
+
+	async fileExists(key: string, isPublic = true): Promise<boolean> {
+		const baseDir = isPublic ? this.publicDir : this.privateDir;
+		const filePath = path.join(baseDir, key);
 		try {
 			await fs.access(filePath);
 			return true;
@@ -139,13 +154,20 @@ export class LocalStorageProvider implements StorageProvider {
 	/**
 	 * Get file content as Buffer.
 	 */
-	async getFile(key: string): Promise<Buffer> {
-		const filePath = path.join(this.publicDir, key);
+	async getFile(key: string, isPublic = true): Promise<Buffer> {
+		const baseDir = isPublic ? this.publicDir : this.privateDir;
+		const filePath = path.join(baseDir, key);
+
+		// Security: prevent path traversal
+		if (!filePath.startsWith(baseDir)) {
+			throw new NotFoundException("File not found");
+		}
+
 		try {
 			return await fs.readFile(filePath);
 		} catch (error) {
 			this.logger.error(`Failed to read file: ${key}`, error);
-			throw error;
+			throw new NotFoundException("File not found");
 		}
 	}
 

@@ -1,7 +1,6 @@
 ---
 import WebLayout from "./_components/layouts/web-layout/index.astro";
 import { getLangFromUrl, useTranslations } from "../../i18n";
-
 const lang = getLangFromUrl(Astro.url);
 const t = useTranslations(lang);
 const { title, description } = Astro.props;

@@ -167,6 +167,7 @@ export class UploadService {
 								original_name: file.originalFilename || finalFilename,
 								dimension: item.dimension,
 								created_at: now().toDate(),
+								isPublic: rule.isPublic !== false,
 							});
 						}
 						return;
@@ -214,6 +215,7 @@ export class UploadService {
 						name: finalFilename,
 						original_name: file.originalFilename || finalFilename,
 						created_at: now().toDate(),
+						isPublic: rule.isPublic !== false,
 					});
 				} catch (error) {
 					this.logger.error(
@@ -373,6 +375,22 @@ export class UploadService {
 
 	async getFileBuffer(key: string): Promise<Buffer> {
 		return this.storage.getFile(key);
+	}
+
+	/**
+	 * Get a private file (requires authentication).
+	 * Only available for LOCAL storage provider.
+	 */
+	async getPrivateFile(key: string): Promise<Buffer> {
+		if (this.providerType !== "LOCAL") {
+			throw new BadRequestException(
+				"Private file access endpoint is only available for LOCAL storage. Use presigned URLs for S3/R2.",
+			);
+		}
+
+		// Get LocalStorageProvider and fetch private file
+		const localProvider = this.storageFactory.getLocalProvider();
+		return localProvider.getFile(key, false); // isPublic = false
 	}
 
 	/**

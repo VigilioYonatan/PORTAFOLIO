@@ -52,7 +52,7 @@ export class NotificationService {
 			user_id,
 		);
 
-		const notifications = subscriptions.map((sub) => {
+		const notifications = subscriptions.map(async (sub) => {
 			return webpush
 				.sendNotification(
 					{

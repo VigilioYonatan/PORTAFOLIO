@@ -3,6 +3,12 @@ import { vi } from "vitest";
 
 vi.mock("react", () => import("preact/compat"));
 vi.mock("react-dom", () => import("preact/compat"));
+vi.mock("astro:env/server", () => ({
+	STORAGE_ENDPOINT: process.env.STORAGE_URL || "/",
+}));
+vi.mock("astro:env/client", () => ({
+	STORAGE_ENDPOINT: process.env.STORAGE_URL || "/",
+}));
 
 // RAF Polyfill
 if (typeof window !== "undefined" && !window.requestAnimationFrame) {
@@ -100,9 +106,8 @@ if (typeof global.ResizeObserver === "undefined") {
 }
 
 // Mock Environment Variables
-process.env.PUBLIC_NAME_APP = "PORTAFOLIO_TEST";
+process.env.NAME_APP = "PORTAFOLIO_TEST";
 process.env.PUBLIC_URL = "http://localhost:3000";
-process.env.PUBLIC_PORT = "3000";
 process.env.PORT = "3000";
 process.env.DB_HOST = "localhost";
 process.env.DB_PORT = "5432";
@@ -117,14 +122,14 @@ process.env.JWT_KEY = "test_jwt_key_must_be_long_enough_32_chars";
 process.env.JWT_EXPIRES_IN = "1h";
 process.env.JWT_REFRESH_KEY = "test_refresh_key_must_be_long_enough_32_chars";
 process.env.JWT_REFRESH_EXPIRES_IN = "7d";
-process.env.PUBLIC_HMAC_KEY = "test_hmac_key_16";
+process.env.HMAC_KEY = "test_hmac_key_16";
 process.env.STORAGE_PROVIDER = "LOCAL";
-process.env.RUSTFS_ENDPOINT = "http://localhost:9000";
-process.env.RUSTFS_PORT = "9000";
-process.env.RUSTFS_ROOT_USER = "minio";
-process.env.RUSTFS_ROOT_PASSWORD = "minio_password";
-process.env.RUSTFS_BUCKET_NAME = "test-bucket";
-process.env.RUSTFS_REGION = "us-east-1";
+process.env.STORAGE_ACCESS_KEY = "minio";
+process.env.STORAGE_SECRET_KEY = "minio_password";
+process.env.STORAGE_BUCKET_PUBLIC = "test-bucket";
+process.env.STORAGE_BUCKET_PRIVATE = "test-bucket-private";
+process.env.STORAGE_REGION = "us-east-1";
+process.env.STORAGE_URL = "http://localhost:9000/test-bucket-public";
 process.env.MAIL_HOST = "smtp.test.com";
 process.env.MAIL_PORT = "587";
 process.env.MAIL_USER = "mail_user";

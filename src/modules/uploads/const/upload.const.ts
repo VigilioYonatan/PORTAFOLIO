@@ -199,6 +199,7 @@ export type UploadConfig = UploadRule & {
 	dimensions?: number[];
 	folder?: string;
 	max_files: number;
+	isPublic?: boolean; // default: true - archivos públicos van a CDN, privados usan presigned URLs
 };
 
 export const UPLOAD_CONFIG: Record<

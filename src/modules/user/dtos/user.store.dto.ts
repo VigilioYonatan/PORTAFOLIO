@@ -12,7 +12,7 @@ export const userStoreDto = userSchema
 		status: true,
 	})
 	.extend({
-		phone_number: userSchema.shape.phone_number.optional(),
+		phone_number: userSchema.shape.phone_number.nullable(),
 		repeat_password: userSchema.shape.password,
 	})
 	.refine((data) => data.password === data.repeat_password, {

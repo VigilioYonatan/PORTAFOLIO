@@ -25,12 +25,11 @@ if (originalDatabaseUrl?.startsWith("pglite://")) {
  */
 const environmentsSchema = z.object({
 	// App
-	PUBLIC_NAME_APP: z.string().min(1),
+	NAME_APP: z.string().min(1),
 	NODE_ENV: z.enum(["PRODUCTION", "DEVELOPMENT", "STAGING", "TEST"]),
 	PUBLIC_URL: z.url(),
-	PUBLIC_PORT: z.coerce.number().int().positive(),
 	PORT: z.coerce.number().int().positive(),
-
+	PUBLIC_PORT: z.coerce.number().int().positive(),
 	// Database
 	DB_HOST: z.string().min(1),
 	DB_PORT: z.coerce.number().int().min(1).max(65535),
@@ -57,20 +56,17 @@ const environmentsSchema = z.object({
 	JWT_REFRESH_EXPIRES_IN: z.string(),
 
 	// HMAC
-	PUBLIC_HMAC_KEY: z
-		.string()
-		.min(16, "HMAC_KEY debe tener al menos 16 caracteres"),
+	HMAC_KEY: z.string().min(16, "HMAC_KEY debe tener al menos 16 caracteres"),
 
-	// Storage (MinIO/RustFS)
+	// Storage
 	STORAGE_PROVIDER: z.enum(["LOCAL", "S3", "CLOUDINARY"]),
-	RUSTFS_ENDPOINT: z.string().min(1),
-	RUSTFS_PORT: z.coerce.number().int().positive(),
-	RUSTFS_ROOT_USER: z.string().min(1),
-	RUSTFS_ROOT_PASSWORD: z.string().min(8),
-	RUSTFS_BUCKET_NAME: z.string().min(1),
-	RUSTFS_REGION: z.string(),
-	RUSTFS_INTERNAL_ENDPOINT: z.url().optional(),
-	RUSTFS_PUBLIC_ENDPOINT: z.url().optional(),
+	STORAGE_ACCESS_KEY: z.string().min(1),
+	STORAGE_SECRET_KEY: z.string().min(1),
+	STORAGE_BUCKET_PUBLIC: z.string().min(1),
+	STORAGE_BUCKET_PRIVATE: z.string().optional(),
+	STORAGE_REGION: z.string(),
+	STORAGE_INTERNAL_ENDPOINT: z.url().optional(),
+	STORAGE_URL: z.url().optional(), // CDN URL para archivos públicos
 
 	// Mail
 	MAIL_HOST: z.string().min(1),

@@ -134,11 +134,16 @@ describe("TechnologyService", () => {
 	describe("update", () => {
 		it("should update technology and invalidate caches", async () => {
 			const id = 1;
-			const body = { name: "Updated Name", category: "AI" as const };
+			const body = {
+				name: "Updated Name",
+				category: "AI" as const,
+				icon: null,
+			};
 			const existingTech = TechnologyFactory.createSchema({ id, name: "Old" });
 			const updatedTech = TechnologyFactory.createSchema({
 				id,
 				name: "Updated Name",
+				icon: null,
 			});
 
 			// Mock show() dependency (cache miss -> repo hit)
@@ -160,7 +165,11 @@ describe("TechnologyService", () => {
 			vi.mocked(repository.showById).mockResolvedValue(null);
 
 			await expect(
-				service.update(TENANT_ID, 999, { name: "New", category: "AI" }),
+				service.update(TENANT_ID, 999, {
+					name: "New",
+					category: "AI",
+					icon: null,
+				}),
 			).rejects.toThrow(NotFoundException);
 
 			expect(repository.update).not.toHaveBeenCalled();

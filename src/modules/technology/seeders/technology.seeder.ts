@@ -92,7 +92,7 @@ export class TechnologySeeder {
 		).map((tech) => ({
 			...tech,
 			tenant_id,
-			icon: [],
+			icon: null,
 			created_at: now().toDate(),
 			updated_at: now().toDate(),
 		}));

@@ -5,9 +5,8 @@ services:
       - "${PORT}:${PORT}"
     environment:
       # App
-      PUBLIC_NAME_APP: ${PUBLIC_NAME_APP}
+      NAME_APP: ${NAME_APP}
       NODE_ENV: ${NODE_ENV}
-      PUBLIC_ENV: ${PUBLIC_ENV}
       PORT: ${PORT}
       PUBLIC_URL: ${PUBLIC_URL}
       PUBLIC_PORT: ${PUBLIC_PORT}
@@ -32,17 +31,17 @@ services:
       JWT_REFRESH_EXPIRES_IN: ${JWT_REFRESH_EXPIRES_IN}
 
       # HMAC
-      PUBLIC_HMAC_KEY: ${PUBLIC_HMAC_KEY}
+      HMAC_KEY: ${HMAC_KEY}
 
-      # Storage (RustFS/MinIO)
-      RUSTFS_ENDPOINT: ${RUSTFS_ENDPOINT}
-      RUSTFS_PORT: ${RUSTFS_PORT}
-      RUSTFS_ROOT_USER: ${RUSTFS_ROOT_USER}
-      RUSTFS_ROOT_PASSWORD: ${RUSTFS_ROOT_PASSWORD}
-      RUSTFS_BUCKET_NAME: ${RUSTFS_BUCKET_NAME}
-      RUSTFS_REGION: ${RUSTFS_REGION}
-      RUSTFS_INTERNAL_ENDPOINT: ${RUSTFS_INTERNAL_ENDPOINT}
-      RUSTFS_PUBLIC_ENDPOINT: ${RUSTFS_PUBLIC_ENDPOINT}
+      # Storage
+      STORAGE_PROVIDER: ${STORAGE_PROVIDER}
+      STORAGE_ACCESS_KEY: ${STORAGE_ACCESS_KEY}
+      STORAGE_SECRET_KEY: ${STORAGE_SECRET_KEY}
+      STORAGE_BUCKET_PUBLIC: ${STORAGE_BUCKET_PUBLIC}
+      STORAGE_BUCKET_PRIVATE: ${STORAGE_BUCKET_PRIVATE}
+      STORAGE_REGION: ${STORAGE_REGION}
+      STORAGE_INTERNAL_ENDPOINT: ${STORAGE_INTERNAL_ENDPOINT}
+      STORAGE_URL: ${STORAGE_URL}
 
       # Mail
       MAIL_HOST: ${MAIL_HOST}
@@ -67,10 +66,10 @@ services:
       CHOKIDAR_INTERVAL: 250
     labels:
       - traefik.enable=true
-      - traefik.http.routers.${PUBLIC_NAME_APP}.rule=Host(`${PUBLIC_URL}`)
-      - traefik.http.routers.${PUBLIC_NAME_APP}.entrypoints=websecure
-      - traefik.http.routers.${PUBLIC_NAME_APP}.tls.certResolver=letsencrypt
-      - traefik.http.services.${PUBLIC_NAME_APP}.loadbalancer.server.port=${PORT}
+      - traefik.http.routers.${NAME_APP}.rule=Host(`${PUBLIC_URL}`)
+      - traefik.http.routers.${NAME_APP}.entrypoints=websecure
+      - traefik.http.routers.${NAME_APP}.tls.certResolver=letsencrypt
+      - traefik.http.services.${NAME_APP}.loadbalancer.server.port=${PORT}
     networks:
       - dokploy-network
 

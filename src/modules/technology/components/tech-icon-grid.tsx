@@ -1,36 +1,14 @@
 import Badge from "@components/extras/badge";
 import Modal from "@components/extras/modal";
+import { printFileWithDimension } from "@infrastructure/utils/hybrid/file.utils";
 import { technologyIndexApi } from "@modules/technology/apis/technology.index.api";
 import TechnologyStore from "@modules/technology/components/technology-store";
 import TechnologyUpdate from "@modules/technology/components/technology-update";
 import type { TechnologySchema } from "@modules/technology/schemas/technology.schema";
+import { DIMENSION_IMAGE } from "@modules/uploads/const/upload.const";
 import { useSignal } from "@preact/signals";
-import {
-	Activity,
-	Cloud,
-	Code,
-	Cpu,
-	Database,
-	Edit,
-	Globe,
-	type LucideIcon,
-	Plus,
-	Server,
-	Smartphone,
-	Zap,
-} from "lucide-preact";
+import { Edit, Plus, Zap } from "lucide-preact";
 import type { JSX } from "preact/jsx-runtime";
-
-const ICON_MAP: Record<string, LucideIcon> = {
-	Frontend: Globe,
-	Backend: Server,
-	Database: Database,
-	Mobile: Smartphone,
-	DevOps: Cloud,
-	Tools: Activity,
-	AI: Cpu,
-	Other: Code,
-};
 
 export default function TechIconGrid() {
 	const editingTech = useSignal<TechnologySchema | null>(null);
@@ -75,7 +53,14 @@ export default function TechIconGrid() {
 	if (isSuccess && data) {
 		const techs = data.results!;
 		component = techs.map((tech) => {
-			const Icon = ICON_MAP[tech.category] || Zap;
+			const iconUrl =
+				tech.icon && tech.icon.length > 0
+					? printFileWithDimension(
+							tech.icon,
+							DIMENSION_IMAGE.xs,
+							window.env.STORAGE_URL,
+						)[0]
+					: null;
 			return (
 				<div
 					key={tech.id}
@@ -97,11 +82,22 @@ export default function TechIconGrid() {
 						<Edit size={14} />
 					</button>
 
-					<div class="w-14 h-14 rounded-2xl bg-zinc-900 border border-white/10 flex items-center justify-center group-hover:scale-110 group-hover:border-primary/40 transition-all duration-500 z-10 shadow-inner group-hover:shadow-primary/20">
-						<Icon
-							size={28}
-							class="text-muted-foreground group-hover:text-primary transition-colors"
-						/>
+					<div class="w-14 h-14 rounded-2xl bg-zinc-900 border border-white/10 flex items-center justify-center group-hover:scale-110 group-hover:border-primary/40 transition-all duration-500 z-10 shadow-inner group-hover:shadow-primary/20 overflow-hidden">
+						{iconUrl ? (
+							<img
+								src={iconUrl}
+								alt={tech.name}
+								title={tech.name}
+								width={DIMENSION_IMAGE.xs}
+								height={DIMENSION_IMAGE.xs}
+								class="w-full h-full object-contain p-1"
+							/>
+						) : (
+							<Zap
+								size={28}
+								class="text-muted-foreground group-hover:text-primary transition-colors"
+							/>
+						)}
 					</div>
 
 					<div class="text-center z-10 space-y-2">

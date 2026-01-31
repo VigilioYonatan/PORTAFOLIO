@@ -5,7 +5,6 @@ import { useEffect, useMemo } from "preact/hooks";
 
 export default function SystemIntro({ lang = "es" }: { lang?: Lang }) {
 	const t = useTranslations(lang);
-
 	const STEPS = [
 		{ command: "whoami", output: "vigilio" },
 		{ command: "hostname", output: "v-portfolio-node-1" },

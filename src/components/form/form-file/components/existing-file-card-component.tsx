@@ -33,7 +33,13 @@ export function ExistingFileCard({
 			<div class="w-16 h-16 rounded-lg bg-muted shrink-0 overflow-hidden flex items-center justify-center border border-border">
 				{isImage ? (
 					<img
-						src={printFileWithDimension([file], DIMENSION_IMAGE.xs)[0]}
+						src={
+							printFileWithDimension(
+								[file],
+								DIMENSION_IMAGE.xs,
+								window.env.STORAGE_URL,
+							)[0]
+						}
 						alt={file.name}
 						title={file.name}
 						width={DIMENSION_IMAGE.xs}
@@ -90,7 +96,7 @@ export function ExistingFileCard({
 					variant="ghost"
 					size="sm"
 					className="absolute top-1 right-1 h-7 w-7 rounded-full text-muted-foreground hover:text-destructive hover:bg-destructive/10 z-20 flex items-center justify-center p-0"
-					onClick={(e: any) => {
+					onClick={(e) => {
 						e.preventDefault();
 						e.stopPropagation();
 						onRemove(file.key);

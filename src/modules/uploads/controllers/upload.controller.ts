@@ -13,10 +13,11 @@ import {
 	Post,
 	Put,
 	Req,
+	Res,
 	UseGuards,
 } from "@nestjs/common";
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
-import type { Request } from "express";
+import type { Request, Response } from "express";
 import type { EntityFile, EntityFileProperty } from "../const/upload.const";
 import {
 	UploadDeleteClassDto,
@@ -215,5 +216,55 @@ export class UploadController {
 		@Body(new ZodPipe(uploadDeleteDto)) body: UploadDeleteDto,
 	): Promise<UploadDeleteResponseDto> {
 		return this.uploadService.deleteByKey(body.key);
+	}
+
+	// =========================================================================
+	// PRIVATE FILE ACCESS
+	// =========================================================================
+
+	/**
+	 * Serve private files with authentication.
+	 * Only available for LOCAL storage provider.
+	 * For S3/R2, use presigned URLs instead.
+	 */
+	@UseGuards(JwtAuthGuard)
+	@Get("/files/*")
+	@ApiOperation({ summary: "Get private file (requires authentication)" })
+	async getPrivateFile(
+		@Req() req: Request,
+		@Res() res: Response,
+	): Promise<void> {
+		// Extract key from URL path (everything after /files/)
+		const key = req.url.split("/files/")[1]?.split("?")[0];
+		if (!key) {
+			throw new BadRequestException("Missing file key");
+		}
+
+		const decodedKey = decodeURIComponent(key);
+		const fileBuffer = await this.uploadService.getPrivateFile(decodedKey);
+
+		// Determine content type from extension
+		const ext = decodedKey.split(".").pop()?.toLowerCase();
+		const contentType = this.getMimeType(ext);
+
+		res.setHeader("Content-Type", contentType);
+		res.setHeader("Cache-Control", "private, max-age=3600");
+		res.send(fileBuffer);
+	}
+
+	private getMimeType(ext?: string): string {
+		const mimeTypes: Record<string, string> = {
+			webp: "image/webp",
+			jpg: "image/jpeg",
+			jpeg: "image/jpeg",
+			png: "image/png",
+			gif: "image/gif",
+			svg: "image/svg+xml",
+			pdf: "application/pdf",
+			mp4: "video/mp4",
+			webm: "video/webm",
+			mp3: "audio/mpeg",
+		};
+		return mimeTypes[ext || ""] || "application/octet-stream";
 	}
 }

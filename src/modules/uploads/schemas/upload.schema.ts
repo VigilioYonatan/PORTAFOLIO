@@ -14,6 +14,7 @@ export function filesSchema(dimensions?: number[]) {
 		size: z.number(),
 		mimetype: z.string(),
 		created_at: customDateSchema.optional(),
+		isPublic: z.boolean().optional(), // true = CDN público, false = presigned URL
 	});
 }
 
