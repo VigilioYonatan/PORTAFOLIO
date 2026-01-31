@@ -25,21 +25,20 @@ export class SessionConfigService {
 	) {}
 
 	setup(app: INestApplication) {
-		const isProd = this.configService.getOrThrow("NODE_ENV") === "PRODUCTION";
-		let store: Store;
+		const isProd = this.configService.getOrThrow("NODE_ENV") === "DEVELOPMENT";
 
-		if (isProd) {
-			// Producción: Redis
-			const redisInstance = getRedisClient(this.configService);
-			store = new RedisStore({
-				client: redisInstance,
-				prefix: "sess:",
-			});
-			this.logger.log("\x1b[32m✓ Sesiones guardadas en Redis\x1b[0m");
-		} else {
+		// if (isProd) {
+		// 	// Producción: Redis
+		// 	const redisInstance = getRedisClient(this.configService);
+		// 	store = new RedisStore({
+		// 		client: redisInstance,
+		// 		prefix: "sess:",
+		// 	});
+		// 	this.logger.log("\x1b[32m✓ Sesiones guardadas en Redis\x1b[0m");
+		// } else {
 			// Desarrollo: PostgreSQL (Persistente y sin bloqueos de archivo)
 			const PgSession = connectPgSimple(session);
-			store = new PgSession({
+		const store = new PgSession({
 				pool: this.pool,
 				tableName: "sessions", // Nombre de la tabla
 				createTableIfMissing: true, // Crea la tabla automáticamente si no existe :)
@@ -48,7 +47,7 @@ export class SessionConfigService {
 			this.logger.log(
 				"\x1b[33m⚡ Sesiones guardadas en PostgreSQL (Dev Persistent)\x1b[0m",
 			);
-		}
+		// }
 
 		app.use(
 			session({
