@@ -20,8 +20,6 @@ async function bootstrap() {
 	const configService = app.get(ConfigService);
 	const corsOrigins = configService.getOrThrow<string>("CORS_ORIGINS");
 	const port = configService.getOrThrow<number>("PORT");
-	const publicDir = path.join(__dirname, "..", "public");
-	app.use(express.static(publicDir));
 	// Logger
 	app.useLogger(app.get(Logger));
 
