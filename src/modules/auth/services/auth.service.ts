@@ -449,7 +449,9 @@ export class AuthService {
 		tenant_id: number,
 		user_id: number,
 	): Promise<AuthMfaSetupResponseDto> {
-		const { NobleCryptoPlugin, ScureBase32Plugin, TOTP } = await import("otplib");
+		const { NobleCryptoPlugin, ScureBase32Plugin, TOTP } = await import(
+			"otplib"
+		);
 
 		this.logger.log({ user_id, tenant_id }, "Setting up MFA");
 
@@ -500,7 +502,9 @@ export class AuthService {
 		user_id: number,
 		body: AuthMfaVerifyDto,
 	): Promise<AuthMfaVerifyResponseDto> {
-		const { NobleCryptoPlugin, ScureBase32Plugin, TOTP } = await import("otplib");
+		const { NobleCryptoPlugin, ScureBase32Plugin, TOTP } = await import(
+			"otplib"
+		);
 
 		this.logger.log({ tenant_id, user_id }, "Verifying MFA setup");
 		const user = await this.userService.showByIdForAuth(tenant_id, user_id);
@@ -546,7 +550,9 @@ export class AuthService {
 		user_id: number,
 		body: AuthMfaDisableDto,
 	): Promise<AuthMfaDisableResponseDto> {
-		const { NobleCryptoPlugin, ScureBase32Plugin, TOTP } = await import("otplib");
+		const { NobleCryptoPlugin, ScureBase32Plugin, TOTP } = await import(
+			"otplib"
+		);
 		this.logger.log({ tenant_id, user_id }, "Deactivating MFA");
 		const user = await this.userService.showByIdForAuth(tenant_id, user_id);
 
@@ -607,7 +613,9 @@ export class AuthService {
 
 	async verifyMfa(dto: AuthMfaLoginDto): Promise<AuthLoginResponseApi> {
 		this.logger.log("Processing MFA login verification");
-		const { NobleCryptoPlugin, ScureBase32Plugin, TOTP } = await import("otplib");
+		const { NobleCryptoPlugin, ScureBase32Plugin, TOTP } = await import(
+			"otplib"
+		);
 
 		// Verify temp token to get user info
 		let payload: {

@@ -14,7 +14,7 @@ export class WorkMilestoneSeeder {
 	) {}
 
 	async run(tenant_id: number) {
-		const {faker} = await import("@faker-js/faker");
+		const { faker } = await import("@faker-js/faker");
 
 		// 1. Get existing experiences
 		const experiences = await this.db.query.workExperienceEntity.findMany({

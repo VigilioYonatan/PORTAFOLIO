@@ -5,15 +5,18 @@ import { astroProxy } from "@infrastructure/utils/server";
 import { SessionConfigService } from "@modules/auth/config/session.config";
 import { ConfigService } from "@nestjs/config";
 import { NestFactory } from "@nestjs/core";
+import type { NestExpressApplication } from "@nestjs/platform-express";
 import express from "express";
 import { Logger } from "nestjs-pino";
 import { AppModule } from "./app.module";
-import type { NestExpressApplication } from "@nestjs/platform-express";
+
 async function bootstrap() {
 	// Validar variables de entorno ANTES de iniciar NestJS
 	validateEnvironments();
 
-	const app = await NestFactory.create<NestExpressApplication>(AppModule, { bufferLogs: true });
+	const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+		bufferLogs: true,
+	});
 	app.enableShutdownHooks(); // Para evitar bug de puerto en uso
 
 	// get configService environment
@@ -22,10 +25,7 @@ async function bootstrap() {
 	const port = configService.getOrThrow<number>("PORT");
 	// Logger
 	app.useLogger(app.get(Logger));
-	console.log({dir:path.join(__dirname, '..', 'public')});
-	
-
-	app.useStaticAssets(path.join(__dirname, '..', 'public'));
+	app.useStaticAssets(path.join(__dirname, "..", "public"));
 
 	// Security Headers
 	// app.use(helmet(helmetConfig(configService)));
@@ -36,7 +36,6 @@ async function bootstrap() {
 			corsOrigins === "*" ? "*" : corsOrigins.split(",").map((s) => s.trim()),
 		credentials: true,
 	});
-	
 
 	// Versioning
 	// Versioning & Global Prefix
@@ -62,7 +61,7 @@ async function bootstrap() {
 	const sessionConfig = app.get(SessionConfigService);
 	sessionConfig.setup(app);
 	app.use(express.static(path.join(process.cwd(), "dist/client")));
-	
+
 	// Start on port
 
 	const server = await app.listen(port);

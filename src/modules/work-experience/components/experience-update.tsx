@@ -5,7 +5,10 @@ import { handlerError } from "@infrastructure/utils/client/handler-error";
 import { formatDate } from "@infrastructure/utils/hybrid";
 import { workExperienceUpdateApi } from "@modules/work-experience/apis/work-experience.update.api";
 import type { WorkExperienceStoreDto } from "@modules/work-experience/dtos/work-experience.store.dto";
-import { WorkExperienceUpdateDto, workExperienceUpdateDto } from "@modules/work-experience/dtos/work-experience.update.dto";
+import {
+	WorkExperienceUpdateDto,
+	workExperienceUpdateDto,
+} from "@modules/work-experience/dtos/work-experience.update.dto";
 import type { WorkExperienceSchema } from "@modules/work-experience/schemas/work-experience.schema";
 import { type Lang, useTranslations } from "@src/i18n";
 import { sweetModal } from "@vigilio/sweet";

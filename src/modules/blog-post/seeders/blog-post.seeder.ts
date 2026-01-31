@@ -14,7 +14,7 @@ export class BlogPostSeeder {
 	) {}
 
 	async run(tenant_id: number, author_id: number, category_id?: number) {
-		const {faker} = await import("@faker-js/faker");
+		const { faker } = await import("@faker-js/faker");
 
 		const contentDir = path.join(
 			process.cwd(),

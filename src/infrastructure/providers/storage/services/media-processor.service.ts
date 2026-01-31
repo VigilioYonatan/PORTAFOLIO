@@ -1,13 +1,8 @@
 import fs from "node:fs/promises";
-import {
-	Injectable,
-	Logger,
-} from "@nestjs/common";
+import { Injectable, Logger } from "@nestjs/common";
 import type { File } from "formidable";
 import sharp from "sharp";
-import {
-	IMAGE_QUALITY,
-} from "../rustfs.const";
+import { IMAGE_QUALITY } from "../rustfs.const";
 
 // ffmpeg.setFfmpegPath(ffmpegPath as unknown as string);
 

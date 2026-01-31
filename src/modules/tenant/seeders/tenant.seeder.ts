@@ -16,7 +16,7 @@ export class TenantSeeder {
 	) {}
 
 	async run() {
-		const {faker} = await import("@faker-js/faker");
+		const { faker } = await import("@faker-js/faker");
 
 		const tenantsSeed: Omit<TenantSchema, "id">[] = Array.from({
 			length: 10,

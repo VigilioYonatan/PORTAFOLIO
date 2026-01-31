@@ -5,7 +5,6 @@ import {
 	VersioningType,
 } from "@nestjs/common";
 import { json, urlencoded } from "express";
-;
 
 export function configureApp(app: INestApplication): void {
 	// Global Prefix with exclusions

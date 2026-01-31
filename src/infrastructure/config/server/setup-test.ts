@@ -10,7 +10,6 @@ if (typeof window !== "undefined" && !window.requestAnimationFrame) {
 	window.cancelAnimationFrame = (id) => clearTimeout(id);
 }
 
-
 type GlobalWithRAF = typeof global & {
 	requestAnimationFrame: (callback: FrameRequestCallback) => number;
 	cancelAnimationFrame: (handle: number) => void;

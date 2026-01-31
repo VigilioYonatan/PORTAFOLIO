@@ -1,3 +1,4 @@
+import { faker } from "@faker-js/faker";
 import { schema } from "@infrastructure/providers/database/database.schema";
 import { DRIZZLE } from "@infrastructure/providers/database/database.service";
 import { now } from "@infrastructure/utils/hybrid";
@@ -6,7 +7,6 @@ import { Inject, Injectable } from "@nestjs/common";
 import { type NodePgDatabase } from "drizzle-orm/node-postgres";
 import { blogCategoryEntity } from "../entities/blog-category.entity";
 import type { BlogCategorySchema } from "../schemas/blog-category.schema";
-import { faker } from "@faker-js/faker";
 
 @Injectable()
 export class BlogCategorySeeder {

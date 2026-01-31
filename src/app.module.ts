@@ -37,8 +37,6 @@ import { EventEmitterModule } from "@nestjs/event-emitter";
 import { ThrottlerModule } from "@nestjs/throttler";
 import { ChatModule } from "./modules/chat/chat.module";
 import { SocialModule } from "./modules/social/social.module";
-import { ServeStaticModule } from "@nestjs/serve-static";
-import path from "node:path";
 
 @Module({
 	imports: [

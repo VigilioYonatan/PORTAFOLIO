@@ -3,7 +3,7 @@
 let highlighter: Awaited<ReturnType<any>> | null = null;
 
 async function getHighlighter() {
-	const { createHighlighter } = await import('shiki');
+	const { createHighlighter } = await import("shiki");
 	if (!highlighter) {
 		highlighter = await createHighlighter({
 			themes: ["dracula", "min-light"], // Dark and light themes
@@ -35,7 +35,7 @@ async function getHighlighter() {
  * @returns HTML string
  */
 export async function renderMarkdown(content: string): Promise<string> {
-	const { marked } = await import('marked');
+	const { marked } = await import("marked");
 	const hl = await getHighlighter();
 
 	// Create a new renderer to avoid type issues with object literal

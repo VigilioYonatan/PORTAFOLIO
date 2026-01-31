@@ -45,7 +45,7 @@ describe("User Module (E2E)", () => {
 		});
 
 		it("should create a new user (POST /users)", async () => {
-			const {faker} = await import("@faker-js/faker");
+			const { faker } = await import("@faker-js/faker");
 
 			const newUser = {
 				username: faker.internet.username(),

@@ -13,7 +13,7 @@ export class ContactSeeder {
 	) {}
 
 	async run(tenant_id: number) {
-		const {faker} = await import("@faker-js/faker");
+		const { faker } = await import("@faker-js/faker");
 
 		const contactMessagesSeed: Omit<ContactMessageSchema, "id">[] = Array.from({
 			length: 50,

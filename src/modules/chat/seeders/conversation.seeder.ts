@@ -13,7 +13,7 @@ export class ConversationSeeder {
 	) {}
 
 	async run(tenant_id: number): Promise<ConversationSchema[]> {
-		const {faker} = await import("@faker-js/faker");
+		const { faker } = await import("@faker-js/faker");
 
 		// Crear conversaciones de ejemplo
 		const conversationsSeed: Omit<ConversationSchema, "id">[] = Array.from({
