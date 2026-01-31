@@ -85,6 +85,10 @@ const environmentsSchema = z.object({
 	// AI API Keys
 	OPENROUTER_API_KEY: z.string().min(1),
 	OPENAI_API_KEY: z.string().optional(), // Optional - only needed if using OpenAI embeddings
+
+	VAPID_EMAIL: z.string().min(1),
+	VAPID_PUBLIC_KEY: z.string().min(1),
+	VAPID_PRIVATE_KEY: z.string().min(1),
 });
 
 // ============================================================================

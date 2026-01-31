@@ -1,6 +1,6 @@
 import Badge from "@components/extras/badge";
+import environments from "@infrastructure/config/client/environments.config";
 import { cn } from "@infrastructure/utils/client";
-
 import { formatDateTz } from "@infrastructure/utils/hybrid";
 import { printFileWithDimension } from "@infrastructure/utils/hybrid/file.utils";
 import { DIMENSION_IMAGE } from "@modules/uploads/const/upload.const";
@@ -18,7 +18,7 @@ export function UserShow({ user }: UserShowProps) {
 		? printFileWithDimension(
 				user.avatar,
 				DIMENSION_IMAGE.md,
-				window.env.STORAGE_URL,
+				environments.STORAGE_URL,
 			)[0]
 		: null;
 

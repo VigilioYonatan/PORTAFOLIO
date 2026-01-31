@@ -1,6 +1,7 @@
 import Badge from "@components/extras/badge";
 import Modal from "@components/extras/modal";
 import VigilioTable from "@components/tables";
+import environments from "@infrastructure/config/client/environments.config";
 import { cn } from "@infrastructure/utils/client";
 import { printFileWithDimension } from "@infrastructure/utils/hybrid/file.utils";
 import { testimonialDestroyApi } from "@modules/testimonial/apis/testimonial.destroy.api";
@@ -50,13 +51,13 @@ export default function TestimonialTable({
 				cell: (row) => (
 					<div class="flex items-center gap-3">
 						<div class="w-10 h-10 rounded-full bg-primary/10 border border-primary/20 overflow-hidden flex items-center justify-center shrink-0">
-							{row.avatar?.[0] ? (
+							{row.avatar ? (
 								<img
 									src={
 										printFileWithDimension(
 											row.avatar,
 											DIMENSION_IMAGE.xs,
-											window.env.STORAGE_URL,
+											environments.STORAGE_URL,
 										)[0]
 									}
 									alt={row.author_name}

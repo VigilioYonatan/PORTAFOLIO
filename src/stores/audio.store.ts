@@ -1,3 +1,4 @@
+import environments from "@infrastructure/config/client/environments.config.js";
 import { printFileWithDimension } from "@infrastructure/utils/hybrid/index.js";
 import { musicTrackIndexFetch } from "@modules/music/apis/music.index.api.js";
 import { DIMENSION_IMAGE } from "@modules/uploads/const/upload.const.js";
@@ -323,12 +324,12 @@ async function loadMoreTracks() {
 				src: printFileWithDimension(
 					t.audio_file,
 					null,
-					window.env.STORAGE_URL,
+					environments.STORAGE_URL,
 				)[0],
 				cover: printFileWithDimension(
 					t.cover,
 					DIMENSION_IMAGE.sm,
-					window.env.STORAGE_URL,
+					environments.STORAGE_URL,
 				)[0],
 			}));
 			addTracks(mapped);

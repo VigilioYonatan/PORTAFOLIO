@@ -1,3 +1,4 @@
+import environments from "@infrastructure/config/client/environments.config";
 import { printFileWithDimension } from "@infrastructure/utils/hybrid";
 import type { BlogPostSchema } from "@modules/blog-post/schemas/blog-post.schema";
 import { DIMENSION_IMAGE } from "@modules/uploads/const/upload.const"; // Check if correct
@@ -35,13 +36,13 @@ export default function RecentBlogs({ latestPosts, lang }: RecentBlogsProps) {
 
 						{/* Image Area */}
 						<div class="relative h-48 overflow-hidden border-b border-white/5 bg-zinc-900 group-hover:border-primary/20 transition-colors">
-							{post.cover?.[0] ? (
+							{post.cover ? (
 								<img
 									src={
 										printFileWithDimension(
 											post.cover,
 											DIMENSION_IMAGE.md,
-											window.env.STORAGE_URL,
+											environments.STORAGE_URL,
 										)[0]
 									}
 									alt={post.title}

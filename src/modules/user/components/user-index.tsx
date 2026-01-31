@@ -3,6 +3,7 @@ import { Card } from "@components/extras/card";
 import EllipsisMenu from "@components/extras/ellipsis-menu";
 import Modal from "@components/extras/modal";
 import VigilioTable from "@components/tables";
+import environments from "@infrastructure/config/client/environments.config";
 import { cn, sizeIcon } from "@infrastructure/utils/client";
 import dayjs from "@infrastructure/utils/hybrid/date.utils";
 import { printFileWithDimension } from "@infrastructure/utils/hybrid/file.utils";
@@ -102,7 +103,7 @@ export default function UserIndex() {
 										printFileWithDimension(
 											row.avatar,
 											DIMENSION_IMAGE.xs,
-											window.env.STORAGE_URL,
+											environments.STORAGE_URL,
 										)[0]
 									}
 									alt={row.username}

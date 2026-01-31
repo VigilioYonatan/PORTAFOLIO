@@ -1,3 +1,4 @@
+import environments from "@infrastructure/config/client/environments.config";
 import { cn } from "@infrastructure/utils/client";
 import { printFileWithDimension } from "@infrastructure/utils/hybrid";
 import { DIMENSION_IMAGE } from "@modules/uploads/const/upload.const";
@@ -51,7 +52,7 @@ function Avatar({ user, size = "md", status, className }: AvatarProps) {
 							printFileWithDimension(
 								user.avatar,
 								DIMENSION_IMAGE.xs,
-								window.env.STORAGE_URL,
+								environments.STORAGE_URL,
 							)[0]
 						}
 						alt={user.username || ""}

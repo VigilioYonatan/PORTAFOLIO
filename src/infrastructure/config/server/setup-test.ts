@@ -99,7 +99,8 @@ if (typeof window !== "undefined") {
 	Object.defineProperty(window, "env", {
 		writable: true,
 		value: {
-			STORAGE_URL: process.env.STORAGE_URL || "http://localhost:9000/test-bucket-public",
+			STORAGE_URL:
+				process.env.STORAGE_URL || "http://localhost:9000/test-bucket-public",
 			NAME_APP: process.env.NAME_APP || "PORTAFOLIO_TEST",
 		},
 	});

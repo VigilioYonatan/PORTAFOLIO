@@ -16,7 +16,7 @@ import AI_AssistantButton from "../../ai-assistant-button";
 import PlanetOverlay from "../../special/planet-overlay";
 import MobileHeader from "./mobile-header";
 import MobileToolsDock from "./mobile-tools-dock";
-import { NAME_APP, STORAGE_URL } from "astro:env/server";
+import * as env from "astro:env/server";
 
 const lang = getLangFromUrl(Astro.url);
 const t = useTranslations(lang);
@@ -58,10 +58,12 @@ const activeThemeRgb = hexToRgb(activeThemeColor);
     <title>{title}</title>
     <meta name="description" content={description} />
     <ClientRouter />
-    <script define:vars={{ STORAGE_URL, NAME_APP }} is:inline>
+    <script define:vars={{ STORAGE_URL: env.STORAGE_URL, NAME_APP: env.NAME_APP, VAPID_PUBLIC_KEY: env.VAPID_PUBLIC_KEY, NODE_ENV: env.NODE_ENV }} is:inline>
       window.env = {
         STORAGE_URL,
-        NAME_APP
+        NAME_APP,
+        VAPID_PUBLIC_KEY,
+        NODE_ENV
       };
     </script>
 

@@ -1,5 +1,6 @@
 import Badge from "@components/extras/badge";
 import Modal from "@components/extras/modal";
+import environments from "@infrastructure/config/client/environments.config";
 import { printFileWithDimension } from "@infrastructure/utils/hybrid/file.utils";
 import { technologyIndexApi } from "@modules/technology/apis/technology.index.api";
 import TechnologyStore from "@modules/technology/components/technology-store";
@@ -53,14 +54,13 @@ export default function TechIconGrid() {
 	if (isSuccess && data) {
 		const techs = data.results!;
 		component = techs.map((tech) => {
-			const iconUrl =
-				tech.icon && tech.icon.length > 0
-					? printFileWithDimension(
-							tech.icon,
-							DIMENSION_IMAGE.xs,
-							window.env.STORAGE_URL,
-						)[0]
-					: null;
+			const iconUrl = tech.icon
+				? printFileWithDimension(
+						tech.icon,
+						DIMENSION_IMAGE.xs,
+						environments.STORAGE_URL,
+					)[0]
+				: null;
 			return (
 				<div
 					key={tech.id}

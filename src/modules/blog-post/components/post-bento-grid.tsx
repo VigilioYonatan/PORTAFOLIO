@@ -1,5 +1,6 @@
 import Modal from "@components/extras/modal";
 import { useEntranceAnimation } from "@hooks/use-motion";
+import environments from "@infrastructure/config/client/environments.config";
 import { LANGUAGES, type Language } from "@infrastructure/types/i18n";
 import { cn } from "@infrastructure/utils/client";
 import { formatDateTz } from "@infrastructure/utils/hybrid/date.utils";
@@ -180,7 +181,7 @@ export default function PostBentoGrid({ lang = "es" }: PostBentoGridProps) {
 											printFileWithDimension(
 												post.cover,
 												DIMENSION_IMAGE.md,
-												window.env.STORAGE_URL,
+												environments.STORAGE_URL,
 											)[0]
 										}
 										alt={post.title}

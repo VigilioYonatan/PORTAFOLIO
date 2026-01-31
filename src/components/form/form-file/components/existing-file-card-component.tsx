@@ -1,5 +1,6 @@
 import Badge from "@components/extras/badge";
 import Button from "@components/extras/button";
+import environments from "@infrastructure/config/client/environments.config";
 import { cn, sizeIcon } from "@infrastructure/utils/client";
 import { printFileWithDimension } from "@infrastructure/utils/hybrid/file.utils";
 import { DIMENSION_IMAGE } from "@modules/uploads/const/upload.const";
@@ -37,7 +38,7 @@ export function ExistingFileCard({
 							printFileWithDimension(
 								[file],
 								DIMENSION_IMAGE.xs,
-								window.env.STORAGE_URL,
+								environments.STORAGE_URL,
 							)[0]
 						}
 						alt={file.name}

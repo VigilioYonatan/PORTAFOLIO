@@ -1,3 +1,4 @@
+import environments from "@infrastructure/config/client/environments.config";
 import { cn } from "@infrastructure/utils/client";
 import { printFileWithDimension } from "@infrastructure/utils/hybrid/file.utils";
 import { technologyIndexApi } from "@modules/technology/apis/technology.index.api";
@@ -29,13 +30,13 @@ export default function TechStackIcons({
 					class="w-6 h-6 p-1 rounded-md bg-zinc-800/50 border border-white/5 flex items-center justify-center group relative"
 					title={tech.name}
 				>
-					{tech.icon?.[0] ? (
+					{tech.icon ? (
 						<img
 							src={
 								printFileWithDimension(
 									tech.icon,
 									DIMENSION_IMAGE.xs,
-									window.env.STORAGE_URL,
+									environments.STORAGE_URL,
 								)[0]
 							}
 							alt={tech.name}

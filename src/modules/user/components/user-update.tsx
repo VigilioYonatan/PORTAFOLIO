@@ -1,5 +1,6 @@
 import Form from "@components/form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import environments from "@infrastructure/config/client/environments.config";
 import type { Refetch } from "@infrastructure/types/client";
 import { cn } from "@infrastructure/utils/client";
 import { handlerError } from "@infrastructure/utils/client/handler-error";
@@ -85,7 +86,7 @@ export function UserUpdate({ user, refetch }: UserUpdateProps) {
 								printFileWithDimension(
 									user.avatar,
 									DIMENSION_IMAGE.xs,
-									window.env.STORAGE_URL,
+									environments.STORAGE_URL,
 								)[0]
 							}
 							alt={user.username}

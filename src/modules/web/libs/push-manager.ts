@@ -1,5 +1,4 @@
-const VAPID_PUBLIC_KEY =
-	"BNHhKhWwwUQXbFqbSmHAuIXBfFIzfAPOxrImmxkih8rPZ_TK7ftRUj5iuyMLK3nLTvN2huaTXCAPTq5C8yZ227Q";
+import environments from "@infrastructure/config/client/environments.config";
 
 function urlBase64ToUint8Array(base64String: string) {
 	const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
@@ -25,7 +24,9 @@ export async function subscribeUserToPush() {
 		const registration = await navigator.serviceWorker.ready;
 		const subscription = await registration.pushManager.subscribe({
 			userVisibleOnly: true,
-			applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
+			applicationServerKey: urlBase64ToUint8Array(
+				environments.VAPID_PUBLIC_KEY,
+			),
 		});
 
 		// Send subscription to backend

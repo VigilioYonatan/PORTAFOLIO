@@ -2,7 +2,7 @@
 import "@assets/css/global.css";
 import "../_main.ts";
 import { DashboardRouter } from "./_dashboard-router";
-import { NAME_APP, STORAGE_URL } from "astro:env/server";
+import * as env from "astro:env/server";
 ---
 
 <!doctype html>
@@ -14,10 +14,12 @@ import { NAME_APP, STORAGE_URL } from "astro:env/server";
     <meta name="generator" content={Astro.generator} />
 
     <title>Dashboard | Admin</title>
-    <script define:vars={{ STORAGE_URL, NAME_APP }} is:inline>
+    <script define:vars={{ STORAGE_URL: env.STORAGE_URL, NAME_APP: env.NAME_APP, VAPID_PUBLIC_KEY: env.VAPID_PUBLIC_KEY, NODE_ENV: env.NODE_ENV }} is:inline>
       window.env = {
        STORAGE_URL,
-       NAME_APP
+       NAME_APP,
+       VAPID_PUBLIC_KEY,
+       NODE_ENV
       };
     </script>
   </head>

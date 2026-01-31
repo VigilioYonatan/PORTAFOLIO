@@ -1,5 +1,6 @@
 import Modal from "@components/extras/modal";
 import VigilioTable from "@components/tables";
+import environments from "@infrastructure/config/client/environments.config";
 import { cn } from "@infrastructure/utils/client";
 import { printFileWithDimension } from "@infrastructure/utils/hybrid/file.utils";
 import { technologyDestroyApi } from "@modules/technology/apis/technology.destroy.api";
@@ -46,7 +47,7 @@ export default function TechnologyTable({ lang = "es" }: TechnologyTableProps) {
 									printFileWithDimension(
 										row.icon,
 										DIMENSION_IMAGE.xs,
-										window.env.STORAGE_URL,
+										environments.STORAGE_URL,
 									)[0]
 								}
 								alt={row.name}

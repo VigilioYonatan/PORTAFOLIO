@@ -1,4 +1,5 @@
 /// <reference types="astro/client" />
+import { Environments } from "@infrastructure/config/server";
 import type { Global } from "@infrastructure/types/request";
 
 declare global {
@@ -11,6 +12,8 @@ declare global {
 		env: {
 			STORAGE_URL: string;
 			NAME_APP: string;
+			VAPID_PUBLIC_KEY: string;
+			NODE_ENV: Environments["NODE_ENV"];
 		};
 	}
 }

@@ -1,3 +1,4 @@
+import environments from "@infrastructure/config/client/environments.config";
 import { printFileWithDimension } from "@infrastructure/utils/hybrid";
 import type { ProjectSchema } from "@modules/project/schemas/project.schema";
 import { DIMENSION_IMAGE } from "@modules/uploads/const/upload.const";
@@ -47,7 +48,7 @@ export default function RecentProjects({
 									printFileWithDimension(
 										project.images,
 										DIMENSION_IMAGE.md,
-										window.env.STORAGE_URL,
+										environments.STORAGE_URL,
 									)[0]
 								}
 								alt={project.title}

@@ -3,6 +3,7 @@ import { Card } from "@components/extras/card";
 import Modal from "@components/extras/modal";
 import Form from "@components/form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import environments from "@infrastructure/config/client/environments.config";
 import { cn, handlerError, sizeIcon } from "@infrastructure/utils/client";
 import {
 	formatDateTz,
@@ -200,7 +201,7 @@ export default function ProfileIndex() {
 												printFileWithDimension(
 													user.avatar || [],
 													DIMENSION_IMAGE.md,
-													window.env.STORAGE_URL,
+													environments.STORAGE_URL,
 												)[0]
 											}
 											alt={user.username}

@@ -32,10 +32,6 @@ export default defineConfig({
 				access: "public",
 			}),
 			PUBLIC_URL: envField.string({
-				context: "client",
-				access: "public",
-			}),
-			PORT: envField.string({
 				context: "server",
 				access: "public",
 			}),
@@ -47,8 +43,8 @@ export default defineConfig({
 				context: "server",
 				access: "public",
 			}),
-			PUBLIC_VAPID_KEY: envField.string({
-				context: "client",
+			VAPID_PUBLIC_KEY: envField.string({
+				context: "server",
 				access: "public",
 			}),
 			STORAGE_URL: envField.string({
