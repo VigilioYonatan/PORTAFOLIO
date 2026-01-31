@@ -9,7 +9,6 @@ import { PortfolioConfigSeeder } from "@modules/portfolio-config/seeders/portfol
 import { ProjectSeeder } from "@modules/project/seeders/project.seeder";
 import { TechnologySeeder } from "@modules/technology/seeders/technology.seeder";
 import { TenantSeeder } from "@modules/tenant/seeders/tenant.seeder";
-import { UserSeeder } from "@modules/user/seeders/user.seeder";
 import { WorkExperienceSeeder } from "@modules/work-experience/seeders/work-experience.seeder";
 import { WorkMilestoneSeeder } from "@modules/work-milestone/seeders/work-milestone.seeder";
 import { Inject, Injectable, Logger } from "@nestjs/common";
@@ -26,7 +25,6 @@ export class SeederService {
 		@Inject(DRIZZLE) private readonly db: NodePgDatabase<typeof schema>,
 		// Base seeders
 		private readonly tenantSeeder: TenantSeeder,
-		private readonly userSeeder: UserSeeder,
 		private readonly contactSeeder: ContactSeeder,
 		private readonly technologySeeder: TechnologySeeder,
 		private readonly workExperienceSeeder: WorkExperienceSeeder,
@@ -50,57 +48,55 @@ export class SeederService {
 		// ==========================================
 		this.logger.log("📦 Fase 1: Seeders base (Roles, Tenant & User)...");
 
-		const tenants = await this.tenantSeeder.run();
-		const savedTenants = tenants;
-		const tenantId = savedTenants[0].id;
+		// const tenants = await this.tenantSeeder.run();
+		// const savedTenants = tenants;
+		// const tenantId = savedTenants[0].id;
 
-		const users = await this.userSeeder.run();
-		const userId = users[0].id; // Assign first user as admin/author
 
-		// ==========================================
-		// FASE 2: Feature Modules
-		// ==========================================
-		this.logger.log("📁 Fase 2: Feature Modules...");
+		// // ==========================================
+		// // FASE 2: Feature Modules
+		// // ==========================================
+		// this.logger.log("📁 Fase 2: Feature Modules...");
 
-		// Contact Messages
-		this.logger.log("   - Contact Messages...");
-		await this.contactSeeder.run(tenantId);
+		// // Contact Messages
+		// this.logger.log("   - Contact Messages...");
+		// await this.contactSeeder.run(tenantId);
 
-		this.logger.log("   - Portfolio Config...");
-		await this.portfolioConfigSeeder.run(tenantId);
+		// this.logger.log("   - Portfolio Config...");
+		// await this.portfolioConfigSeeder.run(tenantId);
 
-		this.logger.log("   - Projects...");
-		await this.projectSeeder.run(tenantId);
+		// this.logger.log("   - Projects...");
+		// await this.projectSeeder.run(tenantId);
 
-		this.logger.log("   - AI Config...");
-		await this.aiConfigSeeder.run(tenantId);
+		// this.logger.log("   - AI Config...");
+		// await this.aiConfigSeeder.run(tenantId);
 
-		this.logger.log("   - Technologies...");
-		await this.technologySeeder.run(tenantId);
+		// this.logger.log("   - Technologies...");
+		// await this.technologySeeder.run(tenantId);
 
-		this.logger.log("   - Work Experiences...");
-		await this.workExperienceSeeder.run(tenantId);
+		// this.logger.log("   - Work Experiences...");
+		// await this.workExperienceSeeder.run(tenantId);
 
-		this.logger.log("   - Work Milestones...");
-		await this.workMilestoneSeeder.run(tenantId);
+		// this.logger.log("   - Work Milestones...");
+		// await this.workMilestoneSeeder.run(tenantId);
 
-		this.logger.log("   - Blog Categories...");
-		const categories = await this.blogCategorySeeder.run(tenantId);
-		const categoryId = categories.length > 0 ? categories[0].id : undefined;
+		// this.logger.log("   - Blog Categories...");
+		// const categories = await this.blogCategorySeeder.run(tenantId);
+		// const categoryId = categories.length > 0 ? categories[0].id : undefined;
 
-		this.logger.log("   - Blog Posts...");
-		await this.blogPostSeeder.run(tenantId, userId, categoryId);
+		// this.logger.log("   - Blog Posts...");
+		// await this.blogPostSeeder.run(tenantId, userId, categoryId);
 
-		this.logger.log("   - Music Tracks...");
-		await this.musicTrackSeeder.run(tenantId);
+		// this.logger.log("   - Music Tracks...");
+		// await this.musicTrackSeeder.run(tenantId);
 
-		this.logger.log("   - Conversations...");
-		await this.conversationSeeder.run(tenantId);
+		// this.logger.log("   - Conversations...");
+		// await this.conversationSeeder.run(tenantId);
 
-		this.logger.log("   - Open Source Projects...");
-		await this.openSourceSeeder.run(tenantId);
+		// this.logger.log("   - Open Source Projects...");
+		// await this.openSourceSeeder.run(tenantId);
 
-		this.logger.log("✅ Seeding completado exitosamente.");
+		// this.logger.log("✅ Seeding completado exitosamente.");
 		process.exit(0);
 	}
 

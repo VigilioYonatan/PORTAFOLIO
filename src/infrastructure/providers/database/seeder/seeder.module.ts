@@ -9,7 +9,6 @@ import { PortfolioConfigSeeder } from "@modules/portfolio-config/seeders/portfol
 import { ProjectSeeder } from "@modules/project/seeders/project.seeder";
 import { TechnologySeeder } from "@modules/technology/seeders/technology.seeder";
 import { TenantSeeder } from "@modules/tenant/seeders/tenant.seeder";
-import { UserSeeder } from "@modules/user/seeders/user.seeder";
 import { WorkExperienceSeeder } from "@modules/work-experience/seeders/work-experience.seeder";
 import { WorkMilestoneSeeder } from "@modules/work-milestone/seeders/work-milestone.seeder";
 import { Module } from "@nestjs/common";
@@ -22,7 +21,6 @@ import { SeederService } from "./seeder.service";
 		SeederService,
 		// Base seeders
 		TenantSeeder,
-		UserSeeder,
 		ContactSeeder,
 		TechnologySeeder,
 		WorkExperienceSeeder,
