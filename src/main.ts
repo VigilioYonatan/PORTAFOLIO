@@ -22,9 +22,11 @@ async function bootstrap() {
 	const port = configService.getOrThrow<number>("PORT");
 	// Logger
 	app.useLogger(app.get(Logger));
-
-	app.useStaticAssets(path.join(__dirname, '..', 'public'));
+	console.log({dir:path.join(__dirname, '..', "..",'public')});
 	
+
+	app.useStaticAssets(path.join(__dirname, '..', "..",'public'));
+
 	// Security Headers
 	// app.use(helmet(helmetConfig(configService)));
 
