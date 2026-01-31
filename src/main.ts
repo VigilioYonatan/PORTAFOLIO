@@ -8,12 +8,12 @@ import { NestFactory } from "@nestjs/core";
 import express from "express";
 import { Logger } from "nestjs-pino";
 import { AppModule } from "./app.module";
-
+import type { NestExpressApplication } from "@nestjs/platform-express";
 async function bootstrap() {
 	// Validar variables de entorno ANTES de iniciar NestJS
 	validateEnvironments();
 
-	const app = await NestFactory.create(AppModule, { bufferLogs: true });
+	const app = await NestFactory.create<NestExpressApplication>(AppModule, { bufferLogs: true });
 	app.enableShutdownHooks(); // Para evitar bug de puerto en uso
 
 	// get configService environment
@@ -23,6 +23,8 @@ async function bootstrap() {
 	// Logger
 	app.useLogger(app.get(Logger));
 
+	app.useStaticAssets(path.join(__dirname, '..', 'public'));
+	
 	// Security Headers
 	// app.use(helmet(helmetConfig(configService)));
 
@@ -32,6 +34,7 @@ async function bootstrap() {
 			corsOrigins === "*" ? "*" : corsOrigins.split(",").map((s) => s.trim()),
 		credentials: true,
 	});
+	
 
 	// Versioning
 	// Versioning & Global Prefix

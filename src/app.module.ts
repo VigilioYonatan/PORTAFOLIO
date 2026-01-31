@@ -43,9 +43,6 @@ import path from "node:path";
 @Module({
 	imports: [
 		EventEmitterModule.forRoot(),
-		ServeStaticModule.forRoot({
-			rootPath: path.join(__dirname, '..', 'public'),
-		}),
 		AppConfigModule,
 		AppCacheModule,
 		AppLoggerModule,
