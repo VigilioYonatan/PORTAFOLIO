@@ -56,10 +56,10 @@ export class SessionConfigService {
 				rolling: true,
 				proxy: isProd,
 				cookie: {
-					secure: isProd,
+					secure: false,
 					httpOnly: isProd, // Siempre true por seguridad
 					maxAge: 1000 * 60 * 60 * 24 * 3, // 3 días en ms
-					sameSite: isProd ? "none" : "lax",
+					// sameSite: isProd ? "none" : "lax",
 				},
 			}),
 		);
