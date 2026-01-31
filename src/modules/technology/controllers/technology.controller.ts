@@ -12,8 +12,8 @@ import {
 	HttpCode,
 	Param,
 	ParseIntPipe,
+	Patch,
 	Post,
-	Put,
 	Query,
 	Req,
 	UseGuards,
@@ -98,7 +98,7 @@ export class TechnologyController {
 	}
 
 	@Roles(1) // Admin only
-	@Put("/:id")
+	@Patch("/:id")
 	@ApiOperation({ summary: "Update technology" })
 	@ApiBody({ type: TechnologyUpdateClassDto })
 	@ApiResponse({

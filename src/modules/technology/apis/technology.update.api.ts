@@ -15,7 +15,7 @@ export function technologyUpdateApi(id: number) {
 		TechnologyUpdateApiError
 	>(`/technology/${id}`, async (url, body) => {
 		const response = await fetch(`/api/v1${url}`, {
-			method: "PUT",
+			method: "PATCH",
 			body: JSON.stringify(body),
 			headers: { "Content-Type": "application/json" },
 		});
