@@ -1,4 +1,4 @@
-/// <reference types="astro/client" />
+/// <reference path="../.astro/types.d.ts" />
 import { Environments } from "@infrastructure/config/server";
 import type { Global } from "@infrastructure/types/request";
 

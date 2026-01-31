@@ -6,6 +6,7 @@ import { z } from "@infrastructure/config/zod-i18n.config";
  */
 export const clientEnvironmentsSchema = z.object({
 	NAME_APP: z.string().min(1),
+	PUBLIC_URL: z.string().min(1),
 	NODE_ENV: z.enum(["PRODUCTION", "STAGING", "DEVELOPMENT"]),
 	VAPID_PUBLIC_KEY: z.string().min(1),
 	STORAGE_URL: z.string().min(1),
@@ -31,6 +32,7 @@ function getClientEnvironments(): ClientEnvironments {
 		// En cliente, retornamos defaults en vez de crashear
 		return {
 			NAME_APP: "Vigilio",
+			PUBLIC_URL: "http://localhost:3004",
 			NODE_ENV: "DEVELOPMENT",
 			VAPID_PUBLIC_KEY: "",
 			STORAGE_URL: "/",
