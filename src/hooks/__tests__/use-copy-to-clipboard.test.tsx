@@ -12,12 +12,16 @@ describe("useCopyToClipboard", () => {
 				writeText: writeTextMock,
 			},
 		});
+		vi.spyOn(console, "warn").mockImplementation(() => {});
 	});
 
 	afterEach(() => {
 		vi.unstubAllGlobals();
 		vi.restoreAllMocks();
 	});
+
+
+
 
 	it("should initialize with null copied text", () => {
 		const { result } = renderHook(() => useCopyToClipboard());
