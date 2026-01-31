@@ -39,7 +39,7 @@ async callback(@Query('code') code: string, @Res() res: Response) {
 
   res.cookie("access_token", tokens.access_token, {
     httpOnly: true, // JS no puede leerla
-    secure: process.env.NODE_ENV === 'production', // Solo HTTPS
+    secure: process.env.NODE_ENV === 'PRODUCTION', // Solo HTTPS
     sameSite: "strict", // Previene CSRF
     maxAge: 3600 * 1000,
   });
@@ -189,7 +189,7 @@ async callback(@Query('code') code: string, @Res() res: Response) {
 
   res.cookie("access_token", tokens.access_token, {
     httpOnly: true, // JS cannot read it
-    secure: process.env.NODE_ENV === 'production', // HTTPS only
+    secure: process.env.NODE_ENV === 'PRODUCTION', // HTTPS only
     sameSite: "strict", // Prevents CSRF
     maxAge: 3600 * 1000,
   });
@@ -339,7 +339,7 @@ async callback(@Query('code') code: string, @Res() res: Response) {
 
   res.cookie("access_token", tokens.access_token, {
     httpOnly: true, // JS não pode ler
-    secure: process.env.NODE_ENV === 'production', // Apenas HTTPS
+    secure: process.env.NODE_ENV === 'PRODUCTION', // Apenas HTTPS
     sameSite: "strict", // Previne CSRF
     maxAge: 3600 * 1000,
   });

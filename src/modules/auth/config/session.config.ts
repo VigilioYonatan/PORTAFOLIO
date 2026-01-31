@@ -9,8 +9,6 @@ import {
 } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import connectPgSimple from "connect-pg-simple";
-import { RedisStore } from "connect-redis";
-import type { Store } from "express-session";
 import session from "express-session";
 import passport from "passport";
 import { Pool } from "pg";
