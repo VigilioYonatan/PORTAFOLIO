@@ -25,7 +25,7 @@ export class SessionConfigService {
 	) {}
 
 	setup(app: INestApplication) {
-		const isProd = this.configService.getOrThrow("NODE_ENV") === "DEVELOPMENT";
+		const isProd = this.configService.getOrThrow("NODE_ENV") === "PRODUCTION";
 
 		// if (isProd) {
 		// 	// Producción: Redis
