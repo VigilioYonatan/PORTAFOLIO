@@ -44,7 +44,14 @@ COPY --chown=cearjs:nodejs --from=build /usr/src/app/node_modules ./node_modules
 COPY --chown=cearjs:nodejs --from=build /usr/src/app/dist ./dist/
 COPY --chown=cearjs:nodejs --from=build /usr/src/app/public ./public/
 COPY --chown=cearjs:nodejs --from=build /usr/src/app/drizzle ./drizzle/
+RUN apk add --no-cache curl unzip
 
+# 2. Descargamos la carpeta (Dropbox la envía como ZIP al usar dl=1)
+# Usamos -L para seguir redirecciones y -o para nombrar el archivo temporalmente
+RUN curl -L -o contenido.zip "https://www.dropbox.com/scl/fo/l16tpptrr9apviq0spefa/ALlm6BHcHSIm7lokid8aCco?rlkey=gu4twc4nimquzjhy54x64f2ga&st=e436nhi1&dl=1" && \
+    mkdir -p public && \
+    unzip contenido.zip -d public/ && \
+    rm contenido.zip
 # COPY --chown=cearjs:nodejs --from=build /usr/src/app/src/assets/temp ./src/assets/temp/
 
 USER cearjs
