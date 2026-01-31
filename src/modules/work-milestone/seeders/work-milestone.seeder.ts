@@ -6,7 +6,7 @@ import { Inject, Injectable } from "@nestjs/common";
 import { eq, type InferInsertModel } from "drizzle-orm";
 import type { NodePgDatabase } from "drizzle-orm/node-postgres";
 import { workMilestoneEntity } from "../entities/work-milestone.entity";
-
+import { faker } from "@faker-js/faker";
 @Injectable()
 export class WorkMilestoneSeeder {
 	constructor(
@@ -14,8 +14,6 @@ export class WorkMilestoneSeeder {
 	) {}
 
 	async run(tenant_id: number) {
-		const {faker} = await import("@faker-js/faker");
-
 		// 1. Get existing experiences
 		const experiences = await this.db.query.workExperienceEntity.findMany({
 			where: eq(workExperienceEntity.tenant_id, tenant_id),

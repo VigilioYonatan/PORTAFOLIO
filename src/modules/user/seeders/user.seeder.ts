@@ -5,6 +5,7 @@ import * as bcrypt from "bcrypt";
 import { type InferInsertModel } from "drizzle-orm";
 import type { NodePgDatabase } from "drizzle-orm/node-postgres";
 import { userEntity } from "../entities/user.entity";
+import { faker } from "@faker-js/faker";
 
 @Injectable()
 export class UserSeeder {
@@ -13,7 +14,6 @@ export class UserSeeder {
 	) {}
 
 	async run() {
-		const {faker} = await import("@faker-js/faker");
 
 		const saltRounds = 10;
 		const usersSeed: InferInsertModel<typeof userEntity>[] = [

@@ -5,7 +5,7 @@ import { Inject, Injectable } from "@nestjs/common";
 import { type NodePgDatabase } from "drizzle-orm/node-postgres";
 import { contactMessageEntity } from "../entities/contact-message.entity";
 import { type ContactMessageSchema } from "../schemas/contact-message.schema";
-
+import { faker } from "@faker-js/faker";
 @Injectable()
 export class ContactSeeder {
 	constructor(
@@ -13,8 +13,6 @@ export class ContactSeeder {
 	) {}
 
 	async run(tenant_id: number) {
-		const {faker} = await import("@faker-js/faker");
-
 		const contactMessagesSeed: Omit<ContactMessageSchema, "id">[] = Array.from({
 			length: 50,
 		}).map(() => ({

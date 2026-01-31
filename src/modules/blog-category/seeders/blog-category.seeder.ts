@@ -6,6 +6,7 @@ import { Inject, Injectable } from "@nestjs/common";
 import { type NodePgDatabase } from "drizzle-orm/node-postgres";
 import { blogCategoryEntity } from "../entities/blog-category.entity";
 import type { BlogCategorySchema } from "../schemas/blog-category.schema";
+import { faker } from "@faker-js/faker";
 
 @Injectable()
 export class BlogCategorySeeder {
@@ -14,7 +15,6 @@ export class BlogCategorySeeder {
 	) {}
 
 	async run(tenantId: number) {
-		const {faker} = await import("@faker-js/faker");
 		const categoriesSeed: Omit<BlogCategorySchema, "id">[] = Array.from({
 			length: 8,
 		}).map(() => {

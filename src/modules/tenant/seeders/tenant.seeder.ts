@@ -8,7 +8,7 @@ import { tenantEntity } from "../entities/tenant.entity";
 import { tenantSettingEntity } from "../entities/tenant-setting.entity";
 import type { TenantSchema } from "../schemas/tenant.schema";
 import type { TenantSettingSchema } from "../schemas/tenant-setting.schema";
-
+import { faker } from "@faker-js/faker";
 @Injectable()
 export class TenantSeeder {
 	constructor(
@@ -16,8 +16,6 @@ export class TenantSeeder {
 	) {}
 
 	async run() {
-		const {faker} = await import("@faker-js/faker");
-
 		const tenantsSeed: Omit<TenantSchema, "id">[] = Array.from({
 			length: 10,
 		}).map((_, i) => {
