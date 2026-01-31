@@ -22,7 +22,7 @@ export class SessionConfigService {
 	) {}
 
 	setup(app: INestApplication) {
-		app.getHttpAdapter().getInstance().set('trust proxy', 1);
+		app.getHttpAdapter().getInstance().set("trust proxy", 1);
 		const isProd = this.configService.getOrThrow("NODE_ENV") === "PRODUCTION";
 
 		// if (isProd) {
@@ -59,6 +59,7 @@ export class SessionConfigService {
 					secure: isProd,
 					httpOnly: isProd, // Siempre true por seguridad
 					maxAge: 1000 * 60 * 60 * 24 * 3, // 3 días en ms
+					sameSite: isProd ? "none" : "lax",
 				},
 			}),
 		);

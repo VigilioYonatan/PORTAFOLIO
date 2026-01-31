@@ -29,7 +29,12 @@ const logger = new Logger("DatabaseModule");
 					return await getSharedPGlite(pathName);
 				}
 
-				const pool = new Pool({ connectionString });
+				const pool = new Pool({
+					connectionString,
+					ssl: {
+						rejectUnauthorized: false, // REQUERIDO para bases de datos en la nube
+					},
+				});
 
 				pool.on("connect", () => logger.debug("New client connected to pool"));
 				pool.on("error", (err) =>
