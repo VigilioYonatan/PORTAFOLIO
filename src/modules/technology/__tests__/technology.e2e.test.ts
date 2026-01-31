@@ -59,7 +59,7 @@ describe("Technology Module (E2E)", () => {
 		});
 	});
 
-	describe("PUT /technologies/:id", () => {
+	describe("PATCH /technologies/:id", () => {
 		it("should update a technology", async () => {
 			const createDto = TechnologyFactory.createStoreDto();
 			const createRes = await request(e2e.app.getHttpServer())
@@ -75,7 +75,7 @@ describe("Technology Module (E2E)", () => {
 			});
 
 			const response = await request(e2e.app.getHttpServer())
-				.put(`/api/v1/technology/${id}`)
+				.patch(`/api/v1/technology/${id}`)
 				.set("Host", "localhost")
 				.set("Authorization", `Bearer ${adminAccessToken}`)
 				.set("x-mock-role", "admin")

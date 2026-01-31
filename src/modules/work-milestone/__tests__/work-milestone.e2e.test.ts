@@ -78,6 +78,7 @@ describe("WorkMilestoneModule (e2e)", () => {
 				milestone_date: new Date().toISOString(),
 				sort_order: 1,
 				work_experience_id: experienceId,
+				icon: null,
 			};
 
 			const response = await request(app.getHttpServer())
@@ -124,6 +125,7 @@ describe("WorkMilestoneModule (e2e)", () => {
 				milestone_date: new Date().toISOString(),
 				sort_order: 2,
 				work_experience_id: experienceId,
+				icon: null,
 			};
 
 			const response = await request(app.getHttpServer())
@@ -151,6 +153,7 @@ describe("WorkMilestoneModule (e2e)", () => {
 				milestone_date: new Date().toISOString(),
 				sort_order: 2,
 				work_experience_id: experienceId,
+				icon: null,
 			};
 
 			await request(app.getHttpServer())

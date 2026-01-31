@@ -54,6 +54,7 @@ describe("User Module (E2E)", () => {
 				repeat_password: "Password123!",
 				role_id: 2,
 				status: "ACTIVE",
+				phone_number: null,
 			};
 
 			const response = await request(e2e.app.getHttpServer())
