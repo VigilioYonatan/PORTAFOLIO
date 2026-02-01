@@ -17,12 +17,13 @@ const { title } = Astro.props;
     <meta name="generator" content={Astro.generator} />
     <title>{title || "Authentication | IntelliDoc AI"}</title>
     <ClientRouter />
-    <script define:vars={{ STORAGE_URL: env.STORAGE_URL, NAME_APP: env.NAME_APP, VAPID_PUBLIC_KEY: env.VAPID_PUBLIC_KEY, NODE_ENV: env.NODE_ENV }} is:inline>
+    <script define:vars={{ STORAGE_URL: env.STORAGE_URL, NAME_APP: env.NAME_APP, VAPID_PUBLIC_KEY: env.VAPID_PUBLIC_KEY, NODE_ENV: env.NODE_ENV, PUBLIC_URL: env.PUBLIC_URL }} is:inline>
       window.env = {
         STORAGE_URL,
-        NAME_APP,
-        VAPID_PUBLIC_KEY,
-        NODE_ENV
+       NAME_APP,
+       VAPID_PUBLIC_KEY,
+       NODE_ENV,
+       PUBLIC_URL
       };
     </script>
   </head>
