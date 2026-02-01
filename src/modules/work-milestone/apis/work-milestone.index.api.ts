@@ -32,7 +32,7 @@ export function workMilestoneIndexApi(
 		WorkMilestoneIndexResponseDto,
 		WorkMilestoneIndexApiError
 	>(
-		`/work-milestone?work_experience_id=${experienceId}`,
+		`/work-milestone`,
 		async (url) => {
 			const data = new URLSearchParams();
 			if (table) {
@@ -71,6 +71,7 @@ export function workMilestoneIndexApi(
 				}
 			}
 
+			data.append("work_experience_id", String(experienceId));
 			const response = await fetch(`/api/v1${url}?${data}`);
 			const result = await response.json();
 			if (!response.ok) throw result;

@@ -23,23 +23,24 @@ export type Environments = ClientEnvironments;
  * En Astro, usa import.meta.env
  */
 function getClientEnvironments(): ClientEnvironments {
-	// check window.env
-	const result = clientEnvironmentsSchema.safeParse(
-		typeof window !== "undefined" ? window.env : {},
-	);
-
-	if (!result.success) {
-		// En cliente, retornamos defaults en vez de crashear
-		return {
-			NAME_APP: "Vigilio",
-			PUBLIC_URL: "http://localhost:3004",
-			NODE_ENV: "DEVELOPMENT",
-			VAPID_PUBLIC_KEY: "",
-			STORAGE_URL: "/",
-		};
+	if(typeof window !== "undefined"){
+		console.log({b:window.env});
+		
+		const result = clientEnvironmentsSchema.safeParse(window.env);
+		if (!result.success) {
+			// En cliente, retornamos defaults en vez de crashear
+			// throw new Error("Invalid client environments");
+			throw new Error(`Invalid client environments ${result.error}`);
+		}
+		return result.data;
 	}
-
-	return result.data;
+	return {
+		NAME_APP: "Vigilio",
+		PUBLIC_URL: "http://localhost:3000",
+		NODE_ENV: "DEVELOPMENT",
+		VAPID_PUBLIC_KEY: "",
+		STORAGE_URL: "http://localhost:3000",
+	};
 }
 
 const environments = getClientEnvironments();

@@ -58,7 +58,6 @@ export default function TechIconGrid() {
 				? printFileWithDimension(
 						tech.icon,
 						DIMENSION_IMAGE.xs,
-						environments.STORAGE_URL,
 					)[0]
 				: null;
 			return (

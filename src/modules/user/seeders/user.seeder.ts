@@ -12,7 +12,7 @@ export class UserSeeder {
 	) {}
 
 	async run(tenant_id: number) {
-		const password = await bcrypt.hash("123456", 10);
+		const password = await bcrypt.hash("Dokixd123@", 10);
 
 		const user = {
 			username: "admin",

@@ -1,3 +1,4 @@
+import environments from "@infrastructure/config/client/environments.config";
 import type { FilesSchema } from "@modules/uploads/schemas/upload.schema";
 
 /**
@@ -25,7 +26,7 @@ export function formatFileSize(bytes: number, decimals = 2): string {
 export function printFileWithDimension(
 	files: FilesSchema[] | null,
 	dimension: number | null = null,
-	publicCdnUrl = "/",
+	publicCdnUrl =environments?.STORAGE_URL || "/",
 	custom_file_no_found: string | null = null,
 ): string[] {
 	if (!files || files.length === 0) {

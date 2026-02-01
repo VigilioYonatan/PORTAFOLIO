@@ -55,14 +55,6 @@ export default defineConfig({
 	},
 	adapter: node({ mode: "middleware" }),
 	vite: {
-		server: {
-			proxy: {
-				"/api": {
-					target: `http://localhost:${PUBLIC_PORT || 3004}`,
-					changeOrigin: true,
-				},
-			},
-		},
 		ssr: {
 			noExternal: [
 				"react-hook-form",
