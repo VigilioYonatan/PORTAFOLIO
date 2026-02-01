@@ -213,7 +213,7 @@ const services = [
                           <div class="absolute inset-0 bg-primary/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-full" />
                           
                           <div class="relative z-10 w-12 h-12 flex items-center justify-center rounded-lg bg-zinc-900 border border-white/5 group-hover:border-primary/30 transition-all duration-500 shadow-inner">
-                            {tech.icon ? (
+                            {tech.icon && tech.icon.length > 0 ? (
                               <Image
                                 src={printFileWithDimension(tech.icon, DIMENSION_IMAGE.xs,env.STORAGE_URL)[0]}
                                 alt={tech.name}
