@@ -553,6 +553,7 @@ export class RustFSService {
 			const command = new PutObjectCommand({
 				Bucket: this.bucket,
 				Key: key,
+				ContentType: fileType || "application/octet-stream",
 			});
 			const uploadUrl = await getSignedUrl(this.getSignerClient(), command, {
 				expiresIn: PRESIGNED_URL_EXPIRY,
