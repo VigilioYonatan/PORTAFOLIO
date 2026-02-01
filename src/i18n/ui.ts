@@ -909,7 +909,7 @@ export const ui = {
 		opensource: {
 			title: "Open Source",
 			subtitle:
-				"Bibliotecas reales y componentes modulares publicados en NPM. Enfocados en la optimización extrema, una DX fluida y estética minimalista.",
+				"Bibliotecas reales y componentes modulares publicados en NPM. Enfocados en la optimización extrema en el desarrollo de tus aplicaciones.",
 			view_details: "Ver Detalles",
 		},
 		common: {

@@ -161,6 +161,8 @@ export class RustFSService {
 
 		// Enforce Public Bucket Policy (Crucial for accessing files via public URL explicitly)
 		await this.setPublicBucketPolicy();
+		// Enforce CORS for Multiparts uploads
+		await this.setPublicBucketCors();
 	}
 
 	private async setPublicBucketPolicy(): Promise<void> {
@@ -190,6 +192,38 @@ export class RustFSService {
 		} catch (error) {
 			this.logger.warn(
 				`Failed to set public bucket policy for "${this.bucket}"`,
+				error,
+			);
+		}
+	}
+
+	private async setPublicBucketCors(): Promise<void> {
+		if (!this.s3Client) return;
+		
+		const corsOrigins = this.configService.get("CORS_ORIGINS") || "*";
+		
+		try {
+			const { PutBucketCorsCommand } = await import("@aws-sdk/client-s3");
+			await this.s3Client.send(
+				new PutBucketCorsCommand({
+					Bucket: this.bucket,
+					CORSConfiguration: {
+						CORSRules: [
+							{
+								AllowedHeaders: ["*"],
+								AllowedMethods: ["GET", "PUT", "POST", "DELETE", "HEAD"],
+								AllowedOrigins: corsOrigins === "*" ? ["*"] : corsOrigins.split(","),
+								ExposeHeaders: ["ETag"],
+								MaxAgeSeconds: 3000,
+							},
+						],
+					},
+				}),
+			);
+			this.logger.log(`Bucket CORS for "${this.bucket}" configured successfully`);
+		} catch (error) {
+			this.logger.warn(
+				`Failed to set bucket CORS for "${this.bucket}"`,
 				error,
 			);
 		}
