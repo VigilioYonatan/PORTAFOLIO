@@ -37,6 +37,9 @@ ENV VAPID_PUBLIC_KEY=$VAPID_PUBLIC_KEY
 ARG STORAGE_URL
 ENV STORAGE_URL=$STORAGE_URL
 
+ARG STORAGE_CDN_URL
+ENV STORAGE_CDN_URL=$STORAGE_CDN_URL
+
 # Cacheamos también la instalación final de producción
 RUN pnpm run build:client && \
     pnpm run build:serve && \
