@@ -23,6 +23,7 @@ async function bootstrap() {
 	const configService = app.get(ConfigService);
 	const corsOrigins = configService.getOrThrow<string>("CORS_ORIGINS");
 	const port = configService.getOrThrow<number>("PORT");
+	const isDevelopment = configService.getOrThrow<string>("NODE_ENV") === "development";
 	// Logger
 	app.useLogger(app.get(Logger));
 	app.useStaticAssets(path.join(__dirname, "..", "public"));
@@ -65,7 +66,9 @@ async function bootstrap() {
 	// Start on port
 
 	const server = await app.listen(port);
-	server.on("upgrade", astroProxy.upgrade);
+	if (isDevelopment) {
+		server.on("upgrade", astroProxy.upgrade);
+	}
 	// biome-ignore lint/suspicious/noConsole: Startup log
 	console.log(`Application is running on: http://localhost:${port}`);
 	// biome-ignore lint/suspicious/noConsole: Startup log
