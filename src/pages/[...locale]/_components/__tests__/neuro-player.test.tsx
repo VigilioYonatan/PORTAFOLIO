@@ -66,22 +66,25 @@ describe("NeuroPlayer Component", () => {
 		});
 	});
 
+
+	const STORAGE_CDN_URL = "https://mock-cdn.com";
+
 	it("renders track info correctly", () => {
-		render(<NeuroPlayer />);
+		render(<NeuroPlayer STORAGE_CDN_URL={STORAGE_CDN_URL} />);
 		expect(screen.getByText("Test Track")).toBeInTheDocument();
 		expect(screen.getByText("Test Artist")).toBeInTheDocument();
 	});
 
 	it("calls togglePlay when play button is clicked", async () => {
 		const { audioStore } = await import("@stores/audio.store");
-		render(<NeuroPlayer />);
+		render(<NeuroPlayer STORAGE_CDN_URL={STORAGE_CDN_URL} />);
 		const playButton = screen.getByLabelText("Play");
 		fireEvent.click(playButton);
 		expect(audioStore.methods.togglePlay).toHaveBeenCalled();
 	});
 
 	it("opens playlist when playlist button is clicked", () => {
-		render(<NeuroPlayer />);
+		render(<NeuroPlayer STORAGE_CDN_URL={STORAGE_CDN_URL} />);
 		const playlistButton = screen.getByLabelText("Open Playlist");
 		fireEvent.click(playlistButton);
 		expect(screen.getByTestId("modal")).toBeInTheDocument();
@@ -90,7 +93,7 @@ describe("NeuroPlayer Component", () => {
 
 	it("calls setVolume when volume button is clicked (mute logic)", async () => {
 		const { audioStore } = await import("@stores/audio.store");
-		render(<NeuroPlayer />);
+		render(<NeuroPlayer STORAGE_CDN_URL={STORAGE_CDN_URL} />);
 		const muteButton = screen.getByLabelText("Toggle Mute");
 		fireEvent.click(muteButton);
 		expect(audioStore.methods.setVolume).toHaveBeenCalledWith(0);

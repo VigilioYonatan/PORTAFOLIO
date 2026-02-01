@@ -6,7 +6,7 @@ import { ProjectGallery } from "@modules/project/components/project-gallery";
 import { Globe, Calendar, ArrowLeft } from "@lucide/astro";
 import { printFileWithDimension } from "@infrastructure/utils/hybrid/file.utils";
 import { DIMENSION_IMAGE } from "@modules/uploads/const/upload.const";
-import { STORAGE_URL } from "astro:env/server";
+import { STORAGE_CDN_URL } from "astro:env/server";
 import { BrandIcon } from "@components/extras/brand-icon";
 import { siGithub } from "simple-icons";
 import { getLangFromUrl, useTranslations } from "../../../i18n";
@@ -59,7 +59,7 @@ const description = project.description;
               printFileWithDimension(
                 project.images,
                 DIMENSION_IMAGE.lg,
-                STORAGE_URL
+                STORAGE_CDN_URL
               )[0]
             }
             alt={project.title}
@@ -175,7 +175,7 @@ const description = project.description;
                               printFileWithDimension(
                                 techeable.technology.icon,
                                 DIMENSION_IMAGE.xs,
-                                STORAGE_URL
+                                STORAGE_CDN_URL
                               )[0]
                             }
                             alt={techeable.technology.name}

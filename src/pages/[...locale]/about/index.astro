@@ -69,7 +69,7 @@ const services = [
           class="w-full h-full rounded-full bg-zinc-900 flex items-center justify-center overflow-hidden"
         >
           <Image
-            src={`${env.STORAGE_URL}/yoni.jpeg`}
+            src={`${env.STORAGE_CDN_URL}/yoni.jpeg`}
             alt="Yonatan Vigilio Lavado"
             title="Yonatan Vigilio Lavado"
             width={128}
@@ -215,7 +215,7 @@ const services = [
                           <div class="relative z-10 w-12 h-12 flex items-center justify-center rounded-lg bg-zinc-900 border border-white/5 group-hover:border-primary/30 transition-all duration-500 shadow-inner">
                             {tech.icon && tech.icon.length > 0 ? (
                               <Image
-                                src={printFileWithDimension(tech.icon, DIMENSION_IMAGE.xs,env.STORAGE_URL)[0]}
+                                src={printFileWithDimension(tech.icon, DIMENSION_IMAGE.xs,env.STORAGE_CDN_URL)[0]}
                                 alt={tech.name}
                                 width={DIMENSION_IMAGE.xs}
                                 height={DIMENSION_IMAGE.xs}

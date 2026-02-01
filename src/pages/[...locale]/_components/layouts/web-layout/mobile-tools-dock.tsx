@@ -9,6 +9,7 @@ import NatureButton from "../../special/nature-button";
 import PlanetButton from "../../special/planet-button";
 import ProtostarButton from "../../special/protostar-button";
 import SystemStats from "../../system-stats";
+import * as  env  from "astro:env/server";
 
 interface MobileToolsDockProps {
 	lang: Lang;
@@ -102,7 +103,7 @@ export default function MobileToolsDock({ lang }: MobileToolsDockProps) {
 						<span className="text-[10px] text-muted-foreground uppercase tracking-widest pl-1">
 							Audio Module
 						</span>
-						<NeuroPlayer className="w-full" />
+						<NeuroPlayer STORAGE_CDN_URL={env.STORAGE_CDN_URL} className="w-full" />
 					</div>
 
 					{/* System Stats */}

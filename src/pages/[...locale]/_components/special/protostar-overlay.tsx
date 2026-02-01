@@ -10,10 +10,10 @@ import { Loader2Icon, XIcon } from "lucide-preact";
 import { useEffect, useMemo, useRef } from "preact/hooks";
 
 interface ProtostarOverlayProps {
-	STORAGE_URL: string;
+	STORAGE_CDN_URL: string;
 }
 export default function ProtostarOverlay({
-	STORAGE_URL,
+	STORAGE_CDN_URL,
 }: ProtostarOverlayProps) {
 	// Lazy Load State - refactored to Signal
 	const hasActivated = useSignal(false);
@@ -122,7 +122,7 @@ export default function ProtostarOverlay({
 			{/* Video */}
 			<video
 				ref={videoRef}
-				src={`${STORAGE_URL}/video/insolation.mp4`}
+				src={`${STORAGE_CDN_URL}/video/insolation.mp4`}
 				class={cn(
 					"w-full h-full object-cover z-0 transition-opacity duration-1000",
 					isLoading.value ? "opacity-0" : "opacity-100",

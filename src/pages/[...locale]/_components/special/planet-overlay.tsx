@@ -6,10 +6,10 @@ import { Loader2Icon, XIcon } from "lucide-preact";
 import { useEffect, useRef } from "preact/hooks";
 
 interface Props {
-	STORAGE_URL: string;
+	STORAGE_CDN_URL: string;
 }
 
-export default function PlanetOverlay({ STORAGE_URL }: Props) {
+export default function PlanetOverlay({ STORAGE_CDN_URL }: Props) {
 	const isActive = isPlanetActive.value;
 	const hasActivated = useSignal(false);
 
@@ -28,9 +28,9 @@ export default function PlanetOverlay({ STORAGE_URL }: Props) {
 	}, [isActive]);
 
 	const videos = [
-		{ src: `${STORAGE_URL}/video/reaper_car.mp4`, label: "RAVEPUNK" },
-		{ src: `${STORAGE_URL}/video/reaper_ninja.mp4`, label: "HEADHUNTER" },
-		{ src: `${STORAGE_URL}/video/reaper_ovni.mp4`, label: "HEATSEEKER" },
+		{ src: `${STORAGE_CDN_URL}/video/reaper_car.mp4`, label: "RAVEPUNK" },
+		{ src: `${STORAGE_CDN_URL}/video/reaper_ninja.mp4`, label: "HEADHUNTER" },
+		{ src: `${STORAGE_CDN_URL}/video/reaper_ovni.mp4`, label: "HEATSEEKER" },
 	];
 
 	// Track which video is currently focused
