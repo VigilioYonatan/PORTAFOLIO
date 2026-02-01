@@ -38,7 +38,7 @@ export function ExistingFileCard({
 							printFileWithDimension(
 								[file],
 								DIMENSION_IMAGE.xs,
-								environments.STORAGE_URL,
+								environments.STORAGE_CDN_URL,
 							)[0]
 						}
 						alt={file.name}

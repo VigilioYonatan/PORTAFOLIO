@@ -47,7 +47,7 @@ export default defineConfig({
 				context: "server",
 				access: "public",
 			}),
-			STORAGE_URL: envField.string({
+			STORAGE_CDN_URL: envField.string({
 				context: "server",
 				access: "public",
 			}),

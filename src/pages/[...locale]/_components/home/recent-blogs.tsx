@@ -42,7 +42,7 @@ export default function RecentBlogs({ latestPosts, lang }: RecentBlogsProps) {
 										printFileWithDimension(
 											post.cover,
 											DIMENSION_IMAGE.md,
-											environments.STORAGE_URL,
+											environments.STORAGE_CDN_URL,
 										)[0]
 									}
 									alt={post.title}

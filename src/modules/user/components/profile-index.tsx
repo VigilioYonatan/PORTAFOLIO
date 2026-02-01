@@ -201,7 +201,7 @@ export default function ProfileIndex() {
 												printFileWithDimension(
 													user.avatar || [],
 													DIMENSION_IMAGE.md,
-													environments.STORAGE_URL,
+													environments.STORAGE_CDN_URL,
 												)[0]
 											}
 											alt={user.username}

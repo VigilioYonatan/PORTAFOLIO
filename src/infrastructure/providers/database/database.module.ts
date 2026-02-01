@@ -31,9 +31,6 @@ const logger = new Logger("DatabaseModule");
 
 				const pool = new Pool({
 					connectionString,
-					ssl: {
-						rejectUnauthorized: false,
-					},
 				});
 
 				pool.on("connect", () => logger.debug("New client connected to pool"));

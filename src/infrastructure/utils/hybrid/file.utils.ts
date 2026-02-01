@@ -26,7 +26,7 @@ export function formatFileSize(bytes: number, decimals = 2): string {
 export function printFileWithDimension(
 	files: FilesSchema[] | null,
 	dimension: number | null = null,
-	publicCdnUrl = environments?.STORAGE_URL || "/",
+	publicCdnUrl = environments?.STORAGE_CDN_URL || "/",
 	custom_file_no_found: string | null = null,
 ): string[] {
 	if (!files || files.length === 0) {

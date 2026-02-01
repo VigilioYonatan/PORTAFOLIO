@@ -23,7 +23,8 @@ async function bootstrap() {
 	const configService = app.get(ConfigService);
 	const corsOrigins = configService.getOrThrow<string>("CORS_ORIGINS");
 	const port = configService.getOrThrow<number>("PORT");
-	const isDevelopment = configService.getOrThrow<string>("NODE_ENV") === "development";
+	const isDevelopment =
+		configService.getOrThrow<string>("NODE_ENV") === "development";
 	// Logger
 	app.useLogger(app.get(Logger));
 	app.useStaticAssets(path.join(__dirname, "..", "public"));

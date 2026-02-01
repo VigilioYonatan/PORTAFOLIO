@@ -86,7 +86,7 @@ export function UserUpdate({ user, refetch }: UserUpdateProps) {
 								printFileWithDimension(
 									user.avatar,
 									DIMENSION_IMAGE.xs,
-									environments.STORAGE_URL,
+									environments.STORAGE_CDN_URL,
 								)[0]
 							}
 							alt={user.username}

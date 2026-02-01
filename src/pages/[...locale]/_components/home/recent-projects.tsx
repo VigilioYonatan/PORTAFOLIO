@@ -48,7 +48,7 @@ export default function RecentProjects({
 									printFileWithDimension(
 										project.images,
 										DIMENSION_IMAGE.md,
-										environments.STORAGE_URL,
+										environments.STORAGE_CDN_URL,
 									)[0]
 								}
 								alt={project.title}

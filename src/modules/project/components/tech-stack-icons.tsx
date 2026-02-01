@@ -36,7 +36,7 @@ export default function TechStackIcons({
 								printFileWithDimension(
 									tech.icon,
 									DIMENSION_IMAGE.xs,
-									environments.STORAGE_URL,
+									environments.STORAGE_CDN_URL,
 								)[0]
 							}
 							alt={tech.name}

@@ -57,7 +57,7 @@ export default function TestimonialTable({
 										printFileWithDimension(
 											row.avatar,
 											DIMENSION_IMAGE.xs,
-											environments.STORAGE_URL,
+											environments.STORAGE_CDN_URL,
 										)[0]
 									}
 									alt={row.author_name}

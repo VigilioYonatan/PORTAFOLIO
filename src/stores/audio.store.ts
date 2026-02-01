@@ -324,12 +324,12 @@ async function loadMoreTracks() {
 				src: printFileWithDimension(
 					t.audio_file,
 					null,
-					environments.STORAGE_URL,
+					environments.STORAGE_CDN_URL,
 				)[0],
 				cover: printFileWithDimension(
 					t.cover,
 					DIMENSION_IMAGE.sm,
-					environments.STORAGE_URL,
+					environments.STORAGE_CDN_URL,
 				)[0],
 			}));
 			addTracks(mapped);

@@ -199,9 +199,9 @@ export class RustFSService {
 
 	private async setPublicBucketCors(): Promise<void> {
 		if (!this.s3Client) return;
-		
+
 		const corsOrigins = this.configService.get("CORS_ORIGINS") || "*";
-		
+
 		try {
 			const { PutBucketCorsCommand } = await import("@aws-sdk/client-s3");
 			await this.s3Client.send(
@@ -212,7 +212,8 @@ export class RustFSService {
 							{
 								AllowedHeaders: ["*"],
 								AllowedMethods: ["GET", "PUT", "POST", "DELETE", "HEAD"],
-								AllowedOrigins: corsOrigins === "*" ? ["*"] : corsOrigins.split(","),
+								AllowedOrigins:
+									corsOrigins === "*" ? ["*"] : corsOrigins.split(","),
 								ExposeHeaders: ["ETag"],
 								MaxAgeSeconds: 3000,
 							},
@@ -220,12 +221,11 @@ export class RustFSService {
 					},
 				}),
 			);
-			this.logger.log(`Bucket CORS for "${this.bucket}" configured successfully`);
-		} catch (error) {
-			this.logger.warn(
-				`Failed to set bucket CORS for "${this.bucket}"`,
-				error,
+			this.logger.log(
+				`Bucket CORS for "${this.bucket}" configured successfully`,
 			);
+		} catch (error) {
+			this.logger.warn(`Failed to set bucket CORS for "${this.bucket}"`, error);
 		}
 	}
 
@@ -258,9 +258,7 @@ export class RustFSService {
 
 			await upload.done();
 
-			const cdnUrl = this.configService.get("STORAGE_CDN_URL");
-			const publicEndpoint = this.configService.get("STORAGE_URL");
-			const baseUrl = cdnUrl || publicEndpoint;
+			const baseUrl = this.configService.get("STORAGE_CDN_URL");
 			return {
 				key,
 				url: `${baseUrl}/${this.bucket}/${key}`,
@@ -379,9 +377,7 @@ export class RustFSService {
 	 * Best for: public assets accessible via CDN.
 	 */
 	getPublicUrl(key: string): string {
-		const cdnUrl = this.configService.get("STORAGE_CDN_URL");
-		const publicEndpoint = this.configService.get("STORAGE_URL");
-		const baseUrl = cdnUrl || publicEndpoint;
+		const baseUrl = this.configService.get("STORAGE_CDN_URL");
 		return `${baseUrl}/${this.bucket}/${key}`;
 	}
 

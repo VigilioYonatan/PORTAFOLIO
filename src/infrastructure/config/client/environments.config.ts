@@ -9,7 +9,7 @@ export const clientEnvironmentsSchema = z.object({
 	PUBLIC_URL: z.string().min(1),
 	NODE_ENV: z.enum(["PRODUCTION", "STAGING", "DEVELOPMENT", "TEST"]),
 	VAPID_PUBLIC_KEY: z.string().min(1),
-	STORAGE_URL: z.string().min(1),
+	STORAGE_CDN_URL: z.string().optional(),
 });
 
 /** Tipo inferido del schema de cliente */
@@ -37,7 +37,7 @@ function getClientEnvironments(): ClientEnvironments {
 		PUBLIC_URL: "http://localhost:3000",
 		NODE_ENV: "DEVELOPMENT",
 		VAPID_PUBLIC_KEY: "",
-		STORAGE_URL: "http://localhost:3000",
+		STORAGE_CDN_URL: "http://localhost:3000",
 	};
 }
 

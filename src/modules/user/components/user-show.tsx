@@ -18,7 +18,7 @@ export function UserShow({ user }: UserShowProps) {
 		? printFileWithDimension(
 				user.avatar,
 				DIMENSION_IMAGE.md,
-				environments.STORAGE_URL,
+				environments.STORAGE_CDN_URL,
 			)[0]
 		: null;
 

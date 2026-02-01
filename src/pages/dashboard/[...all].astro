@@ -14,9 +14,9 @@ import * as env from "astro:env/server";
     <meta name="generator" content={Astro.generator} />
 
     <title>Dashboard | Admin</title>
-    <script define:vars={{ STORAGE_URL: env.STORAGE_URL, NAME_APP: env.NAME_APP, VAPID_PUBLIC_KEY: env.VAPID_PUBLIC_KEY, NODE_ENV: env.NODE_ENV?.toUpperCase(), PUBLIC_URL: env.PUBLIC_URL }} is:inline>
+    <script define:vars={{ STORAGE_CDN_URL: env.STORAGE_CDN_URL, NAME_APP: env.NAME_APP, VAPID_PUBLIC_KEY: env.VAPID_PUBLIC_KEY, NODE_ENV: env.NODE_ENV?.toUpperCase(), PUBLIC_URL: env.PUBLIC_URL }} is:inline>
       window.env = {
-       STORAGE_URL,
+       STORAGE_CDN_URL,
        NAME_APP,
        VAPID_PUBLIC_KEY,
        NODE_ENV,

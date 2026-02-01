@@ -47,7 +47,7 @@ export default function TechnologyTable({ lang = "es" }: TechnologyTableProps) {
 									printFileWithDimension(
 										row.icon,
 										DIMENSION_IMAGE.xs,
-										environments.STORAGE_URL,
+										environments.STORAGE_CDN_URL,
 									)[0]
 								}
 								alt={row.name}
