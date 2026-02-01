@@ -442,7 +442,7 @@ export default function FloatingActionChat() {
 									class="text-primary mx-auto mb-2 animate-pulse"
 								/>
 								<h3 class="text-lg font-black tracking-widest text-white uppercase">
-									Identify Yourself
+									Identificación Requerida
 								</h3>
 								<p class="text-[9px] text-muted-foreground font-mono tracking-widest">
 									SECURITY_PROTOCOL_ALPHA: REQUIRED
@@ -455,7 +455,7 @@ export default function FloatingActionChat() {
 										htmlFor="visitor-name"
 										class="text-[9px] font-bold text-primary tracking-widest uppercase ml-1"
 									>
-										Codename / Name
+										Nombre / Alias
 									</label>
 									<div class="relative group">
 										<div class="absolute inset-y-0 left-3 flex items-center pointer-events-none text-white/30 group-focus-within:text-primary transition-colors">
@@ -479,7 +479,7 @@ export default function FloatingActionChat() {
 										htmlFor="visitor-company"
 										class="text-[9px] font-bold text-primary tracking-widest uppercase ml-1"
 									>
-										Affiliation / Company
+										Empresa / Entidad
 									</label>
 									<div class="relative group">
 										<div class="absolute inset-y-0 left-3 flex items-center pointer-events-none text-white/30 group-focus-within:text-primary transition-colors">
@@ -505,7 +505,7 @@ export default function FloatingActionChat() {
 									disabled={!visitorName.value.trim()}
 									class="w-full mt-4 bg-primary text-black font-black text-xs py-3 rounded-sm uppercase tracking-widest hover:brightness-110 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 group"
 								>
-									Initialize Link
+									Establecer Conexión
 									<ChevronRightIcon
 										size={14}
 										class="group-hover:translate-x-1 transition-transform"
@@ -551,7 +551,7 @@ export default function FloatingActionChat() {
 										class="group relative px-6 py-3 bg-primary text-black font-black text-xs uppercase tracking-widest rounded-sm hover:scale-105 active:scale-95 transition-all overflow-hidden"
 									>
 										<span class="relative z-10 flex items-center justify-center gap-2">
-											<BotIcon size={14} /> Hablar con IA
+											<BotIcon size={14} /> Asistente Virtual
 										</span>
 										<div class="absolute inset-0 bg-white/20 -translate-x-full group-hover:translate-x-full transition-transform duration-500" />
 									</button>
@@ -570,7 +570,7 @@ export default function FloatingActionChat() {
 										class="group relative px-6 py-3 bg-zinc-800 text-white font-black text-xs uppercase tracking-widest rounded-sm hover:bg-zinc-700 hover:scale-105 active:scale-95 transition-all border border-white/5"
 									>
 										<span class="relative z-10 flex items-center justify-center gap-2">
-											<UserIcon size={14} /> Yonatan Vigilio
+											<UserIcon size={14} /> Contactar Humano
 										</span>
 										<div class="absolute inset-0 bg-white/5 -translate-x-full group-hover:translate-x-full transition-transform duration-500" />
 									</button>

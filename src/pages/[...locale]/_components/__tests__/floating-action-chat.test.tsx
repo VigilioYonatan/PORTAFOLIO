@@ -55,11 +55,11 @@ describe("FloatingActionChat Component", () => {
 		fireEvent.click(screen.getByLabelText("Open AI Nexus"));
 
 		// Lead Capture Step
-		const nameInput = screen.getByLabelText("Codename / Name");
+		const nameInput = screen.getByLabelText("Nombre / Alias");
 		fireEvent.input(nameInput, { target: { value: "Test User" } });
 		fireEvent.change(nameInput, { target: { value: "Test User" } });
 
-		const initButton = screen.getByText("Initialize Link");
+		const initButton = screen.getByText("Establecer Conexión");
 		fireEvent.click(initButton);
 
 		// Now Chat Input should be visible
