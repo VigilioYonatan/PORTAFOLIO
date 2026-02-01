@@ -30,7 +30,7 @@ RUN pnpm run build:client && \
 # Production stage
 FROM base AS production
 WORKDIR /usr/src/app
-ARG PORT=8000
+ARG PORT=4000
 ENV PORT=$PORT
 RUN addgroup -g 1001 nodejs && \
     adduser -u 1001 -G nodejs -S -h /usr/src/app cearjs
