@@ -258,10 +258,12 @@ export class RustFSService {
 
 			await upload.done();
 
+			const cdnUrl = this.configService.get("STORAGE_CDN_URL");
 			const publicEndpoint = this.configService.get("STORAGE_URL");
+			const baseUrl = cdnUrl || publicEndpoint;
 			return {
 				key,
-				url: `${publicEndpoint}/${this.bucket}/${key}`,
+				url: `${baseUrl}/${this.bucket}/${key}`,
 			};
 		}, `uploadFile(${key})`);
 	}
@@ -377,8 +379,10 @@ export class RustFSService {
 	 * Best for: public assets accessible via CDN.
 	 */
 	getPublicUrl(key: string): string {
+		const cdnUrl = this.configService.get("STORAGE_CDN_URL");
 		const publicEndpoint = this.configService.get("STORAGE_URL");
-		return `${publicEndpoint}/${this.bucket}/${key}`;
+		const baseUrl = cdnUrl || publicEndpoint;
+		return `${baseUrl}/${this.bucket}/${key}`;
 	}
 
 	// =========================================================================

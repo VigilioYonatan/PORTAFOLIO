@@ -66,7 +66,8 @@ export const environmentsSchema = z.object({
 	STORAGE_BUCKET_PRIVATE: z.string().optional(),
 	STORAGE_REGION: z.string(),
 	STORAGE_INTERNAL_ENDPOINT: z.url().optional(),
-	STORAGE_URL: z.url().optional(), // CDN URL para archivos públicos
+	STORAGE_URL: z.url().optional(), // S3 API Endpoint (Uploads)
+	STORAGE_CDN_URL: z.url().optional(), // CDN URL para archivos públicos
 
 	// Mail
 	MAIL_HOST: z.string().min(1),
