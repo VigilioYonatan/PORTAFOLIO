@@ -54,7 +54,16 @@ describe("FloatingActionChat Component", () => {
 		// Open chat first
 		fireEvent.click(screen.getByLabelText("Open AI Nexus"));
 
-		const input = screen.getByLabelText("Nexus Input");
+		// Lead Capture Step
+		const nameInput = screen.getByLabelText("Codename / Name");
+		fireEvent.input(nameInput, { target: { value: "Test User" } });
+		fireEvent.change(nameInput, { target: { value: "Test User" } });
+
+		const initButton = screen.getByText("Initialize Link");
+		fireEvent.click(initButton);
+
+		// Now Chat Input should be visible
+		const input = await screen.findByLabelText("Nexus Input");
 		const sendButton = screen.getByLabelText("Transmit");
 
 		fireEvent.input(input, { target: { value: "Hello AI" } });

@@ -236,34 +236,34 @@
 @keyframes perspectiveShift {
 	/* 0s - 4s: Slow Drift */
 	0% {
-		transform: scale(2) translate(0%, 0%);
+		transform: scale(1.5) translate(0%, 0%);
 	}
 	24.99% {
-		transform: scale(2.1) translate(2%, 2%);
+		transform: scale(1.6) translate(2%, 2%);
 	}
 	/* 4s: Abrupt Jump */
 	25% {
-		transform: scale(2) translate(-15%, 10%);
+		transform: scale(1.5) translate(-15%, 10%);
 	}
 	49.99% {
-		transform: scale(2.1) translate(-13%, 12%);
+		transform: scale(1.6) translate(-13%, 12%);
 	}
 	/* 8s: Abrupt Jump */
 	50% {
-		transform: scale(2) translate(15%, -10%);
+		transform: scale(1.5) translate(15%, -10%);
 	}
 	74.99% {
-		transform: scale(2.1) translate(17%, -8%);
+		transform: scale(1.6) translate(17%, -8%);
 	}
 	/* 12s: Abrupt Jump */
 	75% {
-		transform: scale(2) translate(-10%, -15%);
+		transform: scale(1.5) translate(-10%, -15%);
 	}
 	99.99% {
-		transform: scale(2.1) translate(-8%, -13%);
+		transform: scale(1.6) translate(-8%, -13%);
 	}
 	100% {
-		transform: scale(2) translate(0%, 0%);
+		transform: scale(1.5) translate(0%, 0%);
 	}
 }
 

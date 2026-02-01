@@ -14,6 +14,7 @@ import RecentProjects from "./_components/home/recent-projects";
 import RecentOpenSources from "./_components/home/recent-open-sources";
 import RecentBlogs from "./_components/home/recent-blogs";
 import LiveVisitors from "./_components/live-visitors";
+import * as env  from "astro:env/server";
 
 const lang = getLangFromUrl(Astro.url);
 const t = useTranslations(lang);
@@ -69,7 +70,7 @@ console.log({latestProjects});
             variant="outline"
             size="lg"
             className="gap-3 px-10 border-white/20 hover:bg-white/5"
-            href="/cv.pdf"
+            href={`${env.STORAGE_CDN_URL}/vigilio-cv.pdf`}
             target="_blank"
             as="a"
           >

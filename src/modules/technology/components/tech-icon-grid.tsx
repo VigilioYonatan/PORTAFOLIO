@@ -1,18 +1,20 @@
 import Badge from "@components/extras/badge";
 import Modal from "@components/extras/modal";
 import { printFileWithDimension } from "@infrastructure/utils/hybrid/file.utils";
+import { technologyDestroyApi } from "@modules/technology/apis/technology.destroy.api";
 import { technologyIndexApi } from "@modules/technology/apis/technology.index.api";
 import TechnologyStore from "@modules/technology/components/technology-store";
 import TechnologyUpdate from "@modules/technology/components/technology-update";
 import type { TechnologySchema } from "@modules/technology/schemas/technology.schema";
 import { DIMENSION_IMAGE } from "@modules/uploads/const/upload.const";
 import { useSignal } from "@preact/signals";
-import { Edit, Plus, Zap } from "lucide-preact";
+import { Edit, Plus, Trash2, Zap } from "lucide-preact";
 import type { JSX } from "preact/jsx-runtime";
 
 export default function TechIconGrid() {
 	const editingTech = useSignal<TechnologySchema | null>(null);
 	const isStoreModalOpen = useSignal<boolean>(false);
+	const technologyDestroyApiMutation = technologyDestroyApi();
 
 	const { data, isLoading, isSuccess, isError, refetch } = technologyIndexApi(
 		null,
@@ -106,6 +108,31 @@ export default function TechIconGrid() {
 							{tech.category}
 						</Badge>
 					</div>
+					{/* Delete Button */}
+					<button
+						type="button"
+						aria-label="Eliminar tecnología"
+						onClick={(e) => {
+							e.stopPropagation();
+							if (
+								window.confirm(
+									"¿Estás seguro de que deseas eliminar esta tecnología?",
+								)
+							) {
+								technologyDestroyApiMutation.mutate(tech.id, {
+									onSuccess: () => {
+										refetch();
+									},
+									onError: (error: { message: string }) => {
+										alert(error.message);
+									},
+								});
+							}
+						}}
+						class="absolute top-3 left-3 z-20 p-2 rounded-xl bg-zinc-900/80 border border-white/10 opacity-0 group-hover:opacity-100 hover:bg-red-500/20 hover:border-red-500/40 hover:text-red-400 transition-all duration-300"
+					>
+						<Trash2 size={14} />
+					</button>
 				</div>
 			);
 		});
