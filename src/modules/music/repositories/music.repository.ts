@@ -114,7 +114,7 @@ export class MusicTrackRepository {
 
 		const count = Number(countResult[0]?.count ?? 0);
 
-		return [results as MusicTrackSchema[], count];
+		return [results, count];
 	}
 
 	async destroy(tenant_id: number, id: number): Promise<MusicTrackSchema> {

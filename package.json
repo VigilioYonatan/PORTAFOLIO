@@ -22,8 +22,10 @@
 		"test:watch": "vitest --watch",
 		"test:cov": "vitest run --coverage",
 		"test:e2e:db": "vitest run --config vitest.e2e.config.ts",
+		"e2e:dev": "concurrently \"pnpm serve\" \"pnpm dev\"",
 		"test:playwright": "playwright test",
 		"test:playwright:ui": "playwright test --ui",
+		"test:ui": "playwright test --ui",
 		"prepare": "husky"
 	},
 	"dependencies": {
@@ -172,6 +174,7 @@
 		"@types/supertest": "^6.0.3",
 		"@types/web-push": "^3.6.4",
 		"@vitest/coverage-v8": "^4.0.16",
+		"concurrently": "^9.2.1",
 		"drizzle-kit": "^0.31.8",
 		"express-session": "^1.18.2",
 		"happy-dom": "^20.0.11",

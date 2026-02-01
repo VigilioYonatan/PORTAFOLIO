@@ -44,20 +44,20 @@ async function bootstrap() {
 	configureApp(app);
 
 	// Swagger Configuration
-	//   const config = new DocumentBuilder()
-	//     .setTitle("Astro-Test API")
-	//     .setDescription("API documentation for Astro-Test project")
-	//     .setVersion("1.0")
-	//     .addTag("users")
-	//     .build();
-	//   const document = SwaggerModule.createDocument(app, config);
+	// const config = new DocumentBuilder()
+	// 	.setTitle("Astro-Test API")
+	// 	.setDescription("API documentation for Astro-Test project")
+	// 	.setVersion("1.0")
+	// 	.addTag("users")
+	// 	.build();
+	// const document = SwaggerModule.createDocument(app, config);
 
-	//   app.use(
-	//     "/reference",
-	//     apiReference({
-	//       content: document,
-	//     })
-	//   );
+	// app.use(
+	// 	"/reference",
+	// 	apiReference({
+	// 		content: document,
+	//      })
+	//    );
 
 	// Session & Passport Configuration
 	const sessionConfig = app.get(SessionConfigService);

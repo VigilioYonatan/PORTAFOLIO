@@ -66,7 +66,6 @@ describe("NeuroPlayer Component", () => {
 		});
 	});
 
-
 	const STORAGE_CDN_URL = "https://mock-cdn.com";
 
 	it("renders track info correctly", () => {

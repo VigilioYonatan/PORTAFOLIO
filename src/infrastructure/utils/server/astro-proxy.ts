@@ -13,7 +13,6 @@ export const astroProxy = createProxyMiddleware({
 export function astroRender(props: Record<string, unknown> = {}) {
 	return async (req: Request, res: Response, next: NextFunction) => {
 		const isProduction = getEnvironments().NODE_ENV === "PRODUCTION";
-
 		// Standardize locals transmission
 		req.headers["x-astro-locals"] = Buffer.from(
 			JSON.stringify({
@@ -21,7 +20,6 @@ export function astroRender(props: Record<string, unknown> = {}) {
 				props,
 			}),
 		).toString("base64");
-
 		if (isProduction) {
 			const entryPath = path.join(process.cwd(), "dist/server/entry.mjs");
 			const { handler: astroHandler } = await import(entryPath);

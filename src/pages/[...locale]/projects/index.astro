@@ -12,7 +12,7 @@ const lang = getLangFromUrl(Astro.url);
 const t = useTranslations(lang);
 const { projects, title, page, limit, total } = Astro.locals
   .props as WebProjectsResponseDto;
-
+console.log({projects});
 // Status colors
 const statusColors = {
   live: "bg-green-500/20 text-green-400 border-green-500/30",

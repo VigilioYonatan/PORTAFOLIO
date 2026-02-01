@@ -17,7 +17,7 @@ export class InitialCacheMiddleware implements NestMiddleware {
 		const host = (req.headers.host || "").split(":")[0];
 		let tenant: TenantShowSchema | null = null;
 
-		this.logger.debug(`req.user: ${JSON.stringify(req.originalUrl, null, 3)}`);
+		this.logger.debug(`Path matched: ${req.originalUrl}`);
 		// Only resolve for functional paths to avoid unnecessary DB load
 		const isFunctionalPath =
 			req.originalUrl.startsWith("/api") ||
@@ -26,8 +26,9 @@ export class InitialCacheMiddleware implements NestMiddleware {
 			req.originalUrl.startsWith("/auth") ||
 			Object.values(WebPath).some((path) =>
 				// Replace * with .* and :param with [^/]+
+				// Allow optional trailing slash
 				new RegExp(
-					`^${path.replace(/\*/g, ".*").replace(/:\w+/g, "[^/]+")}$`,
+					`^${path.replace(/\*/g, ".*").replace(/:\w+/g, "[^/]+")}/?$`,
 				).test(
 					req.originalUrl.split("?")[0], // Ignore query params
 				),

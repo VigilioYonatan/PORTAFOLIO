@@ -9,10 +9,10 @@ import { json, urlencoded } from "express";
 export function configureApp(app: INestApplication): void {
 	// Global Prefix with exclusions
 	app.setGlobalPrefix("api", {
-		exclude: Object.values(WebPath).map((path) => ({
-			path,
-			method: RequestMethod.GET, // Only exclude GET requests (pages), keep POSTs for API
-		})),
+		exclude: Object.values(WebPath).flatMap((path) => [
+			{ path, method: RequestMethod.GET },
+			{ path: `${path}/`, method: RequestMethod.GET },
+		]),
 	});
 
 	app.use(json({ limit: "100mb" }));

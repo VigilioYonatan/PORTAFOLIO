@@ -31,6 +31,9 @@ const logger = new Logger("DatabaseModule");
 
 				const pool = new Pool({
 					connectionString,
+					...(configService.getOrThrow("NODE_ENV") === "PRODUCTION"
+						? { ssl: { rejectUnauthorized: false } }
+						: {}),
 				});
 
 				pool.on("connect", () => logger.debug("New client connected to pool"));

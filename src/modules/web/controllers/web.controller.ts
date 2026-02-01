@@ -5,6 +5,7 @@ import {
 	All,
 	Controller,
 	Get,
+	Logger,
 	Next,
 	Req,
 	Res,
@@ -230,6 +231,8 @@ export class WebController {
 		return await astroRender(props)(req, res, next);
 	}
 
+	private readonly logger = new Logger(WebController.name);
+
 	@Public()
 	@All("*")
 	async catchAll(
@@ -237,6 +240,7 @@ export class WebController {
 		@Res() res: Response,
 		@Next() next: NextFunction,
 	) {
+		this.logger.debug(`CatchAll reached for: ${req.originalUrl}`);
 		if (req.originalUrl.startsWith("/api")) {
 			return next();
 		}

@@ -96,7 +96,7 @@ const activeThemeRgb = hexToRgb(activeThemeColor);
 
     {/* MOBILE HEADER */}
     <MobileHeader lang={lang} client:load />
-    <MobileToolsDock lang={lang} client:load />
+    <MobileToolsDock lang={lang} client:load  STORAGE_CDN_URL={env.STORAGE_CDN_URL} />
 
     {/* LEFT SIDEBAR (Desktop) */}
     <aside

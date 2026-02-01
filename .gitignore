@@ -29,6 +29,8 @@ pnpm-debug.log*
 coverage/
 tests/test-results/
 tests/playwright-report/
+playwright-report/
+test-results/
 playwright/.cache/
 
 # OS

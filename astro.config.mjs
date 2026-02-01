@@ -12,7 +12,7 @@ const __dirname = path.dirname(__filename);
 
 export default defineConfig({
 	output: "server",
-
+	adapter: node({ mode: "middleware" }),
 	integrations: [preact({ compat: true })],
 	i18n: {
 		defaultLocale: "es",
@@ -53,8 +53,15 @@ export default defineConfig({
 			}),
 		},
 	},
-	adapter: node({ mode: "middleware" }),
 	vite: {
+		server: {
+			proxy: {
+				"/api": {
+					target: `http://localhost:${process.env.PORT || 3004}`,
+					changeOrigin: true,
+				},
+			},
+		},
 		ssr: {
 			noExternal: [
 				"react-hook-form",

@@ -24,8 +24,9 @@ const {
   latestPosts,
   latestOpenSources,
   socials,
-  liveVisitors,
-} = Astro.locals.props as WebIndexResponseDto;
+  liveVisitors
+} = (Astro.locals.props ) as WebIndexResponseDto;
+console.log({latestProjects});
 ---
 
 
