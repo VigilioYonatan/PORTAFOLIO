@@ -118,7 +118,7 @@ const activeThemeRgb = hexToRgb(activeThemeColor);
       {/* Decorative Sidebar Info */}
 
       <div class="p-2 border-t border-white/5 bg-zinc-950/20">
-        <NeuroPlayer client:only="preact" transition:persist />
+        <NeuroPlayer client:only="preact" transition:persist STORAGE_URL={env.STORAGE_URL} />
       </div>
 
       <div
@@ -297,8 +297,8 @@ const activeThemeRgb = hexToRgb(activeThemeColor);
       </div>
     </aside>
     <FloatingActionChat client:only="preact" transition:persist />
-    <ProtostarOverlay client:only="preact" transition:persist />
-    <NatureOverlay client:only="preact" transition:persist />
-    <PlanetOverlay client:only="preact" transition:persist />
+    <ProtostarOverlay client:only="preact" transition:persist STORAGE_URL={env.STORAGE_URL} />
+    <NatureOverlay client:only="preact" transition:persist STORAGE_URL={env.STORAGE_URL} />
+    <PlanetOverlay client:only="preact" transition:persist STORAGE_URL={env.STORAGE_URL} />
   </body>
 </html>

@@ -7,7 +7,8 @@ interface LiveVisitorsProps {
 }
 
 export default function LiveVisitors({ initialCount }: LiveVisitorsProps) {
-	const count = useSignal<number>(initialCount);
+
+	const count = useSignal<number>(Number(initialCount) || 1);
 
 	useEffect(() => {
 		// Just a small frontend fluctuation to make it feel alive

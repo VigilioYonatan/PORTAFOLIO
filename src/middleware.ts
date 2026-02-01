@@ -4,6 +4,7 @@ export const onRequest = defineMiddleware((context, next) => {
 	const { pathname } = context.url;
 
 	const headerLocals = context.request.headers.get("x-astro-locals");
+
 	if (headerLocals) {
 		try {
 			const data = JSON.parse(

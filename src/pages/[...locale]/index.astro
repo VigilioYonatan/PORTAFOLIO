@@ -26,7 +26,9 @@ const {
   socials,
   liveVisitors,
 } = Astro.locals.props as WebIndexResponseDto;
+console.log({liveVisitors});
 ---
+
 
 <WebLayout>
   <SystemIntro lang={lang} client:load transition:persist />

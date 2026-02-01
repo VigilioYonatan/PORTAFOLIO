@@ -20,9 +20,6 @@ describe("useCopyToClipboard", () => {
 		vi.restoreAllMocks();
 	});
 
-
-
-
 	it("should initialize with null copied text", () => {
 		const { result } = renderHook(() => useCopyToClipboard());
 		const [, copiedText] = result.current;

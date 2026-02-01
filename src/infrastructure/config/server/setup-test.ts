@@ -148,8 +148,10 @@ process.env.CORS_ORIGINS = "*";
 process.env.THROTTLE_TTL = "60";
 process.env.THROTTLE_LIMIT = "1000";
 process.env.OPENROUTER_API_KEY = "test_openrouter_key";
-process.env.VAPID_PUBLIC_KEY = "test_vapid_public_key_BDoOcdtdxFLfUqZ1UI374sa4eGVKEzSXXpIncXPgdwFZEOh6W3F0e7bkfw0E3djt";
-process.env.VAPID_PRIVATE_KEY = "test_vapid_private_key_ZIXyo8H_7Egr49LwCRejMq7nP3wrSrSGaoz8q2BFbOY";
+process.env.VAPID_PUBLIC_KEY =
+	"test_vapid_public_key_BDoOcdtdxFLfUqZ1UI374sa4eGVKEzSXXpIncXPgdwFZEOh6W3F0e7bkfw0E3djt";
+process.env.VAPID_PRIVATE_KEY =
+	"test_vapid_private_key_ZIXyo8H_7Egr49LwCRejMq7nP3wrSrSGaoz8q2BFbOY";
 process.env.VAPID_EMAIL = "test@example.com";
 process.env.NODE_ENV = "TEST";
 process.env.LOG_LEVEL = "ERROR";

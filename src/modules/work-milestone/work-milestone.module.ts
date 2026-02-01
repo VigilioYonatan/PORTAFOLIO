@@ -1,9 +1,9 @@
-import { WorkExperienceModule } from "@modules/work-experience/work-experience.module.js";
+import { WorkExperienceModule } from "@modules/work-experience/work-experience.module";
 import { Module } from "@nestjs/common";
-import { WorkMilestoneCache } from "./cache/work-milestone.cache.js";
-import { WorkMilestoneController } from "./controllers/work-milestone.controller.js";
-import { WorkMilestoneRepository } from "./repositories/work-milestone.repository.js";
-import { WorkMilestoneService } from "./services/work-milestone.service.js";
+import { WorkMilestoneCache } from "./cache/work-milestone.cache";
+import { WorkMilestoneController } from "./controllers/work-milestone.controller";
+import { WorkMilestoneRepository } from "./repositories/work-milestone.repository";
+import { WorkMilestoneService } from "./services/work-milestone.service";
 
 @Module({
 	imports: [WorkExperienceModule],

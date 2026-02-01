@@ -23,7 +23,7 @@ if (originalDatabaseUrl?.startsWith("pglite://")) {
  * Schema de validación para variables de entorno.
  * Usa z.coerce para conversión automática de tipos.
  */
-const environmentsSchema = z.object({
+export const environmentsSchema = z.object({
 	// App
 	NAME_APP: z.string().min(1),
 	NODE_ENV: z.enum(["PRODUCTION", "DEVELOPMENT", "STAGING", "TEST"]),

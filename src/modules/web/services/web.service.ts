@@ -58,8 +58,8 @@ export class WebService {
 			{ results: latestOpenSources },
 			{ config },
 		] = await Promise.all([
-			this.musicService.index(1, { limit: 10, offset: 0 }),
-			this.workExperienceService.index(1, { limit: 4, language }),
+			this.musicService.index(1, { limit: 29, offset: 0 }),
+			this.workExperienceService.index(1, { limit: 100, language }),
 			this.projectService.index(1, { limit: 3, language }),
 			this.blogPostService.index(1, { limit: 3, language }),
 			this.openSourceService.index(1, { limit: 3, language }),

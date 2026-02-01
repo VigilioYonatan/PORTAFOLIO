@@ -27,7 +27,6 @@ export function astroRender(props: Record<string, unknown> = {}) {
 			const { handler: astroHandler } = await import(entryPath);
 			return astroHandler(req, res, next);
 		}
-
 		return astroProxy(req, res, next);
 	};
 }

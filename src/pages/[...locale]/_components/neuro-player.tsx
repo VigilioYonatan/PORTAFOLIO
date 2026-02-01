@@ -32,6 +32,7 @@ import ProtostarButton from "./special/protostar-button";
 interface NeuroPlayerProps {
 	className?: string;
 	style?: CSSProperties;
+	STORAGE_URL: string;
 }
 
 export default function NeuroPlayer(props: NeuroPlayerProps) {
@@ -85,7 +86,7 @@ export default function NeuroPlayer(props: NeuroPlayerProps) {
 						ref={(el) => {
 							if (el) el.volume = 0.1;
 						}}
-						src="/video/insolation.mp4"
+						src={`${props.STORAGE_URL}/video/insolation.mp4`}
 						class="w-full h-full object-cover"
 						autoPlay
 						loop

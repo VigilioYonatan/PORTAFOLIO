@@ -1299,7 +1299,7 @@ export const ui = {
 				desc3: "Creando impacto real a través de",
 				desc3_end: ".",
 				desc3_highlight: "Tecnología con Alma",
-				engineer: "DE SOFTWARE CON IA",
+				engineer: "DE SOFTWARE CON I.A",
 				execute: "COMUNÍCATE AHORA",
 				view_code: "VER CÓDIGO",
 				software: "INGENIERO",
@@ -1308,7 +1308,7 @@ export const ui = {
 					"## Stack: Typescript, Tailwind, React, NestJS, Langchain, Redis, Docker, AWS.",
 				subtitle:
 					"Construyendo aplicaciones web escalables y de alto rendimiento.",
-				title: "Ingeniero de Software con IA",
+				title: "Ingeniero DE SOFTWARE CON I.A",
 			},
 			technologies: "TECNOLOGÍAS",
 		},
@@ -1322,7 +1322,7 @@ export const ui = {
 				neural: "ENTRENANDO PESOS NEURONALES...",
 				uplink: "ESTABLECIENDO ENLACE-NEURO...",
 			},
-			initializing: "Inicializando Entorno de Ingeniero de Software con IA",
+			initializing: "Inicializando Entorno de Ingeniero DE SOFTWARE CON I.A",
 			loading_modules: "CARGANDO MÓDULOS",
 			secure_connection: "Conexión Segura Establecida // TLS 1.3",
 			system_boot: "INICIO DE SISTEMA",
@@ -1351,7 +1351,7 @@ export const ui = {
 			home: {
 				description:
 					"Soy Yonatan Vigilio Lavado, ingeniero de software con más de 6 años de experiencia desarrollando soluciones escalables e inteligencia artificial desde 2020. Apasionado por la arquitectura limpia, el open source y la producción de Drum and Bass.",
-				title: "Vigilio Yonatan | Ingeniero de Software con IA",
+				title: "Vigilio Yonatan | Ingeniero DE SOFTWARE CON I.A",
 			},
 			projects: {
 				title: "Proyectos | Vigilio Yonatan",
@@ -2043,7 +2043,7 @@ export const ui = {
 				desc3: "Criando impacto real através de",
 				desc3_end: ".",
 				desc3_highlight: "Tecnologia com Alma",
-				engineer: "DE SOFTWARE CON IA",
+				engineer: "DE SOFTWARE CON I.A",
 				execute: "ENTRE EM CONTATO",
 				view_code: "VER CÓDIGO",
 				software: "ENGENHEIRO",

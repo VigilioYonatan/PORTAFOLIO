@@ -26,6 +26,7 @@ export class WebController {
 		@Next() next: NextFunction,
 	): Promise<void> {
 		const props = await this.webService.index(req.locals.language);
+
 		return await astroRender(props)(req, res, next);
 	}
 

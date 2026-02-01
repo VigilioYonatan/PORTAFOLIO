@@ -5,7 +5,11 @@ import { isNatureActive, toggleNatureMode } from "@stores/special-mode.store";
 import { Loader2Icon, XIcon } from "lucide-preact";
 import { useEffect, useRef } from "preact/hooks";
 
-export default function NatureOverlay() {
+interface Props {
+	STORAGE_URL: string;
+}
+
+export default function NatureOverlay({ STORAGE_URL }: Props) {
 	const isActive = isNatureActive.value;
 	const hasActivated = useSignal(false);
 
@@ -24,9 +28,9 @@ export default function NatureOverlay() {
 	}, [isActive]);
 
 	const videos = [
-		{ src: "/video/wolf.mp4", label: "OUT THERE" },
-		{ src: "/video/bird.mp4", label: "NEMESIS" },
-		{ src: "/video/ballena.mp4", label: "SOMEWHERE ELSE" },
+		{ src: `${STORAGE_URL}/video/wolf.mp4`, label: "OUT THERE" },
+		{ src: `${STORAGE_URL}/video/bird.mp4`, label: "NEMESIS" },
+		{ src: `${STORAGE_URL}/video/ballena.mp4`, label: "SOMEWHERE ELSE" },
 	];
 
 	// Track which video is concurrently focused (Mobile tap logic)

@@ -68,7 +68,7 @@ export default function HeroTerminal({
 
 			<div class="z-10 w-full max-w-4xl px-4">
 				{/* Window Frame */}
-				<div class="bg-black/60 border border-white/10 rounded-sm shadow-2xl backdrop-blur-md overflow-hidden relative group min-h-[400px] md:min-h-[450px]">
+				<div class="bg-black/60 border border-white/10 rounded-sm shadow-2xl backdrop-blur-md overflow-hidden relative group min-h-[auto] md:min-h-[450px]">
 					{/* Scanline inside window */}
 					<div class="absolute inset-0 bg-scanline opacity-[0.05] pointer-events-none" />
 
@@ -80,14 +80,14 @@ export default function HeroTerminal({
 								<div class="w-2.5 h-2.5 rounded-full bg-zinc-700" />
 								<div class="w-2.5 h-2.5 rounded-full bg-zinc-700" />
 							</div>
-							<span class="text-[10px] text-muted-foreground font-mono uppercase tracking-widest ml-4">
+							<span class="text-[9px] md:text-[10px] text-muted-foreground font-mono uppercase tracking-widest ml-4 truncate">
 								root@system:~/init
 							</span>
 						</div>
 					</div>
 
 					{/* Content */}
-					<div class="p-4 md:p-8 lg:p-12 flex flex-col gap-6 relative z-10 font-mono">
+					<div class="p-4 sm:p-6 md:p-8 lg:p-12 flex flex-col gap-6 relative z-10 font-mono">
 						{/* Hero Content UI */}
 						<div class="animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-500">
 							{/* Header Row: Title + HUD Modules */}
@@ -151,7 +151,7 @@ export default function HeroTerminal({
 							</div>
 
 							{/* Buttons & Socials */}
-							<div class="flex flex-col md:flex-row md:items-center justify-between gap-8 mt-12">
+							<div class="flex flex-col md:flex-row md:items-center justify-between gap-6 md:gap-8 mt-8 md:mt-12">
 								<div class="flex flex-wrap gap-4">
 									<a
 										href={
@@ -164,7 +164,7 @@ export default function HeroTerminal({
 										target="_blank"
 										rel="noopener noreferrer"
 										aria-label="Start Project"
-										class="px-8 py-3 bg-primary text-primary-foreground font-bold text-[11px] tracking-widest uppercase hover:bg-primary/90 transition-all shadow-[0_0_20px_rgba(6,182,212,0.3)] active:scale-95 flex items-center gap-3 group"
+										class="px-6 md:px-8 py-3 bg-primary text-primary-foreground font-bold text-[10px] md:text-[11px] tracking-widest uppercase hover:bg-primary/90 transition-all shadow-[0_0_20px_rgba(6,182,212,0.3)] active:scale-95 flex items-center justify-center gap-3 group"
 									>
 										<MessageCircle size={16} className="animate-pulse" />
 										{t("home.hero.execute")}
@@ -174,7 +174,7 @@ export default function HeroTerminal({
 										target="_blank"
 										rel="noopener noreferrer"
 										aria-label="View Source Code"
-										class="px-8 py-3 bg-zinc-900 border border-white/10 text-white font-bold text-[11px] tracking-widest uppercase hover:bg-white/5 transition-all shadow-sm active:scale-95 flex items-center gap-3 group"
+										class="px-6 md:px-8 py-3 bg-zinc-900 border border-white/10 text-white font-bold text-[10px] md:text-[11px] tracking-widest uppercase hover:bg-white/5 transition-all shadow-sm active:scale-95 flex items-center justify-center gap-3 group"
 									>
 										<Code size={16} />
 										{t("home.hero.view_code")}

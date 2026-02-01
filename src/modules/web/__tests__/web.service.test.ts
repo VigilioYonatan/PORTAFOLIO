@@ -126,7 +126,7 @@ describe("WebService", () => {
 			const result = await service.index("es");
 
 			expect(result).toEqual({
-				title: "Vigilio Yonatan | Ingeniero de Software con IA",
+				title: "Vigilio Yonatan | Ingeniero DE SOFTWARE CON I.A",
 				description:
 					"Soy Yonatan Vigilio Lavado, ingeniero de software con más de 6 años de experiencia desarrollando soluciones escalables e inteligencia artificial desde 2020. Apasionado por la arquitectura limpia, el open source y la producción de Drum and Bass.",
 				musicTracks: mockTracks,
@@ -138,7 +138,7 @@ describe("WebService", () => {
 				liveVisitors: expect.any(Number),
 			});
 			expect(musicService.index).toHaveBeenCalledWith(1, {
-				limit: 10,
+				limit: 29,
 				offset: 0,
 			});
 		});
