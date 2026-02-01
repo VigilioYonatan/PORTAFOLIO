@@ -102,6 +102,11 @@ if (typeof window !== "undefined") {
 			STORAGE_URL:
 				process.env.STORAGE_URL || "http://localhost:9000/test-bucket-public",
 			NAME_APP: process.env.NAME_APP || "PORTAFOLIO_TEST",
+			PUBLIC_URL: process.env.PUBLIC_URL || "http://localhost:3000",
+			NODE_ENV: "TEST",
+			VAPID_PUBLIC_KEY:
+				process.env.VAPID_PUBLIC_KEY ||
+				"test_vapid_public_key_BDoOcdtdxFLfUqZ1UI374sa4eGVKEzSXXpIncXPgdwFZEOh6W3F0e7bkfw0E3djt",
 		},
 	});
 }

@@ -7,7 +7,7 @@ import { z } from "@infrastructure/config/zod-i18n.config";
 export const clientEnvironmentsSchema = z.object({
 	NAME_APP: z.string().min(1),
 	PUBLIC_URL: z.string().min(1),
-	NODE_ENV: z.enum(["PRODUCTION", "STAGING", "DEVELOPMENT"]),
+	NODE_ENV: z.enum(["PRODUCTION", "STAGING", "DEVELOPMENT", "TEST"]),
 	VAPID_PUBLIC_KEY: z.string().min(1),
 	STORAGE_URL: z.string().min(1),
 });
@@ -23,9 +23,7 @@ export type Environments = ClientEnvironments;
  * En Astro, usa import.meta.env
  */
 function getClientEnvironments(): ClientEnvironments {
-	if(typeof window !== "undefined"){
-		console.log({b:window.env});
-		
+	if (typeof window !== "undefined") {
 		const result = clientEnvironmentsSchema.safeParse(window.env);
 		if (!result.success) {
 			// En cliente, retornamos defaults en vez de crashear
