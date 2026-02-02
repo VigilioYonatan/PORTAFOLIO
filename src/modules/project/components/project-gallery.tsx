@@ -67,9 +67,9 @@ export function ProjectGallery({
 					{lang === "es" ? "Galería" : "Gallery"}
 				</h3>
 				<div class="grid grid-cols-3 lg:grid-cols-2 gap-2">
-					{images.map((image, idx) => (
+					{printFileWithDimension(images, DIMENSION_IMAGE.md, environments.STORAGE_CDN_URL).map((image, idx) => (
 						<button
-							key={image.key}
+							key={image}
 							type="button"
 							aria-label={`Ver imagen ${idx + 1}`}
 							class="group relative aspect-square rounded-lg overflow-hidden border border-white/10 hover:border-primary/50 transition-all duration-300 hover:scale-[1.02] cursor-zoom-in"
@@ -77,11 +77,7 @@ export function ProjectGallery({
 						>
 							<img
 								src={
-									printFileWithDimension(
-										[image],
-										DIMENSION_IMAGE.xs,
-										environments.STORAGE_CDN_URL,
-									)[0]
+									image
 								}
 								alt={`${projectTitle} screenshot ${idx + 1}`}
 								class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
