@@ -1,4 +1,5 @@
 import { ZodPipe } from "@infrastructure/pipes/zod.pipe";
+import { ZodQueryPipe } from "@infrastructure/pipes/zod-query.pipe";
 import { Public } from "@modules/auth/decorators/public.decorator";
 import { AuthenticatedGuard } from "@modules/auth/guards/authenticated.guard";
 import {
@@ -16,7 +17,10 @@ import {
 } from "@nestjs/common";
 import { ApiBody, ApiOperation, ApiTags } from "@nestjs/swagger";
 import type { Request } from "express";
-import { OpenSourceQueryClassDto } from "../dtos/open-source.query.class.dto";
+import {
+	type OpenSourceQueryDto,
+	openSourceQueryDto,
+} from "../dtos/open-source.query.dto";
 import type {
 	OpenSourceDestroyResponseDto,
 	OpenSourceIndexResponseDto,
@@ -38,17 +42,17 @@ export class OpenSourceController {
 	@Public()
 	@Get("/")
 	@ApiOperation({ summary: "List open source projects" })
-	index(
+	async index(
 		@Req() req: Request,
-		@Query() query: OpenSourceQueryClassDto,
+		@Query(new ZodQueryPipe(openSourceQueryDto)) query: OpenSourceQueryDto,
 	): Promise<OpenSourceIndexResponseDto> {
 		return this.openSourceService.index(req.locals.tenant.id, query);
 	}
 
 	@Public()
-	@Get("/:id")
+	@Get(":id")
 	@ApiOperation({ summary: "Show an open source project" })
-	show(
+	async show(
 		@Req() req: Request,
 		@Param("id", ParseIntPipe) id: number,
 	): Promise<OpenSourceShowResponseDto> {
@@ -56,9 +60,9 @@ export class OpenSourceController {
 	}
 
 	@Public()
-	@Get("/slug/:slug")
+	@Get("slug/:slug")
 	@ApiOperation({ summary: "Show an open source project by slug" })
-	showBySlug(
+	async showBySlug(
 		@Req() req: Request,
 		@Param("slug") slug: string,
 	): Promise<OpenSourceShowResponseDto> {

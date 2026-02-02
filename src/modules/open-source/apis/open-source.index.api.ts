@@ -23,6 +23,14 @@ export function openSourceIndexApi(
 			}
 			return result;
 		},
+		{
+			onSuccess(data) {
+				table.updateData({
+					count: data.count,
+					result: data.results,
+				});
+			},
+		},
 	);
 }
 

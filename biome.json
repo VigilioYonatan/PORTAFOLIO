@@ -28,7 +28,8 @@
 			"suspicious": {
 				"noConsole": { "level": "error" },
 				"noArrayIndexKey": "off",
-				"noMisleadingCharacterClass": "off"
+				"noMisleadingCharacterClass": "off",
+				"noNonNullAssertedOptionalChain": "off"
 			},
 			"a11y": {
 				"useKeyWithClickEvents": "off",

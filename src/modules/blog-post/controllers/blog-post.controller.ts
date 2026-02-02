@@ -47,6 +47,17 @@ import { BlogPostService } from "../services/blog-post.service";
 export class BlogPostController {
 	constructor(private readonly service: BlogPostService) {}
 
+	@Roles(1)
+	@Get(":id")
+	@ApiOperation({ summary: "Get blog post by ID (Admin)" })
+	async showById(
+		@Req() req: Request,
+		@Param("id", ParseIntPipe) id: number,
+	): Promise<BlogPostShowResponseDto> {
+		const result = await this.service.show(req.locals.tenant.id, id);
+		return result;
+	}
+
 	@Public()
 	@Get("/")
 	@ApiOperation({ summary: "List blog posts (Public)" })

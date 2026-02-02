@@ -182,7 +182,7 @@ export default function OpenSourceIndex({ lang = "es" }: OpenSourceIndexProps) {
 						<VigilioTable.thead.th />
 					</VigilioTable.thead>
 					<VigilioTable.tbody>
-						<VigilioTable.tbody.row title="No se encontraron proyectos">
+						<VigilioTable.tbody.row title={"No se encontraron proyectos."}>
 							{(data) => <VigilioTable.tbody.td data={data} />}
 						</VigilioTable.tbody.row>
 					</VigilioTable.tbody>

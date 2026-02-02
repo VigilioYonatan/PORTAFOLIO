@@ -5,11 +5,10 @@ import {
 	Code,
 	LucideGithub,
 	LucideLinkedin,
-	MessageCircle,
 	LucideTwitter,
 	LucideYoutube,
+	MessageCircle,
 } from "lucide-preact";
-
 
 import { useEffect, useRef } from "preact/hooks";
 import TypedMessage from "./special/typed-message";
@@ -208,7 +207,6 @@ export default function HeroTerminal({
 										>
 											<LucideGithub size={18} />
 
-
 											<span class="absolute -top-8 left-1/2 -translate-x-1/2 bg-zinc-900 border border-white/10 px-2 py-1 text-[8px] uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
 												GitHub
 											</span>
@@ -223,7 +221,6 @@ export default function HeroTerminal({
 											aria-label="LinkedIn Profile"
 										>
 											<LucideLinkedin size={18} />
-
 
 											<span class="absolute -top-8 left-1/2 -translate-x-1/2 bg-zinc-900 border border-white/10 px-2 py-1 text-[8px] uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
 												LinkedIn
@@ -240,7 +237,6 @@ export default function HeroTerminal({
 										>
 											<LucideTwitter size={18} />
 
-
 											<span class="absolute -top-8 left-1/2 -translate-x-1/2 bg-zinc-900 border border-white/10 px-2 py-1 text-[8px] uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
 												Twitter
 											</span>
@@ -255,7 +251,6 @@ export default function HeroTerminal({
 											aria-label="YouTube Channel"
 										>
 											<LucideYoutube size={18} />
-
 
 											<span class="absolute -top-8 left-1/2 -translate-x-1/2 bg-zinc-900 border border-white/10 px-2 py-1 text-[8px] uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
 												YouTube

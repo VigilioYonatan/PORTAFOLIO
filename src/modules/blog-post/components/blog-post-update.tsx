@@ -27,9 +27,9 @@ interface BlogPostUpdateProps {
 	lang?: Lang;
 }
 
+import type { BlogCategorySchema } from "@modules/blog-category/schemas/blog-category.schema";
 import { blogPostShowApi } from "@modules/blog-post/apis/blog-post.show.api";
 import type { BlogPostSchema } from "../schemas/blog-post.schema";
-import type { BlogCategorySchema } from "@modules/blog-category/schemas/blog-category.schema";
 
 export default function BlogPostUpdate({
 	id,
@@ -208,7 +208,8 @@ function BlogPostUpdateForm({
 
 			<div class="space-y-4 pt-4 border-t border-white/5">
 				<h3 class="text-sm font-semibold text-muted-foreground uppercase tracking-widest flex items-center gap-2">
-					<Tag size={14} class="text-primary" /> {t("dashboard.blog.form.seo_opt")}
+					<Tag size={14} class="text-primary" />{" "}
+					{t("dashboard.blog.form.seo_opt")}
 				</h3>
 			</div>
 
@@ -219,7 +220,9 @@ function BlogPostUpdateForm({
 				entity="blog_post"
 				property="cover"
 				typeFile="image"
-				typesText={typeTextExtensions(UPLOAD_CONFIG.blog_post.cover!.mime_types)}
+				typesText={typeTextExtensions(
+					UPLOAD_CONFIG.blog_post.cover!.mime_types,
+				)}
 				accept={UPLOAD_CONFIG.blog_post.cover!.mime_types.join(", ")}
 			/>
 
