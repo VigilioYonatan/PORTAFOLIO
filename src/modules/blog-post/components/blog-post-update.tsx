@@ -159,19 +159,6 @@ export default function BlogPostUpdate({
 						<Tag size={14} class="text-primary" />{" "}
 						{t("dashboard.blog.form.seo_opt")}
 					</h3>
-					<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-						<Form.control<BlogPostUpdateDto>
-							name="seo.title"
-							title={t("dashboard.blog.form.seo_title")}
-							placeholder="Título para buscadores"
-						/>
-						<Form.control.area<BlogPostUpdateDto>
-							name="seo.description"
-							title={t("dashboard.blog.form.seo_desc")}
-							placeholder="Meta descripción (150-160 caracteres)"
-							rows={2}
-						/>
-					</div>
 				</div>
 
 				<Form.control.file<BlogPostUpdateDto>

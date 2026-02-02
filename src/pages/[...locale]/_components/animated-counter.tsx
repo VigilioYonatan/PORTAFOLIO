@@ -7,7 +7,7 @@ interface AnimatedCounterProps {
 
 export default function AnimatedCounter({
 	value,
-	duration = 2000,
+	duration = 1000,
 }: AnimatedCounterProps) {
 	const [count, setCount] = useState(0);
 	const [hasAnimated, setHasAnimated] = useState(false);

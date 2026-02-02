@@ -180,6 +180,10 @@ describe("TechnologyService", () => {
 		it("should delete technology and invalidate caches", async () => {
 			const id = 1;
 			const tech = TechnologyFactory.createSchema({ id });
+			// Mock show() dependency (cache miss -> repo hit)
+			vi.mocked(cache.get).mockResolvedValue(null);
+			vi.mocked(repository.showById).mockResolvedValue(tech);
+
 			vi.mocked(repository.destroy).mockResolvedValue(tech);
 
 			const result = await service.destroy(TENANT_ID, id);
@@ -191,6 +195,10 @@ describe("TechnologyService", () => {
 		});
 
 		it("should throw NotFoundException if technology not found during delete", async () => {
+			// Mock show() dependency to throw NotFound
+			vi.mocked(cache.get).mockResolvedValue(null);
+			vi.mocked(repository.showById).mockResolvedValue(null);
+
 			vi.mocked(repository.destroy).mockResolvedValue(
 				undefined as unknown as TechnologySchema,
 			); // Simulate null return from repo

@@ -24,7 +24,7 @@ export const techeableEntity = pgTable(
 		techeable_type: techeableTypeEnum().notNull(), // 'PORTFOLIO_PROJECT' | 'BLOG_POST'
 		technology_id: integer()
 			.notNull()
-			.references(() => technologyEntity.id),
+			.references(() => technologyEntity.id, { onDelete: "cascade" }),
 		tenant_id: integer()
 			.notNull()
 			.references(() => tenantEntity.id),

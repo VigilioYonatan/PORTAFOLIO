@@ -95,7 +95,9 @@ export class TechnologyService {
 
 			if (!technology) {
 				this.logger.warn({ tenant_id, id }, "Technology not found");
-				throw new NotFoundException(`Technology #${id} not found`);
+				throw new NotFoundException(
+					`Technology #${id} not found for tenant #${tenant_id}`,
+				);
 			}
 
 			await this.technologyCache.set(tenant_id, technology);
@@ -110,10 +112,16 @@ export class TechnologyService {
 	): Promise<TechnologyDestroyResponseDto> {
 		this.logger.log({ tenant_id, id }, "Deleting technology");
 
+		// Check existence first to distinguish between "not found" and "deletion error"
+		await this.show(tenant_id, id);
+
 		const technology = await this.repository.destroy(tenant_id, id);
 
 		if (!technology) {
-			this.logger.warn({ tenant_id, id }, "Technology not found for deletion");
+			this.logger.error(
+				{ tenant_id, id },
+				"Technology NOT FOUND for deletion after initial check. This suggests it was deleted by another process or there is a database issue.",
+			);
 			throw new NotFoundException(`Technology #${id} not found`);
 		}
 

@@ -27,6 +27,11 @@ vi.mock("@components/extras/terminal-logo", () => ({
 	default: () => <div data-testid="terminal-logo">LOGO</div>,
 }));
 
+// Mock TypedMessage to render its content immediately for tests
+vi.mock("../special/typed-message", () => ({
+	default: ({ message }: { message: string }) => <span>{message}</span>,
+}));
+
 describe("HeroTerminal Component", () => {
 	it("renders basics and engineer title", () => {
 		render(<HeroTerminal />);

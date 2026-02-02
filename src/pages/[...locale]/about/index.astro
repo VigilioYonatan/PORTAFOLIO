@@ -12,6 +12,7 @@ import {
   Sparkles,
   Terminal,
 } from "lucide-preact";
+import TypedMessage from "../_components/special/typed-message";
 import { printFileWithDimension } from "@infrastructure/utils/hybrid/file.utils";
 import { DIMENSION_IMAGE } from "@modules/uploads/const/upload.const";
 import { Image } from "astro:assets";
@@ -21,7 +22,6 @@ const t = useTranslations(lang);
 
 const { title, description, technologies } = Astro.locals
   .props as WebAboutResponseDto;
-console.log({technologies});
 const stats = [
   { value: "6+", label: t("home.experience") || "Years Exp." },
   { value: "50+", label: t("header.projects") || "Projects" },
@@ -96,14 +96,18 @@ const services = [
         class="grid grid-cols-3 gap-8 mt-8 border-t border-white/10 pt-8 w-full max-w-2xl"
       >
         {
-          stats.map((stat) => (
-            <div class="flex flex-col items-center">
-              <span class="text-3xl font-bold text-white mb-1">
+          stats.map((stat, index) => (
+            <div class="flex flex-col items-center gap-3">
+              <span class="text-4xl md:text-5xl font-black text-primary text-glow selection:bg-white selection:text-primary">
                 <AnimatedCounter value={stat.value} client:visible />
               </span>
-              <span class="text-xs uppercase tracking-widest text-muted-foreground">
-                {stat.label}
-              </span>
+              <TypedMessage
+                message={stat.label}
+                delay={800 + index * 400}
+                className="!relative !left-0 !translate-x-0"
+                textClassName="text-[8px] md:text-[10px] !tracking-[0.3em] font-black opacity-80"
+                typingSpeed={30}
+              />
             </div>
           ))
         }
@@ -164,7 +168,9 @@ const services = [
     {/* Technology Stack */}
     <section class="w-full max-w-6xl mx-auto">
       <div class="flex flex-col gap-4 mb-16">
-        <h2 class="text-3xl font-black tracking-tight text-white flex items-center gap-4">
+        <h2
+          class="text-3xl font-black tracking-tight text-white flex items-center gap-4"
+        >
           <Terminal class="text-primary w-8 h-8" />
           {t("dashboard.sidebar.technologies")}
         </h2>
@@ -175,8 +181,18 @@ const services = [
 
       <div class="space-y-20">
         {
-          ["LANGUAGE", "FRONTEND", "BACKEND", "DATABASE", "DEVOPS", "AI", "MOBILE"].map((category) => {
-            const categoryTechs = technologies?.filter(tech => tech.category === category);
+          [
+            "LANGUAGE",
+            "FRONTEND",
+            "BACKEND",
+            "DATABASE",
+            "DEVOPS",
+            "AI",
+            "MOBILE",
+          ].map((category) => {
+            const categoryTechs = technologies?.filter(
+              (tech) => tech.category === category,
+            );
             if (!categoryTechs || categoryTechs.length === 0) return null;
 
             const categoryKey = category.toLowerCase();
@@ -187,8 +203,8 @@ const services = [
                 <div class="flex items-center gap-6">
                   <div class="h-px flex-1 bg-linear-to-r from-transparent via-white/10 to-transparent" />
                   <div class="flex flex-col items-center gap-1">
-                                            {/* Label removed to avoid redundancy */}
-                                            <h3 class="text-xl font-bold text-white tracking-tight">
+                    {/* Label removed to avoid redundancy */}
+                    <h3 class="text-xl font-bold text-white tracking-tight">
                       {categoryData?.title || category}
                     </h3>
                   </div>
@@ -200,7 +216,7 @@ const services = [
                     <div class="group relative p-px rounded-xl overflow-hidden transition-all duration-500 hover:-translate-y-1">
                       {/* Technical Border/Background */}
                       <div class="absolute inset-0 bg-linear-to-b from-white/10 to-transparent opacity-50 group-hover:from-primary/40 group-hover:to-primary/5 transition-colors duration-500" />
-                      
+
                       {/* Recursive Corner Accents */}
                       <div class="absolute top-0 left-0 w-2 h-2 border-t border-l border-white/20 group-hover:border-primary/60" />
                       <div class="absolute top-0 right-0 w-2 h-2 border-t border-r border-white/20 group-hover:border-primary/60" />
@@ -211,11 +227,17 @@ const services = [
                         <div class="relative">
                           {/* Glow background for icon */}
                           <div class="absolute inset-0 bg-primary/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-full" />
-                          
+
                           <div class="relative z-10 w-12 h-12 flex items-center justify-center rounded-lg bg-zinc-900 border border-white/5 group-hover:border-primary/30 transition-all duration-500 shadow-inner">
                             {tech.icon && tech.icon.length > 0 ? (
                               <Image
-                                src={printFileWithDimension(tech.icon, DIMENSION_IMAGE.xs,env.STORAGE_CDN_URL)[0]}
+                                src={
+                                  printFileWithDimension(
+                                    tech.icon,
+                                    DIMENSION_IMAGE.xs,
+                                    env.STORAGE_CDN_URL,
+                                  )[0]
+                                }
                                 alt={tech.name}
                                 width={DIMENSION_IMAGE.xs}
                                 height={DIMENSION_IMAGE.xs}

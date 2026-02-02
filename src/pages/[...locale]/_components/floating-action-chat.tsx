@@ -178,15 +178,15 @@ export default function FloatingActionChat() {
 		localStorage.setItem("chat_visitor_name", visitorName.value);
 		localStorage.setItem("chat_visitor_company", visitorCompany.value);
 		isVerified.value = true;
-		
+
 		// Set personalized greeting immediately after verification
 		if (!conversationId.value && messages.value.length === 0) {
-            const name = visitorName.value.split(" ")[0]; // First name
-            const company = visitorCompany.value;
-            
-            const greeting = company
-                ? `AI_LINK_ESTABLISHED: Hello ${name}. It is a pleasure to connect with ${company}. How can I assist you professionally today?`
-                : `AI_LINK_ESTABLISHED: Hello ${name}. The system is online. How can I assist you professionally today?`;
+			const name = visitorName.value.split(" ")[0]; // First name
+			const company = visitorCompany.value;
+
+			const greeting = company
+				? `AI_LINK_ESTABLISHED: Hello ${name}. It is a pleasure to connect with ${company}. How can I assist you professionally today?`
+				: `AI_LINK_ESTABLISHED: Hello ${name}. The system is online. How can I assist you professionally today?`;
 
 			messages.value = [
 				{
@@ -194,8 +194,8 @@ export default function FloatingActionChat() {
 					content: greeting,
 				},
 			];
-            modeSelected.value = true;
-            chatMode.value = "AI";
+			modeSelected.value = true;
+			chatMode.value = "AI";
 		}
 	}
 
@@ -494,7 +494,9 @@ export default function FloatingActionChat() {
 											onInput={(e) => {
 												visitorCompany.value = e.currentTarget.value;
 											}}
-											onKeyDown={(e) => e.key === "Enter" && handleVerification()}
+											onKeyDown={(e) =>
+												e.key === "Enter" && handleVerification()
+											}
 										/>
 									</div>
 								</div>
@@ -530,7 +532,8 @@ export default function FloatingActionChat() {
 									Link Established
 								</h3>
 								<p class="text-[10px] text-muted-foreground font-mono mb-8 tracking-widest leading-relaxed">
-									WELCOME_ARCHITECT_{visitorName.value.split(" ")[0].toUpperCase()}
+									WELCOME_ARCHITECT_
+									{visitorName.value.split(" ")[0].toUpperCase()}
 									.
 									<br /> SELECT_PROTOCOL:
 								</p>

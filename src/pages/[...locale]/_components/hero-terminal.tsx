@@ -10,6 +10,7 @@ import {
 	Youtube,
 } from "lucide-preact";
 import { useEffect, useRef } from "preact/hooks";
+import TypedMessage from "./special/typed-message";
 
 interface HeroTerminalProps {
 	lang?: Lang;
@@ -58,7 +59,7 @@ export default function HeroTerminal({
 	return (
 		<div
 			ref={containerRef}
-			class="relative w-full py-4 flex flex-col items-center justify-center overflow-hidden"
+			class="relative w-full py-4 flex flex-col items-center justify-center"
 		>
 			{/* Reactive Background Glow */}
 			<div
@@ -94,11 +95,13 @@ export default function HeroTerminal({
 							<div class="flex flex-col md:flex-row items-start md:items-end justify-between gap-8 md:gap-4 mb-8">
 								{/* Left: Title & Badge */}
 								<div class="space-y-2 flex-1">
-									<div class="p-1 px-3 bg-primary/10 border border-primary/20 inline-block rounded-sm">
-										<span class="text-[9px] font-bold text-primary tracking-[0.3em] uppercase">
-											{t("home.hero.badge")}
-										</span>
-									</div>
+									<TypedMessage
+										message={t("home.hero.badge")}
+										delay={500}
+										loop={true}
+										className="mb-4 !relative !left-0 !translate-x-0"
+										textClassName="text-[8px] md:text-[9px] lg:text-[10px] !tracking-[0.1em]"
+									/>
 									<h1 class="text-2xl md:text-5xl lg:text-6xl font-black tracking-tighter text-white leading-tight break-all md:break-normal uppercase">
 										{t("home.hero.software")}
 										<br />
@@ -115,6 +118,16 @@ export default function HeroTerminal({
 							</div>
 
 							<div class="space-y-2 font-mono text-xs md:text-sm text-muted-foreground mt-6">
+								<p class="flex items-center flex-wrap gap-2 leading-relaxed">
+									<span class="text-primary">&gt;</span>
+									<span>
+										{t("home.hero.desc0")}{" "}
+										<span class="text-foreground">
+											{t("home.hero.desc0_highlight")}
+										</span>{" "}
+										{t("home.hero.desc0_end")}
+									</span>
+								</p>
 								<p class="flex items-center flex-wrap gap-2 leading-relaxed">
 									<span class="text-primary">&gt;</span>
 									<span>

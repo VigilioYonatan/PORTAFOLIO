@@ -1,0 +1,483 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.18 [39m[90m/config/Desktop/gat/portfolio[39m
+
+Sourcemap for "/config/Desktop/gat/portfolio/node_modules/.pnpm/@vigilio+sweet@1.1.6/node_modules/@vigilio/sweet/dist/esm/index.js" points to missing source files
+Sourcemap for "/config/Desktop/gat/portfolio/node_modules/.pnpm/@vigilio+sweet@1.1.6/node_modules/@vigilio/sweet/dist/esm/sweet.js" points to missing source files
+Sourcemap for "/config/Desktop/gat/portfolio/node_modules/.pnpm/@vigilio+sweet@1.1.6/node_modules/@vigilio/sweet/dist/esm/helpers.js" points to missing source files
+Sourcemap for "/config/Desktop/gat/portfolio/node_modules/.pnpm/@vigilio+sweet@1.1.6/node_modules/@vigilio/sweet/dist/esm/alert.js" points to missing source files
+[90mstdout[2m | src/modules/technology/__tests__/technology.service.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (42) from .env.test -- tip: 🔐 encrypt with Dotenvx: https://dotenvx.com
+
+ [31m❯[39m src/pages/[...locale]/_components/__tests__/hero-terminal.test.tsx [2m([22m[2m4 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[32m 48[2mms[22m[39m
+     [32m✓[39m renders basics and engineer title[32m 16[2mms[22m[39m
+     [32m✓[39m renders CTA buttons with correct text[32m 8[2mms[22m[39m
+     [32m✓[39m renders system subtitles[32m 8[2mms[22m[39m
+[31m     [31m×[31m renders the online badge[39m[32m 14[2mms[22m[39m
+ [32m✓[39m src/modules/auth/__tests__/register-form.test.tsx [2m([22m[2m31 tests[22m[2m)[22m[33m 774[2mms[22m[39m
+       [33m[2m✓[22m[39m renders register form container [33m 549[2mms[22m[39m
+ [32m✓[39m src/modules/user/__tests__/user-show.test.tsx [2m([22m[2m11 tests[22m[2m)[22m[33m 1036[2mms[22m[39m
+     [33m[2m✓[22m[39m should be exported from the module [33m 975[2mms[22m[39m
+[90mstdout[2m | src/modules/auth/services/__tests__/auth.service.disable-mfa.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (42) from .env.test -- tip: 📡 add observability to secrets: https://dotenvx.com/ops
+
+ [31m❯[39m src/modules/technology/__tests__/technology.service.test.ts [2m([22m[2m9 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[32m 40[2mms[22m[39m
+       [32m✓[39m should return cached list if available[32m 10[2mms[22m[39m
+       [32m✓[39m should fetch from repository and cache if not in cache[32m 5[2mms[22m[39m
+       [32m✓[39m should throw NotFoundException if technology does not exist[32m 2[2mms[22m[39m
+       [32m✓[39m should return from cache if available[32m 1[2mms[22m[39m
+       [32m✓[39m should create technology and invalidate cache[32m 2[2mms[22m[39m
+       [32m✓[39m should update technology and invalidate caches[32m 2[2mms[22m[39m
+       [32m✓[39m should throw NotFoundException if technology not found during update[32m 1[2mms[22m[39m
+[31m       [31m×[31m should delete technology and invalidate caches[39m[32m 11[2mms[22m[39m
+       [32m✓[39m should throw NotFoundException if technology not found during delete[32m 3[2mms[22m[39m
+ [32m✓[39m src/modules/user/__tests__/user-store.test.tsx [2m([22m[2m10 tests[22m[2m)[22m[33m 1981[2mms[22m[39m
+     [33m[2m✓[22m[39m should be exported from the module [33m 1976[2mms[22m[39m
+ [32m✓[39m src/modules/user/__tests__/user-update.test.tsx [2m([22m[2m11 tests[22m[2m)[22m[33m 2051[2mms[22m[39m
+     [33m[2m✓[22m[39m should be exported from the module [33m 2046[2mms[22m[39m
+ [32m✓[39m src/modules/user/components/__tests__/users-index.test.tsx [2m([22m[2m17 tests[22m[2m)[22m[33m 517[2mms[22m[39m
+ [32m✓[39m src/modules/project/__tests__/project-update.test.tsx [2m([22m[2m4 tests[22m[2m)[22m[32m 300[2mms[22m[39m
+ [32m✓[39m src/modules/user/components/__tests__/profile-index.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[32m 289[2mms[22m[39m
+ [32m✓[39m src/modules/auth/services/__tests__/auth.service.disable-mfa.test.ts [2m([22m[2m3 tests[22m[2m)[22m[33m 441[2mms[22m[39m
+ [32m✓[39m src/modules/auth/components/__tests__/reset-password-form.test.tsx [2m([22m[2m4 tests[22m[2m)[22m[32m 154[2mms[22m[39m
+ [32m✓[39m src/modules/user/__tests__/user-reset-attempts.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[32m 225[2mms[22m[39m
+ [32m✓[39m src/modules/user/__tests__/user-qr.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[32m 213[2mms[22m[39m
+ [32m✓[39m src/pages/[...locale]/_components/__tests__/floating-action-chat.test.tsx [2m([22m[2m4 tests[22m[2m)[22m[32m 132[2mms[22m[39m
+ [32m✓[39m src/modules/auth/components/__tests__/register-form.test.tsx [2m([22m[2m4 tests[22m[2m)[22m[32m 280[2mms[22m[39m
+ [32m✓[39m src/modules/skills/components/__tests__/skill-bento-grid.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[32m 95[2mms[22m[39m
+ [32m✓[39m src/modules/auth/components/__tests__/login-form.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[32m 165[2mms[22m[39m
+ [32m✓[39m src/modules/auth/components/__tests__/mfa-setup.test.tsx [2m([22m[2m4 tests[22m[2m)[22m[32m 132[2mms[22m[39m
+[90mstdout[2m | src/modules/auth/__tests__/auth.service.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (42) from .env.test -- tip: 👥 sync secrets across teammates & machines: https://dotenvx.com/ops
+
+[90mstdout[2m | src/modules/user/__tests__/user.service.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (42) from .env.test -- tip: ⚙️  load multiple .env files with { path: ['.env.local', '.env'] }
+
+[90mstdout[2m | src/modules/auth/services/__tests__/auth.service.mfa.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (42) from .env.test -- tip: 🗂️ backup and recover secrets: https://dotenvx.com/ops
+
+ [32m✓[39m src/pages/[...locale]/_components/__tests__/neuro-player.test.tsx [2m([22m[2m4 tests[22m[2m)[22m[32m 118[2mms[22m[39m
+ [32m✓[39m src/modules/auth/components/__tests__/forgot-password-form.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[32m 178[2mms[22m[39m
+[90mstdout[2m | src/modules/music/__tests__/music.service.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (42) from .env.test -- tip: 🔑 add access controls to secrets: https://dotenvx.com/ops
+
+ [32m✓[39m src/modules/user/__tests__/user.service.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 83[2mms[22m[39m
+ [32m✓[39m src/modules/auth/__tests__/auth.service.test.ts [2m([22m[2m15 tests[22m[2m)[22m[32m 66[2mms[22m[39m
+ [32m✓[39m src/modules/auth/components/__tests__/mfa-verify.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[32m 76[2mms[22m[39m
+ [32m✓[39m src/modules/notification/__tests__/notification-center.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[32m 44[2mms[22m[39m
+ [32m✓[39m src/modules/auth/services/__tests__/auth.service.mfa.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 86[2mms[22m[39m
+ [32m✓[39m src/modules/music/__tests__/music.service.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 45[2mms[22m[39m
+ [32m✓[39m src/pages/[...locale]/_components/__tests__/skill-bento-grid.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[32m 45[2mms[22m[39m
+ [32m✓[39m src/components/extras/__tests__/terminal-logo.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[32m 50[2mms[22m[39m
+ [32m✓[39m src/pages/[...locale]/_components/__tests__/wave-timeline.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[32m 63[2mms[22m[39m
+[90mstdout[2m | src/modules/tenant/__tests__/tenant.service.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (42) from .env.test -- tip: 🛠️  run anywhere with `dotenvx run -- yourcommand`
+
+[90mstdout[2m | src/modules/auth/services/__tests__/auth.service.verify-mfa.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (42) from .env.test -- tip: 👥 sync secrets across teammates & machines: https://dotenvx.com/ops
+
+ [32m✓[39m src/components/extras/__tests__/button.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[32m 41[2mms[22m[39m
+[90mstdout[2m | src/modules/web/__tests__/web.service.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (42) from .env.test -- tip: 🔐 prevent committing .env to code: https://dotenvx.com/precommit
+
+ [32m✓[39m src/modules/blog-post/components/__tests__/futuristic-mdx.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[32m 40[2mms[22m[39m
+[32m[Nest] 531959  - [39m02/02/2026, 7:13:57 AM [32m    LOG[39m [38;5;3m[TenantService] [39m[32mListing tenants[39m
+[32m[Nest] 531959  - [39m02/02/2026, 7:13:57 AM [32m    LOG[39m [38;5;3m[TenantService] [39mObject(1) {
+  id: [33m1[39m
+}
+[32m[Nest] 531959  - [39m02/02/2026, 7:13:57 AM [32m    LOG[39m [38;5;3m[TenantService] [39m[32mFetching tenant by ID[39m
+[32m[Nest] 531959  - [39m02/02/2026, 7:13:57 AM [32m    LOG[39m [38;5;3m[TenantService] [39mObject(1) {
+  id: [33m1[39m
+}
+[32m[Nest] 531959  - [39m02/02/2026, 7:13:57 AM [32m    LOG[39m [38;5;3m[TenantService] [39m[32mFetching tenant by ID[39m
+[32m[Nest] 531959  - [39m02/02/2026, 7:13:57 AM [32m    LOG[39m [38;5;3m[TenantService] [39mObject(1) {
+  id: [33m999[39m
+}
+[32m[Nest] 531959  - [39m02/02/2026, 7:13:57 AM [32m    LOG[39m [38;5;3m[TenantService] [39m[32mFetching tenant by ID[39m
+[33m[Nest] 531959  - [39m02/02/2026, 7:13:57 AM [33m   WARN[39m [38;5;3m[TenantService] [39mObject(1) {
+  id: [33m999[39m
+}
+[33m[Nest] 531959  - [39m02/02/2026, 7:13:57 AM [33m   WARN[39m [38;5;3m[TenantService] [39m[33mTenant not found[39m
+[32m[Nest] 531959  - [39m02/02/2026, 7:13:57 AM [32m    LOG[39m [38;5;3m[TenantService] [39mObject(1) {
+  name: [32m'New Tenant'[39m
+}
+[32m[Nest] 531959  - [39m02/02/2026, 7:13:57 AM [32m    LOG[39m [38;5;3m[TenantService] [39m[32mCreating new tenant[39m
+[32m[Nest] 531959  - [39m02/02/2026, 7:13:57 AM [32m    LOG[39m [38;5;3m[TenantService] [39mObject(1) {
+  id: [33m1[39m
+}
+[32m[Nest] 531959  - [39m02/02/2026, 7:13:57 AM [32m    LOG[39m [38;5;3m[TenantService] [39m[32mUpdating tenant[39m
+[32m[Nest] 531959  - [39m02/02/2026, 7:13:57 AM [32m    LOG[39m [38;5;3m[TenantService] [39mObject(1) {
+  id: [33m1[39m
+}
+[32m[Nest] 531959  - [39m02/02/2026, 7:13:57 AM [32m    LOG[39m [38;5;3m[TenantService] [39m[32mDeleting tenant[39m
+[32m[Nest] 531959  - [39m02/02/2026, 7:13:57 AM [32m    LOG[39m [38;5;3m[TenantService] [39mObject(1) {
+  tenant_id: [33m1[39m
+}
+[32m[Nest] 531959  - [39m02/02/2026, 7:13:57 AM [32m    LOG[39m [38;5;3m[TenantService] [39m[32mFetching tenant settings[39m
+[32m[Nest] 531959  - [39m02/02/2026, 7:13:57 AM [32m    LOG[39m [38;5;3m[TenantService] [39mObject(1) {
+  tenant_id: [33m999[39m
+}
+[32m[Nest] 531959  - [39m02/02/2026, 7:13:57 AM [32m    LOG[39m [38;5;3m[TenantService] [39m[32mFetching tenant settings[39m
+[33m[Nest] 531959  - [39m02/02/2026, 7:13:57 AM [33m   WARN[39m [38;5;3m[TenantService] [39mObject(1) {
+  tenant_id: [33m999[39m
+}
+[33m[Nest] 531959  - [39m02/02/2026, 7:13:57 AM [33m   WARN[39m [38;5;3m[TenantService] [39m[33mTenant not found for settings[39m
+[32m[Nest] 531959  - [39m02/02/2026, 7:13:57 AM [32m    LOG[39m [38;5;3m[TenantService] [39mObject(1) {
+  tenant_id: [33m1[39m
+}
+[32m[Nest] 531959  - [39m02/02/2026, 7:13:57 AM [32m    LOG[39m [38;5;3m[TenantService] [39m[32mUpdating tenant settings[39m
+ [32m✓[39m src/modules/tenant/__tests__/tenant.service.test.ts [2m([22m[2m10 tests[22m[2m)[22m[32m 19[2mms[22m[39m
+[90mstdout[2m | src/modules/user/controllers/__tests__/user.controller.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (42) from .env.test -- tip: ⚙️  override existing env vars with { override: true }
+
+ [32m✓[39m src/hooks/__tests__/use-socket.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[32m 15[2mms[22m[39m
+ [32m✓[39m src/modules/auth/services/__tests__/auth.service.verify-mfa.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 32[2mms[22m[39m
+[90mstdout[2m | src/modules/contact/__tests__/contact.service.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (42) from .env.test -- tip: 🔐 encrypt with Dotenvx: https://dotenvx.com
+
+[90mstdout[2m | src/modules/work-milestone/services/work-milestone.service.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (42) from .env.test -- tip: ✅ audit secrets and track compliance: https://dotenvx.com/ops
+
+ [32m✓[39m src/modules/user/controllers/__tests__/user.controller.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 51[2mms[22m[39m
+ [32m✓[39m src/pages/[...locale]/_components/__tests__/tech-orbit.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[32m 18[2mms[22m[39m
+ [32m✓[39m src/modules/work-milestone/services/work-milestone.service.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 54[2mms[22m[39m
+ [32m✓[39m src/modules/web/__tests__/web.service.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 31[2mms[22m[39m
+ [32m✓[39m src/modules/web/controllers/__tests__/web.controller.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 75[2mms[22m[39m
+ [32m✓[39m src/modules/contact/__tests__/contact.service.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 29[2mms[22m[39m
+[90mstdout[2m | src/hooks/__tests__/use-smart-upload.test.tsx[2m > [22m[2museSmartUpload[2m > [22m[2mshould clear all files when clearFiles is called
+[22m[39mArchivo Key: key1 eliminado de S3/MinIO.
+
+ [32m✓[39m src/hooks/__tests__/use-smart-upload.test.tsx [2m([22m[2m6 tests[22m[2m)[22m[32m 15[2mms[22m[39m
+ [32m✓[39m src/hooks/__tests__/use-typing-effect.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[32m 14[2mms[22m[39m
+ [32m✓[39m src/hooks/__tests__/use-motion.test.tsx [2m([22m[2m9 tests[22m[2m)[22m[32m 20[2mms[22m[39m
+ [32m✓[39m src/hooks/__tests__/use-copy-to-clipboard.test.tsx [2m([22m[2m4 tests[22m[2m)[22m[32m 19[2mms[22m[39m
+ [32m✓[39m src/hooks/__tests__/use-dropdown.test.tsx [2m([22m[2m7 tests[22m[2m)[22m[32m 15[2mms[22m[39m
+ [32m✓[39m src/modules/web/__tests__/web.controller.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 52[2mms[22m[39m
+ [32m✓[39m src/modules/auth/components/__tests__/verify-email.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[32m 19[2mms[22m[39m
+ [32m✓[39m src/hooks/__tests__/use-press-timeout.test.tsx [2m([22m[2m4 tests[22m[2m)[22m[32m 29[2mms[22m[39m
+ [32m✓[39m src/hooks/__tests__/use-inactiviy.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[32m 62[2mms[22m[39m
+ [32m✓[39m src/hooks/__tests__/use-debounce-on-blur.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[32m 19[2mms[22m[39m
+ [32m✓[39m src/hooks/__tests__/use-media-query.test.tsx [2m([22m[2m7 tests[22m[2m)[22m[32m 26[2mms[22m[39m
+ [32m✓[39m src/hooks/__tests__/use-intersection-observer.test.tsx [2m([22m[2m4 tests[22m[2m)[22m[32m 17[2mms[22m[39m
+ [32m✓[39m src/pages/[...locale]/_components/legal/__tests__/legal-doc.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[32m 17[2mms[22m[39m
+ [32m✓[39m src/modules/tenant/components/__tests__/settings-index.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[32m 26[2mms[22m[39m
+ [32m✓[39m src/hooks/__tests__/use-click-outside.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+ [32m✓[39m src/hooks/__tests__/use-visitor-id.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[32m 9[2mms[22m[39m
+[90mstdout[2m | src/modules/user/repositories/__tests__/user.repository.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (42) from .env.test -- tip: 🗂️ backup and recover secrets: https://dotenvx.com/ops
+
+ [32m✓[39m src/hooks/__tests__/use-visible.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+ [32m✓[39m src/hooks/__tests__/use-sse.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[32m 9[2mms[22m[39m
+ [32m✓[39m src/modules/user/repositories/__tests__/user.repository.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 2 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m src/modules/technology/__tests__/technology.service.test.ts[2m > [22mTechnologyService[2m > [22mdestroy[2m > [22mshould delete technology and invalidate caches
+[31m[1mNotFoundException[22m: Technology #1 not found for tenant #1[39m
+[36m [2m❯[22m TechnologyService.show src/modules/technology/services/technology.service.ts:[2m98:11[22m[39m
+    [90m 96| [39m   [35mif[39m ([33m![39mtechnology) {
+    [90m 97| [39m    [35mthis[39m[33m.[39mlogger[33m.[39m[34mwarn[39m({ tenant_id[33m,[39m id }[33m,[39m [32m"Technology not found"[39m)[33m;[39m
+    [90m 98| [39m    throw new NotFoundException(`Technology #${id} not found for tenan…
+    [90m   | [39m          [31m^[39m
+    [90m 99| [39m   }
+    [90m100| [39m
+[90m [2m❯[22m TechnologyService.destroy src/modules/technology/services/technology.service.ts:[2m114:3[22m[39m
+[90m [2m❯[22m src/modules/technology/__tests__/technology.service.test.ts:[2m185:19[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/pages/[...locale]/_components/__tests__/hero-terminal.test.tsx[2m > [22mHeroTerminal Component[2m > [22mrenders the online badge
+[31m[1mTestingLibraryElementError[22m[39m: Unable to find an element with the text: home.hero.badge. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"relative w-full py-4 flex flex-col items-center justify-center"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[600px] bg-primary/20 rounded-full blur-[100px] pointer-events-none -z-10 transition-transform duration-75 ease-linear will-change-transform"[39m
+      [36m/>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"z-10 w-full max-w-4xl px-4"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"bg-black/60 border border-white/10 rounded-sm shadow-2xl backdrop-blur-md overflow-hidden relative group min-h-[auto] md:min-h-[450px]"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"absolute inset-0 bg-scanline opacity-[0.05] pointer-events-none"[39m
+          [36m/>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"h-8 border-b border-white/10 flex items-center px-4 justify-between bg-zinc-950/40 relative z-20"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"flex items-center gap-2"[39m
+            [36m>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex gap-1.5"[39m
+              [36m>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"w-2.5 h-2.5 rounded-full bg-primary border border-primary/40 shadow-[0_0_5px_rgba(6,182,212,0.5)]"[39m
+                [36m/>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"w-2.5 h-2.5 rounded-full bg-zinc-700"[39m
+                [36m/>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"w-2.5 h-2.5 rounded-full bg-zinc-700"[39m
+                [36m/>[39m
+              [36m</div>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"text-[9px] md:text-[10px] text-muted-foreground font-mono uppercase tracking-widest ml-4 truncate"[39m
+              [36m>[39m
+                [0mroot@system:~/init[0m
+              [36m</span>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"p-4 sm:p-6 md:p-8 lg:p-12 flex flex-col gap-6 relative z-10 font-mono"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-500"[39m
+            [36m>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex flex-col md:flex-row items-start md:items-end justify-between gap-8 md:gap-4 mb-8"[39m
+              [36m>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"space-y-2 flex-1"[39m
+                [36m>[39m
+                  [36m<div[39m
+                    [33mclass[39m=[32m"z-50 pointer-events-none mb-4 !relative !left-0 !translate-x-0"[39m
+                  [36m>[39m
+                    [36m<div[39m
+                      [33mclass[39m=[32m"relative group"[39m
+                    [36m>[39m
+                      [36m<div[39m
+                        [33mclass[39m=[32m"absolute inset-x-0 inset-y-0 bg-primary/20 backdrop-blur-2xl border border-primary/30 rounded-lg -rotate-0.5 group-hover:rotate-0 transition-transform duration-700 shadow-[0_0_30px_rgba(6,182,212,0.1)]"[39m
+                      [36m/>[39m
+                      [36m<div[39m
+                        [33mclass[39m=[32m"relative px-6 py-4 bg-zinc-950/60 backdrop-blur-xl border border-white/10 rounded-lg shadow-2xl flex items-center gap-4 transition-all duration-300 group-hover:border-primary/40 group-hover:bg-zinc-950/80"[39m
+                      [36m>[39m
+                        [36m<div[39m
+                          [33mclass[39m=[32m"relative flex h-3 w-3"[39m
+                        [36m>[39m
+                          [36m<span[39m
+                            [33mclass[39m=[32m"animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75 "[39m
+                          [36m/>[39m
+                          [36m<span[39m
+                            [33mclass[39m=[32m"relative inline-flex rounded-full h-3 w-3 bg-primary "[39m
+                          [36m/>[39m
+                        [36m</div>[39m
+                        [36m<span[39m
+                          [33mclass[39m=[32m"font-mono font-black tracking-widest text-primary uppercase whitespace-normal break-words leading-relaxed text-glow text-[8px] md:text-[9px] lg:text-[10px] !tracking-[0.1em]"[39m
+                        [36m>[39m
+                          [0m[0m
+                          [36m<span[39m
+                            [33mclass[39m=[32m"inline-block w-2.5 h-[1.2em] ml-1 bg-primary animate-pulse align-middle shadow-[0_0_15px_rgba(6,182,212,1)]"[39m
+                          [36m/>[39m
+                        [36m</span>[39m
+                      [36m</div>[39m
+                      [36m<div[39m
+                        [33mclass[39m=[32m"absolute -top-1.5 -left-1.5 w-4 h-4 border-t-2 border-l-2 border-primary/60 rounded-tl-md"[39m
+                      [36m/>[39m
+                      [36m<div[39m
+                        [33mclass[39m=[32m"absolute -bottom-1.5 -right-1.5 w-4 h-4 border-b-2 border-r-2 border-primary/60 rounded-br-md"[39m
+                      [36m/>[39m
+                      [36m<div[39m
+                        [33mclass[39m=[32m"absolute -top-1.5 -right-1.5 w-2 h-2 border-t-2 border-r-2 border-primary/40 rounded-tr-sm"[39m
+                      [36m/>[39m
+                      [36m<div[39m
+                        [33mclass[39m=[32m"absolute -bottom-1.5 -left-1.5 w-2 h-2 border-b-2 border-l-2 border-primary/40 rounded-bl-sm"[39m
+                      [36m/>[39m
+                    [36m</div>[39m
+                  [36m</div>[39m
+                  [36m<h1[39m
+                    [33mclass[39m=[32m"text-2xl md:text-5xl lg:text-6xl font-black tracking-tighter text-white leading-tight break-all md:break-normal uppercase"[39m
+                  [36m>[39m
+                    [0mhome.hero.software[0m
+                    [36m<br />[39m
+                    [36m<span[39m
+                      [33mclass[39m=[32m"text-primary text-glow transition-all duration-75"[39m
+                      [33mstyle[39m=[32m"text-shadow: 0 0 20px rgba(6,182,212,0.6);"[39m
+                    [36m>[39m
+                      [0mhome.hero.engineer[0m
+                    [36m</span>[39m
+                  [36m</h1>[39m
+                [36m</div>[39m
+              [36m</div>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"space-y-2 font-mono text-xs md:text-sm text-muted-foreground mt-6"[39m
+              [36m>[39m
+                [36m<p[39m
+                  [33mclass[39m=[32m"flex items-center flex-wrap gap-2 leading-relaxed"[39m
+                [36m>[39m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"text-primary"[39m
+                  [36m>[39m
+                    [0m&gt;[0m
+                  [36m</span>[39m
+                  [36m<span>[39m
+                    [0mhome.hero.desc0[0m
+                    [0m [0m
+                    [36m<span[39m
+                      [33mclass[39m=[32m"text-foreground"[39m
+                    [36m>[39m
+                      [0mhome.hero.desc0_highlight[0m
+                    [36m</span>[39m
+                    [0m [0m
+                    [0mhome.hero.desc0_end[0m
+                  [36m</span>[39m
+                [36m</p>[39m
+                [36m<p[39m
+                  [33mclass[39m=[32m"flex items-center flex-wrap gap-2 leading-relaxed"[39m
+                [36m>[39m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"text-primary"[39m
+                  [36m>[39m
+                    [0m&gt;[0m
+                  [36m</span>[39m
+                  [36m<span>[39m
+                    [0mhome.hero.desc1[0m
+                    [0m [0m
+                    [36m<span[39m
+                      [33mclass[39m=[32m"text-foreground"[39m
+                    [36m>[39m
+                      [0mhome.hero.desc1_highlight[0m
+                    [36m</span>[39m
+                    [0m [0m
+                    [0mhome.hero.desc1_end[0m
+                  [36m</span>[39m
+                [36m</p>[39m
+                [36m<p[39m
+                  [33mclass[39m=[32m"flex items-center flex-wrap gap-2 leading-relaxed"[39m
+                [36m>[39m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"text-primary"[39m
+                  [36m>[39m
+                    [0m&gt;[0m
+                  [36m</span>[39m
+                  [36m<span>[39m
+                    [0mhome.hero.desc2[0m
+                    [0m [0m
+                    [36m<span[39m
+                      [33mclass[39m=[32m"text-foreground"[39m
+                    [36m>[39m
+                      [0mhome.hero.desc2_highlight[0m
+                    [36m</span>[39m
+                    [0mhome.hero.desc2_end[0m
+                  [36m</span>[39m
+                [36m</p>[39m
+                [36m<p[39m
+                  [33mclass[39m=[32m"flex items-center flex-wrap gap-2 leading-relaxed"[39m
+                [36m>[39m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"text-primary"[39m
+                  [36m>[39m
+                    [0m&gt;[0m
+                  [36m</span>[39m
+                  [36m<span>[39m
+                    [0mhome.hero.desc3[0m
+                    [0m [0m
+                    [36m<span[39m
+                      [33mclass[39m=[32m"text-foreground"[39m
+                    [36m>[39m
+                      [0mhome.hero.desc3_highlight[0m
+                    [36m</span>[39m
+                    [0mhome.hero.desc3_end[0m
+                  [36m</span>[39m
+                [36m</p>[39m
+                [36m<p[39m
+                  [33mclass[39m=[32m"opacity-40 text-[10px] mt-4"[39m
+                [36m>[39m
+                  [0mhome.hero.stack[0m
+                [36m</p>[39m
+              [36m</div>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex flex-col md:flex-row md:items-center justify-between gap-6 md:gap-8 mt-8 md:mt-12"[39m
+              [36m>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"flex flex-wrap gap-4"[39m
+                [36m>[39m
+                  [36m<a[39m
+                    [33maria-label[39m=[32m"Start Project"[39m
+                    [33mclass[39m=[32m"px-6 md:px-8 py-3 bg-primary text-primary-foreground font-bold text-[10px] md:text-[11px] tracking-widest uppercase hover:bg-primary/90 transition-all shadow-[0_0_20px_rgba(6,182,212,0.3)] active:scale-95 flex items-center justify-center gap-3 group"[39m
+                    [33mhref[39m=[32m"#"[39m
+                    [33mrel[39m=[32m"noopener noreferrer"[39m
+                    [33mtarget[39m=[32m"_blank"[39m
+                  [36m>[39m
+                    [36m<svg[39m
+                      [33mclass[39m=[32m"lucide lucide-message-circle animate-pulse"[39m
+                      [33mfill[39m=[32m"none"[39m
+                      [33mheight[39m=[32m"16"[39m
+                      [33mstroke[39m=[32m"currentColor"[39m
+                      [33mstroke-linecap[39m=[32m"round"[39m
+                      [33mstroke-linejoin[39m=[32m"round"[39m
+                      [33mstroke-width[39m=[32m"2"[39m
+                      [33mviewBox[39m=[32m"0 0 24 24"[39m
+                      [33mwidth[39m=[32m"16"[39m
+                      [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                    [36m>[39m
+                      [36m<path[39m
+                        [33md[39m=[32m"M2.992 16.342a2 2 0 0 1 .094 1.167l-1.065 3.29a1 1 0 0 0 1.236 1.168l3.413-.998a2 2 0 0 1 1.099.092 10 10 0 1 0-4.777-4.719"[39m
+                      [36m/>[39m
+                    [36m</svg>[39m
+                    [0mhome.hero.execute[0m
+                  [36m</a>[39m
+                  [36m<a[39m
+                    [33maria-label[39m=[32m"View Source Code"[39m
+                    [33mclass[39m=[32m"px-6 md:px-8 py-3 bg-zinc-900 border border-white/10 text-white font-bold text-[10px] md:text-[11px] tracking-widest uppercase hover:bg-white/5 transition-all shadow-sm active:scale-95 flex items-center justify-center gap-3 group"[39m
+                    [33mhref[39m=[32m"https://github.com/VigilioYonatan/PORTAFOLIO"[39m
+                    [33mrel[39m=[32m"noopener noreferrer"[39m
+                    [33mtarget[39m=[32m"_blank"[39m
+                  [36m>[39m
+                    [36m<svg[39m
+                      [33mclass[39m=[32m"lucide lucide-code"[39m
+                      [33mfill[39m=[32m"none"[39m
+                      [33mheight[39m=[32m"16"[39m
+                      [33mstroke[39m=[32m"currentColor"[39m
+                      [33mstroke-linecap[39m=[32m"round"[39m
+                      [33mstroke-linejoin[39m=[32m"round"[39m
+                      [33mstroke-width[39m=[32m"2"[39m
+                      [33mviewBox[39m=[32m"0 0 24 24"[39m
+                      [33mwidth[39m=[32m"16"[39m
+                      [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                    [36m>[39m
+                      [36m<path[39m
+                        [33md[39m=[32m"m16 18 6-6-6-6"[39m
+                      [36m/>[39m
+                      [36m<path[39m
+                        [33md[39m=[32m"m8 6-6 6 6 6"[39m
+                      [36m/>[39m
+                    [36m</svg>[39m
+                    [0mhome.hero.view_code[0m
+                  [36m</a>[39m
+                [36m</div>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"flex items-center gap-6"[39m
+                [36m/>[39m
+              [36m</div>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+        [36m</div>[39m
+      [36m</div>[39m
+    [36m</div>[39m
+  [36m</div>[39m
+[36m</body>[39m
+[90m [2m❯[22m Object.getElementError node_modules/.pnpm/@testing-library+dom@8.20.1/node_modules/@testing-library/dom/dist/config.js:[2m37:19[22m[39m
+[90m [2m❯[22m node_modules/.pnpm/@testing-library+dom@8.20.1/node_modules/@testing-library/dom/dist/query-helpers.js:[2m76:38[22m[39m
+[90m [2m❯[22m node_modules/.pnpm/@testing-library+dom@8.20.1/node_modules/@testing-library/dom/dist/query-helpers.js:[2m52:17[22m[39m
+[90m [2m❯[22m getByText node_modules/.pnpm/@testing-library+dom@8.20.1/node_modules/@testing-library/dom/dist/query-helpers.js:[2m95:19[22m[39m
+[36m [2m❯[22m src/pages/[...locale]/_components/__tests__/hero-terminal.test.tsx:[2m65:17[22m[39m
+    [90m 63| [39m [34mit[39m([32m"renders the online badge"[39m[33m,[39m () [33m=>[39m {
+    [90m 64| [39m  [34mrender[39m([33m<[39m[33mHeroTerminal[39m [33m/[39m[33m>[39m)[33m;[39m
+    [90m 65| [39m  [34mexpect[39m(screen[33m.[39m[34mgetByText[39m([32m"home.hero.badge"[39m))[33m.[39m[34mtoBeInTheDocument[39m()[33m;[39m
+    [90m   | [39m                [31m^[39m
+    [90m 66| [39m })[33m;[39m
+    [90m 67| [39m})[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m2 failed[39m[22m[2m | [22m[1m[32m57 passed[39m[22m[90m (59)[39m
+[2m      Tests [22m [1m[31m2 failed[39m[22m[2m | [22m[1m[32m332 passed[39m[22m[90m (334)[39m
+[2m   Start at [22m 07:13:48
+[2m   Duration [22m 14.74s[2m (transform 15.44s, setup 5.48s, import 46.24s, tests 10.52s, environment 23.10s)[22m
+
