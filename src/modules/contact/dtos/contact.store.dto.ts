@@ -5,8 +5,10 @@ export const contactStoreDto = contactMessageSchema.pick({
 	name: true,
 	email: true,
 	message: true,
-	phone_number: true,
-	subject: true,
+
+}).extend({
+	phone_number: contactMessageSchema.shape.phone_number.optional(),
+	subject: contactMessageSchema.shape.subject.optional(),
 });
 
 export type ContactStoreDto = z.infer<typeof contactStoreDto>;

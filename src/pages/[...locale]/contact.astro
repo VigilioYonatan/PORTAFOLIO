@@ -4,6 +4,8 @@ import ContactForm from "./_components/contact-form";
 import { getLangFromUrl, useTranslations } from "../../i18n";
 import SystemIntro from "./_components/system-intro";
 import { Mail } from "lucide-preact";
+import { BrandIcon } from "@components/extras/brand-icon";
+import { siWhatsapp } from "simple-icons";
 import TechOrbit from "./_components/tech-orbit";
 
 const lang = getLangFromUrl(Astro.url);
@@ -59,9 +61,28 @@ const t = useTranslations(lang);
               <span class="text-xs opacity-50 uppercase tracking-wider"
                 >{t("contact.email_label")}</span
               >
-              <span class="text-white">contact@vigilio.dev</span>
+              <span class="text-white">yonatanvigiliolavado09@gmail.com</span>
             </div>
           </div>
+
+          <a
+            href="https://wa.me/51959984398"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="flex items-center gap-4 text-muted-foreground hover:text-green-500 transition-colors cursor-pointer group"
+          >
+            <div
+              class="w-10 h-10 rounded bg-secondary flex items-center justify-center border border-white/5 group-hover:border-green-500/50 transition-colors"
+            >
+              <BrandIcon icon={siWhatsapp} size={20} />
+            </div>
+            <div class="flex flex-col">
+              <span class="text-xs opacity-50 uppercase tracking-wider"
+                >WhatsApp</span
+              >
+              <span class="text-white">+51 959 984 398</span>
+            </div>
+          </a>
         </div>
       </div>
 
@@ -69,7 +90,7 @@ const t = useTranslations(lang);
       <div
         class="w-full max-w-[600px] animate-in fade-in slide-in-from-right-8 duration-700 delay-200"
       >
-        <ContactForm lang={lang} client:load />
+        <ContactForm lang={lang} client:only="preact" />
       </div>
     </div>
   </main>

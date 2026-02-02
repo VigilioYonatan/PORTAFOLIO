@@ -34,6 +34,8 @@ export class ContactService {
 		try {
 			const message = await this.contactRepository.store(tenant_id, {
 				...body,
+				phone_number: body.phone_number ?? null,
+				subject: body.subject ?? null,
 				ip_address: body.ip_address ?? null,
 				is_read: false,
 				deleted_at: null,

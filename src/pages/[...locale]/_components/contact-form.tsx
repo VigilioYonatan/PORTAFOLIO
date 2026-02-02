@@ -2,10 +2,12 @@ import WebForm from "@components/web_form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { ContactStoreDto } from "@modules/contact/dtos/contact.store.dto";
 import { contactStoreDto } from "@modules/contact/dtos/contact.store.dto";
+import { contactStoreApi } from "@modules/contact/apis/contact.store.api";
 import type { Lang } from "@src/i18n";
 import { useTranslations } from "@src/i18n";
 import { Mail, Send, User } from "lucide-preact";
 import { type Resolver, useForm } from "react-hook-form";
+import { sweetModal } from "@vigilio/sweet";
 
 interface ContactFormProps {
 	lang?: Lang;
@@ -17,18 +19,28 @@ export default function ContactForm({ lang = "es" }: ContactFormProps) {
 	const contactForm = useForm<ContactStoreDto>({
 		resolver: zodResolver(contactStoreDto) as Resolver<ContactStoreDto>,
 		mode: "all",
-		defaultValues: {
-			name: "",
-			email: "",
-			message: "",
-		},
+		
 	});
 
-	function onContactSubmit(_body: ContactStoreDto) {
-		// console.log("Contact form submitted:", body);
-		// Alert is temporary until API integration
-		alert(t("contact.form.success"));
-		contactForm.reset();
+	const contactStoreMutation = contactStoreApi();
+
+	function onContactSubmit(body: ContactStoreDto) {
+		contactStoreMutation.mutate(body, {
+			onSuccess: () => {
+				sweetModal({
+					title: t("contact.form.success"),
+					icon: "success",
+				});
+				contactForm.reset();
+			},
+			onError: (err) => {
+				sweetModal({
+					title: t("common.error"),
+					text: err.message || JSON.stringify(err),
+					icon: "danger",
+				});
+			},
+		});
 	}
 
 	return (
@@ -79,6 +91,7 @@ export default function ContactForm({ lang = "es" }: ContactFormProps) {
 
 						<button
 							type="submit"
+							disabled={contactStoreMutation.isLoading || false}
 							className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold h-12 flex items-center justify-center gap-3 transition-all uppercase tracking-widest text-sm disabled:opacity-50 disabled:cursor-not-allowed group relative overflow-hidden"
 						>
 							<div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
