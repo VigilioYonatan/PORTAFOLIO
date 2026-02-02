@@ -14,7 +14,7 @@ import RecentProjects from "./_components/home/recent-projects";
 import RecentOpenSources from "./_components/home/recent-open-sources";
 import RecentBlogs from "./_components/home/recent-blogs";
 import LiveVisitors from "./_components/live-visitors";
-import * as env  from "astro:env/server";
+import * as env from "astro:env/server";
 
 const lang = getLangFromUrl(Astro.url);
 const t = useTranslations(lang);
@@ -25,10 +25,9 @@ const {
   latestPosts,
   latestOpenSources,
   socials,
-  liveVisitors
-} = (Astro.locals.props ) as WebIndexResponseDto;
+  liveVisitors,
+} = Astro.locals.props as WebIndexResponseDto;
 ---
-
 
 <WebLayout>
   <SystemIntro lang={lang} client:load transition:persist />
@@ -46,7 +45,9 @@ const {
         <TechOrbit client:load />
       </div>
 
-      <div class="container mx-auto px-4 z-10 flex flex-col items-center gap-12">
+      <div
+        class="container mx-auto px-4 z-10 flex flex-col items-center gap-12"
+      >
         <HeroTerminal lang={lang} socials={socials} client:load />
 
         <div
@@ -68,13 +69,24 @@ const {
           <Button
             variant="outline"
             size="lg"
-            className="gap-3 px-10 border-white/20 hover:bg-white/5"
+            className="gap-3 px-6 border-white/20 hover:bg-white/5"
             href={`${env.STORAGE_CDN_URL}/vigilio-cv.pdf`}
             target="_blank"
             as="a"
           >
             <Download {...sizeIcon.small} />
-            <span class="tracking-[0.2em]">{t("home.cv")}</span>
+            <span class="tracking-[0.2em]">CV (ES)</span>
+          </Button>
+          <Button
+            variant="outline"
+            size="lg"
+            className="gap-3 px-6 border-white/20 hover:bg-white/5"
+            href={`${env.STORAGE_CDN_URL}/vigilio-cv-en.pdf`}
+            target="_blank"
+            as="a"
+          >
+            <Download {...sizeIcon.small} />
+            <span class="tracking-[0.2em]">CV (EN)</span>
           </Button>
         </div>
 
@@ -139,7 +151,9 @@ const {
     </section>
 
     {/* Open Source Section */}
-    <section class="w-full container mx-auto px-4 py-24 border-t border-white/5">
+    <section
+      class="w-full container mx-auto px-4 py-24 border-t border-white/5"
+    >
       <SectionTitle title={t("opensource.title")} className="mb-12" />
       <div class="">
         <RecentOpenSources
@@ -162,7 +176,9 @@ const {
     </section>
 
     {/* Latest Blogs Section */}
-    <section class="w-full container mx-auto px-4 py-24 border-t border-white/5">
+    <section
+      class="w-full container mx-auto px-4 py-24 border-t border-white/5"
+    >
       <SectionTitle title={t("blog.title")} className="mb-12" />
       <div class="">
         <RecentBlogs latestPosts={latestPosts} lang={lang} client:visible />
