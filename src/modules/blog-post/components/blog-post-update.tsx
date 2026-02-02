@@ -19,24 +19,87 @@ import { FileText, Image as ImageIcon, Link, Tag } from "lucide-preact";
 import { useEffect, useMemo } from "preact/hooks";
 import { type Resolver, useForm } from "react-hook-form";
 import type { BlogPostIndexResponseDto } from "../dtos/blog-post.response.dto";
-import type { BlogPostSchema } from "../schemas/blog-post.schema";
 
 interface BlogPostUpdateProps {
-	post: BlogPostSchema;
+	id: number;
 	refetch: (data: Refetch<BlogPostIndexResponseDto["results"]>) => void;
 	onClose: () => void;
 	lang?: Lang;
 }
 
+import { blogPostShowApi } from "@modules/blog-post/apis/blog-post.show.api";
+import type { BlogPostSchema } from "../schemas/blog-post.schema";
+import type { BlogCategorySchema } from "@modules/blog-category/schemas/blog-category.schema";
+
 export default function BlogPostUpdate({
-	post,
+	id,
 	refetch,
 	onClose,
 	lang = "es",
 }: BlogPostUpdateProps) {
 	const t = useTranslations(lang);
-	const blogPostUpdateMutation = blogPostUpdateApi(post.id);
+	const showQuery = blogPostShowApi(id);
 	const categoriesQuery = blogCategoryIndexApi(null);
+
+	let component = null;
+
+	if (showQuery.isLoading || categoriesQuery.isLoading) {
+		component = (
+			<div class="flex items-center justify-center py-10">
+				<div class="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+			</div>
+		);
+	} else if (showQuery.isError || categoriesQuery.isError) {
+		component = (
+			<div class="text-center py-10 text-red-500 font-mono text-xs">
+				Error al cargar los datos
+			</div>
+		);
+	} else if (showQuery.data && categoriesQuery.data) {
+		component = (
+			<BlogPostUpdateForm
+				post={showQuery.data.post}
+				categories={categoriesQuery.data.results}
+				refetch={refetch}
+				onClose={onClose}
+				lang={lang}
+			/>
+		);
+	}
+
+	return (
+		<div class="px-1 space-y-4">
+			<div class="flex flex-col gap-1 border-b border-white/5 pb-4 mb-4">
+				<span class="text-[9px] font-black tracking-[0.5em] text-primary uppercase animate-pulse">
+					{t("dashboard.blog.form.init_edit")}
+				</span>
+				<h2 class="text-xl font-black tracking-tight text-foreground uppercase">
+					{t("dashboard.blog.form.edit_title")}
+				</h2>
+			</div>
+
+			{component}
+		</div>
+	);
+}
+
+interface BlogPostUpdateFormProps {
+	post: BlogPostSchema;
+	categories: BlogCategorySchema[];
+	refetch: (data: Refetch<BlogPostIndexResponseDto["results"]>) => void;
+	onClose: () => void;
+	lang: Lang;
+}
+
+function BlogPostUpdateForm({
+	post,
+	categories,
+	refetch,
+	onClose,
+	lang,
+}: BlogPostUpdateFormProps) {
+	const t = useTranslations(lang);
+	const blogPostUpdateMutation = blogPostUpdateApi(post.id);
 
 	const blogPostUpdateForm = useForm<BlogPostUpdateDto>({
 		resolver: zodResolver(blogPostUpdateDto) as Resolver<BlogPostUpdateDto>,
@@ -80,108 +143,93 @@ export default function BlogPostUpdate({
 
 	const categoryOptions = useMemo(() => {
 		return (
-			categoriesQuery.data?.results.map((c) => ({
+			categories.map((c) => ({
 				key: c.id,
 				value: c.name,
 			})) ?? []
 		);
-	}, [categoriesQuery.data]);
+	}, [categories]);
 
 	return (
-		<div class="px-1 space-y-4">
-			<div class="flex flex-col gap-1 border-b border-white/5 pb-4 mb-4">
-				<span class="text-[9px] font-black tracking-[0.5em] text-primary uppercase animate-pulse">
-					{t("dashboard.blog.form.init_edit")}
-				</span>
-				<h2 class="text-xl font-black tracking-tight text-foreground uppercase">
-					{t("dashboard.blog.form.edit_title")}
-				</h2>
+		<Form {...blogPostUpdateForm} onSubmit={onBlogPostUpdate}>
+			<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+				<Form.control<BlogPostUpdateDto>
+					name="title"
+					title={t("dashboard.blog.form.title")}
+					ico={<FileText size={18} />}
+					placeholder="Ej: El Futuro del Desarrollo Web"
+				/>
+				<Form.control<BlogPostUpdateDto>
+					name="slug"
+					title={t("dashboard.blog.form.slug")}
+					ico={<Link size={18} />}
+					placeholder="el-futuro-del-desarrollo-web"
+				/>
 			</div>
 
-			<Form {...blogPostUpdateForm} onSubmit={onBlogPostUpdate}>
-				<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-					<Form.control<BlogPostUpdateDto>
-						name="title"
-						title={t("dashboard.blog.form.title")}
-						ico={<FileText size={18} />}
-						placeholder="Ej: El Futuro del Desarrollo Web"
-					/>
-					<Form.control<BlogPostUpdateDto>
-						name="slug"
-						title={t("dashboard.blog.form.slug")}
-						ico={<Link size={18} />}
-						placeholder="el-futuro-del-desarrollo-web"
-					/>
-				</div>
+			<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+				<Form.control.select<BlogPostUpdateDto>
+					name="category_id"
+					title={t("dashboard.blog.form.category")}
+					ico={<Tag size={18} />}
+					array={categoryOptions}
+					placeholder="Seleccionar categoría"
+					options={{ setValueAs: formSelectNumber }}
+				/>
+				<Form.control.toggle<BlogPostUpdateDto>
+					name="is_published"
+					title={t("dashboard.blog.form.published")}
+					placeholder="Visible al público"
+				/>
+			</div>
 
-				<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-					<Form.control.select<BlogPostUpdateDto>
-						name="category_id"
-						title={t("dashboard.blog.form.category")}
-						ico={<Tag size={18} />}
-						array={categoryOptions}
-						placeholder="Seleccionar categoría"
-						options={{ setValueAs: formSelectNumber }}
-						isLoading={categoriesQuery.isLoading ?? false}
-					/>
-					<Form.control.toggle<BlogPostUpdateDto>
-						name="is_published"
-						title={t("dashboard.blog.form.published")}
-						placeholder="Visible al público"
-					/>
-				</div>
-
-				<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-					<Form.control.area<BlogPostUpdateDto>
-						name="extract"
-						title={t("dashboard.blog.form.extract")}
-						placeholder="Breve resumen para indexación..."
-						rows={2}
-					/>
-					<Form.control<BlogPostUpdateDto>
-						name="reading_time_minutes"
-						title={t("dashboard.blog.form.reading_time")}
-						type="number"
-						placeholder="5"
-						options={{ setValueAs: formSelectNumber }}
-					/>
-				</div>
-
+			<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 				<Form.control.area<BlogPostUpdateDto>
-					name="content"
-					title={t("dashboard.blog.form.content")}
-					placeholder="# Tu historia comienza aquí..."
-					rows={8}
+					name="extract"
+					title={t("dashboard.blog.form.extract")}
+					placeholder="Breve resumen para indexación..."
+					rows={2}
 				/>
-
-				<div class="space-y-4 pt-4 border-t border-white/5">
-					<h3 class="text-sm font-semibold text-muted-foreground uppercase tracking-widest flex items-center gap-2">
-						<Tag size={14} class="text-primary" />{" "}
-						{t("dashboard.blog.form.seo_opt")}
-					</h3>
-				</div>
-
-				<Form.control.file<BlogPostUpdateDto>
-					name="cover"
-					title={t("dashboard.blog.form.cover")}
-					ico={<ImageIcon size={18} />}
-					entity="blog_post"
-					property="cover"
-					typeFile="image"
-					typesText={typeTextExtensions(
-						UPLOAD_CONFIG.blog_post.cover!.mime_types,
-					)}
-					accept={UPLOAD_CONFIG.blog_post.cover!.mime_types.join(", ")}
+				<Form.control<BlogPostUpdateDto>
+					name="reading_time_minutes"
+					title={t("dashboard.blog.form.reading_time")}
+					type="number"
+					placeholder="5"
+					options={{ setValueAs: formSelectNumber }}
 				/>
+			</div>
 
-				<Form.button.submit
-					title={t("dashboard.blog.form.save")}
-					loading_title={t("dashboard.blog.form.loading")}
-					isLoading={blogPostUpdateMutation.isLoading || false}
-					disabled={blogPostUpdateMutation.isLoading || false}
-					className="w-full mt-6 bg-primary text-primary-foreground font-black py-4 uppercase tracking-widest rounded-xl hover:brightness-110 transition-all border-none"
-				/>
-			</Form>
-		</div>
+			<Form.control.area<BlogPostUpdateDto>
+				name="content"
+				title={t("dashboard.blog.form.content")}
+				placeholder="# Tu historia comienza aquí..."
+				rows={8}
+			/>
+
+			<div class="space-y-4 pt-4 border-t border-white/5">
+				<h3 class="text-sm font-semibold text-muted-foreground uppercase tracking-widest flex items-center gap-2">
+					<Tag size={14} class="text-primary" /> {t("dashboard.blog.form.seo_opt")}
+				</h3>
+			</div>
+
+			<Form.control.file<BlogPostUpdateDto>
+				name="cover"
+				title={t("dashboard.blog.form.cover")}
+				ico={<ImageIcon size={18} />}
+				entity="blog_post"
+				property="cover"
+				typeFile="image"
+				typesText={typeTextExtensions(UPLOAD_CONFIG.blog_post.cover!.mime_types)}
+				accept={UPLOAD_CONFIG.blog_post.cover!.mime_types.join(", ")}
+			/>
+
+			<Form.button.submit
+				title={t("dashboard.blog.form.save")}
+				loading_title={t("dashboard.blog.form.loading")}
+				isLoading={blogPostUpdateMutation.isLoading || false}
+				disabled={blogPostUpdateMutation.isLoading || false}
+				className="w-full mt-6 bg-primary text-primary-foreground font-black py-4 uppercase tracking-widest rounded-xl hover:brightness-110 transition-all border-none"
+			/>
+		</Form>
 	);
 }

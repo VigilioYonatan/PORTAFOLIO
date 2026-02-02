@@ -16,6 +16,7 @@
 		"db:push": "drizzle-kit push",
 		"db:push:test": "export NODE_ENV=TEST && drizzle-kit push",
 		"db:studio": "drizzle-kit studio",
+		"check": "astro check",
 		"biome": "pnpx @biomejs/biome  check  --diagnostic-level=error  --write",
 		"test": "vitest run",
 		"test:unit": "vitest run",

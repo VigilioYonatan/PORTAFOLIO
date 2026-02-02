@@ -3,12 +3,14 @@ import { type Lang, useTranslations } from "@src/i18n";
 import { audioStore } from "@stores/audio.store";
 import {
 	Code,
-	Github,
-	Linkedin,
+	LucideGithub,
+	LucideLinkedin,
 	MessageCircle,
-	Twitter,
-	Youtube,
+	LucideTwitter,
+	LucideYoutube,
 } from "lucide-preact";
+
+
 import { useEffect, useRef } from "preact/hooks";
 import TypedMessage from "./special/typed-message";
 
@@ -118,7 +120,7 @@ export default function HeroTerminal({
 							</div>
 
 							<div class="space-y-2 font-mono text-xs md:text-sm text-muted-foreground mt-6">
-								<p class="flex items-center flex-wrap gap-2 leading-relaxed">
+								<p class="flex items-center md:flex-wrap gap-2 leading-relaxed">
 									<span class="text-primary">&gt;</span>
 									<span>
 										{t("home.hero.desc0")}{" "}
@@ -128,7 +130,7 @@ export default function HeroTerminal({
 										{t("home.hero.desc0_end")}
 									</span>
 								</p>
-								<p class="flex items-center flex-wrap gap-2 leading-relaxed">
+								<p class="flex items-center md:flex-wrap gap-2 leading-relaxed">
 									<span class="text-primary">&gt;</span>
 									<span>
 										{t("home.hero.desc1")}{" "}
@@ -138,7 +140,7 @@ export default function HeroTerminal({
 										{t("home.hero.desc1_end")}
 									</span>
 								</p>
-								<p class="flex items-center flex-wrap gap-2 leading-relaxed">
+								<p class="flex items-center md:flex-wrap gap-2 leading-relaxed">
 									<span class="text-primary">&gt;</span>
 									<span>
 										{t("home.hero.desc2")}{" "}
@@ -148,7 +150,7 @@ export default function HeroTerminal({
 										{t("home.hero.desc2_end")}
 									</span>
 								</p>
-								<p class="flex items-center flex-wrap gap-2 leading-relaxed">
+								<p class="flex items-center md:flex-wrap gap-2 leading-relaxed">
 									<span class="text-primary">&gt;</span>
 									<span>
 										{t("home.hero.desc3")}{" "}
@@ -204,7 +206,9 @@ export default function HeroTerminal({
 											class="text-muted-foreground hover:text-primary transition-all hover:scale-110 p-2 border border-white/5 hover:border-primary/20 bg-white/5 rounded-sm group relative"
 											aria-label="GitHub Profile"
 										>
-											<Github size={18} />
+											<LucideGithub size={18} />
+
+
 											<span class="absolute -top-8 left-1/2 -translate-x-1/2 bg-zinc-900 border border-white/10 px-2 py-1 text-[8px] uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
 												GitHub
 											</span>
@@ -218,7 +222,9 @@ export default function HeroTerminal({
 											class="text-muted-foreground hover:text-primary transition-all hover:scale-110 p-2 border border-white/5 hover:border-primary/20 bg-white/5 rounded-sm group relative"
 											aria-label="LinkedIn Profile"
 										>
-											<Linkedin size={18} />
+											<LucideLinkedin size={18} />
+
+
 											<span class="absolute -top-8 left-1/2 -translate-x-1/2 bg-zinc-900 border border-white/10 px-2 py-1 text-[8px] uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
 												LinkedIn
 											</span>
@@ -232,7 +238,9 @@ export default function HeroTerminal({
 											class="text-muted-foreground hover:text-primary transition-all hover:scale-110 p-2 border border-white/5 hover:border-primary/20 bg-white/5 rounded-sm group relative"
 											aria-label="Twitter Profile"
 										>
-											<Twitter size={18} />
+											<LucideTwitter size={18} />
+
+
 											<span class="absolute -top-8 left-1/2 -translate-x-1/2 bg-zinc-900 border border-white/10 px-2 py-1 text-[8px] uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
 												Twitter
 											</span>
@@ -246,7 +254,9 @@ export default function HeroTerminal({
 											class="text-muted-foreground hover:text-primary transition-all hover:scale-110 p-2 border border-white/5 hover:border-primary/20 bg-white/5 rounded-sm group relative"
 											aria-label="YouTube Channel"
 										>
-											<Youtube size={18} />
+											<LucideYoutube size={18} />
+
+
 											<span class="absolute -top-8 left-1/2 -translate-x-1/2 bg-zinc-900 border border-white/10 px-2 py-1 text-[8px] uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
 												YouTube
 											</span>
