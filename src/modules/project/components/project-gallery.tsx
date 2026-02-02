@@ -1,3 +1,6 @@
+import environments from "@infrastructure/config/client/environments.config";
+import { printFileWithDimension } from "@infrastructure/utils/hybrid/file.utils";
+import { DIMENSION_IMAGE } from "@modules/uploads/const/upload.const";
 import type { FilesSchema } from "@modules/uploads/schemas/upload.schema";
 import { type Lang } from "@src/i18n";
 import { ChevronLeft, ChevronRight, X, ZoomIn } from "lucide-preact";
@@ -73,7 +76,13 @@ export function ProjectGallery({
 							onClick={() => openLightbox(idx)}
 						>
 							<img
-								src={image.key}
+								src={
+									printFileWithDimension(
+										[image],
+										DIMENSION_IMAGE.xs,
+										environments.STORAGE_CDN_URL,
+									)[0]
+								}
 								alt={`${projectTitle} screenshot ${idx + 1}`}
 								class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
 							/>
@@ -139,7 +148,13 @@ export function ProjectGallery({
 					{/* Image Container */}
 					<div class="relative max-w-[90vw] max-h-[85vh] p-4">
 						<img
-							src={images[currentIndex].key}
+							src={
+								printFileWithDimension(
+									[images[currentIndex]],
+									DIMENSION_IMAGE.lg,
+									environments.STORAGE_CDN_URL,
+								)[0]
+							}
 							alt={`${projectTitle} - ${currentIndex + 1}`}
 							class="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl animate-zoom-in"
 						/>
