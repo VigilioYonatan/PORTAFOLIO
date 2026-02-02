@@ -69,24 +69,13 @@ const {
           <Button
             variant="outline"
             size="lg"
-            className="gap-3 px-6 border-white/20 hover:bg-white/5"
-            href={`${env.STORAGE_CDN_URL}/vigilio-cv.pdf`}
+            className="gap-3 px-10 border-white/20 hover:bg-white/5"
+            href={`${env.STORAGE_CDN_URL}/vigilio-cv${lang === "es" ? "" : "-en"}.pdf`}
             target="_blank"
             as="a"
           >
             <Download {...sizeIcon.small} />
-            <span class="tracking-[0.2em]">CV (ES)</span>
-          </Button>
-          <Button
-            variant="outline"
-            size="lg"
-            className="gap-3 px-6 border-white/20 hover:bg-white/5"
-            href={`${env.STORAGE_CDN_URL}/vigilio-cv-en.pdf`}
-            target="_blank"
-            as="a"
-          >
-            <Download {...sizeIcon.small} />
-            <span class="tracking-[0.2em]">CV (EN)</span>
+            <span class="tracking-[0.2em]">{t("home.cv")}</span>
           </Button>
         </div>
 
