@@ -4,7 +4,7 @@ import { DIMENSION_IMAGE } from "@modules/uploads/const/upload.const";
 import type { FilesSchema } from "@modules/uploads/schemas/upload.schema";
 import { type Lang } from "@src/i18n";
 import { ChevronLeft, ChevronRight, X, ZoomIn } from "lucide-preact";
-import { useCallback, useEffect, useState } from "preact/hooks";
+import { useCallback, useEffect, useMemo, useState } from "preact/hooks";
 
 interface ProjectGalleryProps {
 	images: FilesSchema[];
@@ -19,6 +19,16 @@ export function ProjectGallery({
 }: ProjectGalleryProps) {
 	const [lightboxOpen, setLightboxOpen] = useState(false);
 	const [currentIndex, setCurrentIndex] = useState(0);
+
+	const imageUrls = useMemo(
+		() =>
+			printFileWithDimension(
+				images,
+				DIMENSION_IMAGE.md,
+				environments.STORAGE_CDN_URL,
+			),
+		[images],
+	);
 
 	const openLightbox = useCallback((index: number) => {
 		setCurrentIndex(index);
@@ -67,7 +77,7 @@ export function ProjectGallery({
 					{lang === "es" ? "Galería" : "Gallery"}
 				</h3>
 				<div class="grid grid-cols-3 lg:grid-cols-2 gap-2">
-					{printFileWithDimension(images, DIMENSION_IMAGE.md, environments.STORAGE_CDN_URL).map((image, idx) => (
+					{imageUrls.map((image, idx) => (
 						<button
 							key={image}
 							type="button"
@@ -144,13 +154,7 @@ export function ProjectGallery({
 					{/* Image Container */}
 					<div class="relative max-w-[90vw] max-h-[85vh] p-4">
 						<img
-							src={
-								printFileWithDimension(
-									[images[currentIndex]],
-									DIMENSION_IMAGE.lg,
-									environments.STORAGE_CDN_URL,
-								)[0]
-							}
+							src={imageUrls[currentIndex]}
 							alt={`${projectTitle} - ${currentIndex + 1}`}
 							class="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl animate-zoom-in"
 						/>
