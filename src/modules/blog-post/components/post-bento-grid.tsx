@@ -351,7 +351,7 @@ export default function PostBentoGrid({ lang = "es" }: PostBentoGridProps) {
 				contentClassName="max-w-4xl w-full self-start bg-zinc-950 border border-white/10"
 			>
 				<BlogPostUpdate
-					id={editingPost.value!.id}
+					id={editingPost.value?.id!}
 					refetch={(data) => {
 						results.value = results.value.map((item) =>
 							item.id === data.id ? { ...item, ...data } : item,
