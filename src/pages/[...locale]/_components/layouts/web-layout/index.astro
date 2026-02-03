@@ -49,7 +49,11 @@ const activeThemeRgb = hexToRgb(activeThemeColor);
 ---
 
 <!doctype html>
-<html lang={lang} class="dark" style={`--primary: ${activeThemeColor}; --primary-rgb: ${activeThemeRgb};`}>
+<html
+  lang={lang}
+  class="dark"
+  style={`--primary: ${activeThemeColor}; --primary-rgb: ${activeThemeRgb};`}
+>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
@@ -58,16 +62,24 @@ const activeThemeRgb = hexToRgb(activeThemeColor);
     <title>{title}</title>
     <meta name="description" content={description} />
     <ClientRouter />
-    <script define:vars={{ STORAGE_CDN_URL: env.STORAGE_CDN_URL, NAME_APP: env.NAME_APP, VAPID_PUBLIC_KEY: env.VAPID_PUBLIC_KEY, NODE_ENV: env.NODE_ENV?.toUpperCase(), PUBLIC_URL: env.PUBLIC_URL }} is:inline>
+    <script
+      define:vars={{
+        STORAGE_CDN_URL: env.STORAGE_CDN_URL,
+        NAME_APP: env.NAME_APP,
+        VAPID_PUBLIC_KEY: env.VAPID_PUBLIC_KEY,
+        NODE_ENV: env.NODE_ENV?.toUpperCase(),
+        PUBLIC_URL: env.PUBLIC_URL,
+      }}
+      is:inline
+    >
       window.env = {
-       STORAGE_CDN_URL,
-       NAME_APP,
-       VAPID_PUBLIC_KEY,
-       NODE_ENV,
-       PUBLIC_URL
+        STORAGE_CDN_URL,
+        NAME_APP,
+        VAPID_PUBLIC_KEY,
+        NODE_ENV,
+        PUBLIC_URL,
       };
     </script>
-
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -96,7 +108,11 @@ const activeThemeRgb = hexToRgb(activeThemeColor);
 
     {/* MOBILE HEADER */}
     <MobileHeader lang={lang} client:load />
-    <MobileToolsDock lang={lang} client:load  STORAGE_CDN_URL={env.STORAGE_CDN_URL} />
+    <MobileToolsDock
+      lang={lang}
+      client:load
+      STORAGE_CDN_URL={env.STORAGE_CDN_URL}
+    />
 
     {/* LEFT SIDEBAR (Desktop) */}
     <aside
@@ -104,10 +120,20 @@ const activeThemeRgb = hexToRgb(activeThemeColor);
     >
       <div class="h-24 flex items-center px-6">
         <a href={`/${lang}`} class="flex items-center gap-4 group">
-          <img src="/images/vigilio.png" alt="Vigilio Logo" class="w-16 h-16 object-contain group-hover:scale-105 transition-transform" />
+          <img
+            src="/images/vigilio.png"
+            alt="Vigilio Logo"
+            class="w-16 h-16 object-contain group-hover:scale-105 transition-transform"
+          />
           <div class="flex flex-col justify-center">
-             <span class="text-base font-black tracking-widest text-white leading-none">YONATAN</span>
-             <span class="text-xs font-bold tracking-[0.2em] text-muted-foreground leading-none mt-1">VIGILIO</span>
+            <span
+              class="text-base font-black tracking-widest text-white leading-none"
+              >YONATAN</span
+            >
+            <span
+              class="text-xs font-bold tracking-[0.2em] text-muted-foreground leading-none mt-1"
+              >VIGILIO</span
+            >
           </div>
         </a>
       </div>
@@ -119,7 +145,11 @@ const activeThemeRgb = hexToRgb(activeThemeColor);
       {/* Decorative Sidebar Info */}
 
       <div class="p-2 border-t border-white/5 bg-zinc-950/20">
-        <NeuroPlayer client:only="preact" transition:persist STORAGE_CDN_URL={env.STORAGE_CDN_URL } />
+        <NeuroPlayer
+          client:only="preact"
+          transition:persist
+          STORAGE_CDN_URL={env.STORAGE_CDN_URL}
+        />
       </div>
 
       <div
@@ -298,8 +328,20 @@ const activeThemeRgb = hexToRgb(activeThemeColor);
       </div>
     </aside>
     <FloatingActionChat client:only="preact" transition:persist />
-    <ProtostarOverlay client:only="preact" transition:persist STORAGE_CDN_URL={env.STORAGE_CDN_URL} />
-    <NatureOverlay client:only="preact" transition:persist STORAGE_CDN_URL={env.STORAGE_CDN_URL} />
-    <PlanetOverlay client:only="preact" transition:persist STORAGE_CDN_URL={env.STORAGE_CDN_URL} />
+    <ProtostarOverlay
+      client:only="preact"
+      transition:persist
+      STORAGE_CDN_URL={env.STORAGE_CDN_URL}
+    />
+    <NatureOverlay
+      client:only="preact"
+      transition:persist
+      STORAGE_CDN_URL={env.STORAGE_CDN_URL}
+    />
+    <PlanetOverlay
+      client:only="preact"
+      transition:persist
+      STORAGE_CDN_URL={env.STORAGE_CDN_URL}
+    />
   </body>
 </html>
