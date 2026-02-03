@@ -47,7 +47,7 @@ export default function RecentProjects({
 								src={
 									printFileWithDimension(
 										project.images,
-										DIMENSION_IMAGE.md,
+										DIMENSION_IMAGE.lg,
 										environments.STORAGE_CDN_URL,
 									)[0]
 								}
