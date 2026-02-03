@@ -123,6 +123,7 @@ const {
         <RecentProjects
           latestProjects={latestProjects}
           lang={lang}
+          STORAGE_CDN_URL={env.STORAGE_CDN_URL}
           client:visible
         />
       </div>
@@ -170,7 +171,12 @@ const {
     >
       <SectionTitle title={t("blog.title")} className="mb-12" />
       <div class="">
-        <RecentBlogs latestPosts={latestPosts} lang={lang} client:visible />
+        <RecentBlogs
+          latestPosts={latestPosts}
+          lang={lang}
+          client:visible
+          STORAGE_CDN_URL={env.STORAGE_CDN_URL}
+        />
       </div>
       <div class="flex justify-center mt-12">
         <Button

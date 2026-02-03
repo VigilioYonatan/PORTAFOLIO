@@ -8,9 +8,10 @@ import { Calendar, Terminal } from "lucide-preact";
 interface RecentBlogsProps {
 	latestPosts: BlogPostSchema[];
 	lang: Lang;
+	STORAGE_CDN_URL: string;
 }
 
-export default function RecentBlogs({ latestPosts, lang }: RecentBlogsProps) {
+export default function RecentBlogs({ latestPosts, lang, STORAGE_CDN_URL }: RecentBlogsProps) {
 	if (!latestPosts || latestPosts.length === 0) return null;
 
 	return (
@@ -42,7 +43,7 @@ export default function RecentBlogs({ latestPosts, lang }: RecentBlogsProps) {
 										printFileWithDimension(
 											post.cover,
 											DIMENSION_IMAGE.md,
-											environments.STORAGE_CDN_URL,
+											STORAGE_CDN_URL,
 										)[0]
 									}
 									alt={post.title}

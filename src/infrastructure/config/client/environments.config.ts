@@ -25,6 +25,7 @@ export type Environments = ClientEnvironments;
 function getClientEnvironments(): ClientEnvironments {
 	if (typeof window !== "undefined") {
 		const result = clientEnvironmentsSchema.safeParse(window.env);
+		console.log({result});
 		if (!result.success) {
 			// En cliente, retornamos defaults en vez de crashear
 			// throw new Error("Invalid client environments");

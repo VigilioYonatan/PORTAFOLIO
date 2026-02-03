@@ -1,4 +1,3 @@
-import environments from "@infrastructure/config/client/environments.config";
 import { printFileWithDimension } from "@infrastructure/utils/hybrid";
 import type { ProjectSchema } from "@modules/project/schemas/project.schema";
 import { DIMENSION_IMAGE } from "@modules/uploads/const/upload.const";
@@ -9,11 +8,13 @@ import { Code2 } from "lucide-preact";
 interface RecentProjectsProps {
 	latestProjects: ProjectSchema[];
 	lang: Lang;
+	STORAGE_CDN_URL: string;
 }
 
 export default function RecentProjects({
 	latestProjects,
 	lang,
+	STORAGE_CDN_URL,
 }: RecentProjectsProps) {
 	const t = useTranslations(lang);
 	const hoverIndex = useSignal<number | null>(null);
@@ -48,7 +49,7 @@ export default function RecentProjects({
 									printFileWithDimension(
 										project.images,
 										DIMENSION_IMAGE.lg,
-										environments.STORAGE_CDN_URL,
+										STORAGE_CDN_URL,
 									)[0]
 								}
 								alt={project.title}

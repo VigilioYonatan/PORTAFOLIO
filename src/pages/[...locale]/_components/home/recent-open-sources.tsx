@@ -4,6 +4,7 @@ import { type Lang, useTranslations } from "@src/i18n";
 interface RecentOpenSourcesProps {
 	latestOpenSources: OpenSourceSchema[];
 	lang: Lang;
+	
 }
 
 export default function RecentOpenSources({
