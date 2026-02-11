@@ -33,6 +33,7 @@ interface NeuroPlayerProps {
 	className?: string;
 	style?: CSSProperties;
 	STORAGE_CDN_URL: string;
+	hideSpecialButtons?: boolean;
 }
 
 export default function NeuroPlayer(props: NeuroPlayerProps) {
@@ -58,6 +59,7 @@ export default function NeuroPlayer(props: NeuroPlayerProps) {
 
 	const isOpenPlaylist = useSignal(false);
 	const showVolumeSlider = useSignal(false);
+	const showControls = useSignal(false);
 
 	useEffect(() => {
 		// Initialize store (fetch from API) if not already done
@@ -132,14 +134,21 @@ export default function NeuroPlayer(props: NeuroPlayerProps) {
 		>
 			<ReactiveGlow bassIntensity={bassIntensity} midIntensity={midIntensity} />
 			{/* Special Buttons - "Floating" above (Desktop Only) */}
-			<div class="hidden md:flex absolute -top-16 left-0 right-0 justify-center gap-4">
-				<ProtostarButton />
-				<NatureButton />
-				<PlanetButton />
-			</div>
+			{!props.hideSpecialButtons && (
+				<div class="hidden md:flex absolute -top-16 left-0 right-0 justify-center gap-4">
+					<ProtostarButton />
+					<NatureButton />
+					<PlanetButton />
+				</div>
+			)}
 
 			{/* TOP SECTION: IMAGE & VISUALIZER */}
-			<div class="relative w-full h-24 md:h-auto md:aspect-4/3 rounded-xl overflow-hidden bg-zinc-900 border border-white/5 group font-sans">
+			<div
+				class="relative w-full h-24 md:h-auto md:aspect-4/3 rounded-xl overflow-hidden bg-zinc-900 border border-white/5 group font-sans cursor-pointer"
+				onClick={() => {
+					showControls.value = !showControls.value;
+				}}
+			>
 				{/* 1. Dynamic Background Layer */}
 				<div class="absolute inset-0 w-full h-full flex items-center justify-center overflow-hidden">
 					<div
@@ -156,18 +165,10 @@ export default function NeuroPlayer(props: NeuroPlayerProps) {
 				</div>
 
 				{/* 2. Content Layout (Overlay) */}
-				<div class="absolute inset-0 z-20 flex flex-col justify-end p-3 pb-4">
-					{/* Visualizer - Very compact */}
-					<div class="w-full flex justify-center mb-0 md:mb-1">
-						<div class="w-full h-8 opacity-80">
-							<MonstercatVisualizer />
-						</div>
-					</div>
-
-					{/* Metadata Row: Compact Image + Text */}
+				<div class="absolute inset-0 z-20 flex flex-col justify-between p-4">
+					{/* Top Area: Metadata */}
 					<div class="flex items-center gap-3">
-						{/* Small Image (Clone of cover) - Tiny (48px) */}
-						<div class="w-12 h-12 shrink-0 border-[1.5px] border-white shadow-[0_0_8px_rgba(0,0,0,0.5)] rounded-none bg-black/50 relative z-30">
+						<div class="w-10 h-10 shrink-0 border border-white/20 bg-black/50 relative z-30">
 							{currentTrack.value?.cover ? (
 								<img
 									src={currentTrack.value.cover}
@@ -179,264 +180,224 @@ export default function NeuroPlayer(props: NeuroPlayerProps) {
 								/>
 							) : (
 								<div class="w-full h-full bg-zinc-800 flex items-center justify-center">
-									<ListMusicIcon size={16} class="text-white/50" />
+									<ListMusicIcon size={14} class="text-white/50" />
 								</div>
 							)}
 						</div>
-
-						{/* Text / "Letra" - Small */}
-						<div class="flex flex-col justify-center min-w-0 z-30 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
-							{/* Artist Name */}
-							<h2 class="text-white font-[900] text-sm tracking-wide uppercase leading-none truncate pr-1">
+						<div class="flex flex-col min-w-0 z-30">
+							<h2 class="text-white font-black text-xs tracking-wider uppercase truncate">
 								{currentTrack.value?.artist || "ARTIST"}
 							</h2>
-							{/* Track Title */}
-							<p class="text-white/90 font-bold text-[9px] tracking-widest uppercase mt-0.5 truncate pr-1">
+							<p class="text-white/70 text-[8px] tracking-[0.2em] uppercase truncate">
 								{currentTrack.value?.title || "TRACK TITLE"}
 							</p>
 						</div>
 					</div>
-				</div>
 
-				{/* Top Right Actions (absolute) */}
-				<div class="absolute top-2 right-2 flex gap-1 z-20">
-					<button
-						type="button"
-						onClick={() => {
-							if (currentTrack.value) toggleFavorite(currentTrack.value.id);
-						}}
-						class={cn(
-							"p-2 rounded-full backdrop-blur-md transition-all hover:scale-110",
-							favorites.value.has(currentTrack.value?.id || "")
-								? "bg-primary text-black"
-								: "bg-black/60 text-white hover:bg-white/20",
-						)}
-						aria-label={
-							favorites.value.has(currentTrack.value?.id || "")
-								? "Remove from favorites"
-								: "Add to favorites"
-						}
-					>
-						<HeartIcon
-							size={14}
-							fill={
-								favorites.value.has(currentTrack.value?.id || "")
-									? "currentColor"
-									: "none"
-							}
-						/>
-					</button>
-					<button
-						type="button"
-						onClick={() => {
-							isOpenPlaylist.value = true;
-						}}
-						class="p-2 rounded-full bg-black/60 text-white backdrop-blur-md hover:bg-white/20 transition-all hover:scale-110"
-						aria-label="Open Playlist"
-					>
-						<ListMusicIcon size={14} />
-					</button>
-				</div>
-			</div>
+					{/* Bottom Area: Progress & Visualizer */}
+					<div class="space-y-4">
+						<div class="w-full h-8 opacity-60">
+							<MonstercatVisualizer />
+						</div>
 
-			{/* BOTTOM SECTION: CONTROLS ONLY (Info moved to Visualizer) */}
-			<div class="flex flex-col gap-2 md:gap-3 px-1">
-				{/* Info removed from here */}
-
-				{/* Controls */}
-				<div class="space-y-1.5 md:space-y-3 bg-white/5 p-2 md:p-3 rounded-xl border border-white/5">
-					{/* Progress */}
-					<div class="group/prog flex items-center gap-3 cursor-pointer py-1">
-						<span class="text-[9px] font-black text-white/40 group-hover/prog:text-primary transition-colors w-6 text-right tabular-nums">
-							{formatTime(audioStore.state.currentTime.value)}
-						</span>
-						<div class="flex-1 h-5 flex items-center relative group/slider">
-							{/* Background Bar */}
-							<div class="w-full h-1 bg-white/10 rounded-full relative overflow-hidden">
-								<div
-									class="absolute h-full bg-primary shadow-[0_0_12px_rgba(var(--primary-rgb),0.5)] transition-all duration-75 ease-linear"
-									style={{
-										width: `${(audioStore.state.currentTime.value / audioStore.state.duration.value) * 100}%`,
+						{/* Progress Section */}
+						<div class="flex items-center gap-2 group/prog overflow-hidden">
+							<span class="text-[8px] font-bold text-white/50 tabular-nums">
+								{formatTime(audioStore.state.currentTime.value)}
+							</span>
+							<div class="flex-1 h-3 flex items-center relative">
+								<div class="w-full h-[2px] bg-white/10 rounded-full relative overflow-hidden">
+									<div
+										class="absolute h-full bg-primary shadow-[0_0_8px_rgba(6,182,212,0.6)]"
+										style={{
+											width: `${(audioStore.state.currentTime.value / audioStore.state.duration.value) * 100}%`,
+										}}
+									/>
+								</div>
+								<input
+									type="range"
+									min="0"
+									max={audioStore.state.duration.value || 100}
+									value={audioStore.state.currentTime.value}
+									onInput={(e) => {
+										e.stopPropagation();
+										const val = Number(e.currentTarget.value);
+										audioStore.methods.seek(val);
 									}}
+									onClick={(e) => e.stopPropagation()}
+									class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-40"
 								/>
 							</div>
-							{/* Hover Thumb Indicator */}
-							<div
-								class="absolute h-3 w-3 bg-white border-2 border-primary rounded-full shadow-[0_0_10px_rgba(var(--primary-rgb),0.8)] opacity-0 group-hover/slider:opacity-100 transition-opacity pointer-events-none z-30"
-								style={{
-									left: `${(audioStore.state.currentTime.value / audioStore.state.duration.value) * 100}%`,
-									transform: "translateX(-50%)",
+							<span class="text-[8px] font-bold text-white/50 tabular-nums">
+								{formatTime(audioStore.state.duration.value)}
+							</span>
+						</div>
+					</div>
+				</div>
+
+				{/* 3. INTERACTIVE CONTROLS OVERLAY (Shown on click) */}
+				<div
+					class={cn(
+						"absolute inset-0 z-40 bg-black/80 backdrop-blur-sm transition-all duration-300 flex flex-col items-center justify-center gap-6 p-4",
+						showControls.value
+							? "opacity-100 pointer-events-auto"
+							: "opacity-0 pointer-events-none",
+					)}
+					onClick={(e) => e.stopPropagation()}
+				>
+					{/* Close Button */}
+					<button
+						type="button"
+						onClick={() => {
+							showControls.value = false;
+						}}
+						class="absolute top-3 right-3 p-2 text-white/40 hover:text-white transition-colors"
+					>
+						<XIcon size={16} />
+					</button>
+
+					{/* Secondary Controls Row - Now Above */}
+					<div class="flex items-center gap-6 mb-2">
+						<button
+							type="button"
+							onClick={(e) => {
+								e.stopPropagation();
+								if (currentTrack.value) toggleFavorite(currentTrack.value.id);
+							}}
+							class={cn(
+								"p-1.5 rounded-full transition-all hover:scale-110",
+								favorites.value.has(currentTrack.value?.id || "")
+									? "text-primary"
+									: "text-white/40",
+							)}
+						>
+							<HeartIcon
+								size={16}
+								fill={
+									favorites.value.has(currentTrack.value?.id || "")
+										? "currentColor"
+										: "none"
+								}
+							/>
+						</button>
+
+						<button
+							type="button"
+							onClick={(e) => {
+								e.stopPropagation();
+								toggleRepeat();
+							}}
+							class={cn(
+								"transition-all hover:scale-110",
+								repeatMode.value !== "off" ? "text-primary" : "text-white/40",
+							)}
+						>
+							{repeatMode.value === "one" ? (
+								<Repeat1Icon size={16} />
+							) : (
+								<RepeatIcon size={16} />
+							)}
+						</button>
+
+						<button
+							type="button"
+							onClick={(e) => {
+								e.stopPropagation();
+								isOpenPlaylist.value = true;
+							}}
+							class="text-white/40 hover:text-white hover:scale-110 transition-all"
+							aria-label="Open Playlist"
+						>
+							<ListMusicIcon size={16} />
+						</button>
+					</div>
+
+					{/* Main Controls Row - Now Below */}
+					<div class="flex-1 flex items-center justify-center w-full">
+						<div class="flex items-center justify-center gap-8">
+							<button
+								type="button"
+								onClick={(e) => {
+									e.stopPropagation();
+									prevTrack();
 								}}
+								class="text-white/40 hover:text-white hover:scale-125 transition-all p-2"
+							>
+								<StepBackIcon size={20} />
+							</button>
+
+							<button
+								type="button"
+								onClick={(e) => {
+									e.stopPropagation();
+									togglePlay();
+								}}
+								class="w-14 h-14 rounded-full bg-primary text-black flex items-center justify-center hover:scale-110 active:scale-95 transition-all shadow-[0_0_25px_rgba(6,182,212,0.4)]"
+								aria-label={isPlaying.value ? "Pause" : "Play"}
+							>
+								{isPlaying.value ? (
+									<PauseIcon size={24} />
+								) : (
+									<PlayIcon size={24} class="ml-1" />
+								)}
+							</button>
+
+							<button
+								type="button"
+								onClick={(e) => {
+									e.stopPropagation();
+									nextTrack();
+								}}
+								class="text-white/40 hover:text-white hover:scale-125 transition-all p-2"
+							>
+								<StepForwardIcon size={20} />
+							</button>
+						</div>
+					</div>
+
+					{/* Volume Slider (Horizontal for overlay) */}
+					<div class="flex items-center gap-2.5 w-36 mt-1">
+						<button
+							onClick={(e) => {
+								e.stopPropagation();
+								setVolume(isMuted.value ? 50 : 0);
+							}}
+							aria-label="Toggle Mute"
+							type="button"
+						>
+							{isMuted.value || volume.value === 0 ? (
+								<VolumeXIcon size={14} />
+							) : (
+								<Volume2Icon size={14} />
+							)}
+						</button>
+						<div class="flex-1 h-1 bg-white/10 rounded-full relative overflow-hidden">
+							<div
+								class="absolute h-full bg-primary"
+								style={{ width: `${volume.value}%` }}
 							/>
 							<input
 								type="range"
 								min="0"
-								max={audioStore.state.duration.value || 100}
-								value={audioStore.state.currentTime.value}
+								max="100"
+								value={volume.value}
 								onInput={(e) => {
-									const val = Number(e.currentTarget.value);
-									audioStore.methods.seek(val);
+									e.stopPropagation();
+									setVolume(Number(e.currentTarget.value));
 								}}
-								class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-40"
+								onClick={(e) => e.stopPropagation()}
+								class="absolute inset-0 opacity-0 cursor-pointer"
 							/>
-						</div>
-						<span class="text-[9px] font-black text-white/40 group-hover/prog:text-primary transition-colors w-6 tabular-nums">
-							{formatTime(audioStore.state.duration.value)}
-						</span>
-					</div>
-
-					<div class="flex items-center justify-between gap-2">
-						{/* Playback Buttons */}
-						<div class="flex items-center justify-center gap-1.5 md:gap-2 flex-1">
-							<button
-								type="button"
-								onClick={prevTrack}
-								class="text-white/40 hover:text-white hover:scale-125 transition-all active:scale-90"
-								aria-label="Previous Track"
-							>
-								<StepBackIcon size={18} />
-							</button>
-							<button
-								type="button"
-								onClick={togglePlay}
-								class="w-12 h-12 rounded-full bg-primary/10 text-primary border border-primary/40 flex items-center justify-center hover:scale-110 hover:bg-primary hover:text-black transition-all shadow-glow active:scale-95 group/play"
-								aria-label={isPlaying.value ? "Pause" : "Play"}
-							>
-								{isPlaying.value ? (
-									<PauseIcon size={24} fill="currentColor" />
-								) : (
-									<PlayIcon size={24} fill="currentColor" class="ml-1" />
-								)}
-							</button>
-							<button
-								type="button"
-								onClick={nextTrack}
-								class="text-white/40 hover:text-white hover:scale-125 transition-all active:scale-90"
-								aria-label="Next Track"
-							>
-								<StepForwardIcon size={18} />
-							</button>
-							<button
-								type="button"
-								onClick={toggleRepeat}
-								class={cn(
-									"transition-all hover:scale-125 active:scale-90",
-									repeatMode.value !== "off"
-										? "text-primary text-glow"
-										: "text-white/40 hover:text-white",
-								)}
-								aria-label="Toggle Repeat"
-								title={`Repeat: ${repeatMode.value}`}
-							>
-								{repeatMode.value === "one" ? (
-									<Repeat1Icon size={18} />
-								) : (
-									<RepeatIcon size={18} />
-								)}
-							</button>
-						</div>
-
-						{/* Volume Section - Vertical Pop-up */}
-						<div class="relative flex items-center justify-center group/vol">
-							<button
-								type="button"
-								onClick={() => {
-									showVolumeSlider.value = !showVolumeSlider.value;
-								}}
-								onMouseEnter={() => {
-									showVolumeSlider.value = true;
-								}}
-								class={cn(
-									"p-1.5 rounded-full transition-all active:scale-90",
-									showVolumeSlider.value || volume.value === 0 || isMuted.value
-										? "bg-primary/20 text-primary border border-primary/30"
-										: "text-white/40 hover:text-primary hover:bg-white/5",
-								)}
-								aria-label={
-									isMuted.value || volume.value === 0 ? "Unmute" : "Mute"
-								}
-							>
-								{isMuted.value || volume.value === 0 ? (
-									<VolumeXIcon size={16} />
-								) : (
-									<Volume2Icon size={16} />
-								)}
-							</button>
-
-							{/* Vertical Pop-up Slider */}
-							<div
-								onMouseLeave={() => {
-									showVolumeSlider.value = false;
-								}}
-								class={cn(
-									"absolute bottom-full pb-4 left-1/2 -translate-x-1/2 z-50 transition-all duration-300 origin-bottom flex flex-col items-center",
-									showVolumeSlider.value
-										? "opacity-100 scale-100 translate-y-0 pointer-events-auto"
-										: "opacity-0 scale-75 translate-y-4 pointer-events-none",
-								)}
-							>
-								<div class="bg-zinc-950/90 backdrop-blur-xl border border-primary/20 p-4 rounded-full flex flex-col items-center gap-3 shadow-[0_0_30px_rgba(var(--primary-rgb),0.2)]">
-									<div class="h-32 w-10 flex flex-col items-center justify-center relative">
-										{/* Percentage Indicator */}
-										<span class="text-[9px] font-black text-primary mb-2 tabular-nums">
-											{volume.value}%
-										</span>
-
-										{/* Container with range input rotated */}
-										<div class="relative h-24 w-1 flex items-center justify-center">
-											<div class="absolute h-full w-full bg-white/10 rounded-full overflow-hidden">
-												<div
-													class="absolute bottom-0 w-full bg-primary shadow-[0_0_10px_var(--primary)] transition-all"
-													style={{ height: `${volume.value}%` }}
-												/>
-											</div>
-
-											{/* Native hidden range input with large hit area */}
-											<input
-												type="range"
-												min="0"
-												max="100"
-												value={volume.value}
-												onInput={(e) =>
-													setVolume(Number(e.currentTarget.value))
-												}
-												class="absolute h-24 w-10 -rotate-90 cursor-pointer opacity-0 z-10"
-												style={{
-													width: "96px", // matching 24 * 4
-													height: "40px",
-												}}
-											/>
-
-											{/* Visual Thumb */}
-											<div
-												class="absolute h-3 w-3 bg-white border-2 border-primary rounded-full shadow-glow pointer-events-none z-20"
-												style={{
-													bottom: `${volume.value}%`,
-													transform: "translateY(50%)",
-												}}
-											/>
-										</div>
-
-										<button
-											type="button"
-											onClick={() => setVolume(isMuted.value ? 50 : 0)}
-											class="mt-4 text-white/40 hover:text-white transition-colors"
-											aria-label="Toggle Mute"
-										>
-											{isMuted.value || volume.value === 0 ? (
-												<VolumeXIcon size={12} />
-											) : (
-												<Volume2Icon size={12} />
-											)}
-										</button>
-									</div>
-								</div>
-								{/* Arrow indicator */}
-								<div class="w-2 h-2 bg-zinc-950 border-r border-b border-primary/20 rotate-45 -mt-1 shadow-glow" />
-							</div>
 						</div>
 					</div>
 				</div>
+			</div>
+
+			{/* Buttons removed as requested */}
+			{/* Hidden Metadata - Semantic */}
+			<div class="sr-only">
+				<span>BITRATE: 320KBPS</span>
+				<span>MODE: STEREO_REACTIVE</span>
 			</div>
 
 			{/* Hidden Metadata - Semantic */}

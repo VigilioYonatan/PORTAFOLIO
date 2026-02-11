@@ -107,7 +107,7 @@ const activeThemeRgb = hexToRgb(activeThemeColor);
     </div>
 
     {/* MOBILE HEADER */}
-    <MobileHeader lang={lang} client:load />
+    <MobileHeader lang={lang} STORAGE_CDN_URL={env.STORAGE_CDN_URL} client:load />
     <MobileToolsDock
       lang={lang}
       client:load
@@ -116,7 +116,7 @@ const activeThemeRgb = hexToRgb(activeThemeColor);
 
     {/* LEFT SIDEBAR (Desktop) */}
     <aside
-      class="hidden md:flex w-64 border-r border-white/5 bg-black/40 backdrop-blur-xl flex-col shrink-0 z-40 relative group"
+      class="hidden 3xl:flex w-64 border-r border-white/5 bg-black/40 backdrop-blur-xl flex-col shrink-0 z-40 relative group"
     >
       <div class="h-24 flex items-center px-6">
         <a href={`/${lang}`} class="flex items-center gap-4 group">
@@ -183,7 +183,7 @@ const activeThemeRgb = hexToRgb(activeThemeColor);
         {
           /* Mobile Footer Spacing if needed, or Mobile Music Player placeholder */
         }
-        <div class="h-40 md:hidden block"></div>
+        <div class="h-20 5xl:hidden block"></div>
       </div>
 
       <div class="md:hidden fixed bottom-0 left-0 right-0 z-45 w-full"></div>
@@ -191,7 +191,7 @@ const activeThemeRgb = hexToRgb(activeThemeColor);
 
     {/* RIGHT SIDEBAR (Desktop) */}
     <aside
-      class="hidden xl:flex w-80 border-l border-white/5 bg-black/40 backdrop-blur-xl flex-col shrink-0 z-40"
+      class="hidden 3xl:flex w-80 border-l border-white/5 bg-black/40 backdrop-blur-xl flex-col shrink-0 z-40"
     >
       <div
         class="h-20 flex items-center justify-between px-6 border-b border-white/5"

@@ -6,7 +6,7 @@ import type { WorkExperienceSchema } from "@modules/work-experience/schemas/work
 import { useSignal } from "@preact/signals";
 import { type Lang } from "@src/i18n";
 import { audioStore } from "@stores/audio.store";
-import { useEffect, useMemo } from "preact/hooks";
+import { useEffect, useMemo, useRef } from "preact/hooks";
 
 interface WaveTimelineProps {
 	className?: string;
@@ -20,6 +20,7 @@ export default function WaveTimeline({
 	lang: _lang = "es",
 }: WaveTimelineProps) {
 	const containerRef = useEntranceAnimation(0.2);
+	const detailsRef = useRef<HTMLDivElement>(null);
 	// const t = useTranslations(_lang);
 
 	// Fallback to empty if no data
@@ -67,6 +68,15 @@ export default function WaveTimeline({
 						isSelected={selectedYear.value === year}
 						onSelect={() => {
 							selectedYear.value = year;
+							// Scroll to details on mobile for better UX
+							if (window.innerWidth < 1024) {
+								setTimeout(() => {
+									detailsRef.current?.scrollIntoView({
+										behavior: "smooth",
+										block: "start",
+									});
+								}, 100);
+							}
 						}}
 						index={index}
 						count={exps.length}
@@ -75,7 +85,7 @@ export default function WaveTimeline({
 			</div>
 
 			{/* Detailed View Area */}
-			<div class="w-full max-w-4xl mx-auto">
+			<div ref={detailsRef} class="w-full max-w-4xl mx-auto pt-8">
 				<div class="relative min-h-[400px] flex flex-col gap-8">
 					{grouped
 						.find(([y]) => y === selectedYear.value)?.[1]

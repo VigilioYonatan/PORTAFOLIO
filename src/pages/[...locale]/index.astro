@@ -117,7 +117,7 @@ const {
     </section>
 
     {/* Recent Projects Section */}
-    <section class="w-full container mx-auto px-4 py-24">
+    <section id="projects-section" class="w-full container mx-auto px-4 py-24">
       <SectionTitle title={t("projects.title")} className="mb-12" />
       <div class="">
         <RecentProjects
@@ -142,6 +142,7 @@ const {
 
     {/* Open Source Section */}
     <section
+      id="opensource-section"
       class="w-full container mx-auto px-4 py-24 border-t border-white/5"
     >
       <SectionTitle title={t("opensource.title")} className="mb-12" />
@@ -167,6 +168,7 @@ const {
 
     {/* Latest Blogs Section */}
     <section
+      id="blog-section"
       class="w-full container mx-auto px-4 py-24 border-t border-white/5"
     >
       <SectionTitle title={t("blog.title")} className="mb-12" />

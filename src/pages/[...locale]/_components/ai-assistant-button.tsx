@@ -51,7 +51,7 @@ export default function AI_AssistantButton() {
 							Session Active
 						</>
 					) : (
-						"Awaiting Prompt..."
+						"CHATEAR AHORA"
 					)}
 				</span>
 			</div>

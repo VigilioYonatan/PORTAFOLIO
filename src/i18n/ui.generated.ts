@@ -541,7 +541,8 @@ export const ui = {
 				execute: "EXECUTE_PROTOCOL",
 				software: "SOFTWARE",
 				source: "SOURCE",
-				stack: "## Stack: Python, PyTorch, React, NestJS, Docker, AWS.",
+				stack:
+					"## Stack: Python, PyTorch, React, NestJS, Docker, AWS Services.",
 				subtitle: "Building scalable, high-performance web applications.",
 				title: "Software Engineer with AI",
 			},
@@ -1223,7 +1224,8 @@ export const ui = {
 				execute: "EJECUTAR_PROTOCOLO",
 				software: "INGENIERO",
 				source: "CÓDIGO_FUENTE",
-				stack: "## Stack: Python, PyTorch, React, NestJS, Docker, AWS.",
+				stack:
+					"## Stack: Python, PyTorch, React, NestJS, Docker, AWS Servicios.",
 				subtitle:
 					"Construyendo aplicaciones web escalables y de alto rendimiento.",
 				title: "Ingeniero de Software con I.A",

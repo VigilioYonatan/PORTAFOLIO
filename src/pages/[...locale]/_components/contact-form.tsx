@@ -1,13 +1,13 @@
 import WebForm from "@components/web_form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { contactStoreApi } from "@modules/contact/apis/contact.store.api";
 import type { ContactStoreDto } from "@modules/contact/dtos/contact.store.dto";
 import { contactStoreDto } from "@modules/contact/dtos/contact.store.dto";
-import { contactStoreApi } from "@modules/contact/apis/contact.store.api";
 import type { Lang } from "@src/i18n";
 import { useTranslations } from "@src/i18n";
+import { sweetModal } from "@vigilio/sweet";
 import { Mail, Send, User } from "lucide-preact";
 import { type Resolver, useForm } from "react-hook-form";
-import { sweetModal } from "@vigilio/sweet";
 
 interface ContactFormProps {
 	lang?: Lang;
@@ -19,7 +19,6 @@ export default function ContactForm({ lang = "es" }: ContactFormProps) {
 	const contactForm = useForm<ContactStoreDto>({
 		resolver: zodResolver(contactStoreDto) as Resolver<ContactStoreDto>,
 		mode: "all",
-		
 	});
 
 	const contactStoreMutation = contactStoreApi();

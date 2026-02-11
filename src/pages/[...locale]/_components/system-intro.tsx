@@ -59,16 +59,14 @@ export default function SystemIntro({ lang = "es" }: { lang?: Lang }) {
 
 				// Type command
 				const isFinalStep = i === STEPS.length - 1;
-				const typingSpeed = i < 2 ? 2 : 10; // First steps very fast
 
+				// Batch typing for speed if needed, but let's just minimal delay
 				for (let j = 0; j < step.command.length; j++) {
 					currentTyping.value += step.command[j];
-					await new Promise((r) =>
-						setTimeout(r, typingSpeed + Math.random() * 5),
-					);
+					await new Promise((r) => setTimeout(r, 5));
 				}
 
-				await new Promise((r) => setTimeout(r, i < 2 ? 20 : 150));
+				await new Promise((r) => setTimeout(r, 30));
 
 				history.value = [
 					...history.value,
@@ -80,17 +78,17 @@ export default function SystemIntro({ lang = "es" }: { lang?: Lang }) {
 					? step.output
 					: [step.output];
 				for (const out of outputs) {
-					await new Promise((r) => setTimeout(r, i < 2 ? 2 : 30));
+					await new Promise((r) => setTimeout(r, 10));
 					history.value = [...history.value, { type: "output", text: out }];
 				}
 
-				await new Promise((r) => setTimeout(r, isFinalStep ? 1000 : 50));
+				await new Promise((r) => setTimeout(r, isFinalStep ? 200 : 50));
 				stepIndex.value = i + 1;
 			}
 
-			await new Promise((r) => setTimeout(r, 600));
+			await new Promise((r) => setTimeout(r, 200));
 			isFading.value = true;
-			await new Promise((r) => setTimeout(r, 800));
+			await new Promise((r) => setTimeout(r, 500));
 			isVisible.value = false;
 			document.body.style.overflow = "";
 		};
@@ -103,7 +101,7 @@ export default function SystemIntro({ lang = "es" }: { lang?: Lang }) {
 	return (
 		<div
 			class={cn(
-				"fixed inset-0 z-100 bg-black flex flex-col items-center justify-center font-mono overflow-hidden transition-opacity duration-1000",
+				"fixed inset-0 z-100 bg-black flex flex-col items-center justify-center font-mono overflow-hidden transition-opacity duration-500",
 				isFading.value ? "opacity-0 pointer-events-none" : "opacity-100",
 			)}
 		>
@@ -150,6 +148,15 @@ export default function SystemIntro({ lang = "es" }: { lang?: Lang }) {
 				}}
 			/>
 			<div class="absolute inset-0 bg-linear-to-b from-black via-transparent to-black opacity-60 pointer-events-none" />
+
+			{/* Large React Background Icon */}
+			<div class="absolute bottom-[-10%] md:bottom-[-20%] left-1/2 -translate-x-1/2 w-[300px] md:w-[800px] h-[300px] md:h-[800px] opacity-[0.1] pointer-events-none z-0">
+				<img
+					src="/images/react-original.svg"
+					alt="React Background"
+					class="w-full h-full object-contain animate-[spin_30s_linear_infinite]"
+				/>
+			</div>
 
 			{/* 3. Terminal Container */}
 			<div class="z-10 w-full max-w-[95%] md:max-w-4xl bg-zinc-950/50 backdrop-blur-md border border-white/5 terminal-window rounded-lg overflow-hidden flex flex-col h-[60vh] md:h-[500px] animate-[flicker_0.15s_infinite]">

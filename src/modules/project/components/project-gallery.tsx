@@ -86,9 +86,7 @@ export function ProjectGallery({
 							onClick={() => openLightbox(idx)}
 						>
 							<img
-								src={
-									image
-								}
+								src={image}
 								alt={`${projectTitle} screenshot ${idx + 1}`}
 								class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
 							/>

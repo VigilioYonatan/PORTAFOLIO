@@ -1,4 +1,3 @@
-import environments from "@infrastructure/config/client/environments.config";
 import { printFileWithDimension } from "@infrastructure/utils/hybrid";
 import type { BlogPostSchema } from "@modules/blog-post/schemas/blog-post.schema";
 import { DIMENSION_IMAGE } from "@modules/uploads/const/upload.const"; // Check if correct
@@ -11,7 +10,11 @@ interface RecentBlogsProps {
 	STORAGE_CDN_URL: string;
 }
 
-export default function RecentBlogs({ latestPosts, lang, STORAGE_CDN_URL }: RecentBlogsProps) {
+export default function RecentBlogs({
+	latestPosts,
+	lang,
+	STORAGE_CDN_URL,
+}: RecentBlogsProps) {
 	if (!latestPosts || latestPosts.length === 0) return null;
 
 	return (
