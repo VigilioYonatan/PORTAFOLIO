@@ -40,6 +40,7 @@ export default defineConfig({
 		environment: "happy-dom",
 		globals: true,
 		pool: "forks",
+		maxWorkers: 4,
 		testTimeout: 30000,
 		// Default: Unit tests with mocks
 		setupFiles: [

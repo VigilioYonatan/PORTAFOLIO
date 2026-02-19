@@ -15,6 +15,7 @@ import type { ProjectWithRelations } from "../schemas/project.schema";
 vi.mock("../apis/project.show.api", () => ({
 	projectShowApi: vi.fn(),
 }));
+
 import { projectShowApi } from "../apis/project.show.api";
 
 // Mock the update API
@@ -128,11 +129,7 @@ describe("ProjectUpdate", () => {
 		const onCloseMock = vi.fn();
 
 		render(
-			<ProjectUpdate
-				id={1}
-				refetch={refetchMock}
-				onClose={onCloseMock}
-			/>,
+			<ProjectUpdate id={1} refetch={refetchMock} onClose={onCloseMock} />,
 		);
 
 		// Check that form fields are populated with project data
@@ -154,11 +151,7 @@ describe("ProjectUpdate", () => {
 		const onCloseMock = vi.fn();
 
 		render(
-			<ProjectUpdate
-				id={1}
-				refetch={refetchMock}
-				onClose={onCloseMock}
-			/>,
+			<ProjectUpdate id={1} refetch={refetchMock} onClose={onCloseMock} />,
 		);
 
 		const titleInput = screen.getByDisplayValue("Test Project");
@@ -183,11 +176,7 @@ describe("ProjectUpdate", () => {
 		const onCloseMock = vi.fn();
 
 		render(
-			<ProjectUpdate
-				id={1}
-				refetch={refetchMock}
-				onClose={onCloseMock}
-			/>,
+			<ProjectUpdate id={1} refetch={refetchMock} onClose={onCloseMock} />,
 		);
 
 		expect(
@@ -211,11 +200,7 @@ describe("ProjectUpdate", () => {
 		const onCloseMock = vi.fn();
 
 		render(
-			<ProjectUpdate
-				id={1}
-				refetch={refetchMock}
-				onClose={onCloseMock}
-			/>,
+			<ProjectUpdate id={1} refetch={refetchMock} onClose={onCloseMock} />,
 		);
 
 		const titleInput = screen.getByDisplayValue("Test Project");
