@@ -126,7 +126,7 @@ export default function NeuroPlayer(props: NeuroPlayerProps) {
 	return (
 		<div
 			class={cn(
-				"flex flex-col gap-2 md:gap-3 border border-white/5 bg-black/40 backdrop-blur-md rounded-2xl font-mono shadow-2xl transition-all relative mt-16",
+				"flex flex-col gap-2 md:gap-3 p-3 md:p-4 border border-white/5 bg-black/40 backdrop-blur-md rounded-2xl font-mono shadow-2xl transition-all relative mt-16",
 				(isNatureActive.value || isPlanetActive.value) && "hidden", // Hide in Nature/Planet Mode
 				props.className,
 			)}
@@ -243,7 +243,7 @@ export default function NeuroPlayer(props: NeuroPlayerProps) {
 				{/* 3. INTERACTIVE CONTROLS OVERLAY (Shown on click) */}
 				<div
 					class={cn(
-						"absolute inset-0 z-40 bg-black/80 backdrop-blur-sm transition-all duration-300 flex flex-col items-center justify-center gap-6 p-4",
+						"absolute inset-0 z-40 bg-black/80 backdrop-blur-sm transition-all duration-300 flex flex-col items-center justify-center gap-3 p-4",
 						showControls.value
 							? "opacity-100 pointer-events-auto"
 							: "opacity-0 pointer-events-none",
@@ -262,7 +262,7 @@ export default function NeuroPlayer(props: NeuroPlayerProps) {
 					</button>
 
 					{/* Secondary Controls Row - Now Above */}
-					<div class="flex items-center gap-6 mb-2">
+					<div class="flex items-center gap-5">
 						<button
 							type="button"
 							onClick={(e) => {
@@ -318,8 +318,8 @@ export default function NeuroPlayer(props: NeuroPlayerProps) {
 					</div>
 
 					{/* Main Controls Row - Now Below */}
-					<div class="flex-1 flex items-center justify-center w-full">
-						<div class="flex items-center justify-center gap-8">
+					<div class="flex items-center justify-center">
+						<div class="flex items-center justify-center gap-6">
 							<button
 								type="button"
 								onClick={(e) => {
@@ -361,7 +361,7 @@ export default function NeuroPlayer(props: NeuroPlayerProps) {
 					</div>
 
 					{/* Volume Slider (Horizontal for overlay) */}
-					<div class="flex items-center gap-2.5 w-36 mt-1">
+					<div class="flex items-center gap-2.5 w-36">
 						<button
 							onClick={(e) => {
 								e.stopPropagation();

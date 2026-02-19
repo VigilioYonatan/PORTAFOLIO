@@ -1498,7 +1498,7 @@ export const ui = {
 		},
 		slug: {
 			back_to_archives: "VOLVER_ARCHIVOS",
-			impact_summary: "RESUMEN_IMPACTO",
+			impact_summary: "",
 			live_demo: "DEMO_ENVIVO",
 			propagate: "PROPAGAR_NODO",
 			source_code: "CÓDIGO_FUENTE",
