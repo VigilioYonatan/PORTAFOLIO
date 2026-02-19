@@ -1,6 +1,24 @@
-# Astro-Test API
+<div align="center">
 
-Full-stack app: **NestJS** + **Astro** + **PostgreSQL** + **Dragonfly**
+# 🚀 VIGILIO — Portfolio
+
+**Ingeniero de Software con Inteligencia Artificial**
+
+![Portfolio Preview](./vigilio-ai.png)
+
+[![NestJS](https://img.shields.io/badge/NestJS-11-E0234E?style=for-the-badge&logo=nestjs&logoColor=white)](https://nestjs.com/)
+[![Astro](https://img.shields.io/badge/Astro-5-BC52EE?style=for-the-badge&logo=astro&logoColor=white)](https://astro.build/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
+[![Dragonfly](<https://img.shields.io/badge/Dragonfly_(Redis)-00C853?style=for-the-badge&logo=redis&logoColor=white>)](https://www.dragonflydb.io/)
+[![Drizzle](https://img.shields.io/badge/Drizzle_ORM-C5F74F?style=for-the-badge&logo=drizzle&logoColor=black)](https://orm.drizzle.team/)
+[![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
+
+> 🧠 _+5 años automatizando negocios y optimizando procesos empresariales._
+> _Garantizando calidad, escalabilidad y seguridad en arquitectura de software._
+
+---
+
+</div>
 
 ## 📦 Librerías Principales
 
