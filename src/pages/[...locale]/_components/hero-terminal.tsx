@@ -35,33 +35,32 @@ export default function HeroTerminal({
 	const botAudioRef = useRef<HTMLAudioElement | null>(null);
 	const t = useTranslations(lang);
 	const isBotAnimating = useSignal(false);
-	const botPos = useSignal({ x: 0, y: 0 });
+	const botPos = useSignal({ x: 750, y: 350 });
 	const isDragging = useSignal(false);
-	const startPos = useRef({ x: 0, y: 0 });
-	const initialBotPos = useRef({ x: 0, y: 0 });
+	const startPos = useRef({ x: 2, y: 0 });
+	const initialBotPos = useRef({ x: 2, y: 0 });
 	const hasMoved = useRef(false);
 	const botTilt = useSignal(0);
 	const lastX = useRef(0);
 	const currentTechIndex = useSignal(0);
 
 	const techIcons = [
-		"/images/react-original.svg",
-		"/images/typescript-original.svg",
-		"/images/aws-lambda.png",
-		"/images/nestjs-original.svg",
-		"/images/redis.png",
-		"/images/puppeteer.png",
-		"/images/jest.avif",
-		"/images/linux.png",
-		"/images/openai.png",
-		"/images/claude.svg",
-		"/images/deepseek.png",
-		"/images/ollama.png",
-		"/images/aws-ecs.png",
-		"/images/mcp.png",
-		"/images/langchain.png",
-		"/images/antigravity.png",
-		"/images/docker-plain.svg",
+		{ src: "/images/react-original.svg", name: "React" },
+		{ src: "/images/typescript-original.svg", name: "TypeScript" },
+		{ src: "/images/aws-lambda.png", name: "AWS Lambda" },
+		{ src: "/images/nestjs-original.svg", name: "NestJS" },
+		{ src: "/images/redis.png", name: "Redis" },
+		{ src: "/images/puppeteer.png", name: "Puppeteer" },
+		{ src: "/images/jest.avif", name: "Jest" },
+		{ src: "/images/linux.png", name: "Linux" },
+		{ src: "/images/openai.png", name: "OpenAI" },
+		{ src: "/images/claude.svg", name: "Claude" },
+		{ src: "/images/ollama.png", name: "Ollama" },
+		{ src: "/images/aws-ecs.png", name: "AWS ECS" },
+		{ src: "/images/mcp.png", name: "MCP" },
+		{ src: "/images/langchain.png", name: "LangChain" },
+		{ src: "/images/antigravity.png", name: "Antigravity" },
+		{ src: "/images/docker-plain.svg", name: "Docker" },
 	];
 
 	useEffect(() => {
@@ -71,40 +70,43 @@ export default function HeroTerminal({
 		return () => clearInterval(interval);
 	}, []);
 
+	const botRef = useRef<HTMLDivElement>(null);
+
 	const onPointerDown = (e: PointerEvent) => {
 		isDragging.value = true;
 		hasMoved.current = false;
 		startPos.current = { x: e.clientX, y: e.clientY };
 		lastX.current = e.clientX;
 		initialBotPos.current = { x: botPos.value.x, y: botPos.value.y };
-		(e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
-	};
+		e.preventDefault();
 
-	const onPointerMove = (e: PointerEvent) => {
-		if (!isDragging.value) return;
+		const onMove = (ev: PointerEvent) => {
+			const dx = ev.clientX - startPos.current.x;
+			const dy = ev.clientY - startPos.current.y;
 
-		const dx = e.clientX - startPos.current.x;
-		const dy = e.clientY - startPos.current.y;
+			const speedX = ev.clientX - lastX.current;
+			botTilt.value = Math.max(-15, Math.min(15, speedX * 0.8));
+			lastX.current = ev.clientX;
 
-		// Calculate tilt based on horizontal movement speed
-		const speedX = e.clientX - lastX.current;
-		botTilt.value = speedX * 0.8; // Adjust multiplier for tilt intensity
-		lastX.current = e.clientX;
+			if (Math.abs(dx) > 5 || Math.abs(dy) > 5) {
+				hasMoved.current = true;
+			}
 
-		if (Math.abs(dx) > 5 || Math.abs(dy) > 5) {
-			hasMoved.current = true;
-		}
-
-		botPos.value = {
-			x: initialBotPos.current.x + dx,
-			y: initialBotPos.current.y + dy,
+			botPos.value = {
+				x: initialBotPos.current.x + dx,
+				y: initialBotPos.current.y + dy,
+			};
 		};
-	};
 
-	const onPointerUp = (e: PointerEvent) => {
-		isDragging.value = false;
-		botTilt.value = 0;
-		(e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
+		const onUp = () => {
+			isDragging.value = false;
+			botTilt.value = 0;
+			document.removeEventListener("pointermove", onMove);
+			document.removeEventListener("pointerup", onUp);
+		};
+
+		document.addEventListener("pointermove", onMove);
+		document.addEventListener("pointerup", onUp);
 	};
 
 	useEffect(() => {
@@ -160,21 +162,22 @@ export default function HeroTerminal({
 				<div class="bg-black/60 border border-white/10 rounded-sm shadow-2xl backdrop-blur-md overflow-visible relative group min-h-auto md:min-h-[450px]">
 					{/* AI Bot Assistant - Outside Terminal but anchored to it */}
 					<div
-						class={`absolute -right-2 md:-right-32 lg:-right-48 top-12 md:top-1/2 -translate-y-1/2 w-26 sm:w-32 md:w-48 lg:w-56 select-none mix-blend-screen opacity-90 z-50 will-change-transform ${
+						ref={botRef}
+						class={`absolute -left-2 md:-right-42 lg:-right-2 top-12 md:top-1/6 -translate-y-1/2 w-26 sm:w-32 md:w-48 lg:w-56 select-none mix-blend-screen opacity-90 z-50 will-change-transform ${
 							isDragging.value
 								? "cursor-grabbing scale-110 z-[100] drop-shadow-[0_40px_50px_rgba(6,182,212,0.4)]"
 								: "cursor-grab hover:scale-105 active:scale-95"
 						} ${isBotAnimating.value ? "animate-[float_2s_ease-in-out_1]" : ""}`}
 						style={{
-							transform: `translate(${botPos.value.x}px, ${botPos.value.y}px) translateY(-50%) rotate(${botTilt.value}deg)`,
+							left: `${botPos.value.x}px`,
+							top: `${botPos.value.y}px`,
+							rotate: `${botTilt.value}deg`,
 							touchAction: "none",
 							transition: isDragging.value
 								? "none"
-								: "transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
+								: "left 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), top 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), rotate 0.3s ease",
 						}}
 						onPointerDown={onPointerDown}
-						onPointerMove={onPointerMove}
-						onPointerUp={onPointerUp}
 						onClick={(e) => {
 							if (hasMoved.current) return;
 							isBotAnimating.value = true;
@@ -272,7 +275,7 @@ export default function HeroTerminal({
 													src={
 														techIcons[
 															(currentTechIndex.value + 1) % techIcons.length
-														]
+														].src
 													}
 													alt="Next Tech"
 													class="w-full h-full object-contain p-4 opacity-60"
@@ -289,7 +292,7 @@ export default function HeroTerminal({
 														techIcons[
 															(currentTechIndex.value - 1 + techIcons.length) %
 																techIcons.length
-														]
+														].src
 													}
 													alt="Prev Tech"
 													class="w-full h-full object-contain p-4 opacity-60"
@@ -297,8 +300,9 @@ export default function HeroTerminal({
 											</div>
 
 											{/* Main Display Card (Front Center) */}
-											<div
-												class="w-[90px] h-[90px] rounded-xl bg-zinc-900/80 border border-primary/30 p-4 flex items-center justify-center backdrop-blur-md relative overflow-hidden group hover:border-primary/60 transition-all duration-500 shadow-[0_20px_40px_rgba(0,0,0,0.9)] z-10"
+											<a
+												href={`/${lang}/about`}
+												class="w-[90px] h-[90px] rounded-xl bg-zinc-900/80 border border-primary/30 p-4 flex items-center justify-center backdrop-blur-md relative overflow-hidden group hover:border-primary/60 transition-all duration-500 shadow-[0_20px_40px_rgba(0,0,0,0.9)] z-10 cursor-pointer"
 												key={`main-${currentTechIndex.value}`}
 											>
 												<div class="absolute inset-0 bg-scanline opacity-10 pointer-events-none" />
@@ -306,18 +310,17 @@ export default function HeroTerminal({
 
 												{/* Rotating Icon */}
 												<img
-													src={techIcons[currentTechIndex.value]}
+													src={techIcons[currentTechIndex.value].src}
 													alt="Rotating Tech"
 													class="w-full h-full object-contain filter brightness-110 drop-shadow-[0_0_15px_rgba(6,182,212,0.5)] animate-in fade-in zoom-in duration-700"
 												/>
-											</div>
+											</a>
 										</div>
 
 										{/* Tech Counter Label */}
-										<div class="absolute -bottom-4 right-2 bg-black/80 border border-white/20 px-2 py-0.5 rounded-sm z-20">
+										<div class="absolute -bottom-4 right-2 bg-black/80 border border-white/20 px-2 py-0.5 rounded-sm z-20 pointer-events-none">
 											<span class="text-[8px] font-mono text-primary font-bold uppercase tracking-tighter">
-												CARD_
-												{String(currentTechIndex.value + 1).padStart(2, "0")}
+												{techIcons[currentTechIndex.value].name}
 											</span>
 										</div>
 									</div>

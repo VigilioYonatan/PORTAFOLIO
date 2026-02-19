@@ -43,7 +43,7 @@ export default function MobileToolsDock({
 			{/* Floating Action Button - Only visible up to 4xl */}
 			<div
 				className={cn(
-					"3xl:hidden fixed bottom-24 right-6 z-50 transition-all duration-300 flex flex-col gap-4",
+					"xl:hidden fixed bottom-24 right-6 z-50 transition-all duration-300 flex flex-col gap-4",
 					isOpen
 						? "translate-y-20 opacity-0 pointer-events-none"
 						: "translate-y-0 opacity-100",

@@ -34,7 +34,7 @@ export default function MobileHeader({ lang }: MobileHeaderProps) {
 			<button
 				onClick={() => setIsOpen(true)}
 				className={cn(
-					"fixed top-4 left-4 z-[60] p-3 bg-black/40 backdrop-blur-md border border-white/10 text-primary rounded-xl shadow-2xl transition-all active:scale-90 3xl:hidden",
+					"fixed top-4 left-4 z-[60] p-3 bg-black/40 backdrop-blur-md border border-white/10 text-primary rounded-xl shadow-2xl transition-all active:scale-90 xl:hidden",
 					isOpen && "opacity-0 pointer-events-none",
 				)}
 				aria-label="Open Menu"
@@ -69,14 +69,14 @@ export default function MobileHeader({ lang }: MobileHeaderProps) {
 								<img
 									src="/images/vigilio.png"
 									alt="Vigilio Logo"
-									className="w-8 h-8 object-contain"
+									className="w-12 h-12 object-contain"
 								/>
 								<div className="flex flex-col">
-									<span className="text-[10px] font-black tracking-widest text-white leading-none">
-										SYSTEM
+									<span className="text-sm font-black tracking-widest text-white leading-none">
+										YONATAN
 									</span>
-									<span className="text-[8px] font-bold tracking-[0.2em] text-primary leading-none mt-1 uppercase">
-										Navigation
+									<span className="text-xs font-bold tracking-[0.2em] text-primary leading-none mt-1 uppercase">
+										VIGILIO
 									</span>
 								</div>
 							</div>

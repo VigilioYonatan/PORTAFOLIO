@@ -1,6 +1,10 @@
 import Button from "@components/extras/button";
 
-function View404() {
+interface View404Props {
+	message?: string;
+}
+
+function View404({ message }: View404Props) {
 	return (
 		<div class="relative flex flex-col items-center justify-center min-h-screen bg-background p-4 overflow-hidden">
 			{/* Scanline Effect */}
@@ -24,7 +28,7 @@ function View404() {
 
 				<div class="space-y-4">
 					<h2 class="text-2xl font-bold text-foreground tracking-tight terminal-cursor">
-						ERROR_PAGE_NOT_FOUND
+						{message || "ERROR_PAGE_NOT_FOUND"}
 					</h2>
 					<p class="text-muted-foreground font-mono max-w-md mx-auto">
 						&gt; The requested resource could not be found.

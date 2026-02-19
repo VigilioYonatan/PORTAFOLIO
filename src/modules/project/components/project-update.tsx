@@ -12,85 +12,108 @@ import {
 	type ProjectUpdateDto,
 	projectUpdateDto,
 } from "../dtos/project.update.dto";
-import type { ProjectWithRelations } from "../schemas/project.schema";
 import { ProjectForm } from "./project-form";
+import { projectShowApi } from "../apis/project.show.api";
+import Loader from "@components/extras/loader";
+import View404 from "@components/extras/404";
+import type { JSX } from "preact/jsx-runtime";
 
 interface ProjectUpdateProps {
-	project: ProjectWithRelations;
+	id: number;
 	refetch: (data: Refetch<ProjectIndexResponseDto["results"]>) => void;
 	onClose: () => void;
 	lang?: Lang;
 }
 
 export default function ProjectUpdate({
-	project,
+	id,
 	refetch,
 	onClose,
 	lang = "es",
 }: ProjectUpdateProps) {
 	const t = useTranslations(lang);
-	const projectUpdateMutation = projectUpdateApi(project.id);
-	const technologiesQuery = technologyIndexApi(null, null, { limit: 100 });
+	const projectShowQuery = projectShowApi(id);
+	let component: JSX.Element | null = null;
 
-	const projectUpdateForm = useForm<ProjectUpdateDto>({
-		resolver: zodResolver(projectUpdateDto) as Resolver<ProjectUpdateDto>,
-		mode: "all",
-		defaultValues: {
-			...project,
-			start_date: project.start_date
-				? (formatDate(project.start_date, "YYYY-MM-DD") as Date)
-				: undefined,
-			end_date: project.end_date
-				? (formatDate(project.end_date, "YYYY-MM-DD") as Date)
-				: undefined,
-			techeables: project.techeables.map((t) => t.technology_id),
-		},
-	});
-
-	function onProjectUpdate(body: ProjectUpdateDto) {
-		sweetModal({
-			title:
-				t("dashboard.project.delete_confirm_title")?.replace(
-					"DELETE",
-					"UPDATE",
-				) || "¿CONFIRMAR ACTUALIZACIÓN?",
-			text: `¿Guardar cambios para "${project.title}"?`,
-			icon: "warning",
-			showCancelButton: true,
-			confirmButtonText: "GUARDAR",
-		}).then(({ isConfirmed }) => {
-			if (isConfirmed) {
-				projectUpdateMutation.mutate(body, {
-					onSuccess(data) {
-						sweetModal({
-							icon: "success",
-							title: t("dashboard.project.form.success_update"),
-							text: t("dashboard.project.form.success_update"),
-						});
-						refetch({
-							...project,
-							...data.project,
-							updated_at: now().toDate(),
-						});
-						onClose();
-					},
-					onError(error) {
-						handlerError(projectUpdateForm, error, "Error de actualización");
-					},
-				});
-			}
-		});
+	if (projectShowQuery.isLoading) {
+		component = <Loader />;
 	}
 
-	return (
-		<ProjectForm
-			// biome-ignore lint/suspicious/noExplicitAny: <explanation>
-			form={projectUpdateForm as any}
-			onSubmit={onProjectUpdate}
-			isLoading={projectUpdateMutation.isLoading || false}
-			technologies={technologiesQuery.data?.results || []}
-			isUpdate
-			initialTitle={project.title}
-		/>
-	);
+	if (projectShowQuery.isError) {
+		component = <View404 message={projectShowQuery.error?.message} />;
+	}
+
+	if (projectShowQuery.isSuccess && projectShowQuery.data) {
+		const project = projectShowQuery.data.project;
+		const projectUpdateMutation = projectUpdateApi(project.id);
+		const technologiesQuery = technologyIndexApi(null, null, { limit: 100 });
+
+		const projectUpdateForm = useForm<ProjectUpdateDto>({
+			resolver: zodResolver(projectUpdateDto) as Resolver<ProjectUpdateDto>,
+			mode: "all",
+			defaultValues: {
+				...project,
+				start_date: project.start_date
+					? (formatDate(project.start_date, "YYYY-MM-DD") as Date)
+					: undefined,
+				end_date: project.end_date
+					? (formatDate(project.end_date, "YYYY-MM-DD") as Date)
+					: undefined,
+				techeables: project.techeables.map((t) => t.technology_id),
+			},
+		});
+
+		function onProjectUpdate(body: ProjectUpdateDto) {
+			sweetModal({
+				title:
+					t("dashboard.project.delete_confirm_title")?.replace(
+						"DELETE",
+						"UPDATE",
+					) || "¿CONFIRMAR ACTUALIZACIÓN?",
+				text: `¿Guardar cambios para "${project.title}"?`,
+				icon: "warning",
+				showCancelButton: true,
+				confirmButtonText: "GUARDAR",
+			}).then(({ isConfirmed }) => {
+				if (isConfirmed) {
+					projectUpdateMutation.mutate(body, {
+						onSuccess(data) {
+							sweetModal({
+								icon: "success",
+								title: t("dashboard.project.form.success_update"),
+								text: t("dashboard.project.form.success_update"),
+							});
+							refetch({
+								...project,
+								...data.project,
+								updated_at: now().toDate(),
+							});
+							onClose();
+						},
+						onError(error) {
+							handlerError(
+								projectUpdateForm,
+								error,
+								"Error de actualización",
+							);
+						},
+					});
+				}
+			});
+		}
+
+		component = (
+			<ProjectForm
+				// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+				form={projectUpdateForm as any}
+				onSubmit={onProjectUpdate}
+				isLoading={projectUpdateMutation.isLoading || false}
+				technologies={technologiesQuery.data?.results || []}
+				isUpdate
+				initialTitle={project.title}
+			/>
+		);
+	}
+
+	return component;
 }

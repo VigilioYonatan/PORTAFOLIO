@@ -58,7 +58,7 @@ export default function NeuroPlayer(props: NeuroPlayerProps) {
 	} = audioStore.methods;
 
 	const isOpenPlaylist = useSignal(false);
-	const showVolumeSlider = useSignal(false);
+
 	const showControls = useSignal(false);
 
 	useEffect(() => {
@@ -142,67 +142,72 @@ export default function NeuroPlayer(props: NeuroPlayerProps) {
 				</div>
 			)}
 
-			{/* TOP SECTION: IMAGE & VISUALIZER */}
+			{/* TOP SECTION: MONSTERCAT-STYLE VISUALIZER */}
 			<div
-				class="relative w-full h-24 md:h-auto md:aspect-4/3 rounded-xl overflow-hidden bg-zinc-900 border border-white/5 group font-sans cursor-pointer"
+				class="relative w-full h-48 md:h-auto md:aspect-video rounded-xl overflow-hidden bg-zinc-900 border border-white/5 group font-sans cursor-pointer"
 				onClick={() => {
 					showControls.value = !showControls.value;
 				}}
 			>
-				{/* 1. Dynamic Background Layer */}
-				<div class="absolute inset-0 w-full h-full flex items-center justify-center overflow-hidden">
+				{/* 1. Dynamic Background Layer (Blurred album art) */}
+				<div class="absolute inset-0 w-full h-full overflow-hidden">
 					<div
 						key={currentTrack.value?.id}
-						class="absolute inset-0 bg-cover bg-center transition-[background-image] duration-1000 ease-in-out"
+						class="absolute inset-[-20px] bg-cover bg-center transition-[background-image] duration-1000 ease-in-out blur-2xl scale-110"
 						style={{
 							backgroundImage: `url('${currentTrack.value?.cover || "/images/visualizer-bg.png"}')`,
-							animation: "perspectiveShift 16s infinite linear",
 						}}
 					/>
-					{/* Darken for contrast */}
-					<div class="absolute inset-0 bg-black/50" />
-					<div class="absolute inset-0 bg-[url('/grid.svg')] opacity-10 mix-blend-overlay" />
+					{/* Dark overlay for contrast */}
+					<div class="absolute inset-0 bg-black/60" />
+					<div class="absolute inset-0 bg-[url('/grid.svg')] opacity-5 mix-blend-overlay" />
 				</div>
 
-				{/* 2. Content Layout (Overlay) */}
-				<div class="absolute inset-0 z-20 flex flex-col justify-between p-4">
-					{/* Top Area: Metadata */}
-					<div class="flex items-center gap-3">
-						<div class="w-10 h-10 shrink-0 border border-white/20 bg-black/50 relative z-30">
-							{currentTrack.value?.cover ? (
-								<img
-									src={currentTrack.value.cover}
-									class="w-full h-full object-cover"
-									alt={currentTrack.value.title}
-									title={currentTrack.value.title}
-									width={DIMENSION_IMAGE.xs}
-									height={DIMENSION_IMAGE.xs}
-								/>
-							) : (
-								<div class="w-full h-full bg-zinc-800 flex items-center justify-center">
-									<ListMusicIcon size={14} class="text-white/50" />
-								</div>
-							)}
-						</div>
-						<div class="flex flex-col min-w-0 z-30">
-							<h2 class="text-white font-black text-xs tracking-wider uppercase truncate">
-								{currentTrack.value?.artist || "ARTIST"}
-							</h2>
-							<p class="text-white/70 text-[8px] tracking-[0.2em] uppercase truncate">
-								{currentTrack.value?.title || "TRACK TITLE"}
-							</p>
+				{/* 2. Content Layout - Monstercat Video Style */}
+				<div class="absolute inset-0 z-20 flex flex-col">
+					{/* Top: Visualizer Bars - Fills remaining space */}
+					<div class="flex-1 w-full flex items-end px-3 md:px-5 pt-2 md:pt-4 overflow-hidden">
+						<div class="w-full h-full">
+							<MonstercatVisualizer />
 						</div>
 					</div>
 
-					{/* Bottom Area: Progress & Visualizer */}
-					<div class="space-y-4">
-						<div class="w-full h-8 opacity-60">
-							<MonstercatVisualizer />
+					{/* Bottom: Cover Art + Artist/Title + Progress - Fixed height */}
+					<div class="shrink-0 px-3 md:px-5 pb-2 md:pb-3 pt-1">
+						{/* Artist Row */}
+						<div class="flex items-end gap-2 md:gap-3 mb-1">
+							{/* Small Album Art */}
+							<div class="w-6 h-6 md:w-12 md:h-12 shrink-0 border border-white/20 bg-black/60 rounded-sm overflow-hidden shadow-[0_0_20px_rgba(0,0,0,0.6)]">
+								{currentTrack.value?.cover ? (
+									<img
+										src={currentTrack.value.cover}
+										class="w-full h-full object-cover"
+										alt={currentTrack.value.title}
+										title={currentTrack.value.title}
+										width={DIMENSION_IMAGE.xs}
+										height={DIMENSION_IMAGE.xs}
+									/>
+								) : (
+									<div class="w-full h-full bg-zinc-800 flex items-center justify-center">
+										<ListMusicIcon size={14} class="text-white/50" />
+									</div>
+								)}
+							</div>
+
+							{/* Artist & Title */}
+							<div class="flex flex-col justify-end min-w-0 flex-1">
+								<h2 class="text-white font-black text-[10px] md:text-xl lg:text-2xl tracking-wider uppercase truncate drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)] leading-none">
+									{currentTrack.value?.artist || "ARTIST"}
+								</h2>
+								<p class="text-white/70 text-[7px] md:text-[11px] tracking-[0.2em] uppercase truncate font-semibold mt-0.5">
+									{currentTrack.value?.title || "TRACK TITLE"}
+								</p>
+							</div>
 						</div>
 
-						{/* Progress Section */}
-						<div class="flex items-center gap-2 group/prog overflow-hidden">
-							<span class="text-[8px] font-bold text-white/50 tabular-nums">
+						{/* Progress Bar */}
+						<div class="flex items-center gap-1.5 overflow-hidden">
+							<span class="text-[7px] md:text-[8px] font-bold text-white/50 tabular-nums">
 								{formatTime(audioStore.state.currentTime.value)}
 							</span>
 							<div class="flex-1 h-3 flex items-center relative">
@@ -228,7 +233,7 @@ export default function NeuroPlayer(props: NeuroPlayerProps) {
 									class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-40"
 								/>
 							</div>
-							<span class="text-[8px] font-bold text-white/50 tabular-nums">
+							<span class="text-[7px] md:text-[8px] font-bold text-white/50 tabular-nums">
 								{formatTime(audioStore.state.duration.value)}
 							</span>
 						</div>

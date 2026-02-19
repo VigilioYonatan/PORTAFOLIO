@@ -33,6 +33,11 @@ export const ui = {
 				desc: "I am Yonatan Vigilio Lavado, a software developer with over 6 years of experience, specializing in AI implementation since 2020. I focus on designing robust and maintainable software using clean architecture principles, ensuring long-term scalability, performance, and code quality. I have led scalable projects and developed open-source libraries, mastering a wide stack of modern technologies. Beyond my passion for continuous learning and innovation, I am an electronic music enthusiast, specifically Drum and Bass, which I explore through music production in my spare time.",
 				title: "Services & Capabilities",
 			},
+			stats: {
+				experience: "YEARS OF EXPERIENCE",
+				projects: "PROJECTS",
+				commitment: "COMMITMENT",
+			},
 		},
 		auth: {
 			alreadyHaveAccount: "Already have an account?",
@@ -780,6 +785,11 @@ export const ui = {
 			services: {
 				desc: "Soy Yonatan Vigilio Lavado, desarrollador de software con más de 6 años de experiencia y especialista en la implementación de inteligencia artificial desde 2020. Me especializo en el diseño de software robusto y mantenible bajo principios de arquitectura limpia, asegurando escalabilidad, rendimiento y calidad de código a largo plazo. He liderado proyectos escalables y el desarrollo de bibliotecas open source, dominando un amplio stack de tecnologías modernas. Además de mi pasión por el aprendizaje continuo y la innovación, soy un entusiasta de la música electrónica, específicamente del Drum and Bass, género que exploro a través de la producción musical en mi tiempo libre.",
 				title: "Servicios y Capacidades",
+			},
+			stats: {
+				experience: "AÑOS DE EXPERIENCIA",
+				projects: "PROYECTOS",
+				commitment: "COMPROMISO",
 			},
 		},
 		auth: {
@@ -1533,6 +1543,11 @@ export const ui = {
 			services: {
 				desc: "Sou Yonatan Vigilio Lavado, desenvolvedor de software com mais de 6 anos de experiência e implementação de inteligência artificial desde 2020. Especializo-me no design de software robusto e de fácil manutenção sob princípios de arquitetura limpa, garantindo escalabilidade, desempenho e qualidade de código a longo prazo. Lidero projetos escaláveis e o desenvolvimento de bibliotecas open source, dominando um amplo stack de tecnologias modernas. Além da minha paixão pelo aprendizado contínuo e inovação, sou um entusiasta da música eletrônica, especificamente Drum and Bass, gênero que exploro através da produção musical no meu tempo livre.",
 				title: "Serviços e Capacidades",
+			},
+			stats: {
+				experience: "ANOS DE EXPERIÊNCIA",
+				projects: "PROJETOS",
+				commitment: "COMPROMISSO",
 			},
 		},
 		auth: {

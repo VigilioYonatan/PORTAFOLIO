@@ -1,4 +1,4 @@
-import environments from "@infrastructure/config/client/environments.config";
+
 import { printFileWithDimension } from "@infrastructure/utils/hybrid/file.utils";
 import { DIMENSION_IMAGE } from "@modules/uploads/const/upload.const";
 import type { FilesSchema } from "@modules/uploads/schemas/upload.schema";
@@ -10,12 +10,14 @@ interface ProjectGalleryProps {
 	images: FilesSchema[];
 	projectTitle: string;
 	lang: Lang;
+	STORAGE_CDN_URL: string;
 }
 
 export function ProjectGallery({
 	images,
 	projectTitle,
 	lang,
+	STORAGE_CDN_URL,
 }: ProjectGalleryProps) {
 	const [lightboxOpen, setLightboxOpen] = useState(false);
 	const [currentIndex, setCurrentIndex] = useState(0);
@@ -25,9 +27,9 @@ export function ProjectGallery({
 			printFileWithDimension(
 				images,
 				DIMENSION_IMAGE.md,
-				environments.STORAGE_CDN_URL,
+				STORAGE_CDN_URL,
 			),
-		[images],
+		[images, STORAGE_CDN_URL],
 	);
 
 	const openLightbox = useCallback((index: number) => {

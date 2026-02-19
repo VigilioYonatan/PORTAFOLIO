@@ -23,9 +23,9 @@ const t = useTranslations(lang);
 const { title, description, technologies } = Astro.locals
   .props as WebAboutResponseDto;
 const stats = [
-  { value: "6+", label: t("home.experience") || "Years Exp." },
-  { value: "50+", label: t("header.projects") || "Projects" },
-  { value: "100%", label: "Commitment" },
+  { value: "5+", label: t("about.stats.experience") },
+  { value: "50+", label: t("about.stats.projects") },
+  { value: "100%", label: t("about.stats.commitment") },
 ];
 
 const services = [
@@ -93,7 +93,7 @@ const services = [
       </p>
 
       <div
-        class="grid grid-cols-3 gap-8 mt-8 border-t border-white/10 pt-8 w-full max-w-2xl"
+        class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-8 border-t border-white/10 pt-8 w-full max-w-2xl"
       >
         {
           stats.map((stat, index) => (
@@ -107,6 +107,7 @@ const services = [
                 className="!relative !left-0 !translate-x-0"
                 textClassName="text-[8px] md:text-[10px] !tracking-[0.3em] font-black opacity-80"
                 typingSpeed={30}
+                client:visible
               />
             </div>
           ))
@@ -124,7 +125,8 @@ const services = [
           <p class="text-lg text-muted-foreground leading-relaxed">
             {t("about.services.desc")}
           </p>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 relative">
+
             {
               services.map((service) => (
                 <div class="flex items-center gap-3 p-3 rounded-lg bg-zinc-900/50 border border-white/5 hover:border-primary/20 transition-colors">

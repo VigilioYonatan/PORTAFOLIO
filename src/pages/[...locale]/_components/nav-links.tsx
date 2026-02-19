@@ -33,42 +33,27 @@ export default function NavLinks({ lang, vertical, className }: NavLinksProps) {
 			href: `/${lang}/experience`,
 			label: t("header.briefcase"),
 			icon: DatabaseIcon,
-			section: "experience-section",
 		},
 		{
 			href: `/${lang}/projects`,
 			label: t("header.projects"),
 			icon: GridIcon,
-			section: "projects-section",
 		},
 		{
 			href: `/${lang}/open-source`,
 			label: t("header.opensource"),
 			icon: PackageIcon,
-			section: "opensource-section",
 		},
 		{
 			href: `/${lang}/blog`,
 			label: t("header.blog"),
 			icon: RssIcon,
-			section: "blog-section",
 		},
 
 		{ href: `/${lang}/contact`, label: t("header.contact"), icon: MailIcon },
 	];
 
-	const handleScroll = (e: MouseEvent, sectionId?: string) => {
-		if (!sectionId) return;
-		const element = document.getElementById(sectionId);
-		if (element) {
-			e.preventDefault();
-			element.scrollIntoView({ behavior: "smooth" });
-
-			// Close menu if on mobile (special signal or event could be used,
-			// but for now we focus on the scroll behavior)
-			window.dispatchEvent(new CustomEvent("close-mobile-menu"));
-		}
-	};
+	
 
 	return (
 		<nav
@@ -82,7 +67,6 @@ export default function NavLinks({ lang, vertical, className }: NavLinksProps) {
 				<a
 					key={link.href}
 					href={link.href}
-					onClick={(e) => handleScroll(e, link.section)}
 					className={cn(
 						"relative font-mono text-sm tracking-widest text-muted-foreground hover:text-primary transition-all py-2 group flex items-center gap-4 w-full px-4 border-l-2 border-transparent hover:border-primary hover:bg-primary/5",
 						!vertical && "border-none px-0 hover:bg-transparent",
