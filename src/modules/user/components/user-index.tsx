@@ -299,7 +299,7 @@ export default function UserIndex() {
 		total: userIndex.data?.count || 0,
 		totalChange: "+12%",
 		activeSessions: 412,
-		activeChange: "+5%",
+		activeChange: "+6%",
 		pendingInvites: 18,
 	};
 

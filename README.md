@@ -13,7 +13,7 @@
 [![Drizzle](https://img.shields.io/badge/Drizzle_ORM-C5F74F?style=for-the-badge&logo=drizzle&logoColor=black)](https://orm.drizzle.team/)
 [![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
 
-> 🧠 _+5 años automatizando negocios y optimizando procesos empresariales._
+> 🧠 _+6 años automatizando negocios y optimizando procesos empresariales._
 > _Garantizando calidad, escalabilidad y seguridad en arquitectura de software._
 
 ---
