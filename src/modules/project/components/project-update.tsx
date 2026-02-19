@@ -19,20 +19,20 @@ import {
 import { ProjectForm } from "./project-form";
 
 interface ProjectUpdateProps {
-	id: number;
+	slug: string;
 	refetch: (data: Refetch<ProjectIndexResponseDto["results"]>) => void;
 	onClose: () => void;
 	lang?: Lang;
 }
 
 export default function ProjectUpdate({
-	id,
+	slug,
 	refetch,
 	onClose,
 	lang = "es",
 }: ProjectUpdateProps) {
 	const t = useTranslations(lang);
-	const projectShowQuery = projectShowApi(id);
+	const projectShowQuery = projectShowApi(slug);
 	let component: JSX.Element | null = null;
 
 	if (projectShowQuery.isLoading) {
