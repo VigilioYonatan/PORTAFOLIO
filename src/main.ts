@@ -66,10 +66,11 @@ async function bootstrap() {
 
 	// Start on port
 
-	const server = await app.listen(port);
+	const server = await app.listen(port,'0.0.0.0');
 	if (isDevelopment) {
 		server.on("upgrade", astroProxy.upgrade);
 	}
+	
 	// biome-ignore lint/suspicious/noConsole: Startup log
 	console.log(`Application is running on: http://localhost:${port}`);
 	// biome-ignore lint/suspicious/noConsole: Startup log
