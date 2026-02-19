@@ -46,13 +46,13 @@ async function bootstrap() {
 	// Swagger Configuration
 	// const config = new DocumentBuilder()
 	// 	.setTitle("Astro-Test API")
-	// 	.setDescription("API documentation for Astro-Test project")
+	// 	.setDescription("API documentation for Astro-Test projectS")
 	// 	.setVersion("1.0")
 	// 	.addTag("users")
 	// 	.build();
 	// const document = SwaggerModule.createDocument(app, config);
-
-	// app.use(
+2
+	// app.us2e(
 	// 	"/reference",
 	// 	apiReference({
 	// 		content: document,
