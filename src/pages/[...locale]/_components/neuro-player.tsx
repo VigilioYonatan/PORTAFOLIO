@@ -196,10 +196,10 @@ export default function NeuroPlayer(props: NeuroPlayerProps) {
 
 							{/* Artist & Title */}
 							<div class="flex flex-col justify-end min-w-0 flex-1">
-								<h2 class="text-white font-black text-[10px] md:text-xl lg:text-2xl tracking-wider uppercase truncate drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)] leading-none">
+								<h2 class="text-white font-black text-[10px] md:text-sm lg:text-base tracking-wider uppercase truncate drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)] leading-none">
 									{currentTrack.value?.artist || "ARTIST"}
 								</h2>
-								<p class="text-white/70 text-[7px] md:text-[11px] tracking-[0.2em] uppercase truncate font-semibold mt-0.5">
+								<p class="text-white/70 text-[7px] md:text-[9px] tracking-[0.2em] uppercase truncate font-semibold mt-0.5">
 									{currentTrack.value?.title || "TRACK TITLE"}
 								</p>
 							</div>
