@@ -16,7 +16,6 @@ import { projectUpdateApi } from "@modules/project/apis/project.update.api";
 import ProjectStore from "@modules/project/components/project-store";
 import ProjectUpdate from "@modules/project/components/project-update";
 import TechStackIcons from "@modules/project/components/tech-stack-icons";
-import type { ProjectWithRelations } from "@modules/project/schemas/project.schema";
 import { useSignal } from "@preact/signals";
 import { type Lang, useTranslations } from "@src/i18n";
 import { useTable } from "@vigilio/preact-table";
@@ -43,7 +42,7 @@ export default function ProjectTable({ lang = "es" }: ProjectTableProps) {
 	const t = useTranslations(lang);
 	const projectDestroyMutation = projectDestroyApi();
 	const projectSyncMutation = projectSyncApi();
-	const editingProject = useSignal<ProjectWithRelations | null>(null);
+	const editingProject = useSignal<number | null>(null);
 	const isStoreModalOpen = useSignal<boolean>(false);
 
 	const table = useTable<
@@ -202,7 +201,7 @@ export default function ProjectTable({ lang = "es" }: ProjectTableProps) {
 								class="p-2 text-muted-foreground hover:text-amber-400 rounded-lg hover:bg-amber-400/10 transition-all"
 								title={t("dashboard.project.edit")}
 								onClick={() => {
-									editingProject.value = row;
+									editingProject.value = row.id;
 								}}
 							>
 								<Edit size={14} />
@@ -416,7 +415,7 @@ export default function ProjectTable({ lang = "es" }: ProjectTableProps) {
 					contentClassName="max-w-4xl bg-zinc-950 border border-white/10 shadow-3xl rounded-3xl"
 				>
 					<ProjectUpdate
-						project={editingProject.value!}
+						id={editingProject.value!}
 						refetch={(data) => {
 							table.updateData((old, count) => ({
 								result: old.map((item) =>

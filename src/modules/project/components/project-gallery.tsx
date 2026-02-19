@@ -36,12 +36,12 @@ export function ProjectGallery({
 	}, []);
 
 	const showPrev = useCallback(() => {
-		setCurrentIndex((prev) => (prev - 1 + images.length) % images.length);
-	}, [images.length]);
+		setCurrentIndex((prev) => (prev - 1 + imageUrls.length) % imageUrls.length);
+	}, [imageUrls.length]);
 
 	const showNext = useCallback(() => {
-		setCurrentIndex((prev) => (prev + 1) % images.length);
-	}, [images.length]);
+		setCurrentIndex((prev) => (prev + 1) % imageUrls.length);
+	}, [imageUrls.length]);
 
 	// Keyboard navigation
 	useEffect(() => {
@@ -100,7 +100,7 @@ export function ProjectGallery({
 			{/* Lightbox Modal */}
 			{lightboxOpen && (
 				<div
-					class="fixed inset-0 z-50 flex items-center justify-center bg-black/95 backdrop-blur-sm animate-fade-in"
+					class="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-xl animate-fade-in"
 					onClick={(e) => {
 						if (e.target === e.currentTarget) closeLightbox();
 					}}
@@ -122,7 +122,7 @@ export function ProjectGallery({
 					</button>
 
 					{/* Previous Button */}
-					{images.length > 1 && (
+					{imageUrls.length > 1 && (
 						<button
 							type="button"
 							aria-label="Imagen anterior"
@@ -134,7 +134,7 @@ export function ProjectGallery({
 					)}
 
 					{/* Next Button */}
-					{images.length > 1 && (
+					{imageUrls.length > 1 && (
 						<button
 							type="button"
 							aria-label="Imagen siguiente"
@@ -154,9 +154,9 @@ export function ProjectGallery({
 						/>
 
 						{/* Counter */}
-						{images.length > 1 && (
+						{imageUrls.length > 1 && (
 							<div class="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-8 text-white/60 text-sm font-mono">
-								{currentIndex + 1} / {images.length}
+								{currentIndex + 1} / {imageUrls.length}
 							</div>
 						)}
 					</div>

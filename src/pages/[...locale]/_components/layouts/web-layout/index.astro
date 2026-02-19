@@ -57,11 +57,10 @@ const activeThemeRgb = hexToRgb(activeThemeColor);
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" href="/images/vigilio.png" />
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
     <meta name="description" content={description} />
-    <ClientRouter />
     <script
       define:vars={{
         STORAGE_CDN_URL: env.STORAGE_CDN_URL,
@@ -144,7 +143,7 @@ const activeThemeRgb = hexToRgb(activeThemeColor);
 
       {/* Decorative Sidebar Info */}
 
-      <div class="p-2 border-t border-white/5 bg-zinc-950/20">
+      <div class="border-t border-white/5 bg-zinc-950/20">
         <NeuroPlayer
           client:only="preact"
           transition:persist

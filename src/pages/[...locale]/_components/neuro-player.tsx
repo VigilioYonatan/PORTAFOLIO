@@ -126,7 +126,7 @@ export default function NeuroPlayer(props: NeuroPlayerProps) {
 	return (
 		<div
 			class={cn(
-				"flex flex-col gap-2 md:gap-3 p-4 md:p-4 border border-white/5 bg-black/40 backdrop-blur-md rounded-2xl font-mono shadow-2xl transition-all relative mt-16",
+				"flex flex-col gap-2 md:gap-3 border border-white/5 bg-black/40 backdrop-blur-md rounded-2xl font-mono shadow-2xl transition-all relative mt-16",
 				(isNatureActive.value || isPlanetActive.value) && "hidden", // Hide in Nature/Planet Mode
 				props.className,
 			)}
@@ -144,7 +144,7 @@ export default function NeuroPlayer(props: NeuroPlayerProps) {
 
 			{/* TOP SECTION: MONSTERCAT-STYLE VISUALIZER */}
 			<div
-				class="relative w-full h-48 md:h-auto md:aspect-video rounded-xl overflow-hidden bg-zinc-900 border border-white/5 group font-sans cursor-pointer"
+				class="relative w-full h-56 md:h-auto md:aspect-video rounded-xl overflow-hidden bg-zinc-900 border border-white/5 group font-sans cursor-pointer"
 				onClick={() => {
 					showControls.value = !showControls.value;
 				}}
