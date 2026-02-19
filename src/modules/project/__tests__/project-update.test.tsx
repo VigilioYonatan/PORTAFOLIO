@@ -11,7 +11,13 @@ import { projectUpdateApi } from "../apis/project.update.api";
 import ProjectUpdate from "../components/project-update";
 import type { ProjectWithRelations } from "../schemas/project.schema";
 
-// Mock the API
+// Mock the project show API (used internally by the component)
+vi.mock("../apis/project.show.api", () => ({
+	projectShowApi: vi.fn(),
+}));
+import { projectShowApi } from "../apis/project.show.api";
+
+// Mock the update API
 vi.mock("../apis/project.update.api", () => ({
 	projectUpdateApi: vi.fn(),
 }));
@@ -35,6 +41,11 @@ vi.mock("@modules/project/apis/project.index.api", () => ({
 		isLoading: false,
 		data: { results: [{ id: 1, title: "Test Project" }] },
 	})),
+}));
+
+// Mock i18n
+vi.mock("@src/i18n", () => ({
+	useTranslations: () => (key: string) => key,
 }));
 
 // Mock MKD Editor to avoid browser API issues in tests
@@ -71,6 +82,32 @@ const mockProject: ProjectWithRelations = {
 	parent_id: null,
 };
 
+/**
+ * Helper: mock projectShowApi to return success state with project data.
+ */
+function mockShowApiSuccess(project = mockProject) {
+	(projectShowApi as ReturnType<typeof vi.fn>).mockReturnValue({
+		isLoading: false,
+		isError: false,
+		isSuccess: true,
+		data: { project },
+		error: null,
+	});
+}
+
+/**
+ * Helper: mock projectShowApi to return loading state.
+ */
+function mockShowApiLoading() {
+	(projectShowApi as ReturnType<typeof vi.fn>).mockReturnValue({
+		isLoading: true,
+		isError: false,
+		isSuccess: false,
+		data: null,
+		error: null,
+	});
+}
+
 describe("ProjectUpdate", () => {
 	afterEach(() => {
 		cleanup();
@@ -78,6 +115,8 @@ describe("ProjectUpdate", () => {
 	});
 
 	it("renders update form with project data", () => {
+		mockShowApiSuccess();
+
 		const mutateMock = vi.fn();
 		(projectUpdateApi as ReturnType<typeof vi.fn>).mockReturnValue({
 			mutate: mutateMock,
@@ -90,18 +129,20 @@ describe("ProjectUpdate", () => {
 
 		render(
 			<ProjectUpdate
-				project={mockProject}
+				id={1}
 				refetch={refetchMock}
 				onClose={onCloseMock}
 			/>,
 		);
 
-		// Check that form fields are populated
+		// Check that form fields are populated with project data
 		expect(screen.getByDisplayValue("Test Project")).toBeInTheDocument();
 		expect(screen.getByDisplayValue("test-project")).toBeInTheDocument();
 	});
 
 	it("handles user input correctly", async () => {
+		mockShowApiSuccess();
+
 		const mutateMock = vi.fn();
 		(projectUpdateApi as ReturnType<typeof vi.fn>).mockReturnValue({
 			mutate: mutateMock,
@@ -114,7 +155,7 @@ describe("ProjectUpdate", () => {
 
 		render(
 			<ProjectUpdate
-				project={mockProject}
+				id={1}
 				refetch={refetchMock}
 				onClose={onCloseMock}
 			/>,
@@ -130,6 +171,8 @@ describe("ProjectUpdate", () => {
 	});
 
 	it("shows loading state when submitting", () => {
+		mockShowApiSuccess();
+
 		(projectUpdateApi as ReturnType<typeof vi.fn>).mockReturnValue({
 			mutate: vi.fn(),
 			isLoading: true,
@@ -141,7 +184,7 @@ describe("ProjectUpdate", () => {
 
 		render(
 			<ProjectUpdate
-				project={mockProject}
+				id={1}
 				refetch={refetchMock}
 				onClose={onCloseMock}
 			/>,
@@ -155,6 +198,8 @@ describe("ProjectUpdate", () => {
 	});
 
 	it("auto-generates slug from title", async () => {
+		mockShowApiSuccess();
+
 		const mutateMock = vi.fn();
 		(projectUpdateApi as ReturnType<typeof vi.fn>).mockReturnValue({
 			mutate: mutateMock,
@@ -167,7 +212,7 @@ describe("ProjectUpdate", () => {
 
 		render(
 			<ProjectUpdate
-				project={mockProject}
+				id={1}
 				refetch={refetchMock}
 				onClose={onCloseMock}
 			/>,

@@ -1,3 +1,5 @@
+import View404 from "@components/extras/404";
+import Loader from "@components/extras/loader";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { Refetch } from "@infrastructure/types/client";
 import { handlerError } from "@infrastructure/utils/client/handler-error";
@@ -6,17 +8,15 @@ import type { ProjectIndexResponseDto } from "@modules/project/dtos/project.resp
 import { technologyIndexApi } from "@modules/technology/apis/technology.index.api";
 import { type Lang, useTranslations } from "@src/i18n";
 import { sweetModal } from "@vigilio/sweet";
+import type { JSX } from "preact/jsx-runtime";
 import { type Resolver, useForm } from "react-hook-form";
+import { projectShowApi } from "../apis/project.show.api";
 import { projectUpdateApi } from "../apis/project.update.api";
 import {
 	type ProjectUpdateDto,
 	projectUpdateDto,
 } from "../dtos/project.update.dto";
 import { ProjectForm } from "./project-form";
-import { projectShowApi } from "../apis/project.show.api";
-import Loader from "@components/extras/loader";
-import View404 from "@components/extras/404";
-import type { JSX } from "preact/jsx-runtime";
 
 interface ProjectUpdateProps {
 	id: number;
@@ -91,11 +91,7 @@ export default function ProjectUpdate({
 							onClose();
 						},
 						onError(error) {
-							handlerError(
-								projectUpdateForm,
-								error,
-								"Error de actualización",
-							);
+							handlerError(projectUpdateForm, error, "Error de actualización");
 						},
 					});
 				}

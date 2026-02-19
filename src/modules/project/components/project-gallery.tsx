@@ -1,4 +1,3 @@
-
 import { printFileWithDimension } from "@infrastructure/utils/hybrid/file.utils";
 import { DIMENSION_IMAGE } from "@modules/uploads/const/upload.const";
 import type { FilesSchema } from "@modules/uploads/schemas/upload.schema";
@@ -23,12 +22,7 @@ export function ProjectGallery({
 	const [currentIndex, setCurrentIndex] = useState(0);
 
 	const imageUrls = useMemo(
-		() =>
-			printFileWithDimension(
-				images,
-				DIMENSION_IMAGE.md,
-				STORAGE_CDN_URL,
-			),
+		() => printFileWithDimension(images, DIMENSION_IMAGE.md, STORAGE_CDN_URL),
 		[images, STORAGE_CDN_URL],
 	);
 

@@ -53,8 +53,6 @@ export default function NavLinks({ lang, vertical, className }: NavLinksProps) {
 		{ href: `/${lang}/contact`, label: t("header.contact"), icon: MailIcon },
 	];
 
-	
-
 	return (
 		<nav
 			className={cn(

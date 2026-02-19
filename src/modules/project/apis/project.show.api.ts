@@ -1,5 +1,5 @@
-import type { ProjectShowResponseDto } from "../dtos/project.response.dto";
 import { useQuery } from "@vigilio/preact-fetching";
+import type { ProjectShowResponseDto } from "../dtos/project.response.dto";
 
 export function projectShowApi(id: number | string) {
 	return useQuery<ProjectShowResponseDto, { message: string }>(
