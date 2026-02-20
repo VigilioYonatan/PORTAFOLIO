@@ -3,6 +3,7 @@ import { DIMENSION_IMAGE } from "@modules/uploads/const/upload.const";
 import type { FilesSchema } from "@modules/uploads/schemas/upload.schema";
 import { type Lang } from "@src/i18n";
 import { ChevronLeft, ChevronRight, X, ZoomIn } from "lucide-preact";
+import { createPortal } from "preact/compat";
 import { useCallback, useEffect, useMemo, useState } from "preact/hooks";
 
 interface ProjectGalleryProps {
@@ -43,7 +44,7 @@ export function ProjectGallery({
 		setCurrentIndex((prev) => (prev + 1) % imageUrls.length);
 	}, [imageUrls.length]);
 
-	// Keyboard navigation
+	// Keyboard navigation + scroll lock
 	useEffect(() => {
 		if (!lightboxOpen) return;
 
@@ -64,9 +65,212 @@ export function ProjectGallery({
 
 	if (!images.length) return null;
 
+	const lightboxModal = lightboxOpen && (
+		<div
+			style={{
+				position: "fixed",
+				inset: 0,
+				zIndex: 9999,
+				display: "flex",
+				alignItems: "center",
+				justifyContent: "center",
+				backgroundColor: "rgba(0,0,0,0.92)",
+				backdropFilter: "blur(20px)",
+				WebkitBackdropFilter: "blur(20px)",
+				animation: "lb-fade-in 0.25s ease-out",
+			}}
+			onClick={(e) => {
+				if (e.target === e.currentTarget) closeLightbox();
+			}}
+			role="dialog"
+			aria-modal="true"
+			aria-label="Image viewer"
+		>
+			{/* ── Close button ── */}
+			<button
+				type="button"
+				aria-label="Cerrar"
+				onClick={closeLightbox}
+				style={{
+					position: "absolute",
+					top: "1.25rem",
+					right: "1.25rem",
+					zIndex: 10,
+					display: "flex",
+					alignItems: "center",
+					justifyContent: "center",
+					width: "2.75rem",
+					height: "2.75rem",
+					borderRadius: "9999px",
+					border: "1px solid rgba(255,255,255,0.2)",
+					background: "rgba(255,255,255,0.08)",
+					cursor: "pointer",
+					transition: "background 0.2s, transform 0.2s",
+				}}
+				onMouseEnter={(e) => {
+					(e.currentTarget as HTMLButtonElement).style.background = "rgba(255,255,255,0.18)";
+					(e.currentTarget as HTMLButtonElement).style.transform = "rotate(90deg) scale(1.1)";
+				}}
+				onMouseLeave={(e) => {
+					(e.currentTarget as HTMLButtonElement).style.background = "rgba(255,255,255,0.08)";
+					(e.currentTarget as HTMLButtonElement).style.transform = "rotate(0deg) scale(1)";
+				}}
+			>
+				<X size={20} style={{ color: "white" }} />
+			</button>
+
+			{/* ── Prev button ── */}
+			{imageUrls.length > 1 && (
+				<button
+					type="button"
+					aria-label="Imagen anterior"
+					onClick={showPrev}
+					style={{
+						position: "absolute",
+						left: "1rem",
+						top: "50%",
+						transform: "translateY(-50%)",
+						zIndex: 10,
+						display: "flex",
+						alignItems: "center",
+						justifyContent: "center",
+						width: "3rem",
+						height: "3rem",
+						borderRadius: "9999px",
+						border: "1px solid rgba(255,255,255,0.2)",
+						background: "rgba(255,255,255,0.08)",
+						cursor: "pointer",
+						transition: "background 0.2s, transform 0.2s",
+					}}
+					onMouseEnter={(e) => {
+						(e.currentTarget as HTMLButtonElement).style.background = "rgba(255,255,255,0.18)";
+						(e.currentTarget as HTMLButtonElement).style.transform = "translateY(-50%) scale(1.1)";
+					}}
+					onMouseLeave={(e) => {
+						(e.currentTarget as HTMLButtonElement).style.background = "rgba(255,255,255,0.08)";
+						(e.currentTarget as HTMLButtonElement).style.transform = "translateY(-50%) scale(1)";
+					}}
+				>
+					<ChevronLeft size={24} style={{ color: "white" }} />
+				</button>
+			)}
+
+			{/* ── Next button ── */}
+			{imageUrls.length > 1 && (
+				<button
+					type="button"
+					aria-label="Imagen siguiente"
+					onClick={showNext}
+					style={{
+						position: "absolute",
+						right: "1rem",
+						top: "50%",
+						transform: "translateY(-50%)",
+						zIndex: 10,
+						display: "flex",
+						alignItems: "center",
+						justifyContent: "center",
+						width: "3rem",
+						height: "3rem",
+						borderRadius: "9999px",
+						border: "1px solid rgba(255,255,255,0.2)",
+						background: "rgba(255,255,255,0.08)",
+						cursor: "pointer",
+						transition: "background 0.2s, transform 0.2s",
+					}}
+					onMouseEnter={(e) => {
+						(e.currentTarget as HTMLButtonElement).style.background = "rgba(255,255,255,0.18)";
+						(e.currentTarget as HTMLButtonElement).style.transform = "translateY(-50%) scale(1.1)";
+					}}
+					onMouseLeave={(e) => {
+						(e.currentTarget as HTMLButtonElement).style.background = "rgba(255,255,255,0.08)";
+						(e.currentTarget as HTMLButtonElement).style.transform = "translateY(-50%) scale(1)";
+					}}
+				>
+					<ChevronRight size={24} style={{ color: "white" }} />
+				</button>
+			)}
+
+			{/* ── Image + counter ── */}
+			<div
+				style={{
+					display: "flex",
+					flexDirection: "column",
+					alignItems: "center",
+					gap: "1.25rem",
+					padding: "1rem",
+					maxWidth: "90vw",
+					maxHeight: "90vh",
+					animation: "lb-zoom-in 0.25s ease-out",
+				}}
+			>
+				<img
+					src={imageUrls[currentIndex]}
+					alt={`${projectTitle} — ${currentIndex + 1}`}
+					style={{
+						maxWidth: "100%",
+						maxHeight: "80vh",
+						objectFit: "contain",
+						borderRadius: "0.75rem",
+						boxShadow: "0 25px 60px rgba(0,0,0,0.7)",
+						display: "block",
+					}}
+				/>
+
+				{/* Dot indicators */}
+				{imageUrls.length > 1 && (
+					<div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+						{imageUrls.map((_, idx) => (
+							<button
+								key={idx}
+								type="button"
+								aria-label={`Ir a imagen ${idx + 1}`}
+								onClick={() => setCurrentIndex(idx)}
+								style={{
+									width: idx === currentIndex ? "1.5rem" : "0.5rem",
+									height: "0.5rem",
+									borderRadius: "9999px",
+									background: idx === currentIndex ? "white" : "rgba(255,255,255,0.35)",
+									border: "none",
+									cursor: "pointer",
+									transition: "all 0.25s ease",
+									padding: 0,
+								}}
+							/>
+						))}
+					</div>
+				)}
+
+				{/* Numeric counter */}
+				<span
+					style={{
+						color: "rgba(255,255,255,0.45)",
+						fontSize: "0.75rem",
+						fontFamily: "monospace",
+						letterSpacing: "0.1em",
+					}}
+				>
+					{currentIndex + 1} / {imageUrls.length}
+				</span>
+			</div>
+
+			{/* Keyframe styles injected inline */}
+			<style>{`
+				@keyframes lb-fade-in {
+					from { opacity: 0; }
+					to   { opacity: 1; }
+				}
+				@keyframes lb-zoom-in {
+					from { transform: scale(0.92); opacity: 0; }
+					to   { transform: scale(1);    opacity: 1; }
+				}
+			`}</style>
+		</div>
+	);
+
 	return (
 		<>
-			{/* Thumbnail Grid */}
+			{/* ── Thumbnail Grid ── */}
 			<div class="space-y-4">
 				<h3 class="font-mono text-primary text-xs uppercase tracking-widest flex items-center gap-2">
 					<ZoomIn size={14} />
@@ -97,71 +301,10 @@ export function ProjectGallery({
 				</div>
 			</div>
 
-			{/* Lightbox Modal */}
-			{lightboxOpen && (
-				<div
-					class="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-xl animate-fade-in"
-					onClick={(e) => {
-						if (e.target === e.currentTarget) closeLightbox();
-					}}
-					role="dialog"
-					aria-modal="true"
-					aria-label="Image gallery"
-				>
-					{/* Close Button */}
-					<button
-						type="button"
-						aria-label="Cerrar"
-						class="absolute top-6 right-6 z-10 p-3 rounded-full bg-white/10 hover:bg-white/20 transition-colors group"
-						onClick={closeLightbox}
-					>
-						<X
-							size={24}
-							class="text-white group-hover:rotate-90 transition-transform duration-200"
-						/>
-					</button>
-
-					{/* Previous Button */}
-					{imageUrls.length > 1 && (
-						<button
-							type="button"
-							aria-label="Imagen anterior"
-							class="absolute left-4 top-1/2 -translate-y-1/2 z-10 p-3 rounded-full bg-white/10 hover:bg-white/20 transition-colors hover:scale-110"
-							onClick={showPrev}
-						>
-							<ChevronLeft size={24} class="text-white" />
-						</button>
-					)}
-
-					{/* Next Button */}
-					{imageUrls.length > 1 && (
-						<button
-							type="button"
-							aria-label="Imagen siguiente"
-							class="absolute right-4 top-1/2 -translate-y-1/2 z-10 p-3 rounded-full bg-white/10 hover:bg-white/20 transition-colors hover:scale-110"
-							onClick={showNext}
-						>
-							<ChevronRight size={24} class="text-white" />
-						</button>
-					)}
-
-					{/* Image Container */}
-					<div class="relative max-w-[90vw] max-h-[85vh] p-4">
-						<img
-							src={imageUrls[currentIndex]}
-							alt={`${projectTitle} - ${currentIndex + 1}`}
-							class="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl animate-zoom-in"
-						/>
-
-						{/* Counter */}
-						{imageUrls.length > 1 && (
-							<div class="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-8 text-white/60 text-sm font-mono">
-								{currentIndex + 1} / {imageUrls.length}
-							</div>
-						)}
-					</div>
-				</div>
-			)}
+			{/* ── Lightbox Portal ── */}
+			{typeof document !== "undefined" &&
+				lightboxOpen &&
+				createPortal(lightboxModal, document.body)}
 		</>
 	);
 }
