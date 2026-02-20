@@ -44,7 +44,7 @@ const statusLabels = {
 
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
       {
         projects.map((project, index) => (
           <a
@@ -81,7 +81,7 @@ const statusLabels = {
             {/* Content */}
             <div class="absolute bottom-0 left-0 right-0 p-6 md:p-8">
               {/* Status + Year */}
-              <div class="flex items-center gap-3 mb-4">
+              <div class="flex items-center gap-1 mb-4">
                 <span
                   class={`text-xs font-bold px-3 py-1 rounded-full border ${statusColors[project.status]}`}
                 >
