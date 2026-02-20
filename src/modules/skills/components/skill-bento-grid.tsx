@@ -109,7 +109,7 @@ export default function SkillBentoGrid({ lang = "es" }: { lang?: Lang }) {
 					<div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
 
 					<div className="relative z-10 flex flex-col h-full">
-						<div className="flex items-center gap-3 mb-4">
+						<div className="flex items-center gap-3 mb-1">
 							<div className="p-2 rounded-lg bg-secondary text-primary">
 								<category.icon size={24} />
 							</div>
